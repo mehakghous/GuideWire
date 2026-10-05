@@ -1,0 +1,7 @@
+PyQt6
+opencv-python
+mss
+pydantic
+youtube-transcript-api
+bcrypt
+python-dotenv

@@ -1,0 +1,181 @@
+{
+  "schema_version": "0.1",
+  "source_type": "youtube",
+  "app": "blender",
+  "app_version_tutorial": "2.80",
+  "video_id": "34FBeC9mktE",
+  "title": "Object and Edit Mode - Blender 2.80 Fundamentals",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Toggle between Object Mode and Edit Mode",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "verifiable": true,
+      "video_start_s": 18.0,
+      "video_end_s": 31.0,
+      "alternatives": [
+        "Click the Mode dropdown menu in the top-left of the 3D Viewport and select Edit Mode."
+      ],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 1.0,
+      "evidence": [
+        "For hotkey users, you can press Tab to toggle between Edit and Object mode.",
+        "Changing this drop down menu here in the top left-hand corner."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Edit multiple mesh objects simultaneously",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "3D Viewport",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "verifiable": true,
+      "video_start_s": 117.0,
+      "video_end_s": 132.0,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.95,
+      "evidence": [
+        "Simply select all the objects you would like to edit and go into Edit Mode."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Join multiple objects into a single mesh object",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Object > Join",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "verifiable": true,
+      "video_start_s": 152.0,
+      "video_end_s": 169.0,
+      "alternatives": [
+        "Press Ctrl + J in Object Mode to join selected objects."
+      ],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 1.0,
+      "evidence": [
+        "Select them in Object Mode, go to the Object menu and select Join. For hotkey users, you can simply press Ctrl+J."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Separate selected geometry into a distinct object",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Mesh > Separate > Selection",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "verifiable": false,
+      "video_start_s": 170.0,
+      "video_end_s": 187.0,
+      "alternatives": [
+        "Press P in Edit Mode to open the Separate menu."
+      ],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.85,
+      "evidence": [
+        "Go into Edit Mode, select a part of your mesh, go to the Mesh menu, and select Separate > Selection."
+      ],
+      "flags": [
+        "unrecognised UI name 'Mesh > Separate > Selection': please check"
+      ],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "extracted_at": "2026-10-10T13:57:28.873992Z"
+}

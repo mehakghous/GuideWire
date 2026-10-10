@@ -1,0 +1,31 @@
+{
+  "schema_version": "0.1",
+  "source_type": "written",
+  "app": "blender",
+  "app_version_tutorial": null,
+  "video_id": null,
+  "title": "HAND-WRITTEN EXAMPLE: add a cube and extrude a face",
+  "model_id": null,
+  "extracted_at": "2026-10-10T00:00:00Z",
+  "steps": [
+    {"id": "s01", "order": 1, "goal": "Add a cube to the scene",
+     "actions": [{"verb": "open_menu", "ui_element": "Add > Mesh > Cube"}],
+     "start_state": [{"kind": "mode", "target": "OBJECT"}],
+     "expected_state": [{"kind": "selection_type", "target": "MESH"}, {"kind": "mode", "target": "OBJECT"}],
+     "confidence": 1.0, "evidence": ["hand-written example"], "review_status": "reviewed"},
+    {"id": "s02", "order": 2, "goal": "Enter Edit Mode",
+     "actions": [{"verb": "press_keys", "keys": ["Tab"]}],
+     "start_state": [{"kind": "mode", "target": "OBJECT"}],
+     "expected_state": [{"kind": "mode", "target": "EDIT_MESH"}],
+     "confidence": 1.0, "evidence": ["hand-written example"], "review_status": "reviewed"},
+    {"id": "s03", "order": 3, "goal": "Choose the Extrude Region tool",
+     "actions": [{"verb": "click", "ui_element": "Extrude Region"}],
+     "start_state": [{"kind": "mode", "target": "EDIT_MESH"}],
+     "expected_state": [{"kind": "active_tool", "target": "builtin.extrude_region"}],
+     "confidence": 1.0, "evidence": ["hand-written example"], "review_status": "reviewed"},
+    {"id": "s04", "order": 4, "goal": "Make the result look pleasing",
+     "actions": [{"verb": "drag", "ui_element": "Extrude Region"}],
+     "confidence": 0.6, "evidence": ["aesthetic outcome: nothing readable, so unverifiable"],
+     "review_status": "reviewed"}
+  ]
+}

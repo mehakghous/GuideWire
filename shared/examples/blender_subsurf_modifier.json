@@ -1,0 +1,22 @@
+{
+  "schema_version": "0.1",
+  "source_type": "written",
+  "app": "blender",
+  "title": "HAND-WRITTEN EXAMPLE: add a Subdivision Surface modifier",
+  "extracted_at": "2026-10-10T00:00:00Z",
+  "steps": [
+    {"id": "s01", "order": 1, "goal": "Select the mesh object",
+     "actions": [{"verb": "click", "ui_element": "Cube"}],
+     "expected_state": [{"kind": "selection_type", "target": "MESH"}],
+     "confidence": 1.0, "review_status": "reviewed"},
+    {"id": "s02", "order": 2, "goal": "Open the Modifier Properties tab",
+     "actions": [{"verb": "click", "ui_element": "Modifier Properties"}],
+     "expected_state": [{"kind": "panel_open", "target": "Properties:Modifiers"}],
+     "confidence": 1.0, "review_status": "reviewed"},
+    {"id": "s03", "order": 3, "goal": "Add a Subdivision Surface modifier",
+     "actions": [{"verb": "open_menu", "ui_element": "Add Modifier > Generate > Subdivision Surface"}],
+     "expected_state": [{"kind": "property_equals", "target": "object.modifiers[0].type", "value": "SUBSURF"}],
+     "version_dependent": ["Add Modifier menu layout changed in Blender 4.x"],
+     "confidence": 0.9, "review_status": "reviewed"}
+  ]
+}

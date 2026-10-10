@@ -181,3 +181,9 @@ cython_debug/
 .cursorindexingignore.env
 venv/
 .venv/
+
+# Run logs (raw model responses; derived YouTube data must be deleted within 30 days)
+runs/
+
+# Local copies of user-supplied captions/transcripts (YouTube-derived; not for the repo)
+local_data/

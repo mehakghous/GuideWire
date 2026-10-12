@@ -1,7 +1,10 @@
 PyQt6
 opencv-python
 mss
-pydantic
-youtube-transcript-api
+pydantic>=2.6
 bcrypt
 python-dotenv
+google-genai
+httpx
+pytest
+youtube-transcript-api

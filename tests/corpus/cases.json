@@ -1,0 +1,681 @@
+[
+ {
+  "id": "proc_short_1",
+  "category": "procedural/short",
+  "input": "Press Tab to enter Edit Mode.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "mode.enter_edit"
+   ],
+   "min_steps": 1,
+   "max_steps": 1
+  }
+ },
+ {
+  "id": "proc_short_2",
+  "category": "procedural/short",
+  "input": "Select the cube.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "select.object"
+   ],
+   "max_steps": 1
+  }
+ },
+ {
+  "id": "proc_multi_main",
+  "category": "procedural/multi",
+  "version": "2.80",
+  "supported": true,
+  "input": "Select the cube, enter Edit Mode, select a vertex, move it to change the shape, then return to Object Mode.",
+  "expect": {
+   "route": "text_parser",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "select.object",
+    "mode.enter_edit",
+    "select.elements",
+    "transform.move",
+    "mode.enter_object"
+   ],
+   "min_steps": 5,
+   "max_steps": 5,
+   "forbid_ops": [
+    "history.undo",
+    "mesh.separate",
+    "object.join"
+   ],
+   "assumptions_contain": [
+    "Assumes Object Mode"
+   ],
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "proc_numbered",
+  "category": "procedural/multi",
+  "version": "2.80",
+  "supported": true,
+  "input": "1. Select both cubes\n2. Choose Object > Join",
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "select.object",
+    "object.join"
+   ],
+   "max_steps": 2,
+   "flags_absent": [
+    "does not match"
+   ]
+  }
+ },
+ {
+  "id": "proc_menu_documented",
+  "category": "procedural/menu",
+  "version": "2.80",
+  "supported": true,
+  "input": "Enter Edit Mode, then choose Mesh > Separate > Selection.",
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "mode.enter_edit",
+    "mesh.separate"
+   ],
+   "max_steps": 2,
+   "flags_absent": [
+    "does not match the documented path"
+   ]
+  }
+ },
+ {
+  "id": "howto_edit",
+  "category": "howto",
+  "input": "How do I switch to Edit Mode?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "mode.enter_edit"
+   ],
+   "forbid_ops": [
+    "history.undo",
+    "mesh.separate",
+    "object.join"
+   ],
+   "min_steps": 1,
+   "max_steps": 3,
+   "sources": true
+  }
+ },
+ {
+  "id": "howto_join",
+  "category": "howto",
+  "input": "How do I join two mesh objects?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "object.join"
+   ],
+   "forbid_ops": [
+    "history.undo",
+    "mesh.separate",
+    "mode.enter_edit"
+   ],
+   "min_steps": 2,
+   "sources": true,
+   "clarification": true,
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "howto_separate",
+  "category": "howto",
+  "input": "How do I separate selected geometry into a new object?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "mesh.separate"
+   ],
+   "forbid_ops": [
+    "history.undo",
+    "object.join"
+   ],
+   "min_steps": 2
+  }
+ },
+ {
+  "id": "howto_undo",
+  "category": "howto",
+  "input": "How do I undo?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "history.undo"
+   ],
+   "forbid_ops": [
+    "history.redo"
+   ],
+   "max_steps": 1
+  }
+ },
+ {
+  "id": "howto_move",
+  "category": "howto",
+  "input": "How do I move a vertex?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "transform.move"
+   ],
+   "forbid_ops": [
+    "transform.rotate",
+    "transform.scale"
+   ]
+  }
+ },
+ {
+  "id": "concept_edit",
+  "category": "concept",
+  "input": "What is Edit Mode?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "concept",
+   "no_steps": true,
+   "explanations_min": 1,
+   "explanation_contains": [
+    "vertices"
+   ],
+   "sources": true
+  }
+ },
+ {
+  "id": "concept_difference",
+  "category": "concept",
+  "input": "What is the difference between Object Mode and Edit Mode?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "concept",
+   "no_steps": true,
+   "explanations_min": 1
+  }
+ },
+ {
+  "id": "shortcut_undo",
+  "category": "concept/shortcut",
+  "input": "What is the shortcut for undo?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "concept",
+   "no_steps": true,
+   "explanation_contains": [
+    "Ctrl+Z"
+   ]
+  }
+ },
+ {
+  "id": "shortcut_join",
+  "category": "concept/shortcut",
+  "input": "Which key joins objects?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "no_steps": true,
+   "explanation_contains": [
+    "Ctrl+J"
+   ]
+  }
+ },
+ {
+  "id": "trouble_cross_object",
+  "category": "troubleshooting",
+  "input": "Why can't I connect vertices from two different objects?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "troubleshooting",
+   "explanations_min": 1,
+   "explanation_links": true,
+   "ops_in_steps": [
+    "object.join"
+   ],
+   "forbid_ops": [
+    "history.undo",
+    "mesh.separate"
+   ],
+   "explanation_contains": [
+    "Join the objects"
+   ]
+  }
+ },
+ {
+  "id": "trouble_join_generic",
+  "category": "troubleshooting",
+  "input": "Why can't I join these objects?",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "troubleshooting",
+   "explanations_min": 1,
+   "explanation_contains": [
+    "only works when"
+   ],
+   "ops_in_steps": [
+    "object.join"
+   ]
+  }
+ },
+ {
+  "id": "trouble_join_observed_state",
+  "category": "troubleshooting/state",
+  "input": "Why can't I join these objects?",
+  "version": "2.80",
+  "observed": {
+   "mode": "EDIT_MESH",
+   "selected_objects": [
+    "MESH"
+   ]
+  },
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "troubleshooting",
+   "unmet_contains": [
+    "Two or more objects"
+   ],
+   "first_step_goal_contains": "First:",
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "howto_join_observed_ok",
+  "category": "howto/state",
+  "input": "How do I join two mesh objects?",
+  "version": "2.80",
+  "observed": {
+   "mode": "OBJECT",
+   "selected_objects": [
+    "MESH",
+    "MESH"
+   ]
+  },
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "kind": "procedure",
+   "ops_in_steps": [
+    "object.join"
+   ],
+   "unmet_empty": true,
+   "clarification": false,
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "mixed_join_explain",
+  "category": "mixed",
+  "version": "2.80",
+  "supported": true,
+  "input": "Show me how to join two objects, and explain why I need to do it before connecting their vertices.",
+  "expect": {
+   "route": "catalog",
+   "kind": "mixed",
+   "ops_in_steps": [
+    "object.join"
+   ],
+   "explanations_min": 1,
+   "explanation_links": true,
+   "forbid_ops": [
+    "history.undo",
+    "mesh.separate",
+    "mode.enter_edit"
+   ]
+  }
+ },
+ {
+  "id": "vague_1",
+  "category": "ambiguous",
+  "input": "how do I do it",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "clarify",
+   "kind": "clarification",
+   "clarification": true,
+   "no_steps": true
+  }
+ },
+ {
+  "id": "vague_2",
+  "category": "ambiguous",
+  "input": "it doesn't work",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "clarify",
+   "clarification": true,
+   "no_steps": true
+  }
+ },
+ {
+  "id": "vague_3",
+  "category": "ambiguous",
+  "input": "help",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "clarify",
+   "clarification": true
+  }
+ },
+ {
+  "id": "unsupported_bevel",
+  "category": "unsupported",
+  "input": "How do I bevel an edge?",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "fallback_required",
+   "kind": "needs_model",
+   "fallback": true,
+   "no_steps": true,
+   "api_calls": 0
+  }
+ },
+ {
+  "id": "unsupported_sculpt",
+  "category": "unsupported",
+  "input": "Explain how sculpting brushes work",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "fallback_required",
+   "fallback": true,
+   "no_steps": true
+  }
+ },
+ {
+  "id": "unsupported_render",
+  "category": "unsupported",
+  "input": "How do I render an animation?",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "fallback_required",
+   "fallback": true,
+   "api_calls": 0
+  }
+ },
+ {
+  "id": "partial_supported_plus_unsupported",
+  "category": "unsupported/partial",
+  "input": "Join the two cubes, then add a bevel modifier.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "object.join"
+   ],
+   "fallback": true,
+   "flags_contain": [
+    "not in the Blender catalog"
+   ]
+  }
+ },
+ {
+  "id": "prereq_order_wrong",
+  "category": "missing prerequisite/order",
+  "input": "Select a vertex. Press Tab to enter Edit Mode.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "caveats_contain": [
+    "order may be wrong"
+   ],
+   "flags_contain": [
+    "order:"
+   ],
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "prereq_join_in_edit_mode",
+  "category": "missing prerequisite",
+  "input": "Enter Edit Mode, then join the objects.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "mode.enter_edit",
+    "object.join"
+   ],
+   "max_steps": 2,
+   "caveats_contain": [
+    "prerequisite not met"
+   ],
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "prereq_unstated_mode",
+  "category": "missing prerequisite",
+  "input": "Select a vertex.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "select.elements"
+   ],
+   "max_steps": 1,
+   "assumptions_contain": [
+    "Assumes Edit Mode"
+   ],
+   "clarification": true,
+   "prereq_handled": true
+  }
+ },
+ {
+  "id": "conflict_shortcut",
+  "category": "conflicting",
+  "input": "Press Ctrl+Q to enter Edit Mode.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "mode.enter_edit"
+   ],
+   "flags_contain": [
+    "the manual gives tab"
+   ],
+   "goal_unchanged": true
+  }
+ },
+ {
+  "id": "conflict_menu",
+  "category": "conflicting",
+  "input": "Choose Mesh > Join to join the objects.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "object.join"
+   ],
+   "flags_contain": [
+    "does not match the documented path"
+   ]
+  }
+ },
+ {
+  "id": "conflict_version",
+  "category": "version-sensitive",
+  "input": "Enter Edit Mode",
+  "version": "2.70",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "flags_contain": [
+    "needs Blender 2.80"
+   ]
+  }
+ },
+ {
+  "id": "version_unknown_howto",
+  "category": "version-sensitive",
+  "input": "How do I join two mesh objects?",
+  "version": null,
+  "supported": true,
+  "expect": {
+   "route": "catalog",
+   "caveats_contain": [
+    "version not provided"
+   ]
+  }
+ },
+ {
+  "id": "dup_instructions",
+  "category": "duplicate/reordered/incomplete",
+  "input": "Press Tab. Press Tab. Press Tab to enter Edit Mode.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "caveats_contain": [
+    "duplicate instruction removed"
+   ],
+   "max_steps": 2
+  }
+ },
+ {
+  "id": "incomplete_no_return",
+  "category": "duplicate/reordered/incomplete",
+  "input": "Enter Edit Mode, select a vertex",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "mode.enter_edit",
+    "select.elements"
+   ],
+   "max_steps": 2
+  }
+ },
+ {
+  "id": "unchecked_result_claim",
+  "category": "unsupported expected state",
+  "input": "Enter Edit Mode and the object will turn red.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "ops_in_steps": [
+    "mode.enter_edit"
+   ],
+   "max_steps": 1,
+   "flags_contain": [
+    "cannot be checked"
+   ]
+  }
+ },
+ {
+  "id": "unknown_instruction_kept_unvalidated",
+  "category": "unsupported",
+  "input": "Select the cube. Frobnicate the widget.",
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "text_parser",
+   "flags_contain": [
+    "not in the Blender catalog"
+   ],
+   "fallback": true,
+   "min_steps": 2
+  }
+ },
+ {
+  "id": "transcript_synthetic_long",
+  "category": "long transcript/multi-topic",
+  "input_file": "tests/corpus/transcript_synthetic.vtt",
+  "input_type": "transcript",
+  "duration_s": 100,
+  "version": "2.80",
+  "supported": true,
+  "expect": {
+   "route": "transcript_parser",
+   "ops_in_steps": [
+    "mode.enter_edit",
+    "select.elements",
+    "mode.enter_object",
+    "history.undo",
+    "select.object",
+    "mode.enter_edit",
+    "object.join",
+    "mode.enter_edit",
+    "select.elements",
+    "mesh.separate"
+   ],
+   "forbid_ops": [
+    "history.redo",
+    "transform.move",
+    "transform.rotate",
+    "transform.scale"
+   ],
+   "all_narrated": true,
+   "times_within": 100
+  }
+ },
+ {
+  "id": "uncovered_verb_not_remapped",
+  "category": "unsupported",
+  "input": "Delete the default cube by selecting it and pressing X.",
+  "version": "2.80",
+  "supported": false,
+  "expect": {
+   "route": "text_parser",
+   "flags_contain": [
+    "not in the Blender catalog"
+   ],
+   "forbid_ops": [
+    "select.object"
+   ],
+   "max_steps": 1,
+   "fallback": true
+  }
+ }
+]

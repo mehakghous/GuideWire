@@ -1,0 +1,18 @@
+{
+  "schema_version": "0.1",
+  "source_type": "written",
+  "app": "blender",
+  "title": "HAND-WRITTEN EXAMPLE: switch to Sculpting and pick the Draw brush",
+  "extracted_at": "2026-10-10T00:00:00Z",
+  "steps": [
+    {"id": "s01", "order": 1, "goal": "Open the Sculpting workspace",
+     "actions": [{"verb": "click", "ui_element": "Sculpting"}],
+     "expected_state": [{"kind": "workspace", "target": "Sculpting"}, {"kind": "mode", "target": "SCULPT"}],
+     "confidence": 1.0, "review_status": "reviewed"},
+    {"id": "s02", "order": 2, "goal": "Select the Draw brush",
+     "actions": [{"verb": "click", "ui_element": "Draw"}],
+     "start_state": [{"kind": "mode", "target": "SCULPT"}],
+     "expected_state": [{"kind": "active_tool", "target": "builtin_brush.Draw"}],
+     "confidence": 1.0, "review_status": "reviewed"}
+  ]
+}

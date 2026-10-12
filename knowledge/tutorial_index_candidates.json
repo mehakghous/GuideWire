@@ -1,0 +1,1826 @@
+{
+ "_about": "UNREVIEWED tutorial candidates from YouTube Data API search + videos.list. Metadata is exactly what the API returned; keywords are title words only; level, topic fit and Blender version must be checked by a person before promotion into tutorial_index.json. Not used by any router or evaluation. (version hints re-derived from titles with ingestion.tutorials.version_hint_from_title; the platform captions flag was removed as unreliable.)",
+ "retrieved": "2026-10-11",
+ "queries": [
+  "blender join objects tutorial",
+  "blender object mode vs edit mode beginner",
+  "blender extrude inset bevel modeling basics",
+  "blender low poly tree tutorial",
+  "blender realistic glass material tutorial",
+  "blender rigging a character armature beginner",
+  "blender fix shading artifacts smooth shading normals",
+  "blender select move rotate scale objects beginner"
+ ],
+ "approx_quota_units_used": 804,
+ "dropped": [
+  {
+   "id": "fHdAE2hN1T0",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "f18wmCp8QhE",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "96KbbF5N5s0",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "_zKnaVeSYhk",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "Tx5m67ba4yI",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "hHCCgybm-cI",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "_glRlRdCm0Y",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "lPoaeVu6g5Q",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "Y1KmI8mmFiA",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "IIlOanpVSEE",
+   "why": "shorter than 1 minute"
+  },
+  {
+   "id": "75wYZdCwaM4",
+   "why": "shorter than 1 minute"
+  }
+ ],
+ "entries": [
+  {
+   "id": "sB68HUH87dk",
+   "url": "https://www.youtube.com/watch?v=sB68HUH87dk",
+   "title": "How to Combine Objects in Blender like a Pro 2024",
+   "channel": "Architecture Topics",
+   "duration_s": 195,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2023-12-22",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "combine",
+    "objects",
+    "like",
+    "pro",
+    "2024"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "aMGzPiOAqTk",
+   "url": "https://www.youtube.com/watch?v=aMGzPiOAqTk",
+   "title": "How to Combine Objects in Blender like a Pro 2025",
+   "channel": "Architecture Topics",
+   "duration_s": 271,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-04-14",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "combine",
+    "objects",
+    "like",
+    "pro",
+    "2025"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "qqX_rFEr5iM",
+   "url": "https://www.youtube.com/watch?v=qqX_rFEr5iM",
+   "title": "Unions Booleans & Joins in Blender (Which is Better?)",
+   "channel": "Josh - Blender Bros",
+   "duration_s": 426,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-09-12",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "unions",
+    "booleans",
+    "joins",
+    "which",
+    "better"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "zkUteBKHhpw",
+   "url": "https://www.youtube.com/watch?v=zkUteBKHhpw",
+   "title": "How to join 2 objects together using Blender",
+   "channel": "3D Printer Academy Tutorials",
+   "duration_s": 213,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2023-09-13",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "join",
+    "objects",
+    "together",
+    "using"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "OjhhnrbK9YM",
+   "url": "https://www.youtube.com/watch?v=OjhhnrbK9YM",
+   "title": "How to merge and separate objects (Blender tutorial)",
+   "channel": "1 minute Blender",
+   "duration_s": 61,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-04-03",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "merge",
+    "separate",
+    "objects"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "1t-F-r_cd6g",
+   "url": "https://www.youtube.com/watch?v=1t-F-r_cd6g",
+   "title": "How to Join and Separate Objects in Blender (Tutorial)",
+   "channel": "Ryan King Art",
+   "duration_s": 636,
+   "licence": "youtube",
+   "chapters": 12,
+   "published": "2022-10-07",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "join",
+    "separate",
+    "objects"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "p3EM6GBzVsg",
+   "url": "https://www.youtube.com/watch?v=p3EM6GBzVsg",
+   "title": "Blender 2.8 Tutorial: How To Join Vertices, Edges, Faces & Objects.",
+   "channel": "Chipper Videos",
+   "duration_s": 361,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2020-09-30",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "2.8",
+   "source_tier": "community",
+   "keywords": [
+    "join",
+    "vertices",
+    "edges",
+    "faces",
+    "objects"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender join objects tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "w1230zfelas",
+   "url": "https://www.youtube.com/watch?v=w1230zfelas",
+   "title": "Blender 4.5 Edit Mode vs Object Mode Explained | Beginner Tutorial in Urdu/Hindi",
+   "channel": "Blender Motion Graphics",
+   "duration_s": 485,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-07-30",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.5",
+   "source_tier": "community",
+   "keywords": [
+    "edit",
+    "mode",
+    "object",
+    "explained",
+    "beginner",
+    "urdu",
+    "hindi"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "0U6aSSiipmU",
+   "url": "https://www.youtube.com/watch?v=0U6aSSiipmU",
+   "title": "Beginners Blender 3D: Tutorial 5 - Modelling in Edit Mode - Blender",
+   "channel": "bpwebmedia",
+   "duration_s": 457,
+   "licence": "creativeCommon",
+   "chapters": 0,
+   "published": "2020-03-07",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "beginners",
+    "modelling",
+    "edit",
+    "mode"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "3-hPZvNAV3E",
+   "url": "https://www.youtube.com/watch?v=3-hPZvNAV3E",
+   "title": "Blender - object mode vs edit mode",
+   "channel": "Phil Adams",
+   "duration_s": 145,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2017-02-14",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "object",
+    "mode",
+    "edit"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "edy-o2uvVYg",
+   "url": "https://www.youtube.com/watch?v=edy-o2uvVYg",
+   "title": "Blender Absolute Beginner:  Object Mode Vs Edit Mode Lesson",
+   "channel": "Dane Sigua",
+   "duration_s": 731,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-01-22",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "absolute",
+    "beginner",
+    "object",
+    "mode",
+    "edit",
+    "lesson"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "A73SDNJLqog",
+   "url": "https://www.youtube.com/watch?v=A73SDNJLqog",
+   "title": "Blender 2026 Object Mode vs Edit Mode Explained | Beginner to Pro Guide | Part 10 🚀",
+   "channel": "Blender 3D Universe",
+   "duration_s": 844,
+   "licence": "creativeCommon",
+   "chapters": 0,
+   "published": "2026-04-08",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "2026",
+    "object",
+    "mode",
+    "edit",
+    "explained",
+    "beginner",
+    "pro",
+    "guide"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "9Y0w7FhrsM0",
+   "url": "https://www.youtube.com/watch?v=9Y0w7FhrsM0",
+   "title": "Mastering BLENDER BASICS Made Easy - Edit Mode",
+   "channel": "Artisans of Vaul",
+   "duration_s": 996,
+   "licence": "youtube",
+   "chapters": 11,
+   "published": "2025-01-08",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "mastering",
+    "basics",
+    "made",
+    "easy",
+    "edit",
+    "mode"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner",
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "iG8Psvfp6Ng",
+   "url": "https://www.youtube.com/watch?v=iG8Psvfp6Ng",
+   "title": "Adding objects, Mesh and it's components, Edit and object mode in Blender in Hindi",
+   "channel": "CG Aman",
+   "duration_s": 433,
+   "licence": "youtube",
+   "chapters": 5,
+   "published": "2024-05-28",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "adding",
+    "objects",
+    "mesh",
+    "components",
+    "edit",
+    "object",
+    "mode",
+    "hindi"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "uaOHtbuE8Fo",
+   "url": "https://www.youtube.com/watch?v=uaOHtbuE8Fo",
+   "title": "Blender Edit Mode Explained | Beginner’s Guide to Modeling",
+   "channel": "Skill Brew",
+   "duration_s": 1056,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-09-12",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "edit",
+    "mode",
+    "explained",
+    "beginner",
+    "guide",
+    "modeling"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "oOuwHh9P4co",
+   "url": "https://www.youtube.com/watch?v=oOuwHh9P4co",
+   "title": "5. Blender Beginners Video Tutorial - What is Object and Edit Mode",
+   "channel": "Blender Geek",
+   "duration_s": 397,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2013-09-27",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "beginners",
+    "video",
+    "what",
+    "object",
+    "edit",
+    "mode"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender object mode vs edit mode beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "VFMGp0bdJdc",
+   "url": "https://www.youtube.com/watch?v=VFMGp0bdJdc",
+   "title": "Blender 3.3 Basics Tutorial - How to Extrude, Inset and Loop Cut (Modeling 101)",
+   "channel": "TutsByKai",
+   "duration_s": 423,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2022-10-29",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.3",
+   "source_tier": "community",
+   "keywords": [
+    "basics",
+    "extrude",
+    "inset",
+    "loop",
+    "cut",
+    "modeling",
+    "101"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "lx8BCaZ-uRc",
+   "url": "https://www.youtube.com/watch?v=lx8BCaZ-uRc",
+   "title": "Blender basics – Learn Extrude, Inset, Bevel | Urdu & Hindi",
+   "channel": "Blender Motion Graphics",
+   "duration_s": 1041,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-03-13",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "basics",
+    "learn",
+    "extrude",
+    "inset",
+    "bevel",
+    "urdu",
+    "hindi"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "UlTj9rzrGDE",
+   "url": "https://www.youtube.com/watch?v=UlTj9rzrGDE",
+   "title": "Blender - Extrude, Inset, Bevel, Loopcut, Knife",
+   "channel": "Matt Romein",
+   "duration_s": 386,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-02-09",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "extrude",
+    "inset",
+    "bevel",
+    "loopcut",
+    "knife"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "LoyG3OjtpRU",
+   "url": "https://www.youtube.com/watch?v=LoyG3OjtpRU",
+   "title": "Top 4 Essential Tools in Blender: Extrude, Bevel, Inset, Loop Cut (Beginners Guide)",
+   "channel": "DaVinci and Blender Studio",
+   "duration_s": 871,
+   "licence": "youtube",
+   "chapters": 5,
+   "published": "2024-10-13",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "top",
+    "essential",
+    "tools",
+    "extrude",
+    "bevel",
+    "inset",
+    "loop",
+    "cut"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "BRCAR-c6DFU",
+   "url": "https://www.youtube.com/watch?v=BRCAR-c6DFU",
+   "title": "Extrude Tool  Explained | Blender 4 for Beginners",
+   "channel": "3Dnot2D",
+   "duration_s": 466,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2023-12-06",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.x",
+   "source_tier": "community",
+   "keywords": [
+    "extrude",
+    "tool",
+    "explained",
+    "beginners"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "iJ2Np8-F_58",
+   "url": "https://www.youtube.com/watch?v=iJ2Np8-F_58",
+   "title": "Blender Tools Explained in Hindi: Extrude, Inset Faces & Bevel | Must-Know for 3D Modelling!",
+   "channel": "BlendWithBerry",
+   "duration_s": 1033,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-08-02",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "tools",
+    "explained",
+    "hindi",
+    "extrude",
+    "inset",
+    "faces",
+    "bevel",
+    "must"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "zxrkReD4P1I",
+   "url": "https://www.youtube.com/watch?v=zxrkReD4P1I",
+   "title": "BLENDER BASICS 13: The Extrude, Inset, and Knife Tools",
+   "channel": "CG Cookie – Learn Blender",
+   "duration_s": 567,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-12-26",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "basics",
+    "extrude",
+    "inset",
+    "knife",
+    "tools"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "Kf0giCUUo7c",
+   "url": "https://www.youtube.com/watch?v=Kf0giCUUo7c",
+   "title": "Blender Basics 04: Extrude, Inset, Bevel, Knife, Loop Cut",
+   "channel": "Ivan Spasov",
+   "duration_s": 1194,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2023-09-15",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "basics",
+    "extrude",
+    "inset",
+    "bevel",
+    "knife",
+    "loop",
+    "cut"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "atWsdWadG6M",
+   "url": "https://www.youtube.com/watch?v=atWsdWadG6M",
+   "title": "Blender for Beginners | Part 4 Extrude Inset Bevel & Loop Cuts",
+   "channel": "Dansky",
+   "duration_s": 394,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-05-08",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "beginners",
+    "extrude",
+    "inset",
+    "bevel",
+    "loop",
+    "cuts"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender extrude inset bevel modeling basics"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "hvxoAX_poI0",
+   "url": "https://www.youtube.com/watch?v=hvxoAX_poI0",
+   "title": "Create a Low Poly Tree in Blender in 1 Minute!",
+   "channel": "BlenderVitals",
+   "duration_s": 60,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2023-12-04",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "create",
+    "low",
+    "poly",
+    "tree",
+    "minute"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "y7PdiGXbrD0",
+   "url": "https://www.youtube.com/watch?v=y7PdiGXbrD0",
+   "title": "How to Create a Low Poly Tree in 1 Minute",
+   "channel": "CG Geek",
+   "duration_s": 61,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2019-12-09",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "2.8",
+   "source_tier": "community",
+   "keywords": [
+    "create",
+    "low",
+    "poly",
+    "tree",
+    "minute"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "DqPz1R2Iemk",
+   "url": "https://www.youtube.com/watch?v=DqPz1R2Iemk",
+   "title": "Easy Way To Create A Low Poly Tree In Blender",
+   "channel": "Enpix",
+   "duration_s": 742,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2026-01-19",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "easy",
+    "way",
+    "create",
+    "low",
+    "poly",
+    "tree"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "P3WhEfdqXZY",
+   "url": "https://www.youtube.com/watch?v=P3WhEfdqXZY",
+   "title": "How to create a Low Poly Tree in Blender in 3 Minutes!",
+   "channel": "Ashty",
+   "duration_s": 231,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2022-12-14",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "create",
+    "low",
+    "poly",
+    "tree",
+    "minutes"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "p-9pgZI3inI",
+   "url": "https://www.youtube.com/watch?v=p-9pgZI3inI",
+   "title": "Make Low Poly Trees & Save the Planet | #Teamtrees | Blender 2.8",
+   "channel": "Grant Abbitt (Gabbitt)",
+   "duration_s": 989,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2019-10-26",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "2.8",
+   "source_tier": "community",
+   "keywords": [
+    "make",
+    "low",
+    "poly",
+    "trees",
+    "save",
+    "planet",
+    "teamtrees"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "V0LyhVM6ILk",
+   "url": "https://www.youtube.com/watch?v=V0LyhVM6ILk",
+   "title": "How to create a low poly branched tree in Blender 2.8",
+   "channel": "Winglett Entertainment",
+   "duration_s": 757,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2019-09-12",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "2.8",
+   "source_tier": "community",
+   "keywords": [
+    "create",
+    "low",
+    "poly",
+    "branched",
+    "tree"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "fm6ppdhbifg",
+   "url": "https://www.youtube.com/watch?v=fm6ppdhbifg",
+   "title": "How to Create a Low Poly Tree in Blender in 1 Minute!",
+   "channel": "BlenderNinjas",
+   "duration_s": 86,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-05-11",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "create",
+    "low",
+    "poly",
+    "tree",
+    "minute"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "ZXo0aBLW6hc",
+   "url": "https://www.youtube.com/watch?v=ZXo0aBLW6hc",
+   "title": "How to make a low poly tree in Blender 2.8",
+   "channel": "Winglett Entertainment",
+   "duration_s": 474,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2019-06-30",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "2.8",
+   "source_tier": "community",
+   "keywords": [
+    "make",
+    "low",
+    "poly",
+    "tree"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "jdTabPJuqdc",
+   "url": "https://www.youtube.com/watch?v=jdTabPJuqdc",
+   "title": "Easy Realist Low Poly Trees -  Blender 3",
+   "channel": "Grant Abbitt (Gabbitt)",
+   "duration_s": 892,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2022-03-25",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "easy",
+    "realist",
+    "low",
+    "poly",
+    "trees"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "jgaaNmplML4",
+   "url": "https://www.youtube.com/watch?v=jgaaNmplML4",
+   "title": "Blender Speed Modeling Lowpoly Tree in 5 MINUTES in Blender 3d | Low poly 3d Modeling | Lowpoly Tree",
+   "channel": "brainchildpl",
+   "duration_s": 631,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-03-26",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "speed",
+    "modeling",
+    "lowpoly",
+    "tree",
+    "minutes",
+    "low",
+    "poly"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender low poly tree tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "MzIreMJRhqk",
+   "url": "https://www.youtube.com/watch?v=MzIreMJRhqk",
+   "title": "Best Glass Material in Blender Tutorial",
+   "channel": "Architecture Topics",
+   "duration_s": 100,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2023-09-26",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "best",
+    "glass",
+    "material"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "8QhVv3Olvsw",
+   "url": "https://www.youtube.com/watch?v=8QhVv3Olvsw",
+   "title": "How to make Transparent Glass Material in Blender using Principled BSDF Shader Node",
+   "channel": "blenderian",
+   "duration_s": 283,
+   "licence": "youtube",
+   "chapters": 8,
+   "published": "2024-01-01",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "make",
+    "transparent",
+    "glass",
+    "material",
+    "using",
+    "principled",
+    "bsdf",
+    "shader"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "HeN7Qv9jC9g",
+   "url": "https://www.youtube.com/watch?v=HeN7Qv9jC9g",
+   "title": "How To Create Glass in blender",
+   "channel": "ChuckCG",
+   "duration_s": 184,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-07-14",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "create",
+    "glass"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "tc-xuMpE0o4",
+   "url": "https://www.youtube.com/watch?v=tc-xuMpE0o4",
+   "title": "Glass Material in Blender 4.3: Quick and Easy!",
+   "channel": "Berk Kaplan - Designer",
+   "duration_s": 379,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-01-25",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.3",
+   "source_tier": "community",
+   "keywords": [
+    "glass",
+    "material",
+    "quick",
+    "easy"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "0G9-Txjns1k",
+   "url": "https://www.youtube.com/watch?v=0G9-Txjns1k",
+   "title": "Best Glass Material in Blender Tutorial",
+   "channel": "Architecture Topics",
+   "duration_s": 76,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-06-23",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "best",
+    "glass",
+    "material"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "4bBCZwkp8ww",
+   "url": "https://www.youtube.com/watch?v=4bBCZwkp8ww",
+   "title": "Procedural Glass Material (Blender Tutorial)",
+   "channel": "Ryan King Art",
+   "duration_s": 1866,
+   "licence": "youtube",
+   "chapters": 5,
+   "published": "2024-03-28",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "procedural",
+    "glass",
+    "material"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "D2AgCcC1hjs",
+   "url": "https://www.youtube.com/watch?v=D2AgCcC1hjs",
+   "title": "Blender 3D Modeling software: Glass Perfume Bottle Tutorial",
+   "channel": "IndustrialDesign ",
+   "duration_s": 324,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-06-08",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "modeling",
+    "software",
+    "glass",
+    "perfume",
+    "bottle"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "I6g_B5cXcHg",
+   "url": "https://www.youtube.com/watch?v=I6g_B5cXcHg",
+   "title": "Crystal Glasses in Blender 4.0 - Part 1: Creating the Crisscross Whiskey Tumbler",
+   "channel": "Crow3D",
+   "duration_s": 1044,
+   "licence": "youtube",
+   "chapters": 6,
+   "published": "2024-01-07",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.0",
+   "source_tier": "community",
+   "keywords": [
+    "crystal",
+    "glasses",
+    "creating",
+    "crisscross",
+    "whiskey",
+    "tumbler"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "V79ELoAcl1I",
+   "url": "https://www.youtube.com/watch?v=V79ELoAcl1I",
+   "title": "Realistic EEVEE GLASS Material Blender 4.5 TUTORIAL!",
+   "channel": "Faebe Tutorials",
+   "duration_s": 115,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-08-27",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.5",
+   "source_tier": "community",
+   "keywords": [
+    "realistic",
+    "eevee",
+    "glass",
+    "material"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "tAwf4WjeCC4",
+   "url": "https://www.youtube.com/watch?v=tAwf4WjeCC4",
+   "title": "[4.1] Blender Tutorial: Realistic Glass in 1 minute",
+   "channel": "Olav3D Tutorials",
+   "duration_s": 72,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-04-07",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.1",
+   "source_tier": "community",
+   "keywords": [
+    "realistic",
+    "glass",
+    "minute"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender realistic glass material tutorial"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "eCtSviaHZ6U",
+   "url": "https://www.youtube.com/watch?v=eCtSviaHZ6U",
+   "title": "Blender: Rig A Character From Scratch | CLEAR BEGINNERS GUIDE",
+   "channel": "PIXXO 3D",
+   "duration_s": 2039,
+   "licence": "youtube",
+   "chapters": 13,
+   "published": "2022-11-23",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "rig",
+    "character",
+    "from",
+    "scratch",
+    "clear",
+    "beginners",
+    "guide"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "2nlMZx0vp6E",
+   "url": "https://www.youtube.com/watch?v=2nlMZx0vp6E",
+   "title": "Character Rigging in Blender : Easy Setup for Beginners",
+   "channel": "Grant Abbitt (Gabbitt)",
+   "duration_s": 537,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-07-07",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.x",
+   "source_tier": "community",
+   "keywords": [
+    "character",
+    "rigging",
+    "easy",
+    "setup",
+    "beginners"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "rQ1PqUZhcFQ",
+   "url": "https://www.youtube.com/watch?v=rQ1PqUZhcFQ",
+   "title": "How to Rig a Character in Blender | Full Beginner to Pro Rigging Tutorial",
+   "channel": "EVIL ROX ANIMATION",
+   "duration_s": 390,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-06-24",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "rig",
+    "character",
+    "full",
+    "beginner",
+    "pro",
+    "rigging"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "DDeB4tDVCGY",
+   "url": "https://www.youtube.com/watch?v=DDeB4tDVCGY",
+   "title": "Rigging for impatient people - Blender Tutorial",
+   "channel": "Joey Carlino",
+   "duration_s": 602,
+   "licence": "youtube",
+   "chapters": 7,
+   "published": "2023-05-05",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "rigging",
+    "impatient",
+    "people"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "RdTuAY23vzk",
+   "url": "https://www.youtube.com/watch?v=RdTuAY23vzk",
+   "title": "Easy Rigging Using RIGIFY in Blender",
+   "channel": "Grant Abbitt (Gabbitt)",
+   "duration_s": 900,
+   "licence": "youtube",
+   "chapters": 7,
+   "published": "2025-10-19",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "easy",
+    "rigging",
+    "using",
+    "rigify"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "X590IZeyT1s",
+   "url": "https://www.youtube.com/watch?v=X590IZeyT1s",
+   "title": "Blender - Completely Rigging A Character (5 MINUTES!)",
+   "channel": "Royal Skies",
+   "duration_s": 269,
+   "licence": "creativeCommon",
+   "chapters": 0,
+   "published": "2022-03-22",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "completely",
+    "rigging",
+    "character",
+    "minutes"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "saWUIoVaqjc",
+   "url": "https://www.youtube.com/watch?v=saWUIoVaqjc",
+   "title": "Rig Low Poly Characters EASY: Blender Beginners",
+   "channel": "PIXXO 3D",
+   "duration_s": 1494,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-11-07",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "4.2",
+   "source_tier": "community",
+   "keywords": [
+    "rig",
+    "low",
+    "poly",
+    "characters",
+    "easy",
+    "beginners"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "EBgHRd5tJfE",
+   "url": "https://www.youtube.com/watch?v=EBgHRd5tJfE",
+   "title": "Blender 5.1 Basic Rigging Tutorial | Simple Armature Setup & Automatic Weights (Beginner Guide)",
+   "channel": "Freedom Arts 3D Workflow",
+   "duration_s": 267,
+   "licence": "youtube",
+   "chapters": 5,
+   "published": "2026-04-13",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "5.1",
+   "source_tier": "community",
+   "keywords": [
+    "basic",
+    "rigging",
+    "simple",
+    "armature",
+    "setup",
+    "automatic",
+    "weights",
+    "beginner"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "4z7G4TyKE9g",
+   "url": "https://www.youtube.com/watch?v=4z7G4TyKE9g",
+   "title": "Rig and Animate Character in 10 Minutes with Blender 3.1",
+   "channel": "Poly Flo",
+   "duration_s": 784,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2022-05-04",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.1",
+   "source_tier": "community",
+   "keywords": [
+    "rig",
+    "animate",
+    "character",
+    "minutes"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender rigging a character armature beginner"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "chcpHtHUfzw",
+   "url": "https://www.youtube.com/watch?v=chcpHtHUfzw",
+   "title": "Why Your Shading BREAKS in Blender (+ The Fix)",
+   "channel": "Josh - Blender Bros",
+   "duration_s": 761,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-08-19",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "why",
+    "shading",
+    "breaks",
+    "fix"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender fix shading artifacts smooth shading normals"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "ZdNEqv6M7p8",
+   "url": "https://www.youtube.com/watch?v=ZdNEqv6M7p8",
+   "title": "The Easy Way to Fix Ugly Shading in Blender",
+   "channel": "DECODED",
+   "duration_s": 546,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-07-30",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "easy",
+    "way",
+    "fix",
+    "ugly",
+    "shading"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender fix shading artifacts smooth shading normals"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "2MXFJ0I60Mo",
+   "url": "https://www.youtube.com/watch?v=2MXFJ0I60Mo",
+   "title": "Why Does Smooth Shading Look HORRIBLE in Blender??",
+   "channel": "Clonemace",
+   "duration_s": 84,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-04-03",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "why",
+    "does",
+    "smooth",
+    "shading",
+    "look",
+    "horrible"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender fix shading artifacts smooth shading normals"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "4sux_7qYRBE",
+   "url": "https://www.youtube.com/watch?v=4sux_7qYRBE",
+   "title": "5 Methods to Fix Shading Issues in Blender",
+   "channel": "The SoulWarrior",
+   "duration_s": 103,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2025-02-28",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "methods",
+    "fix",
+    "shading",
+    "issues"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender fix shading artifacts smooth shading normals"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "qB1eg3ef5vs",
+   "url": "https://www.youtube.com/watch?v=qB1eg3ef5vs",
+   "title": "Why Your Shading Is Broken (and how to fix it!)",
+   "channel": "Josh - Blender Bros",
+   "duration_s": 524,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2022-01-10",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "why",
+    "shading",
+    "broken",
+    "fix"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender fix shading artifacts smooth shading normals"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "vFCDABDGiwg",
+   "url": "https://www.youtube.com/watch?v=vFCDABDGiwg",
+   "title": "Blender - How To Fix Weird Shading In One Click!",
+   "channel": "Architecture Topics",
+   "duration_s": 230,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2024-12-09",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.x",
+   "source_tier": "community",
+   "keywords": [
+    "fix",
+    "weird",
+    "shading",
+    "one",
+    "click"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender fix shading artifacts smooth shading normals"
+   ],
+   "version_source": "description"
+  },
+  {
+   "id": "k5QyqaPMXSs",
+   "url": "https://www.youtube.com/watch?v=k5QyqaPMXSs",
+   "title": "Blender 2.8 How to move rotate and scale with shortcuts",
+   "channel": "CGMatter",
+   "duration_s": 121,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2019-02-11",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "2.8",
+   "source_tier": "community",
+   "keywords": [
+    "move",
+    "rotate",
+    "scale",
+    "shortcuts"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "G8FMPYZVcis",
+   "url": "https://www.youtube.com/watch?v=G8FMPYZVcis",
+   "title": "The most practical blender shortcut - blender tutorial - pat2 scale/rotate/select/move",
+   "channel": "roniyo",
+   "duration_s": 381,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-04-12",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "most",
+    "practical",
+    "shortcut",
+    "pat2",
+    "scale",
+    "rotate",
+    "select",
+    "move"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "hch5j8hjlac",
+   "url": "https://www.youtube.com/watch?v=hch5j8hjlac",
+   "title": "BLENDER - UNIT 1, LESSON 6 -How to Select, Move, Rotate, and Scale.",
+   "channel": "Art Logic Resources",
+   "duration_s": 805,
+   "licence": "youtube",
+   "chapters": 0,
+   "published": "2021-04-23",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "unit",
+    "lesson",
+    "select",
+    "move",
+    "rotate",
+    "scale"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "TJtiyQI6J-Q",
+   "url": "https://www.youtube.com/watch?v=TJtiyQI6J-Q",
+   "title": "How to move, rotate, scale image texture in Blender using mapping node and UV layout",
+   "channel": "blenderian",
+   "duration_s": 224,
+   "licence": "youtube",
+   "chapters": 11,
+   "published": "2024-02-22",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "move",
+    "rotate",
+    "scale",
+    "image",
+    "texture",
+    "using",
+    "mapping",
+    "node"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "ITc-bgNQIj4",
+   "url": "https://www.youtube.com/watch?v=ITc-bgNQIj4",
+   "title": "Beginner Guide to Moving, Scaling, and Rotating Objects in Blender 3.0",
+   "channel": "pixelseek",
+   "duration_s": 1434,
+   "licence": "youtube",
+   "chapters": 12,
+   "published": "2022-01-19",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": "3.0",
+   "source_tier": "community",
+   "keywords": [
+    "beginner",
+    "guide",
+    "moving",
+    "scaling",
+    "rotating",
+    "objects"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": "title"
+  },
+  {
+   "id": "U63t03RGyC8",
+   "url": "https://www.youtube.com/watch?v=U63t03RGyC8",
+   "title": "Blender: How to Move, Rotate and Scale (Transformations)",
+   "channel": "One Wheel Studio",
+   "duration_s": 241,
+   "licence": "youtube",
+   "chapters": 9,
+   "published": "2020-08-20",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "move",
+    "rotate",
+    "scale",
+    "transformations"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": null
+  },
+  {
+   "id": "z9vKRfPeIKc",
+   "url": "https://www.youtube.com/watch?v=z9vKRfPeIKc",
+   "title": "Blender Toolbar Beginners| Selection, Cursor, Move, Scale, Rotate| Ch2 | blender in Hindi/Urdu",
+   "channel": "Huseyn Studios",
+   "duration_s": 1361,
+   "licence": "youtube",
+   "chapters": 11,
+   "published": "2023-09-17",
+   "embeddable": true,
+   "privacy": "public",
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "toolbar",
+    "beginners",
+    "selection",
+    "cursor",
+    "move",
+    "scale",
+    "rotate",
+    "ch2"
+   ],
+   "review": "unreviewed",
+   "found_by": [
+    "blender select move rotate scale objects beginner"
+   ],
+   "version_source": null
+  }
+ ]
+}

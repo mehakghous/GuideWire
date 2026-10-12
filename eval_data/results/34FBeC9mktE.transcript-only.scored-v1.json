@@ -1,0 +1,255 @@
+{
+ "reference": "34FBeC9mktE.reference.v1.json",
+ "reference_sha256": "f4cbd54e1ef5",
+ "stats": {
+  "empty": 0,
+  "duplicate": 0,
+  "overlap_trimmed": 0,
+  "cues_in": 86,
+  "units": 24,
+  "steps": 16,
+  "explanation_units": 3,
+  "unmatched_units": 12
+ },
+ "limitations": [
+  "A transcript cannot show what was done on screen: demonstrated-only actions are not produced.",
+  "Only operations in the catalog are recognised; other instructions appear as unmatched units, not steps.",
+  "Step start and end times are the span of the matched transcript unit, not the moment of a key press."
+ ],
+ "steps": 16,
+ "narrated_recall_lenient": 0.55,
+ "narrated_recall_strict": 0.45,
+ "narrated_only_recall": 0.5,
+ "overall_recall_lenient": 0.5238095238095238,
+ "demonstrated_content_coverage_lenient": 0.5263157894736842,
+ "demonstrated_visual_claims": 0,
+ "demonstrated_recall_claimed": 0.0,
+ "not_applicable_demonstrated_only_reference_steps": [
+  "R16"
+ ],
+ "precision_lenient": 0.8125,
+ "precision_strict": 0.625,
+ "unmatched_generated": [
+  "s03",
+  "s11",
+  "s12"
+ ],
+ "broad_generated": [
+  "s01",
+  "s02",
+  "s16"
+ ],
+ "duplicate_generated": [
+  "s02",
+  "s06",
+  "s08",
+  "s15"
+ ],
+ "unsupported_evidence_quotes": 0,
+ "false_visual_claims": [],
+ "timestamps_beyond_end": [],
+ "untimed": [],
+ "temporal_within_tol": 0.8,
+ "temporal_median_abs_err_s": 1.8100000000000023,
+ "state_recall_vs_reference": 0.25,
+ "state_wrong_rate_vs_reference": 0.0,
+ "order_inversion_rate": 0.0,
+ "prerequisite_violation_rate": 0.0,
+ "counts": {
+  "verified": 21,
+  "verified_demonstrated": 19,
+  "verified_narrated": 20,
+  "verified_demonstrated_only": 1,
+  "verified_narrated_only": 2,
+  "unverified": 3,
+  "generated": 16
+ },
+ "covered_reference_ids": [
+  "R01",
+  "R02",
+  "R03",
+  "R04",
+  "R09",
+  "R11",
+  "R12",
+  "R17",
+  "R20",
+  "R22",
+  "R23",
+  "R24"
+ ],
+ "strict_pairs": {
+  "R03": "s02",
+  "R23": "s16",
+  "R09": "s05",
+  "R17": "s10",
+  "R12": "s09",
+  "R01": "s01",
+  "R04": "s04",
+  "R20": "s13",
+  "R22": "s14",
+  "R11": "s07"
+ },
+ "steps_detail": [
+  {
+   "id": "s01",
+   "t": [
+    22.83,
+    24.779
+   ],
+   "op": "catalog:mode.enter_edit@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s02",
+   "t": [
+    26.609,
+    30.96
+   ],
+   "op": "catalog:mode.toggle@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s03",
+   "t": [
+    38.73,
+    42.03
+   ],
+   "op": "catalog:mode.enter_object@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s04",
+   "t": [
+    40.26,
+    42.03
+   ],
+   "op": "catalog:transform.move@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s05",
+   "t": [
+    63.0,
+    66.36
+   ],
+   "op": "catalog:select.elements@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s06",
+   "t": [
+    66.36,
+    68.49
+   ],
+   "op": "catalog:transform.move@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s07",
+   "t": [
+    66.36,
+    75.21
+   ],
+   "op": "catalog:transform.rotate@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s08",
+   "t": [
+    66.36,
+    68.49
+   ],
+   "op": "catalog:transform.scale@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s09",
+   "t": [
+    81.21,
+    84.06
+   ],
+   "op": "catalog:history.undo@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s10",
+   "t": [
+    120.0,
+    124.35
+   ],
+   "op": "catalog:select.object@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s11",
+   "t": [
+    122.579,
+    126.479
+   ],
+   "op": "catalog:mode.enter_edit@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s12",
+   "t": [
+    157.94,
+    159.92
+   ],
+   "op": "catalog:select.object@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s13",
+   "t": [
+    159.92,
+    162.86
+   ],
+   "op": "catalog:object.join@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s14",
+   "t": [
+    171.44,
+    175.58
+   ],
+   "op": "catalog:mode.enter_edit@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s15",
+   "t": [
+    173.57,
+    175.58
+   ],
+   "op": "catalog:select.elements@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  },
+  {
+   "id": "s16",
+   "t": [
+    175.58,
+    180.56
+   ],
+   "op": "catalog:mesh.separate@main",
+   "support": "narrated",
+   "provenance": "transcript_rules"
+  }
+ ]
+}

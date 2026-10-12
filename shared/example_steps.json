@@ -1,0 +1,24 @@
+{
+  "title": "Switch to Edit Mode and add a cube",
+  "source_type": "youtube",
+  "source_url": "https://www.youtube.com/watch?v=EXAMPLE",
+  "blender_version": null,
+  "steps": [
+    {
+      "step_number": 1,
+      "instruction_text": "Click the mode dropdown in the top-left of the 3D viewport and choose Edit Mode.",
+      "action_type": "select",
+      "target_ui_element": "Mode selector",
+      "expected_result": "The mode label reads Edit Mode.",
+      "timestamp": 12.5
+    },
+    {
+      "step_number": 2,
+      "instruction_text": "Open the Add menu and choose Mesh, then Cube.",
+      "action_type": "click",
+      "target_ui_element": "Add menu",
+      "expected_result": "A new cube appears in the viewport.",
+      "timestamp": 27.0
+    }
+  ]
+}

@@ -7,3 +7,4 @@ python-dotenv
 google-genai
 httpx
 pytest
+youtube-transcript-api

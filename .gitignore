@@ -187,3 +187,7 @@ runs/
 
 # Local copies of user-supplied captions/transcripts (YouTube-derived; not for the repo)
 local_data/
+
+# Knowledge base: fetched manual source text and the built index are local build artifacts (CC-BY-SA text is not committed)
+knowledge/cache/
+knowledge/*.sqlite

@@ -52,7 +52,7 @@ Keyframe;Insert Keyframe;Play;Frame Start;Frame End;Render Image;Render Animatio
 Collection;New Collection;Link;Unlink;Hide;Unhide;Select All;Deselect All;Invert Selection;
 Select Linked;Merge;Merge Vertices;Fill;Grid Fill;Bridge Edge Loops;Dissolve;Subdivide;Triangulate;
 Separate;Selection;By Material;By Loose Parts;Duplicate;Mirror Vertices;Recalculate Normals;Flip Normals;
-Make Edge Face;New Edge Face from Vertices;Rip;Vertices;Edges;Faces;Face;Edge;Vertex;Loop Select;Ring Select;
+Mode Selector;Undo;Redo;Undo History;Repeat History;Adjust Last Operation;Pose Mode;Make Edge Face;New Edge Face from Vertices;Rip;Vertices;Edges;Faces;Face;Edge;Vertex;Loop Select;Ring Select;
 Select Random;Checker Deselect;Select More;Select Less;Grow Selection;Shrink Selection;Similar;
 Origin;Set Origin Geometry to Origin;Clear Parent;Make Parent;Apply Transformations;All Transforms;
 Location;Rotation;Scale Transform;Convert;Copy;Paste;Undo;Redo;Preferences;Save;Open;New;Append;Import;Export;

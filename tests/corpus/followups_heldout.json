@@ -1,0 +1,70 @@
+{
+ "_about": "HELD-OUT follow-up conversations, written and hash-frozen BEFORE the session/follow-up code existed (see followups_heldout.sha256). Author-written by the assistant, not by an independent annotator: they show whether the resolver generalises beyond the cases it was developed on, not how real users phrase things. Run ONCE for the reported number; after seeing results, any fix makes the later numbers 'not clean' (same rule as question set B).",
+ "_vocab": {
+  "route": "session = answered from the active procedure; standalone = treated as a new request (session untouched); clarify = a question back",
+  "tutorials": "A = 'Select both cubes. Press Ctrl+J to join them. Press Tab to enter Edit Mode. Select two vertices. Press G to move them.' (s01..s05, written text, version 2.80); B = 'Press Tab to enter Edit Mode. Select a face. Press S to scale it. Press Tab to return to Object Mode. Press Ctrl+Z to undo.' (s01..s05); T = tests/corpus/transcript_synthetic.vtt (10 steps, duration 100 s, tutorial version hint 2.80)",
+  "expect": "intent, route, kind (AnswerBundle.kind), contains / not_contains (case-insensitive, searched in clarification + questions + explanations + caveats + step goals of the answer), grounded (answer carries a source or points at a step), unmet (unmet_prerequisites non-empty), status_after {step: done|skipped|failed|pending}, current_after, active_after, verification_after {step: met|unmet|unverifiable}, not_done [steps that must NOT be done after the turn]"
+ },
+ "conversations": [
+  {"id": "F1", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "Why are we doing this step?", "expect": {"intent": "why", "route": "session", "contains": ["merges"], "grounded": true, "not_done": ["s02"]}},
+   {"say": "Can I use a keyboard shortcut instead?", "expect": {"intent": "shortcut_alt", "route": "session", "contains": ["ctrl+j"], "grounded": true}},
+   {"say": "Where can I find that button?", "expect": {"intent": "where", "route": "session", "contains": ["object > join"], "grounded": true}},
+   {"say": "Is there another way to do this?", "expect": {"intent": "other_way", "route": "session", "contains": ["object > join"], "grounded": true, "not_done": ["s02"]}}
+  ]},
+  {"id": "F2", "tutorial": "A", "version": "2.80", "done": ["s01", "s02"], "current": "s03", "turns": [
+   {"say": "What should I do next?", "expect": {"intent": "next", "route": "session", "contains": ["tab"], "current_after": "s03", "not_done": ["s03"]}},
+   {"say": "ok I did that", "expect": {"intent": "done_stmt", "route": "session", "status_after": {"s03": "done"}, "current_after": "s04"}},
+   {"say": "Can you explain the previous step again?", "expect": {"intent": "explain_prev", "route": "session", "contains": ["edit mode"], "current_after": "s04", "not_done": ["s04"]}},
+   {"say": "Can you explain the rest without repeating what I've already done?", "expect": {"intent": "explain_rest", "route": "session", "contains": ["vertices", "move"], "not_contains": ["ctrl+j"]}}
+  ]},
+  {"id": "F3", "tutorial": "A", "version": "2.80", "done": ["s01", "s02", "s03"], "current": "s04", "observed": {"mode": "OBJECT"}, "turns": [
+   {"say": "I don't see that option on my screen.", "expect": {"intent": "missing_option", "route": "session", "contains": ["edit mode"], "unmet": true, "not_done": ["s04"]}},
+   {"say": "What if I already completed this step?", "expect": {"intent": "already_done_q", "route": "session", "not_done": ["s04"], "current_after": "s04"}},
+   {"say": "I already did that.", "expect": {"intent": "done_stmt", "route": "session", "status_after": {"s04": "done"}, "current_after": "s05"}}
+  ]},
+  {"id": "F4", "tutorial": "B", "version": "2.80", "current": "s02", "observed": {"mode": "EDIT_MESH"}, "turns": [
+   {"say": "Will this work in my Blender version?", "expect": {"intent": "version", "route": "session", "contains": ["2.80"]}},
+   {"say": "I made a mistake. How do I recover?", "expect": {"intent": "mistake", "route": "session", "kind": "procedure", "contains": ["ctrl+z"], "not_done": ["s02"]}},
+   {"say": "That didn't work.", "expect": {"intent": "didnt_work", "route": "session", "status_after": {"s02": "failed"}, "kind": "clarification"}}
+  ]},
+  {"id": "F5", "tutorial": "B", "version": "2.80", "done": ["s01", "s02"], "current": "s03", "turns": [
+   {"say": "Why?", "expect": {"intent": "why", "route": "session", "contains": ["scale"], "not_done": ["s03"]}},
+   {"say": "What about the other one?", "expect": {"intent": "other_one", "route": "clarify", "kind": "clarification", "current_after": "s03", "not_done": ["s03"]}},
+   {"say": "Continue.", "expect": {"intent": "continue", "route": "session", "contains": ["scale"], "current_after": "s03", "not_done": ["s03"]}}
+  ]},
+  {"id": "F6", "tutorial": "A", "version": "2.80", "done": ["s01"], "current": "s02", "turns": [
+   {"do": ["load:B"], "say": "What should I do next?", "expect": {"intent": "next", "route": "session", "contains": ["tab"], "not_contains": ["ctrl+j", "join"], "current_after": "s01", "status_after": {"s01": "pending"}}}
+  ]},
+  {"id": "F7", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "What is the difference between Object Mode and Edit Mode?", "expect": {"intent": "standalone", "route": "standalone", "kind": "concept", "current_after": "s02", "not_done": ["s02"]}},
+   {"say": "Continue", "expect": {"intent": "continue", "route": "session", "contains": ["join"], "current_after": "s02"}}
+  ]},
+  {"id": "F8", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "How do I scale an object?", "expect": {"intent": "standalone", "route": "standalone", "contains": ["scale"], "current_after": "s02", "not_done": ["s02"]}}
+  ]},
+  {"id": "F9", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "Actually I want to learn how to rig a character instead.", "expect": {"intent": "task_change", "route": "standalone", "active_after": false, "not_done": ["s02"]}},
+   {"say": "Why?", "expect": {"intent": "why", "route": "clarify", "kind": "clarification", "not_contains": ["merges"]}}
+  ]},
+  {"id": "F10", "tutorial": "T", "version": "2.80", "turns": [
+   {"say": "What happens at 0:41?", "expect": {"intent": "timestamp", "route": "session", "contains": ["object mode"], "grounded": true, "not_done": ["s03"]}},
+   {"say": "Explain the step at 1:18", "expect": {"intent": "timestamp", "route": "session", "contains": ["join"], "grounded": true}},
+   {"say": "What happens at 5:00?", "expect": {"intent": "timestamp", "route": "session", "kind": "clarification", "not_contains": ["join"]}},
+   {"say": "Go back to the undo part", "expect": {"intent": "goto", "route": "session", "current_after": "s04"}}
+  ]},
+  {"id": "F11", "tutorial": "A", "version": "2.80", "done": ["s01"], "current": "s02", "observed": {"mode": "EDIT_MESH"}, "turns": [
+   {"say": "The tutorial says to press Ctrl+J but nothing happens.", "expect": {"intent": "nothing_happens", "route": "session", "contains": ["object mode"], "unmet": true, "not_done": ["s02"]}}
+  ]},
+  {"id": "F12", "tutorial": "B", "version": "2.80", "done": ["s01", "s02", "s03", "s04"], "current": "s05", "observed": {"mode": "EDIT_MESH"}, "turns": [
+   {"say": "I followed the steps, but my result looks different.", "expect": {"intent": "result_differs", "route": "session", "contains": ["object mode"], "verification_after": {"s04": "unmet"}, "not_done": ["s05"]}}
+  ]},
+  {"id": "F13", "tutorial": "A", "version": "2.80", "done": ["s01", "s02"], "current": "s03", "turns": [
+   {"say": "Skip this step.", "expect": {"intent": "skip", "route": "session", "status_after": {"s03": "skipped"}, "current_after": "s04"}},
+   {"say": "Go back to step 2.", "expect": {"intent": "goto", "route": "session", "current_after": "s02", "status_after": {"s03": "skipped"}}}
+  ]},
+  {"id": "F14", "tutorial": "T", "version": "4.2", "tutorial_version_hint": "2.80", "turns": [
+   {"say": "Will this work in my Blender version?", "expect": {"intent": "version", "route": "session", "contains": ["2.80", "4.2"]}}
+  ]}
+ ]
+}

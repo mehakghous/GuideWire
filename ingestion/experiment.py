@@ -42,6 +42,10 @@ PRICES = {                    # USD per 1M tokens (input, output incl. thinking)
     "gemini-3.8-flash": (0.75, 3.75),
     "gemini-3.5-flash-lite": (0.30, 2.50),
 }
+# The cache key must change when what the MODEL sees changes (prompt text, response schema), not when the stored StepList contract gains fields.
+# Keying on SCHEMA_VERSION silently invalidated every cached result when the contract moved 0.3 -> 0.6 (found 2026-10-11: cached cells were re-called).
+# "0.3" is the tag the E1 cells were stored under; bump it ONLY together with a change to the model-facing schema (tests/test_experiment.py pins its fingerprint).
+MODEL_SCHEMA_TAG = "0.3"
 ARMS = {"A": {"prompt_version": "v2"}, "B": {"prompt_version": "v3"}}
 
 
@@ -107,7 +111,7 @@ def cell_key(*, model: str, prompt_version: str, video_id: str, duration_s: floa
     sys_h = _h(build_system_prompt(get_profile("blender"), prompt_version))
     usr_h = _h(video_prompt(prompt_version, duration_s, title_hint))
     blob = json.dumps({"m": model, "sys": sys_h, "usr": usr_h, "v": video_id, "d": duration_s, "r": repeat,
-                       "schema": SCHEMA_VERSION, "mo": max_output_tokens, "res": media_resolution,
+                       "schema": MODEL_SCHEMA_TAG, "mo": max_output_tokens, "res": media_resolution,
                        "temp": 0.2}, sort_keys=True)
     return _h(blob)
 
@@ -135,7 +139,7 @@ def _check_before(ledger: Ledger, lim: Limits, duration_s: float, model: str) ->
 def run_cell(
     *, provider_factory: Callable[[], Any], model: str, arm: str, video_id: str, duration_s: float,
     title_hint: str | None, repeat: int, cache_dir: Path, ledger: Ledger, lim: Limits,
-    media_resolution: str | None = None, sleep: Callable[[float], None] = time.sleep,
+    media_resolution: str | None = None, sleep: Callable[[float], None] = time.sleep, retry_503: bool = True,
 ) -> dict[str, Any]:
     """Run one (arm, video, repeat) cell, or return the cached result. Raises StopExperiment on a limit."""
     pv = ARMS[arm]["prompt_version"]
@@ -146,7 +150,7 @@ def run_cell(
         cell = json.loads(path.read_text(encoding="utf-8"))
         cell["cached"] = True
         return cell
-    for pause in (0, 30, 60):  # a cell that only ever got 503s is retried twice after a pause, then given up
+    for pause in ((0, 30, 60) if retry_503 else (0,)):  # a cell that only ever got 503s is retried twice after a pause, then given up (retry_503=False: never)
         _check_before(ledger, lim, duration_s, model)
         if pause:
             sleep(pause)
@@ -318,6 +322,7 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--max-video-seconds", type=float, default=9000)
     r.add_argument("--max-output-tokens", type=int, default=16384)
     r.add_argument("--dir", default="runs")
+    r.add_argument("--no-retry", action="store_true", help="one HTTP attempt per call and one pass per cell: any 503/429 ends that cell and is reported (the extraction's own corrective re-prompt after an INVALID answer is part of the protocol and stays)")
     s = sub.add_parser("score")
     s.add_argument("--video", required=True)
     s.add_argument("--reference", required=True)
@@ -350,13 +355,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"video is {md.privacy_status}; the URL route needs a public video", file=sys.stderr)
         return 2
     ledger = Ledger.load(base / "ledger.json")
-    factory = lambda: GeminiProvider(model=args.model, max_output_tokens=lim.max_output_tokens, max_attempts=3)
+    factory = lambda: GeminiProvider(model=args.model, max_output_tokens=lim.max_output_tokens, max_attempts=1 if args.no_retry else 3)
     try:
         for rep in range(1, args.repeats + 1):
             for arm in args.arms.split(","):
                 cell = run_cell(provider_factory=factory, model=args.model, arm=arm, video_id=args.video,
                                 duration_s=float(md.duration_s), title_hint=md.title, repeat=rep,
-                                cache_dir=base / "cache", ledger=ledger, lim=lim)
+                                cache_dir=base / "cache", ledger=ledger, lim=lim, retry_503=not args.no_retry)
                 print(f"arm {arm} repeat {rep}: accepted={cell['accepted']} cached={cell['cached']} "
                       f"attempts={len(cell['attempts'])} statuses={[e.get('status') for e in cell['events']]} "
                       f"cost_notional=${cell['cost_notional_usd']:.4f} total=${ledger.notional_usd:.4f} "

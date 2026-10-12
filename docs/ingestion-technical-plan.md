@@ -920,3 +920,1009 @@ If billing is enabled the quota problem goes away; that is your decision, and it
 - I then made one direct request to capture the full error text (a refused call costs nothing). It names the quota: **`GenerateRequestsPerDayPerProjectPerModel-FreeTier`, limit 20 requests per day per model, for `gemini-3.6-flash`**, with a retry delay of about 5 h 29 min. The earlier tiny probe was not representative: the limit counts requests, not tokens, and 503 responses very likely count towards it (E1 made 15 HTTP attempts, 8 of them 503s, 1 a connection reset).
 - Consequences: (1) the daily budget for this model is about 20 requests, so a full 3 × 3 comparison with the current 503 rate needs more than one day; (2) the runner's `--max-calls` should be kept at or below 18 per day on a free key; (3) changing to another model to escape the limit would change the variable under test and is not done; (4) enabling billing removes this limit (the user will do so later).
 - Resume (after the reset, around 5.5 h after this entry): `python -m ingestion.experiment run --video 34FBeC9mktE --arms A,B --repeats 3 --max-calls 18`. Only A2, A3 and B3 are missing; the ledger stop must be cleared once after the reset (see history entry).
+
+
+---
+
+# Part VI: No-Gemini input paths, documentation-backed knowledge layer, transcript-only evaluation (2026-10-11)
+
+Scope: no Gemini or other paid or quota-consuming call was made. Billing, keys and quota safeguards were not touched. Labels: **[MEASURED]** produced by a run in this repository; **[REVIEWED]** my reading of a source or output, not an automated result; **[HYPOTHESIS]** untested; **[DONE]** implemented and unit-tested; **[PROPOSED]** not built.
+
+## 53. Input-method inventory (what actually exists)
+
+| # | Input path | Status | Model needed? | Reliably produces | Cannot establish | Constraints | Offline tests |
+|---|---|---|---|---|---|---|---|
+| 1 | Written instructions, pasted | **[DONE]** `ingestion/text_steps.py` via `route()`; the Gemini route `extract_from_text` also exists | none (rules); Gemini only as an explicit fallback | ordered steps for clauses in the catalog, user wording kept, shortcut/menu/version/prerequisite checks | meaning of prose outside the catalog (kept as unvalidated steps) | none | corpus: 17 cases routed to the written parser |
+| 2 | Direct questions | **[DONE]** `ingestion/intent.py` + `router.py` | none | how-to steps, concepts, shortcut lookups, troubleshooting for the 13 catalog procedures and 1 troubleshooting entry; clarification when vague | anything outside the catalog (returns `fallback_required`, calls nothing) | none | corpus: 15 answered from the catalog, 3 clarifications, 3 explicit declines |
+| 3 | SRT / WebVTT supplied by the user | **[DONE]** parser existed; step generation added in `transcript_ingest.py` | none | narrated candidate steps with cue times and verbatim evidence | what was done on screen | caption text is YouTube-derived: keep local | 11 tests + synthetic VTT |
+| 4 | Plain / pasted timestamped transcript | **[DONE]** same module (`00:00:12.340 text`, `1:23 text`, `[83s] text`, markdown bullets) | none | same as 3 | same | same | included in the 11 |
+| 5 | Manually entered step list (JSON) | **[DONE]** `workflows.normalise_manual_steps`, `route(input_type="manual_steps")` | none | schema validation, vocabulary restriction, flags; nothing repaired | whether the steps are correct | none | 2 tests |
+| 6 | Saved / reviewed workflows | **[DONE]** `ReviewedWorkflowStore`; **the store is empty** (the hand-written examples are fixtures, not reviewed) | none | reuse of an approved workflow, only if a named reviewer approved it and the Blender version is known and in range | that it still fits a given scene | none | 3 tests |
+| 7 | Blender application state | **[DONE]** the observed-state dict is used by the router (`mode`, `selected_objects`) and by the existing `StepEvaluator`. **No component produces it yet** (Umaima's adapter) | none | prerequisite checks, a context step when state breaks a prerequisite, completion checks | anything not in the dict (reported unknown) | needs the adapter | 4 tests |
+| 8 | Screenshots (local) | **[PROPOSED]** not implemented | none if local OCR | **[HYPOTHESIS]** the mode label in the viewport header could be read by OCR | layout-dependent, untested | RAM/CPU (see §58) | none |
+| 9 | User-supplied video file | **[PROPOSED]** not implemented | none if local | **[HYPOTHESIS]** local frame extraction (OpenCV is already a dependency) and local speech-to-text on our own recordings | untested | RAM/CPU; own recordings only | none |
+| 10 | YouTube URL, metadata, chapters | **[DONE]** metadata + chapter parsing; understanding is Gemini-only | Gemini for understanding | duration, licence, embeddability, chapters | tutorial content (metadata is not understanding) | quota; free tier 20 requests/day/model | existing 36 + live smoke |
+| — | Video understanding via Gemini | **[DONE, partly evaluated]** Part V | Gemini | see Part V | | | |
+
+## 54. Transcript-only evaluation (local transcript of video 34FBeC9mktE, frozen reference v1; zero cost)
+
+The transcript is a **local fixture** (`local_data/`, git-ignored, YouTube caption text supplied by the user). The version-controlled corpus uses a short synthetic VTT written for this repository. Command: `python -m ingestion.eval.transcript_eval --transcript local_data/34FBeC9mktE.transcript.txt --reference eval_data/gold/34FBeC9mktE.reference.v1.json --duration 188`.
+
+**Important caveat: the rules were developed while looking at this transcript, so these numbers are optimistic. There is no held-out transcript yet.**
+
+| Metric [MEASURED] | Denominator | Transcript-only | Notes |
+|---|---|---|---|
+| Narrated-step recall, lenient (strict) | 20 verified reference steps that are narrated or both | **0.55 (0.45)** | v2 post-hoc reference: 0.52 (0.43) |
+| Narrated-only recall | 2 steps (R03, R21) | 0.50 (1 of 2) | v2: 1.0 (R21 became "both"; 1 step) |
+| Precision, lenient (strict) | 16 generated steps | **0.81 (0.62)** | unmatched: s03 (a general statement "toggle back into Object Mode to move the object as a whole"), s11 and s12 (real actions the reference's match terms do not cover [REVIEWED]) |
+| Demonstrated recall, **visual claim** | 19 verified demonstrated-or-both steps | **0.00 by construction** (0 steps claim visual evidence) | never counts a narrated step as seen |
+| Demonstrated **content coverage** (narration describes the demonstrated action) | same 19 | 0.53 | a ceiling for what narration alone can cover, not a visual result |
+| Demonstrated-only reference steps | R16 (v2: R14, R16) | **not applicable** | nothing is said, so a transcript cannot contain them; not counted as misses |
+| Unsupported claims | 16 steps | 0 evidence quotes missing from the transcript; 0 false visual claims; 0 timestamps past the end | |
+| Timestamps | matched steps | within the ±3 s tolerance 0.80; median error 1.8 s | spans are the cues that contain the instruction, not the key press |
+| Expected-state correctness vs reference | matched steps with predicates | recall 0.25; wrong rate 0.0 | states come from the catalog (the transcript rarely states them) |
+| Ordering / prerequisites | matched pairs | inversions 0.0; prerequisite violations 0.0 | |
+| Reference steps a transcript cannot reach | R06, R07, R08 (the 49–61 s undo/Tab/undo demonstration) | not covered (tested) | the demonstration gap of Part V is visible here as a limit of the input, not of the parser |
+
+**Before and after one change [MEASURED].** First version used the whole grouped unit as each step's time span; it was replaced by the span of the cues that contain the instruction (a synthetic-corpus test showed a step starting at 2 s instead of 14 s). Timestamps within tolerance 0.55 → 0.80 and median error 2.5 → 1.8 s; narrated recall unchanged lenient 0.55, strict 0.50 → 0.45; precision lenient 0.88 → 0.81, strict 0.69 → 0.62. It is a trade: better timing, lower precision.
+
+**Fair baselines on the same reference [MEASURED, tiny n].** Gemini whole-video v2 (A1): narrated recall 0.25 (0.10 strict); Gemini v3 (B1, B2): 0.65 and 0.35. Transcript-only (0.55) therefore sits between them, at zero cost, no quota, and without any visual claim. These are not matched conditions (one video, 1 + 2 runs), so no ranking is claimed.
+
+## 55. Written instructions and direct questions (39-case offline corpus)
+
+`tests/corpus/cases.json`, run by `python -m ingestion.eval.offline_report` and by pytest. Expectations are properties (route, kind, ordered operations, forbidden operations, flags, assumptions, links), not exact wording. **The cases were written by me alongside the rules, so the pass rate is a regression measure, not accuracy on unseen requests.**
+
+| Metric [MEASURED] | Result |
+|---|---|
+| Cases passed | 39 of 39 |
+| Schema validation (every bundle round-trips through the shared schema) | 100% |
+| Supported requests answered with no model | 32 of 32 |
+| Declined with an explicit `fallback_required` (nothing called) | 3 (bevel, sculpt, render) |
+| Clarification questions instead of an answer | 3 (vague requests) |
+| Cases where part of the request needs a model (reported, not called) | 6 |
+| Model calls made | 0 |
+| Model calls a model-only pipeline would have made (one per case) | 39; avoided: 36 |
+| Prerequisite handling visible (assumption, flag, question, context step or observed check) | 7 of 7 cases that require it |
+| Latency | mean 0.7 ms, max 3.2 ms |
+
+Categories covered: short and multi-step procedures; how-to, concept, shortcut, troubleshooting and mixed questions; ambiguous and unsupported requests; missing prerequisites and wrong order; conflicting shortcut, menu path and version; duplicates and incomplete lists; uncheckable expected results; one long multi-topic transcript. **Negative tests** include: a how-to about joining must not produce undo or separate steps; "Delete the cube by selecting it" must not be reduced to a Select step; "separate objects" in speech must not become a Separate step; an incomplete list must not grow extra steps.
+
+**Defects these tests exposed and I fixed (hand-reviewed):** stemmer never produced "cube" from "cubes"; "Choose Object > Join" compared with "Choose" included; transcript pattern did not accept "select **a** vertex"; "Edit Mode … the object" matched "object mode" as loose words; the redo shortcut was stored un-normalised; a "Delete …" clause was mapped to Select; unit spans were too broad.
+
+**Comparison with the Gemini-backed written route [REVIEWED, one historical case].** The only live written-instruction result is the 5-line input of 2026-10-10 (Gemini: 5 steps in about 6 s, 3 verifiable, plausible). The rule parser on the same input: 5 steps in 3 ms, of which 2 are catalog-backed (1 verifiable) and 3 are kept as unvalidated steps (UV sphere, Sculpting workspace, "make it look nice") with `fallback_reason` naming them. It also exposed a fault that is now fixed (the "Delete…" clause). So the rules are fast and honest about coverage but cannot do open prose; a model is still needed for that.
+
+## 56. Documentation-backed knowledge layer
+
+**Sources assessed.**
+| Source | Use | Licence / terms [VERIFIED 2026-10-11] | Decision |
+|---|---|---|---|
+| Blender manual (source files on `main`, currently the 5.2 LTS manual) | facts: shortcuts, menu paths, prerequisites, caveats | CC-BY-SA 4.0, credit "Blender Documentation Team" with a link; logos, trademarks, icons, code excluded | **Used.** Short paraphrases and facts only, never copied pages; credit and link in every `SourceRef`. No bulk download |
+| Blender manual for 2.80 | version-specific check | same licence | **Not verified**: the 2.80 branch path returned 404. All entries are reported as "documented for the current manual; this version unverified" |
+| Tutorial video 34FBeC9mktE (2.80) | confirms behaviour visible in 2.80 | YouTube licence field creativeCommon | cited per operation, from the assistant-read reference |
+| Project documents and examples | none reusable | n/a | `shared/examples` are hand-written fixtures, not reviewed workflows |
+| Reviewed GuideWire workflows | reuse | project-owned | store implemented, **empty** |
+
+**Design decision.** A structured operation registry (`ingestion/catalog.py`), not a documentation index, embedding model or vector store: 13 procedures and 1 troubleshooting entry are fully testable, auditable and cheap, and no retrieval infrastructure was justified. Each entry carries aliases, prerequisites (some checkable against observed state), applicable object types, shortcuts, menu paths, caveats, sources, a minimum version and an explicit `unverified` list.
+
+**Initial operations (14 entries: 13 procedures and 1 troubleshooting).** Enter Edit Mode; return to Object Mode; switch between modes; select an object; select vertices/edges/faces; move; rotate; scale; undo; redo; join objects; separate geometry; edit several objects at once; and the troubleshooting entry "vertices of two objects cannot be connected" (remedy: join first). The catalog does **not** claim to answer arbitrary Blender questions.
+
+**Source-of-truth policy.** Documented procedure (the catalog) ≠ context-validated (version and prerequisites checked) ≠ observed state (what the application reports). Documentation never counts as observation: with no observed state a prerequisite is **unknown** and becomes an assumption plus a clarification question; with observed state it is met, unmet (a context step is prepended, or the user is told) or unknown. Every step records `provenance` (`catalog_template`, `catalog_context`, `user_text`, `transcript_rules`, `reviewed_workflow`) and `source_refs`; catalog steps have `support="unknown"` and are never narrated or demonstrated. Tested: `test_documentation_does_not_count_as_observation`, `test_provenance_and_sources_on_every_catalog_step`.
+
+**Version compatibility.** `version_status` returns incompatible (below the operation's minimum), unknown (no version given) or unverified. It never returns "verified" for a version whose manual was not read. **Updating:** edit the entry, re-read the manual file, update `verified_on`; the tests fail if an entry lacks a source, licence or date. Expand using `scripts/dump_blender_vocab.py` when Blender is available (written, never run).
+
+**Routing policy (`ingestion/router.py`).**
+1. Manual step list and timestamped transcripts have their own routes and bypass question logic (they are not questions).
+2. A person-reviewed workflow, if the version is known and in range.
+3. A deterministic catalog answer (how-to, concept, shortcut, troubleshooting).
+4. Offline parsing of a pasted procedure.
+5. A clarification question when the request is vague or a material prerequisite is unknown.
+6. Otherwise `fallback_required`. **The router has no way to call a model** (a test checks that importing it loads no network or model library). Whether to spend quota is the caller's explicit decision, so nothing falls back silently.
+Bypass rules: a concept or shortcut question skips steps, state and screenshots entirely; a transcript or manual list is never classified as a question; screenshot or live-state use (not built) would only be asked for when a prerequisite is unknown and material.
+
+**Implemented now vs proposed.** Implemented: catalog, intent classification, router, written parser, transcript ingestion, reviewed store, manual-step validation, offline CLI (`ask`, `transcript`, `validate`). Proposed: version-specific verification against a 2.80 manual, real vocabulary dump, OCR-based observed state, local speech-to-text on our own recordings, a reviewed-workflow editing UI.
+
+## 57. API calls avoided and fallbacks (offline, [MEASURED])
+36 of 39 corpus requests need no model; 3 are declined explicitly and 3 ask a question; 6 contain a part that only a model could handle, and that part is named, not sent. Latency is milliseconds instead of the 25–50 s of a Gemini video call. Free-tier quota is 20 requests per day per model [VERIFIED, §52], so each avoided call matters.
+
+## 58. Local hardware and what is justified [MEASURED hardware; the rest HYPOTHESIS]
+This laptop: Intel Core i7-6600U (2 cores, 4 threads), 7.9 GB RAM, Intel HD 520 (no usable GPU for ML), 59 GB free disk. **Recommendation: no local LLM.** Everything added runs in plain Python in milliseconds. If local speech-to-text is wanted for our own screencasts, the smallest models of a CPU-only Whisper port (tens to a few hundred MB, int8) are the only plausible candidates; install size and real-time factor on a 2-core CPU are **unmeasured**, so a 5-minute trial on our own recording must precede any decision. For screenshots, a small ONNX OCR (read the mode label in the header) is cheaper than any vision model; accuracy on Blender's UI is untested. Nothing was installed.
+
+## 59. Schema and integration changes for Mehak and Umaima
+- **Schema 0.4 (additive)**: `Step.provenance`, `Step.source_refs`, `Step.assumptions`; new `StepList.source_type` values `transcript`, `catalog`, `manual`. Earlier files still validate.
+- **New `shared/answer.py` (`AnswerBundle`)**: explanations stay separate from steps; carries `route`, `clarification`, `assumptions`, `caveats`, `sources`, `unmet_prerequisites`, `fallback_reason`, `api_calls`. The review UI should show assumptions and the clarification question; the session engine should treat `needs_model` / `fallback_required` as a decision for the user or developer, not an error.
+- **Observed-state keys** the router and evaluator read: `mode`, `selection_types`, `selected_objects` (list of object types, new), `active_tool`, `workspace`, `open_panels`, `properties`. Umaima's adapter should supply `selected_objects` if Join/Move prerequisites are to be checked.
+- `StepEvaluator` now returns "unverifiable" for steps whose expected state already held before the step.
+- Needs review: provenance names, the `selected_objects` key, and whether `AnswerBundle` fits the UI.
+
+## 60. Commands
+```
+python -m pytest -q                                   # 171 offline tests (the transcript fixture tests skip if local_data/ is absent)
+python -m ingestion.eval.offline_report               # 39-case corpus, writes runs/results/offline_report.json
+python -m ingestion.eval.transcript_eval --transcript local_data/34FBeC9mktE.transcript.txt --reference eval_data/gold/34FBeC9mktE.reference.v1.json --duration 188
+python -m ingestion.cli ask "How do I join two mesh objects?" --version 2.80 --mode EDIT_MESH --selected MESH
+python -m ingestion.cli transcript tests/corpus/transcript_synthetic.vtt --duration 100 --version 2.80
+python -m ingestion.cli validate shared/examples/blender_cube_extrude.json --version 2.80
+```
+Sanitized result files: `eval_data/results/*transcript-only*.json`, `eval_data/results/offline_corpus_report.json`.
+
+## 61. Limitations and unresolved assumptions
+- The transcript results are on the development video; no held-out transcript exists. The corpus is author-written.
+- The catalog covers 14 entries; coverage of real user questions is unknown and not claimed.
+- 2.80 behaviour is confirmed only by the tutorial video, not by a 2.80 manual; shortcut cancel/confirm details for rotate and scale were not on the pages read.
+- Shift+click extending a selection is visible in the video but not stated on the manual page read.
+- Mode state names follow this app's vocabulary (`EDIT_MESH` is mesh-only).
+- The reference annotation is assistant-read and unverified by a human (Part V).
+
+## 62. Next steps for when the API quota resets (prioritised)
+1. Resume experiment E1 with `--max-calls 18` (A2, A3, B3).
+2. Test a transcript-assisted video call: pass the user-supplied transcript as a hint and check evidence deterministically, against `v3` alone, on the same video.
+3. Get a **held-out** transcript and a second reference (the 11-minute video) to measure the transcript rules and the router on unseen content.
+4. Human check of the reference, then rescore everything.
+5. Extend patterns and catalog entries only from held-out failures; verify a 2.80 manual path; run the vocabulary dump on the pinned Blender version.
+6. Trial local OCR on frames of our own screencast for the mode label.
+
+## 63. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Offline knowledge layer, router, written parser, transcript ingestion, reviewed store, manual-step validation and offline CLI built; 171 offline tests pass; transcript-only evaluation and 39-case corpus recorded. No model call made. |
+
+
+---
+
+# Part VII: Rethinking knowledge and question answering: a local documentation index, tutorial discovery, trust levels (2026-10-11)
+
+No Gemini or other AI call was made. Network use this session (none by the product code): about 300 targeted GETs of manual source files, the repository host's tree/branch API (paths and sizes), the manual's title inventory (one file), one YouTube Data API `videos.list` call (metadata only, 1 quota unit), and documentation reads. Labels: **[MEASURED]** produced by a run here; **[REVIEWED]** my reading of outputs, not automated; **[VERIFIED-DOC]** read in an official source on the date given; **[UNVERIFIED]** from a third-party summary or memory; **[HYPOTHESIS]** untested.
+
+## 64. What the existing implementation actually does [VERIFIED by running it]
+- `catalog.py` holds **14 hand-written entries with 42 alias groups**. Each new operation costs manual work (aliases, templates, prerequisites, sources), so coverage cannot grow with the documentation.
+- `intent.py` rejects any request that mentions one of **42 blocklisted topic words** with no catalog match. Nine of those words (`bevel`, `extrude`, `inset`, `subdivide`, `mirror`, `array`, `boolean`, `sculpt`, `render`) are things the manual documents in detail, so the router sent answerable questions to `fallback_required`.
+- Vague or unrecognised requests got the same canned question ("Which Blender operation do you mean?").
+- There was no retrieval, no tutorial discovery, no separate handling of "my option is missing" questions, and source attribution existed only for the 14 entries.
+- **Before measurement [MEASURED]** (old router, development set A, 28 questions the manual can answer): answered **2 of 28 (7%)**, cited the gold manual page for **0**, asked "which operation?" for **15**, declined **11**, false confidence **0** (safe only because it knew almost nothing).
+
+## 65. Evidence gathered about the documentation as a source
+| Fact | Value | Basis |
+|---|---|---|
+| Manual size | 2,419 `.rst` pages, 5.85 MB total; median page 1.3 KB | tree API, `main` [MEASURED] |
+| Scope indexed | 284 pages (mesh modelling, object, 3D viewport, selected interface pages), 0.84 MB | `CORE_SCOPE`; chosen to avoid bulk-downloading the manual |
+| Version branches | `main` (5.x), 5.0–5.3, 4.0–4.5, 3.3/3.5/3.6, **2.93**; **no 2.80** | branch API [MEASURED] |
+| Licence | CC-BY-SA 4.0, credit "Blender Documentation Team" with a link; logos, trademarks, icons, code excluded | licence page [VERIFIED-DOC 2026-10-11] |
+| Structured data | 377 `Mode`, 367 `Menu`, 214 `Shortcut` fields in `.. reference::` blocks across the indexed pages, plus operator labels such as `bpy.ops.mesh.bevel` | [MEASURED] |
+| Whole-manual titles | 2,358 page titles / 150 KB in the site's own `objects.inv` (no content) | [MEASURED] |
+| Local index | SQLite FTS5 (standard library), 294 pages across two branches, 1.7 MB, builds in about 1 s | [MEASURED] |
+| Version drift | of 8 pages compared between `main` and 2.93, 6 have identical Reference blocks; **Extrude Faces moved** from `Mesh > Face > Extrude Faces` (2.93) to `Face > Extrude Faces` (current); the Bevel page differs | [MEASURED] |
+| Update frequency | the manual changes with each release; each indexed page's sha256 is in `knowledge/KB_MANIFEST.json` so staleness is detectable | design |
+
+## 66. Architecture options compared
+Scores are expected behaviour for THIS scope and laptop; only the rows marked [MEASURED] were run.
+
+| Option | Breadth | Procedural accuracy | Source traceability | Latency | API / hosting cost | Internet | Disk / RAM | Maintenance | Version handling | Privacy | Verdict |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| A. Curated catalog only (before) | 7% of A [MEASURED] | high where it exists | high | <1 ms | 0 | no | tiny | every entry by hand | per entry | local | keep as the **trusted core**, not the only path |
+| B. Local full-text index | 100% answered on A, 100% on B after fixes [MEASURED] | excerpts only, no procedures | high (page + licence) | 20–70 ms [MEASURED] | 0 | no (after build) | 1.7 MB | rebuild by command | branch per version | local | good for concepts |
+| **C. Local index + deterministic procedure extraction from Reference blocks + small trusted catalog (chosen)** | as B plus one-step procedures for tool pages | mode/menu/shortcut exactly as the manual states them; selection and options NOT covered | high | same | 0 | no | same | rebuild; promotion by a reviewer | oldest branch for old versions | local | **chosen** |
+| D. Live web search plus page fetch | widest | unknown; arbitrary pages | variable | 1–3 s | see §67 | yes | none | provider churn | none | queries leave the machine | defer; options in §67 |
+| E. Local retrieval, model only when needed | widest | model-dependent | model output needs checking | 5–50 s on a model call | quota/billing | for the model | none | prompts | none | content leaves the machine | the explicit fallback, never silent |
+| F. Embeddings / vector RAG | similar to B at this size | same as B | same | similar | model download, hosting | optional | tens to hundreds of MB, RAM | model updates | none | local possible | **rejected for now**: B ranks the gold page in the top 3 for 28 of 28 (B) and 30 of 32 (A) without it; no measured gain to justify it [HYPOTHESIS that it would help for paraphrased questions] |
+
+## 67. Web search, community answers and tutorial sources: what is permitted and what it costs
+| Option | Facts | Decision |
+|---|---|---|
+| Google Programmable Search JSON API | 100 free queries/day, $5 per 1,000 beyond, up to 10k/day; **closed to new customers; discontinued 2027-01-01**; returns results from a configured engine, not the open web [VERIFIED-DOC 2026-10-11] | not viable |
+| Bing Search API | **retired 2025-08-11**; replacement "Grounding with Bing" returns answers to an AI agent, not raw results [WebSearch of Microsoft's lifecycle notice] | not viable |
+| Brave Search API | $5 free monthly credit (about 1,000 requests, card required), $5 per 1,000; storing results needs a plan that grants storage rights; no rights to third-party pages [VERIFIED-DOC] | candidate **if approved**: about $0 up to ~1,000 queries/month; needs your approval and a card |
+| DuckDuckGo | no official search API documented on the page checked [VERIFIED-DOC, absence of evidence] | do not scrape |
+| Scraping Google/Bing result pages | against provider terms, fragile, bot protection | **rejected** |
+| YouTube Data API `search.list` | already in the project; 100 calls/day default, free quota [VERIFIED earlier] | the supported way to find videos; not called |
+| Manual's own title inventory (`objects.inv`) | official file for cross-referencing, no content | **used**: points at the right official page |
+| Stack Exchange (Blender Stack Exchange) | third-party summaries: 300 requests/day without a key, 10,000 with a free key; content CC BY-SA (3.0 older, 4.0 newer) with attribution (link to question and answer, author names); data-dump AI use restricted [UNVERIFIED: the official pages could not be fetched here] | **design only**, not built (below) |
+| Reputable tutorials, GitHub examples | no API used | only through the curated index (below) |
+
+**Community-source policy (design, not built).** Trust order: reviewed > catalog > doc_extracted > doc_passage > community answer > model text. A community answer is never merged into a procedure and is never shown as authoritative: it is labelled community, with link, author, date, score, accepted flag and Blender-version tags, and ranked below the manual. When it disagrees with the manual, the disagreement is reported (`AnswerBundle.conflicts`, `detect_conflicts`), not resolved by blending. Answers older than the user's version by more than one major version are flagged outdated. Building this needs a network pass and the attribution display above, so it waits for approval.
+
+## 68. Routing: the cheapest reliable path per question type
+Implemented in `ingestion/router.py` and `ingestion/answer_kb.py`. Each pathway records why it was chosen; none can call the network or a model.
+
+| Question type | Example | Pathway | Trust |
+|---|---|---|---|
+| Known operation | "How do I join two objects?" | reviewed workflow if any, else catalog | reviewed / catalog |
+| Conceptual | "What does proportional editing do?" | local index, attributed excerpt, no steps | doc_passage |
+| Unfamiliar operation | "How do I bevel an edge?" | local index + Reference block → one validated step (variant chosen from the question, or a question asked) | doc_extracted |
+| Comparison | "Difference between extrude region and extrude individual faces?" | one page per side, both excerpts shown, no invented comparison | doc_passage |
+| Project goal / learning plan | "How do I make a low-poly model?" | curated tutorial index; empty result is stated, not padded | tutorial_metadata or none |
+| Find a tutorial | "Find me a tutorial for a chair." | curated index ranked by topic, source tier, version; "needs external search" when nothing matches | tutorial_metadata |
+| Import a tutorial | "Turn this video into a workflow: URL" | explicit: needs a user transcript (offline route) or a video model; nothing called | none |
+| State-dependent | "The Join option is missing." | documented context (menu, mode, prerequisites) + questions; observed state used when supplied | catalog / doc_extracted |
+| Outside the local index | "How do I render with Cycles?" | pointers to the right official page (titles only); says reading it needs the network | index_pointer |
+| Vague / unrelated | "Make it better." / "Capital of Japan?" | clarify / decline | none |
+Bypass rules: a concept question never triggers state or screenshot logic; a transcript or a manual step list never goes through question classification; a project goal is not forced through a single documentation page (unless a strong page match shows it is an operation); a vague request is checked for vagueness **before** titles are matched, so "fix it" cannot match a page called "Fix Deforms".
+
+## 69. Trust levels, validation and promotion (growing past a hard-coded catalog)
+Trust ladder: `reviewed` > `catalog` > `doc_extracted` > `doc_passage` > `index_pointer` / `tutorial_metadata` > `none`. A model-generated procedure would sit below `doc_passage` and may never enter the trusted library unreviewed.
+
+| Stage | Automated without a model? | Status |
+|---|---|---|
+| Identify the page | yes (local index; title inventory for out-of-index pages) | [DONE] |
+| Extract mode / menu / shortcut / operator id | yes (`.. reference::` block, page-level only; sub-heading blocks describe sub-features) | [DONE] |
+| Convert to the shared step schema | yes (provenance `doc_reference`, empty expected state, assumptions stated) | [DONE] |
+| Validate | yes: mode mapped to the vocabulary only when unambiguous; shortcut parsed or marked mouse/unparsed; shortcut collisions with other pages in the same mode flag `needs_review`; menu names added to the UI vocabulary as manual-stated | [DONE] |
+| Cross-check against the hand-written catalog | yes (`audit_catalog`): **5 of 5 checkable entries agree with the manual** (Join, Separate, Move, Rotate, Scale), 3 cannot be checked because their page has no page-level Reference block | [MEASURED] |
+| Version check | yes for pages present in both branches (`compare` above) | [DONE for 2.93 on 10 pages] |
+| Understand "Usage" prose (selection prerequisites, option values) | **no**: needs an LLM or a human; this is where a model would genuinely help | [PROPOSED] |
+| Review | a named person via `promote()`; the source sha256 is stored so a changed page makes the entry detectably stale (`is_stale`) | [DONE] |
+Candidates never reach the reviewed store automatically; the first reviewed workflow is still to be written by a person.
+
+## 70. What was implemented
+`ingestion/kb/{fetch,rst,index,candidates,build}.py`; `ingestion/answer_kb.py`; `ingestion/tutorials.py`; `knowledge/tutorial_index.json` (8 videos, exact metadata read from the YouTube Data API, keywords assigned from titles only); `knowledge/KB_MANIFEST.json` (page paths and sha256, no text); `ingestion/eval/kb_eval.py`; schema 0.5 and trust fields in `shared/answer.py`; router and CLI integration (`ask --kb`); 35 new tests. The fetched manual text and the built index are git-ignored build artifacts (CC-BY-SA text is not committed).
+
+## 71. Evaluation
+**Protocol and its limits.** Set **A** (48 questions) was written before the retrieval layer existed; during integration I looked at the system's answers to 11 of them, so **A is a development set** and was tuned on. Set **B** (43 new questions) was written and hash-frozen before any code change that followed that smoke test, and was run **once, with no tuning**. After seeing B's misses I made four general fixes (below) and re-ran B, so **B's later numbers are not clean**. Gold labels (class, gold manual page) are my judgement, were not checked by a second person, and were assigned from the file listing, not from page content. Class definitions are in the first lines of each file.
+
+| Metric [MEASURED] | A before (old router) | A first look | A after tuning | **B first look (clean)** | B after post-hoc fixes |
+|---|---|---|---|---|---|
+| Questions | 48 | 48 | 48 | **43** | 43 |
+| Class accuracy | n/a | 85.4% | 93.8% | **83.7%** | 90.7% |
+| Locally answerable questions answered | 2 / 28 | 27 / 28 | 28 / 28 | **24 / 26** | 26 / 26 |
+| ...of which cite the gold manual page | 0 / 28 | 22 / 28 | 23 / 28 | **22 / 26** | 25 / 26 |
+| Retrieval: gold page at rank 1 / in top 3 | n/a | 26 / 29 of 32 | 27 / 30 of 32 | **25 / 28 of 28** | 27 / 28 of 28 |
+| False confidence (answered locally when it should not) | 0 | 1 | 0 | **0** | 0 |
+| Unnecessary escalation (answerable but not answered) | 26 | 1 | 0 | **2** | 0 |
+| Attribution checks / schema validity | n/a | 48 / 48 each | same | **43 / 43 each** | same |
+| Tutorial recommendation decision correct | n/a | n/a | n/a | **3 / 4** | 4 / 4 |
+| Model calls / network calls made | 0 / 0 | 0 / 0 | 0 / 0 | **0 / 0** | 0 / 0 |
+| Mean latency (includes opening the index) | <1 ms | 17 ms | 70 ms | **32 ms** | 56 ms |
+Per class on B first look: answer_local 0.92, ask_state 1.0 (3/3), find_tutorial 0.75, import_tutorial 1.0 (1/1), outside_index 0.6 (3/5), clarify 0.5 (1/2), decline 0.5 (1/2).
+
+**The four general fixes made after B's first look:** sufficiency now counts the last three path components as location words ("object/editing/clear" explains why "clear an object's transformation" is about that page); one shared stemmer for title matching ("bake" ~ "Baking"); the vagueness check runs before title matching; tutorial keyword matching uses the same stemmer. A fifth defect (the tutorial matcher comparing raw to stemmed words) was found by a unit test, not by B.
+
+**Remaining misses (B after fixes):** "I want to learn modeling a character" → outside_index (a stray title match on "Special Characters"); "How do I bake a texture?" → decline (should point at the Baking page); "How do I rig a character…" → find_tutorial (a composite-verb rule fires; arguably defensible); "Write me a poem" → outside_index. **A:** "animate a bouncing ball" → find_tutorial; "best graphics card" → outside_index; "Translate this sentence" → clarify. Several are label ambiguities, not clear errors.
+
+**Hand-review of real answers [REVIEWED, 7 answers]:** correct page and menu/shortcut as the manual's Reference block states them for bevel (Edge > Bevel Edges, Ctrl-B chosen from the word "edge"), inset (Face > Inset Faces, I), merge, duplicate; problems found: "add a loop cut" returns the tool page (shortcut only, no menu) and is marked needs-review because two pages share Ctrl-R; "extrude a face" ranks the Individual Faces page above plain Extrude Faces (the right page is rank 3); "add a UV sphere" returns an excerpt only (the page states no menu or shortcut); the concept excerpt for "normals" is the page's first paragraph, which is not a definition. **Concept excerpts are the page lead, not the best-matching passage: the biggest known quality gap.**
+
+**Catalog audit [MEASURED]:** 5 of 5 checkable hand-written entries agree with the manual; the audit also exposed two defects in my own tooling (a page can hold several Reference blocks; menu comparison must be prefix-aware), both fixed and tested.
+
+## 72. What GuideWire can answer now without Gemini, and what it cannot
+**Without a model or network (after the index is built):** concept and "what does X do" questions for the 284 indexed pages with attributed excerpts; one-step "how do I use tool X" answers from Reference blocks with mode, menu and shortcut, variant chosen or asked; the 14 reviewed-quality catalog operations; state-dependent questions (documented context plus the questions to ask); tutorial discovery over the curated index with honest empty results; out-of-index pointers to the right official page; clarification and declines.
+**Still needs the network:** reading any page outside the indexed scope (modifiers, sculpting, rendering, animation, shading, geometry nodes: about 88% of the manual by page count); finding tutorials beyond the 8-entry index; community answers.
+**Still needs a model or a human:** turning a manual's "Usage" prose into selection and option steps; comparing two tools in prose; multi-step projects ("make a low-poly tree"); converting a tutorial without a transcript.
+**Still needs visual evidence or observed state:** whether an option is actually available or greyed out, what is selected, which mode the user is in, and anything shown only on screen.
+
+## 73. Costs, dependencies, licensing, unresolved risks
+- **New Python dependencies: none** (SQLite FTS5 is in the standard library; `httpx` was already used). Disk: 0.84 MB source + 1.7 MB index. RAM: negligible. Hosting: none.
+- **Money: $0** (no model, no search provider). Brave Search would be about $0 up to roughly 1,000 queries a month with a card on file; it is not added without approval.
+- **Licensing, unresolved:** manual text is CC-BY-SA. We keep fetched text and the index out of the repository, show short excerpts with page link, version, date and licence, and credit the Blender Documentation Team. ShareAlike applies to adaptations of the text; whether showing excerpts inside a distributed app triggers obligations beyond attribution should be checked by the supervisor before distribution. The repository host's terms for raw-file access were not located; the fetch is a few hundred polite requests at about 2/second with an identifying User-Agent and stops on 403/429.
+- **Risks:** Reference blocks state how to start a tool, not what must be selected; excerpts can be the wrong passage; the index is the current manual and the oldest branch (2.93), never 2.80; the 14 hand-written entries were verified against the manual only for 5 of them; gold labels are single-author; the tutorial index is 8 videos and says nothing about video content.
+
+## 74. Next steps, ranked by impact and feasibility
+1. **Best-passage excerpts for concepts** (use the best-matching chunk instead of the page lead). High impact on answer quality, low effort, offline.
+2. **A second annotator for set B and a held-out set C** (30 more questions, ideally from real user questions collected in the usability study). High value for credibility; cheap.
+3. **Promote the first 5–10 reviewed procedures** (Join, Separate, Bevel, Inset, Loop Cut, Merge, Extrude...) through `promote()` with a reviewer, version checked, and add them to the store. Medium effort; immediate trust gain.
+4. **Selection/prerequisite extraction from "Usage" prose with a model, reviewed** (the one stage that genuinely needs an LLM), after the quota resets and with a cost cap.
+5. **Targeted official-page fetch for out-of-index topics** (one page at a time, on user request, cached with sha256), instead of widening the index in bulk.
+6. Decide on a search provider (Brave, about $5 per 1,000 queries after the credit) only if the tutorial index proves too small; add community answers only with the ranking and attribution policy in §67.
+7. Index a 2.93 (or 3.6 LTS) branch for the whole core scope if older versions matter in the user study.
+
+## 75. Commands
+```
+python -m ingestion.kb.fetch --branch main --inventory           # ~284 files, ~0.85 MB, throttled; stops on 403/429
+python -m ingestion.kb.fetch --branch blender-v2.93-release --only modeling/meshes/editing/edge/bevel   # a few pages from an older branch
+python -m ingestion.kb.build                                     # builds knowledge/kb.sqlite
+python -m ingestion.cli ask "How do I bevel an edge?" --version 2.80
+python -m ingestion.eval.kb_eval --set tests/corpus/heldout_questions.json --label A
+python -m ingestion.eval.kb_eval --set tests/corpus/heldout_B_questions.json --label B
+python -m pytest -q                                              # 206 offline tests; index-dependent tests skip when knowledge/kb.sqlite is absent
+```
+Result files (questions, predictions, no manual text): `eval_data/results/kb_eval_*.json`. The clean B result is `kb_eval_B-heldout_FIRST-LOOK_clean.json`.
+
+## 76. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Local documentation index, Reference-block procedure extraction, tutorial discovery, trust levels, version-aware lookup and offline evaluation built; 206 offline tests pass; held-out B first look 83.7% class accuracy with zero false confidence; no model or search provider used. |
+
+
+---
+
+# Part VIII: Third-party captions, transcripts as a step-finding path, and options to improve step extraction (2026-10-11)
+
+No Gemini call was made. Labels as before: **[MEASURED]**, **[REVIEWED]** (my reading of outputs), **[HYPOTHESIS]**.
+
+## 77. Third-party caption trial [MEASURED]
+Decision by the project owner (2026-10-11) to try the third-party options despite the earlier "no scraping" decision in Proposal §4.f and the platform terms (automated access outside the documented API is against YouTube's terms; the Data API's `captions.download` needs edit permission on the video, `captions.list` needs OAuth and returns only track metadata). Run from the developer's own connection, one list request and one fetch per video, no proxy, no retries; installed into the venv by the owner.
+
+| Tool | Result |
+|---|---|
+| `youtube-transcript-api` 1.2.4 | fetched captions for all 3 videos in 1–2 s each; `34FBeC9mktE`: auto-generated track; `hTL6AKR8YDs`: **creator-written**; `8XyIYRW_2xk`: both. **On the baseline video it matched the owner's pasted transcript on all 86 cues (identical start times and text)** |
+| `yt-dlp` 2026.8.19 (`--skip-download --write-auto-subs`) | saved the same captions as a 29 KB VTT, no media; queries format info and warns about impersonation; more moving parts. **Dropped.** Our existing cleaner turned its 170 rolling-caption cues into the same 86 and the same 16 steps |
+Not tested: reliability at scale, other regions or networks, behaviour under rate limits, cloud IP blocking (the library's own README warns about it). ~8 requests in total, no refusal.
+
+**Adopted as an opt-in adapter** (`ingestion/youtube/captions.py`, CLI `ingestion.cli captions VIDEO`): fetches only when asked; prefers creator-written tracks and reports which it used; one request set per video, a block raises `CaptionsBlocked` and is not retried or worked around; cached in git-ignored `local_data/captions/` and deleted after 30 days (by the timestamp inside the file); output feeds the ordinary offline transcript route. **Nothing in the product calls it automatically** (tests assert the router never imports the library and a URL in a question never triggers a fetch). Added `youtube-transcript-api` to `requirements.txt`. 8 tests with an injected fake source.
+
+## 78. Transcripts as a step-finding path: where they sit in the plan
+Transcripts are now a first-class input to step finding, not a fallback. Flow for any tutorial (a URL, a paste, or a video file):
+1. **Get narration text**, cheapest legitimate source first: reviewed workflow → user-supplied subtitles → opt-in caption adapter (creator track preferred) → in-model transcript from the video route.
+2. **Offline rule pass** (built): catalog operations the speaker instructs, with cue times, verbatim evidence, narrated labels.
+3. **Optional documentation mapping** (built, experimental, opt-in): tools the speaker names that are not in the catalog, taken from the manual's Reference block.
+4. **Model pass on the text** (proposed, needs quota): a text-only model turns the narration into steps with timestamps, validated by the existing validators and the evidence check against the same transcript.
+5. **Visual pass** (proposed): a video model or on-screen key overlays find the actions the narration never states, restricted to time windows where the transcript is thin.
+6. **Review**: a person approves; `promote()` stores the workflow with source hashes and version checked.
+Each step carries `support` (narrated / demonstrated / both), `provenance` and `source_refs`, so a step is never presented as visually verified because it came from a transcript.
+
+**Measured limit of steps 2–3 on unseen transcripts [MEASURED counts, REVIEWED quality]:** with the catalog alone, `hTL6AKR8YDs` gives 10 steps (95 unmatched units) and `8XyIYRW_2xk` gives 2 (100 unmatched). Adding strict documentation mapping gives 15 and 3. **Hand review of the 6 added steps: about half are right** (Snapping and Median Point are plausible; "Wireframe: choose Face > Wireframe" is wrong because the speaker meant the viewport display, not the mesh tool; two "3D Cursor" steps only carry a pivot shortcut, not an operation). Name matching cannot tell which of two same-named features is meant, so this stays **opt-in and unreviewed**; a model or a person must disambiguate. There is no gold annotation for these two videos, so no precision or recall is claimed.
+
+## 79. Options for better step extraction, ranked
+| # | Option | What it adds | Needs | Evidence so far | Status |
+|---|---|---|---|---|---|
+| 1 | **Author-side capture**: a small Blender add-on logs each operator the author runs with its time (and optionally shows key overlays) while they record | exact steps and times for tutorials GuideWire authors; also exact gold data for evaluation | Blender installed, the pinned version, an hour to write and test | none; the idea rests on Blender exposing recent operators (untested here) | **proposed**, highest reliability for owned content |
+| 2 | **Transcript + text-only model** | semantic steps from narration at tiny cost (a transcript is a few thousand tokens), timestamps kept, evidence re-checkable | free-tier quota (20 requests/day/model) | catalog rules reach recall 0.55 on the dev video; Gemini whole-video v3 reached 0.65 / 0.35 | proposed, first to test when quota resets |
+| 3 | **Transcript as a hint to the video call**, evidence checked against it | fewer invented quotes, better timing | quota | code exists (`transcript_cues`), not run live | built, untested live |
+| 4 | **Two-pass: narration first, then watch only thin windows** | recovers demonstrated actions the speech never mentions | quota; clip offsets for YouTube URLs are undocumented (each window may re-send the whole video) | the first experiment missed the on-screen demonstration | proposed |
+| 5 | **Key-overlay friendly recordings** (Screencast-Keys style overlay on our own tutorials) | makes shortcuts and clicks legible to any video model | author discipline | the model read "Ctrl + Z x28", "E x2", "Shift + A" in the Blender Foundation video | cheap, applies to our own tutorials |
+| 6 | **Chapters as segments**, one call per chapter | shorter inputs, retry per segment | quota; chapters exist for 3 of 16 candidate videos | untested | proposed |
+| 7 | **Self-consistency** (run twice, keep agreeing steps) | a confidence signal not based on the model's own rating | double the quota | untested | proposed |
+| 8 | **Manual-derived UI vocabulary** (`KnowledgeBase.menu_names()`: every menu path the manual states) | fewer false "unrecognised UI name" flags, authoritative names | nothing | the starter list flagged a real menu once | built (export), not yet wired into the validator |
+| 9 | **Human correction loop** (edit steps in the review UI, store as reviewed workflows) | the library grows from real use; corrections become test data | Mehak's UI | store exists and is empty | built (backend) |
+| 10 | Local OCR of the mode label / overlays on our own recordings | observed state without a cloud call | small OCR install, trial | untested | proposed (Umaima's area) |
+| 11 | Fine-tuned or large local model | none justified yet | labels first, then GPU | laptop has no usable GPU; the binding constraint is labels, see Part X | **deferred pending Experiment 0 (§97)** |
+
+**Suggested experiment ladder when quota returns (cheapest first):** options 2, then 3, then 4 on the baseline video (reference exists) and on `hTL6AKR8YDs` (needs a visually checked reference first); each compared with the existing numbers on recall, timestamp accuracy and unsupported steps, with the same budget cap. Option 1 and 5 can be done now, without any API.
+
+## 80. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Third-party captions tried and wired in as an opt-in adapter; strict documentation mapping added as experimental opt-in; options for better extraction recorded; 216 offline tests pass. |
+
+
+---
+
+# Part IX: Reference study of Clicky (farzaa/clicky) and what it changes for GuideWire (2026-10-11)
+
+No model call, no network use, no new dependency. Clicky was read from a local clone (`C:\Users\Ayesha Raza\clicky`; its README says this is an April 2026 snapshot and newer versions are private). Labels: **[SOURCE]** read in the code (file and function given), **[JUDGEMENT]** my reasoning, **[HYPOTHESIS]** untested.
+
+## 81. What Clicky is [SOURCE]
+A macOS menu-bar "AI teacher": push-to-talk voice, one screenshot per monitor, Claude answers, and a cursor overlay flies to a point. It does **not** execute actions, track tasks or check outcomes. Almost all logic is in `CompanionManager.swift` (~1,000 lines); `worker/src/index.ts` is a key-hiding proxy.
+
+| Question | Answer, with evidence |
+|---|---|
+| How does it observe the UI? | Screenshots only (`CompanionScreenCaptureUtility.captureAllScreensAsJPEG`, ScreenCaptureKit, longest side 1280, JPEG 0.8). No accessibility tree, DOM, CV or OCR. |
+| How does it find elements and positions? | The vision model writes `[POINT:x,y:label:screenN]` at the end of its reply, as instructed by `companionVoiceResponseSystemPrompt`. Each image is labelled "(image dimensions: WxH pixels)". `parsePointingCoordinates` (a regex) extracts it. |
+| Coordinates | `sendTranscriptToClaudeWithScreenshot`: clamp to the image, scale image pixels to display points, flip y (top-left to AppKit bottom-left), add the monitor origin. Multi-monitor via `screenN`. |
+| Intent to action | None. The output is speech plus a pointer. |
+| Verification, retries, errors | **None.** One call, no retry (grep finds none), no check that the element exists or that the user acted. Errors speak a hard-coded credits message. |
+| Context/memory | Last 10 text-only exchanges (`conversationHistory`); the POINT tag is stripped before storing; old screenshots are never resent. A new push-to-talk cancels the running `Task`. |
+| Routing | One model for everything (Sonnet/Opus picker). |
+| Tests | `leanring_buddyTests.swift` has 3 tests, all about permission prompts. **Nothing tests grounding.** |
+| Dead code | `ElementLocationDetector.swift` (Anthropic Computer Use tool with a declared resolution) is referenced by nothing except itself (grep over all `.swift`). The shipped path is the prompt tag. Its comment that Computer Use is "significantly more accurate" is **not measured**. |
+
+## 82. Comparison (only findings that survive scrutiny)
+| # | Clicky technique | Evidence | Benefit to GuideWire | Blender adaptation | Difficulty | Reliability / cost / latency | Verdict |
+|---|---|---|---|---|---|---|---|
+| 1 | Label each image with the exact pixel size the model sees; map image px to display px; per-monitor origin | `CompanionManager` ~lines 600-675; `CompanionScreenCaptureUtility` | Prevents silent offset/scale bugs between Umaima's capture and overlay | Windows: physical pixels, DPI-aware, negative-y monitors, Blender window rect as a sanity region | Low | + reliability, no cost, no latency | **Adapt: done** (`shared/grounding.py`, §86) |
+| 2 | Declared size must equal sent size (the Retina bug documented in `resizeScreenshotForComputerUse`) | that function's comment | The same bug can appear under Windows DPI scaling | `check_declared_size` before any grounding call | Low | + reliability | **Adopt idea: done** |
+| 3 | Explicit "no element" answer (`[POINT:none]`) | system prompt; `PointingParseResult.coordinate == nil` | An honest abstention that pairs with `unverifiable` | `GroundingResult.status == "none"` | Low | + trust | **Adopt: done** |
+| 4 | Exclude own overlay windows from capture | `SCContentFilter(... excludingWindows: ownAppWindows)` | Umaima's overlay would otherwise appear in the screenshots the model sees | Windows has no filter list; try `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` on the overlay, or capture before drawing | Low-medium | + reliability | **Investigate (Umaima)**; not implemented, not tested on this machine |
+| 5 | Short text-only history, strip pointer tags from history, cancel in-flight work on new input | `conversationHistory`; `currentResponseTask?.cancel()` | Cheap context policy for a future chat loop | Keep answer text, never old images | Low | + cost | Adapt later (no chat loop exists yet) |
+| 6 | Computer Use "declared resolution" pixel counting | `ElementLocationDetector` | Unproven, Anthropic-specific, unused by Clicky itself | GuideWire uses Gemini, which has its own point/box output | n/a | unknown | **Reject** as evidence; measure Gemini's grounding on our own Blender screenshots |
+| 7 | Model writes coordinates blind from a downscaled screenshot | the system prompt | Simple, but the least reliable option, and Clicky has no fallback | Blender can state most state without pixels (§83) | n/a | - | **Reject as the primary Blender path** |
+
+Clicky does **not** offer postcondition verification, stale-screenshot handling, recovery from missing controls, retries, cost-aware routing, failure simulation or fixtures. GuideWire already goes further there (`StepEvaluator`, validators, provenance, the offline corpus), so nothing is borrowed for those areas.
+
+## 83. What Blender changes
+1. **Semantic state first, pixels second [JUDGEMENT].** Clicky has no application API, so it must guess pixels. Blender exposes mode, workspace, selection, active tool and operator reports through `bpy`. Those map onto our `StatePredicate` kinds, so completion checks should come from an add-on rather than screenshots. This is §79 option 1. The add-on is not written, and the `bpy` names are from memory and unchecked against the pinned Blender version.
+2. **Pixels are still needed only to decide where to highlight [HYPOTHESIS].** An add-on could also report editor/area rectangles, so a model's point can be validated against the right region. `to_screen(target=...)` already supports a rectangle.
+3. **Screenshots remain for** frames of a tutorial video and for installs without the add-on.
+4. **Cost/latency:** a local state read is effectively free; a Gemini grounding call is paid and takes seconds. Screenshot-plus-model should be the fallback, not the loop.
+
+## 84. Licensing and reuse [SOURCE: `LICENSE`]
+Clicky is **MIT, Copyright (c) 2026 Farza**, and the README repeats that reuse is welcome. Its dependencies (Sparkle, PostHog iOS, wrangler) are macOS/Cloudflare-only and none is adopted, so I did not check their licences.
+- **Ideas only:** everything adopted above.
+- **Independently reimplemented:** `shared/grounding.py`, written in Python from the idea. No Swift was translated or copied, so no MIT notice is required; the docstring credits the idea anyway.
+- **Copied code:** none. If Swift is ever translated, MIT requires keeping the copyright and licence notice.
+- **New dependencies:** none. Do not reuse the Worker, analytics or Sparkle parts (wrong platform, not needed).
+
+## 85. Roadmap re-assessment
+Clicky does not change the order of the seven priorities. It shows that item 5 is thinner in Clicky than in our design, so we are not behind there.
+| Priority | Change |
+|---|---|
+| 1-3 Docs Q&A, transcripts, step extraction | none from Clicky |
+| 4 Blender add-on | **Raised in importance.** It can replace most screenshot grounding for verification and, as an author-side recorder (§79 #1), gives exact gold steps. Needs the Blender version pinned (the README still has a placeholder). |
+| 5 Grounding and verification | Use `shared/grounding.py` as the capture-to-overlay contract. Verification stays `StepEvaluator` over add-on state; vision only for predicates the add-on cannot observe. |
+| 6 Routing | none from Clicky |
+| 7 GPU | none; Clicky uses no local model |
+
+## 86. Implemented, evidence, limits
+- **Added:** `shared/grounding.py` (`Rect`, `CaptureGeometry`, `GroundingResult`, `to_screen`, `check_declared_size`, `aspect_ratio_drift`) and `tests/test_grounding.py` (10 tests: scaling, second-monitor offset incl. negative y, 0-1000 normalised input, abstention, edge tolerance, refusal of far-out points, target-window rejection, declared-size mismatch, aspect drift, bad geometry). It is not wired into any other module; `SCHEMA_VERSION` is unchanged; `vision/` and `app/` are untouched.
+- **Evidence:** full offline suite 226 passed (216 before, plus 10), 2 live tests deselected. This proves the arithmetic only. It has **not** been run against a real screen, real DPI scaling or a real model's output.
+- **Deliberate difference from Clicky:** a point more than 2 % outside the image is refused instead of clamped. The 2 % is my guess, not measured.
+- **Not done:** overlay exclusion from capture; the Blender add-on; any live grounding test; measuring Gemini point accuracy.
+
+## 87. Decisions for you
+1. **Add-on:** commit to a minimal read-only Blender add-on (state dump plus operator log) now? It needs the pinned Blender version and Umaima's agreement on the observed-state keys that `evaluator.py` already defines. Recommended: yes.
+2. **Where `grounding.py` lives:** I put it in `shared/` as a proposal; Umaima may prefer `vision/`. Cheap to move.
+3. **Overlay capture exclusion:** ask Umaima to test `WDA_EXCLUDEFROMCAPTURE`.
+
+## 88. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Clicky reviewed from source; MIT confirmed; `shared/grounding.py` and 10 tests added; 226 offline tests pass; no API calls, no dependencies added. |
+
+
+---
+
+# Part X: If we had a GPU: what would be worth training, and does it beat retrieval, prompts and Blender verification? (2026-10-11)
+
+No training, download, install, paid call or model call was made. Labels: **[MEASURED]** produced by a run in this repository; **[REPO]** read in this repository's code, plan or results; **[ESTIMATE]** my arithmetic or rule of thumb, not measured, no live price/model lookup was done this session, so every price, model name and licence below must be re-checked before a decision; **[HYPOTHESIS]** untested; **[PROPOSED]** not built.
+
+**Bottom line.** Fine-tuning is not rejected for ever, but the earlier reason ("no GPU") was the wrong reason. The binding constraint is **labels, not compute**: today we have one human-unverified reference video (21 steps) and a 39-case author-written corpus. With a GPU we would still have nothing to train on or to prove improvement against. Recommended order: (1) get held-out labels and measure how far the strongest non-training pipeline is from them; (2) build Blender-side instrumentation and a verified-procedure library (which also manufactures the labels); (3) only if a *measured, learnable* gap remains, run one small LoRA experiment and one small screenshot classifier. A text fine-tune is justified only for failure types 1–3 below, and only if a prompted strong model plus our validators leaves a measurable gap.
+
+## 89. Capability and failure analysis
+
+Evidence base, all [REPO] unless stated: transcript rules reach narrated recall 0.55 / precision 0.81 on the **development** video (optimistic, no held-out transcript, §54); Gemini whole-video reached 0.25–0.65 narrated recall on the same video with a demonstration gap (§44–45); question routing on a **clean** held-out set reached 83.7% class accuracy, 0 false confidence, 24/26 answerable questions answered (§71); concept excerpts are the page lead, the largest known quality gap; keyword mapping of unseen transcripts was "about half right" and cannot tell two same-named features apart (§78); no Blender add-on exists and Blender is not installed on the development machine; the laptop has no usable GPU (§58).
+
+| # | Failure type | Current state and evidence | Best fix (ordered by how much I would trust it) | Training expected to help? |
+|---|---|---|---|---|
+| 1 | Extract actionable steps from narration | rules: recall 0.55 dev; unseen videos get 10 and 2 steps from 100+ units (§78) | text-only strong model + evidence-check validator (4 in §79); few-shot prompt | **Possibly (a), only after the prompted baseline is measured** |
+| 2 | Instruction vs explanation / joke / aside | rules use imperative patterns; a precision loss (s03 general statement) | prompt with explicit definitions; evidence quote required | **Possibly (a)**: classification-like, learnable from ~1-2k labelled cues |
+| 3 | Natural-language action to a supported operation | catalog 14 entries + manual Reference blocks; name matching ambiguous ("Wireframe") | retrieval over docs + operator vocabulary dump from `bpy` + model disambiguation among **retrieved candidates** | Weak: retrieval-then-choose beats memorising operator names, which change by version |
+| 4 | Preserve timestamps and evidence | transcript rules: 80% within 3 s, 0 invented quotes | deterministic: spans come from cues; validator rejects quotes absent from the transcript | **No.** Deterministic; a model would only add error |
+| 5 | Narrated vs demonstrated | `support` field exists; a transcript can never claim "demonstrated" | structural: the input type decides what can be claimed; visual claims need a frame check | **No** for text; for video frames see 6-8 |
+| 6 | Interpret a screenshot / find UI elements | grounding arithmetic done, accuracy unmeasured (§86) | for the user's live Blender: add-on reports mode/selection/area rectangles; pixels only for highlight placement | Only for **tutorial video frames**, where no API exists (see D) |
+| 7 | Actions across frames | demonstration gap in E1; key overlays read by Gemini ("Ctrl + Z x28") | two-pass: transcript finds windows, video model/OCR reads thin windows; author-side capture for our own content | Not at our data scale (see C) |
+| 8 | Valid procedure with prerequisites and outcomes | catalog prerequisites + `StepEvaluator`; 7/7 prerequisite cases handled (author-written) | deterministic validators + verified-procedure library (§92) | Weak: validity is checkable, so check it |
+| 9 | Ambiguous Blender terminology | 3/3 vague requests clarified; 1/2 clarify on held-out | retrieval + a clarification rule keyed on candidate-set size/score gap | **Possibly** a small router/classifier (D), and only if rules plateau |
+| 10 | Know when information is missing / ask | assumption + clarification question pattern implemented | deterministic: prerequisite unknown => ask | No |
+| 11 | Version/layout differences | manual branches (main, 2.93, no 2.80), Reference-block drift measured (Extrude Faces moved) | per-version index + pinned Blender version; add-on dumps the real vocabulary | No: a model would guess; a version-specific index knows |
+| 12 | Use observed state to pick next step | `StepEvaluator` reads `mode`, `selection_types`, ... | add-on state + deterministic predicates | **No.** Do not train a model to infer what `bpy` states directly |
+
+Reading of the table: of 12 failure types, 2-3 have a plausible text-training story, 1 (frame-level mode/state recognition on tutorial video) has a plausible small-classifier story, and the rest are better solved by structure, retrieval or instrumentation. That is the entire case for training; it is narrower than the brief's list suggests.
+
+## 90. Training strategies, each against its strongest non-training baseline
+
+Sizing assumes 4-bit QLoRA or bf16 LoRA with typical context lengths [ESTIMATE]; see §94 for the hardware table.
+
+**A. Small LM for structured step extraction (SFT + LoRA/QLoRA, constrained decoding, post-validation).**
+- *What it would learn:* the *style of the decision* "is this cue an instruction, which catalog/manual operation is it, what are its prerequisites", emitting our `StepList` JSON. Constrained decoding (grammar/JSON-schema) fixes syntax for free; **it does not make steps correct**, and post-validation already exists in `ingestion/validate.py`.
+- *Baseline to beat:* strong hosted model + structured output + few-shot + our validators + retrieved operation candidates. Hosted structured-output modes already give schema validity near 100% [HYPOTHESIS for Gemini; E1 produced two accepted outputs only after retry, §16], so **schema validity cannot be the evidence for training**.
+- *What it could plausibly add:* lower per-call cost and no quota (the free tier is 20 requests/day/model, §52); local privacy; consistent instruction-vs-explanation boundary. *What it cannot add:* knowledge of operations absent from training data, version facts, visual information.
+- *Verdict:* **conditional.** Run only after the prompted baseline is measured on held-out transcripts. Expected gain is in cost/latency/availability, not accuracy, unless the baseline shows a systematic, labelable boundary error.
+
+**B. Fine-tuned VLM for Blender UI understanding.**
+- *Learnable from a single screenshot:* the editor type and mode shown in the header dropdown, workspace tab, which panel is open, whether a menu is open, visible text/shortcut hints (largely OCR), approximate control locations.
+- *Not reliably learnable from screenshots:* hidden state (what is selected in a dense mesh, an object's properties, undo stack), which operation produced a change, exact sequences, anything off-screen. Before/after comparison can say "geometry changed", rarely *which* operator did it. A screenshot can show a claim is plausible; it cannot prove a narration-only claim false.
+- *Baselines:* (i) `bpy` state for the live session (exact, free), (ii) OCR of header/menu text, (iii) a prompted general VLM (Gemini or an open VLM) with a Blender-specific prompt. Clicky-style blind coordinate emission is the least reliable option (§82).
+- *Verdict:* **not justified for the FYP.** A VLM fine-tune needs thousands of screenshots with box/point labels that nobody has, and the live-session half of the problem is solved by the add-on. Revisit only if (ii) and (iii) fail on a measured set of real Blender frames.
+
+**C. Temporal model for video-to-step extraction.**
+- Plausible components are cheap and mostly non-trained: transcript-guided windows; frame differencing/change-point detection to find where the UI changed; OCR of key-overlay text (Screencast-Keys style); then a video-capable model only on windows the transcript leaves thin. This is §79 #4 and #5.
+- Training a video-language model needs hundreds of hours of aligned video and large compute; we have 1 reference video. A lightweight change-point detector needs no training.
+- *Verdict:* **no training.** Implement window selection and overlay OCR; evaluate on the E1 demonstration gap (the 49-61 s undo/Tab/undo section), which is exactly the case it must fix.
+
+**D. Specialised state/action classifiers.**
+- Where a classifier is *not* justified: the live session. Mode, selection type, active tool and workspace come from `bpy` (to be verified when Blender is installed; the names are from memory).
+- Where one *is* worth testing: **tutorial video frames**, because a recorded video has no API. A small image classifier (MobileNet/ResNet-18 class, or a linear head on a frozen pretrained encoder) on the header crop, predicting {Object, Edit, Sculpt, Pose, ...}, trained on synthetic screenshots from real Blender runs where the label is known exactly. **Try OCR of the mode label first**; train only if OCR fails across themes, scales and versions. This trains in minutes on a laptop CPU or a free notebook GPU [ESTIMATE], needs no large model, and the synthetic labels are exact. Risk: domain gap (custom themes, zoomed videos, compression, overlays); mitigate with augmentation and *always evaluate on real tutorial frames*, labelled by hand.
+- *Verdict:* **the best-justified training experiment**, small and cheap, and only after OCR is shown insufficient.
+
+**E. Distillation / synthetic data.**
+- A teacher (strong hosted model) proposes structured procedures; we keep what passes deterministic checks (schema, evidence quote present in the source, operation exists in the catalog or manual, prerequisites consistent) and, for operations, a **Blender execution check**. Remaining items go to human review in proportion to risk.
+- Hazards and mitigations: teacher hallucinations pass the schema check, so *consistency checks never promote a label to ground truth* (enforced in `TrainingExample.eval_eligible`); the student inherits the teacher's biases, so the **test set is human-only**; synthetic phrasings from one template collapse diversity, so cap examples per template family and split by family; quote-grounded evidence is the main hallucination filter for transcript tasks.
+- Licence: using a hosted model's outputs to train another model is governed by that provider's terms [UNVERIFIED]; check before any distillation run. Do not train on YouTube captions we are not licensed to redistribute; keep them as local fixtures and train, if at all, on creator-licensed or CC-licensed transcripts and our own recordings.
+
+## 91. Creative data sources: which labels each can produce
+
+| Source | Reliably produces | Needs human verification | Access / licence |
+|---|---|---|---|
+| Blender manual (CC-BY-SA 4.0) | mode, menu path, shortcut, tool name (Reference blocks); operator names | prerequisites, "usage" prose to steps | attribution + ShareAlike; derived training data may be an adaptation: ask supervisor before releasing a model trained on it [UNVERIFIED legal reading] |
+| `bpy` API docs / operator vocabulary dump | operator ids, labels, properties, poll contexts | which operator a spoken phrase means | Blender is GPL; docs under CC-BY-SA; dump script exists, never run |
+| Public tutorials, creator captions | candidate narration, chapter boundaries, titles | everything about what is shown; step boundaries | YouTube terms bar scraping outside the API; creator licence varies; keep as **local fixtures**, evaluate on them, do not redistribute |
+| Our own recordings with an operator-logging add-on | **exact operator sequence and times**, state before/after, narration if we speak it | wording quality | ours; best-quality labels per hour of effort |
+| Programmatic scenes (headless Blender) | scene state, mode, selection, operator outcome, screenshots with exact labels, negatives (prerequisite missing -> poll fails) | whether a procedure is *natural* or matches a tutorial | ours; the strongest source for state/outcome labels |
+| Weak alignment (cue time vs UI change, overlay OCR, chapter boundaries) | candidate windows; noisy step boundaries | all of it if used as truth | derived from tutorials: same restrictions |
+| Teacher-assisted annotation | draft steps | all test data; all high-impact (destructive) steps | provider terms [UNVERIFIED] |
+| GUI-agent datasets (public) | generic click-grounding pretraining signal | domain fit to Blender is poor (custom GL UI, dense panels) | per-dataset licence; not assessed |
+
+**Small diverse beats large repetitive.** Our own measurements already say so: gains came from fixing specific defect classes, not from volume (§55, §71). For a LoRA pilot I would plan about 300-800 human-verified examples spanning 40-60 operations and at least 15-25 distinct tutorials/authors, plus several thousand synthetic state-transition examples *capped per template family*, rather than 50,000 near-duplicates [ESTIMATE of sizes; the cap is the principle].
+
+**The two things that make labels cheap here:** (1) an author-side operator-logging add-on gives exact gold steps from our own sessions (§79 #1); (2) headless Blender gives exact outcome labels for synthetic tasks. Neither exists yet.
+
+## 92. Blender as a verification engine (verified-procedure library)
+
+Pipeline [PROPOSED]: retrieve a documented procedure -> model or rules produce a candidate `StepList` -> validate schema and prerequisites -> **run in a disposable headless Blender (`blender --background`), never in the user's session** -> check `expected_state` with the same predicate vocabulary the runtime uses -> store as a `reviewed_workflow` candidate with Blender version, build hash, scene fixture id, and result -> at runtime reuse when version and context match.
+
+| Class | Automatable headlessly [HYPOTHESIS] | Notes |
+|---|---|---|
+| Object-level and mode operators with a fixed context (add primitive, join, parent, mode switch, set origin, apply modifier) | likely | need a scene fixture with the right selection; each operator's `poll` failing is itself a useful negative label |
+| Mesh edit operators acting on a selection (extrude, inset, merge, bevel, separate) | likely with a scripted selection | outcome: counts/bounds of vertices, faces, objects |
+| Modal/interactive tools (loop cut slide, knife, sculpt strokes, drag transforms) | partial | need operator parameters, not mouse paths; the *UI-path* version of the step is not verified by this |
+| UI-only behaviour (menu location, panel layout, shortcut conflicts, overlays) | no | needs a GUI run or the manual; shortcuts are keymap-dependent |
+| Destructive/undo-sensitive sequences | yes, because the scene is disposable | test undo explicitly; never run user files |
+| Version differences | per installed version only | each verified procedure is tagged with the version it was run on; others stay "documented, unverified" |
+
+What a pass proves: the operator sequence reaches the stated state in that scene on that version. What it does **not** prove: the steps are the clearest, the shortest, visually faithful to a source tutorial, correct for a different selection, or understandable. Record it as `Check(name="blender_postcondition")`; keep `review_status` separate. Coverage estimate: a plausible 30-60% of the common modelling operators are headless-testable [HYPOTHESIS]; the smallest test of that is §97 experiment 0. It would reduce runtime inference to retrieval plus context matching for those operations and manufacture exact labels for any later training. This is the highest-leverage item, and it is not a GPU item.
+
+## 93. Training example schema and data hygiene
+
+Implemented offline: `ingestion/training/example.py` (`TrainingExample`) and `ingestion/training/split.py`; `tests/test_training_example.py` (6 tests). It reuses `StepList` for targets and adds only: `task`, `blender_version`, `input_origin` (real/synthetic), `label_origin` (human, blender_executed, rules, weak_alignment, teacher_model), `group_key`, `frame_refs` (references, never embedded media), `time_span_s`, `clarification_*`, `teacher_model`, `checks[]`, `review`/`reviewer`, `licence`. Narrated-vs-demonstrated, provenance, evidence, confidence and expected state already live in `Step`.
+
+Enforced by tests: a human label must carry a reviewer; a `blender_executed` label must carry a passing `blender_postcondition` check; **teacher, rule and weak labels are never evaluation truth, however many checks they pass**; real tutorial examples labelled only by Blender execution still need a person.
+
+Leakage: `group_key` is one source video (all its clips), one manual page, or one synthetic template family; `split_examples` assigns whole groups by a salted hash, drops non-eligible items from dev/test instead of moving them to train, and `find_leaks` audits group overlap and identical input text across splits. Not covered yet: near-duplicate (paraphrase) detection across groups, and contamination of the *teacher* by the test set (a hosted model may have seen public tutorials), which can only be addressed by including a freshly recorded, never-published test set.
+
+## 94. Hardware, cost, runtime [ESTIMATE ONLY; prices, model names and licences unchecked this session]
+
+Memory arithmetic: weights = parameters x bytes (4-bit ~0.5 B, bf16 2 B); QLoRA adds adapters, optimizer state, activations and cache: roughly weights + 30-60% for short contexts.
+
+| Scenario | Model class | VRAM / RAM | Initial dataset | Time (key assumption) | Storage | Local inference | Cost | Complexity |
+|---|---|---|---|---|---|---|---|---|
+| Consumer GPU 12-16 GB | 3-4B text, QLoRA | 8-12 GB / 16-32 GB | 1-3k examples x ~1-2k tokens | ~1-4 h per run (~1-2k tokens/s) | 20-40 GB incl. checkpoints | yes, 2-4 GB at 4-bit; interactive on that GPU | hardware purchase, or $0 if owned | low-medium |
+| Consumer GPU 24 GB | 7-8B text QLoRA; 3-4B VLM QLoRA | 16-22 GB / 32 GB | same | ~2-8 h | 40-80 GB | 7-8B 4-bit ~5-6 GB, fine on 8 GB+ GPUs | owned | medium |
+| Workstation 48-80 GB | 7-14B LoRA bf16; 7B VLM | 40-70 GB | 5-20k | ~hours to a day | 100+ GB | same as above after quantising | owned | medium |
+| Rented GPU, limited run | any above | as above | as above | each run hours | transient | model must still be exported | ~$0.3-1/h for 24 GB class, ~$1.5-4/h for 80 GB class [rough market range]; **a full pilot including failed runs and evaluation: roughly $20-100** | medium: environment, data upload, reproducibility |
+| Hosted fine-tuning service | provider's small model | none locally | 100s-1000s | minutes-hours | none | **no**, hosted inference only | per-token training + higher per-token inference [UNVERIFIED] | low; but check terms on training data and whether a tuned model can be exported |
+| Small image classifier | 1-25M params | <4 GB or CPU | 2-10k screenshots | minutes (CPU feasible, free notebook GPU easy) | <5 GB | yes, even on the laptop (tens of ms) | ~$0 | low |
+
+The user's machine matters more than ours: a 4-bit 3B model on a 2-core CPU like this laptop gives low single-digit tokens/second [ESTIMATE], too slow for interactive use, so a local LM would mean "needs a GPU on the user's side" or a hosted call. Licensing: open-weight families differ (Apache-2.0/MIT-style versus custom community licences with use or size conditions); **verify the licence of the exact checkpoint before training**. Nothing was downloaded to check.
+
+## 95. Fair staged experiment
+
+Same held-out tasks and the same human reference for every arm; hold-out by video/author (never by clip). Systems: **S1** rules + retrieval (exists); **S2** strong model + structured prompt; **S3** S2 + improved context (transcript, retrieved candidates, add-on state); **S4** fine-tuned small LM; **S5** fine-tuned VLM (only if justified); **S6** hybrid with Blender verification and deterministic checks.
+
+| Outcome | How measured | Not enough alone |
+|---|---|---|
+| Source extraction | step recall/precision vs reference, lenient and strict (existing `transcript_eval`) | exact text match, BLEU |
+| Procedure correctness | order, missing/extra steps, operator identity; for synthetic tasks, Blender-executed outcome | schema validity |
+| Prerequisite correctness | `eval_data` prerequisite violations and unmet-prerequisite flags | |
+| Schema validity | validator pass rate | reported but not a quality claim |
+| Timestamp accuracy | within +-3 s, median error (existing) | |
+| Narrated vs demonstrated | confusion matrix vs reference; zero false visual claims required | |
+| UI grounding | point-in-target-rect rate on real Blender frames; abstention rate | |
+| Completion detection | agreement with add-on ground truth on scripted user actions | |
+| Clarification / fallback | right decision on ambiguous, impossible and missing-prerequisite cases; false-confidence count | |
+| Latency / cost / hardware | measured per request | |
+
+**Minimum evidence to continue training (all required):** a held-out set of at least 10 tutorials from at least 5 authors, human-labelled, with a second annotator on at least 20% (agreement reported); S3 measured and its remaining error *categorised* so that a majority of the errors are of a type training can plausibly fix (boundary/format/consistency, not missing knowledge or missing visual information); S4 beats S3 by a predefined margin I propose as **>= 10 points on procedure correctness (or equal accuracy at <= 1/5 the per-request cost) with no increase in unsupported steps or false-confidence cases, on the same held-out set**, replicated across at least 2 seeds or data subsets; the margin must exceed the measured annotator disagreement.
+**Stopping rules:** stop if S3 already meets the product target; stop if S4 does not beat S3 after one data-scaling step (doubling labelled data); stop if annotation passes about 40 person-hours before the pilot; stop if gains appear only on synthetic data and vanish on real held-out tutorials; do not tune on the test set (the B-set lesson in §71).
+
+## 96. Hybrid architectures worth keeping or rejecting
+
+| Idea | Trade-off | Decision |
+|---|---|---|
+| Retrieval first, model only for unresolved cases | already the design (§68); 36/39 corpus items need no model | **Keep** |
+| Small local intent classifier + remote synthesis | classifier gains little over rules at 84-94% route accuracy with tuning risk | Later, only if rules plateau |
+| VLM + `bpy` state | state first, pixels only for highlight and video frames | **Keep, state part first** |
+| Model proposes, deterministic checks reject | validators + evidence quote check exist | **Keep** (highest value per effort) |
+| Retrieval over verified procedures | requires §92 library | **Keep, build** |
+| Model-generated candidate tests for procedures | risk: the model writes a test that its own wrong procedure passes; mitigate by deriving postconditions from the manual/catalog, not from the same call | Only with independent source |
+| Confidence-calibrated escalation | our `confidence` is explicitly uncalibrated; calibrate on held-out data before using as a gate | Later |
+| Learning from user corrections | accepted only as *candidates* with reviewer promotion (`promote()` already exists) | **Keep**, never auto-trust |
+| Several specialised models | each adds data, eval and ops cost | Reject until one specialist shows a measured win |
+| Self-consistency (agree across two runs) | doubles quota; gives a confidence signal independent of self-rating | Test on the same held-out set |
+
+## 97. Roadmaps and the experiment that could disprove the recommendation
+
+**Recommended initial architecture:** retrieval over the local documentation index and verified-procedure library; deterministic rules and validators; a strong hosted text model for synthesis restricted to retrieved candidates and checked against the source evidence; a read-only Blender add-on for observed state and an operator log; two-pass video analysis only for thin transcript windows; humans promote procedures.
+
+**Smallest experiment that could disprove it (Experiment 0, ~1-2 days, no GPU, no training):** take **10 held-out tutorial transcripts** (>= 5 authors, hand-labelled steps, at least a partial second annotation), run S1 and S2/S3 (10-20 free-tier calls), and categorise every error. If S3 is already near the product target, training has no headroom (the recommendation holds). If S3 is poor *and* the errors are mostly boundary/format/consistency, the recommendation is wrong for the text task and the LoRA pilot is justified. Its companion check (**Experiment 0b**, needs Blender installed, which needs approval): run the 13 catalog procedures headless and count how many execute and have checkable postconditions; if fewer than about a third, the verified-library plan shrinks and the add-on matters more.
+
+**Roadmap A, feasible FYP (no GPU):** (1) held-out transcript set + second annotator; (2) Experiment 0; (3) pin the Blender version, write the read-only add-on (state dump + operator log), verify the observed-state keys; (4) run `scripts/dump_blender_vocab.py`; (5) headless verification of the catalog procedures, promote a first reviewed set; (6) OCR trial for mode labels and key overlays on our own recording; (7) best-passage excerpts for concepts (§74 #1); (8) evaluation write-up with the categorised error analysis, which is itself a credible FYP result whichever way it goes.
+
+**Roadmap B, GPU-enabled extension (only if Roadmap A shows headroom):** (1) synthetic scene generator + screenshot corpus with exact labels; (2) small mode/panel classifier vs OCR on real frames; (3) one QLoRA pilot of a 3-4B text model on <= 800 human-verified + capped synthetic examples, rented 24 GB GPU, 2 seeds; (4) compare S4 with S3 under §95; (5) a VLM or temporal model only if (2) succeeds and a real-frame gap remains. Estimated rented compute for steps 2-4 is tens of dollars; the dominant cost is annotation hours.
+
+**Implemented now (offline, tested, no cost):** `ingestion/training/{example,split}.py` and 6 tests. Full suite: 232 passed, 2 live tests deselected. Nothing in the product imports them. **Not implemented because unjustified:** any trainer, dataset download, model, GPU dependency, scene generator (needs Blender), or verification runner (needs Blender).
+
+## 98. Direct answers
+
+- **What would we actually train, and what would the model learn?** First, a small mode/panel image classifier (if OCR fails) on exact synthetic labels, to read state from tutorial *video frames*. Second, conditionally, a LoRA on a 3-4B text model to decide "instruction vs explanation and which retrieved operation" while emitting `StepList`. It would learn a boundary and a format, not Blender knowledge.
+- **What examples, and how to get them?** Human-verified transcript-to-step labels from 15-25 tutorials by different authors (annotation is the expensive part); exact operator logs from our own recordings via the add-on; headless-Blender state-transition labels; negatives from failed `poll`s. Teacher drafts only as unverified training material, never test data.
+- **Most realistic GPU-enabled approach?** Rent a 24 GB GPU for a few short runs: the screenshot classifier and one QLoRA pilot, each with a predefined stopping rule. No always-on GPU, no VLM, no video model.
+- **Could synthetic Blender scenes give useful labels?** Yes for state, mode, selection and operator-outcome labels and for negatives, because Blender states the answer. No for how a human tutorial is worded or whether steps are natural; and the domain gap to real videos must be measured on hand-labelled real frames. Requires Blender installed and a pinned version.
+- **Would fine-tuning beat better retrieval, prompts and state verification?** Not on the evidence we have. For 8-9 of the 12 failure types the better tool is structure, retrieval or instrumentation. Training might help cost/latency and a boundary-classification error, but that is a hypothesis Experiment 0 should test.
+- **Most appropriate for the FYP?** Roadmap A: retrieval + deterministic validation + add-on state + a carefully labelled held-out evaluation. A clean negative or positive training result needs labels the team does not have yet.
+- **What I would build first as technical lead:** the held-out labelled set and Experiment 0, then the Blender add-on with the operator log. Reason: they unblock every other decision (they are the test set, the gold-data generator, the verifier and the training-data source), they cost no compute, and a GPU without them produces numbers nobody can trust.
+
+## 99. Limitations of this part
+- No live lookup of prices, model checkpoints, licences or provider fine-tuning terms: all in §94 and §90E are estimates and must be re-verified.
+- Blender is not installed here: every statement about headless execution, `bpy` state names and coverage is a hypothesis.
+- The reference annotation for the one evaluated video is assistant-read and awaiting human review; the corpus is author-written; all evaluation sets are tiny.
+- The proposed margin (10 points) and the 40-hour stop are judgement calls, not derived values.
+- Legal reading of CC-BY-SA for derived training data and of YouTube terms for training on captions is unresolved and should go to the supervisor.
+
+## 100. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Part X: failure analysis, training-strategy comparison, data-source and verification-library analysis, hardware estimates, fair experiment with stopping rules, two roadmaps. Added `ingestion/training/` (example schema + group-aware split + leakage audit) and 6 tests; 232 offline tests pass. No training, download, install, paid or model call. |
+
+
+---
+
+# Part XI: Input-to-guidance pipeline: audit, technique comparison, shared architecture, first fixes (2026-10-11)
+
+No Gemini or other model call, no network call, no download, no new dependency, no credential. Git state was checked first (41 uncommitted paths, including all of Parts V–X); nothing was reverted or committed, and `local_data/` and `knowledge/` were not touched. Labels: **[PROBED]** observed by running the real router on a request before any change (the probe list is in the status log); **[MEASURED]** produced by a run or test here; **[SOURCE]** read in the code; **[ESTIMATE]/[HYPOTHESIS]** reasoning only; **[UNVERIFIED]** from memory, not re-checked this session.
+
+## 101. Audit of the implementation (verified against source and by running it)
+
+| Flow | Entry point | What happens | Deterministic / model / retrieval | Status |
+|---|---|---|---|---|
+| 1. YouTube URL | `router.route` -> `answer_kb.answer_extended` step 1 | A video link returns `needs_model` with two options and **no steps**. There is no code path from a URL to captions to steps inside `route()` (deliberate: the caption fetch is opt-in, `cli captions`). With a transcript in hand the path is `transcript_ingest.ingest_transcript` (rules, narrated only). The Gemini route (`extract.py`, `cli video`) is a separate, quota-bound CLI, not reachable from `route()` | URL parsing and catalog rules deterministic; Gemini route model-based; caption adapter experimental/opt-in | **Unfinished joint**: nothing connected "selected tutorial" to "transcript" to "steps" before this part |
+| 2. Written instructions | `intent.classify` -> `text_steps.parse_written` | Clause split, alias match to 14 catalog operations, user wording and evidence kept verbatim, shortcut/menu/version/prerequisite checks, mode-chain tracking, unmatched clauses kept as flagged `unvalidated` steps. Gemini alternative exists (`extract_from_text`) | deterministic; model only as an explicit alternative | Working, narrow (catalog-limited) |
+| 3. Questions | `intent.classify` + `answer_extended` + catalog | Deterministic intent kinds (how_to, concept, shortcut, troubleshooting, mixed, vague, unsupported), then local manual index (SQLite FTS5, 284 pages) for concepts and one-step how-tos, state-dependent questions, official-page pointers | rules + lexical retrieval; no model, no network | Working; weakest on context-dependent follow-ups (fixed in part below) |
+| 4. Discovery | `tutorials.rank` over `knowledge/tutorial_index.json` | Deterministic topic-word ranking over **8 curated entries**; empty result with "needs external search" when nothing matches | deterministic over curated records | Working but narrow; constraints in the request were ignored (fixed in part below) |
+
+**Information loss and wrong-assumption points [PROBED, then fixed unless noted]**
+1. A clause naming one key and a different purpose ("Press Ctrl+Z to enter edit mode") became **two steps** with identical wording: an invented step.
+2. A modelling verb after a comma ("press Tab, extrude it") was not recognised as a new clause, so "extrude it" was swallowed by the Tab step.
+3. Leading "Then" stayed in the step goal.
+4. Follow-ups ("Why didn't that action work?", "my screen looks different") were matched to manual pages by stray words and answered with **irrelevant official-page pointers** (`outside_index`); "Continue from where I left off" was **declined**. Both are wrong: the correct answer is a question, because no session state is held.
+5. "tab does nothing" got the canned "which operation?" question instead of a state question.
+6. A Vimeo link with "turn this tutorial into steps" went to **tutorial discovery** (a search for unrelated videos). A playlist or channel link was likewise not identified.
+7. A section request ("only the part about edit mode", `?t=60`) was silently ignored.
+8. Discovery ignored the version in the request ("Blender 4.2" still returned a 2.80 video with only "tell me your version"), the duration limit ("under 15 minutes"), and the level; "compatible with Blender 4.x" returned "nothing matches" instead of asking what to learn.
+9. The version stated inside a question ("... in Blender 4.2?") was not used for the version check.
+10. `captions_flag: false` was presented as if captions were unavailable, but the repository itself measured an auto-generated track for `34FBeC9mktE` whose flag is false (§77). **Not "unavailable": "no creator-uploaded captions reported".**
+
+**Still open (suspected or demonstrated, not fixed here):**
+- "Press Shift+A, add a cube" yields two unvalidated steps for one action (the catalog has no "add primitive" operation). [PROBED]
+- Concept answers return the page lead, not the best-matching passage (§71). [REVIEWED]
+- The curated tutorial index has 8 entries; nothing finds tutorials beyond it. [SOURCE]
+- No conversation/session state exists: follow-ups cannot be resolved, only asked about. [SOURCE]
+- `Step` has no dependency links and no stored verification result; `AnswerBundle` has no explicit goal/constraints object (see §104).
+- The router's classes were validated on two author-written question sets (A is a development set; B was clean at first look). There is no real-user data.
+
+**Provenance preservation [SOURCE, tested]:** every step carries `provenance`, `source_refs`, `evidence`, `support`, `assumptions`, `flags`; transcript steps carry `transcript:start-end s` refs and verbatim quotes; manual excerpts carry `SourceRef` with licence and read date; the router has no model/network call path (tested).
+
+## 102. Techniques per flow, compared
+
+Priority legend: **P1** do now, **P2** next, **P3** later, **X** reject for the FYP.
+
+### A. YouTube tutorial ingestion
+
+| Technique | Problem addressed | Expected benefit / evidence | Limits and failure modes | Cost / offline | Effort | Decision |
+|---|---|---|---|---|---|---|
+| Source classification + clear refusal for unsupported links (done) | wrong route for non-video links | removes a wrong-route class [PROBED] | cannot tell if a video exists/is public offline | none / yes | low | **P1 done** |
+| Local transcript first: user file -> cached captions -> opt-in fetch, with the choice reported (done) | missing captions, provenance | uses only permitted/opted-in sources; caption kind (creator vs auto) travels with the result | auto captions mis-hear tool names; fetch endpoint is third-party | none for local / opt-in network | low | **P1 done** |
+| Targeted section extraction: time range, `t=`, "first N min", chapters, topic -> candidate window (done) | long videos, user wants one part | processes only the span; times stay absolute | topic window is a candidate to confirm; "mentions a word" is not "teaches it" | none / yes | low | **P1 done** |
+| Cue grouping into instruction units, catalog-based action extraction, evidence quotes, tight spans (exists) | arbitrary caption cuts, timestamps | dev video: narrated recall 0.55, precision 0.81, 80% within 3 s [MEASURED, dev, optimistic] | catalog-limited; reference-resolution absent | none / yes | done | keep |
+| Chapters as segment boundaries | long videos, structure | chapters exist for 3 of 16 candidate videos (§79) | most videos have none | metadata call 1 unit | low | P2 (parser exists in `metadata.py`) |
+| Reference resolution ("this object", "the panel on the right", "switch back") | pronoun-only instructions | high value in principle | needs the screen or a mode history; text alone cannot resolve "the panel on the right" | model or state | medium | **P3**: record as unresolved reference flag instead of guessing |
+| Mode/selection state tracking across steps (exists in written parser; not yet in the transcript route) | "switch back", Tab toggles, missing prerequisites | catches prerequisite violations (7/7 on author corpus) | needs explicit mode words | none | low | P2: reuse `text_steps` chain logic in `transcript_ingest` |
+| Text-only model on the transcript, validated against the same transcript (quote must exist in source) | prose outside the catalog | the one stage that needs a model; tiny input (a few thousand tokens) | quota; hallucinated steps unless the quote check rejects them | quota / no | medium | **P2, needs approval** (Experiment 0 of Part X) |
+| Visual pass only on thin windows (two-pass) | demonstrated-only actions | the E1 demonstration gap (§45) | clip-offset behaviour for URLs undocumented; each call may re-send the video | quota | high | P3 |
+| Hierarchical summaries / generic RAG over the transcript | long-video comprehension | not demonstrated needed; the catalog+docs already ground actions | adds a model call and new failure modes | quota | medium | **X** for now |
+| Multimodal alignment / key-overlay OCR | shortcuts shown on screen | model read "Ctrl + Z x28" in a video (§79 #5) | untested on our content | OCR install | medium | P3 |
+
+### B. Written instructions
+
+| Technique | Problem | Evidence / benefit | Limits | Cost | Effort | Decision |
+|---|---|---|---|---|---|---|
+| Deterministic clause split + catalog alias match, original wording and evidence kept (exists, hardened here) | atomic ordered actions; no invention | 3 defects found and fixed this part (items 1-3 above) | outside-catalog clauses stay unvalidated | none | done | keep |
+| Shortcut / menu / version / prerequisite checks against the catalog and manual Reference blocks (exists) | invalid shortcuts, wrong menus, missing steps | the wrong-key flag now fires once, on one step | validates 14 operations fully, others only if a Reference block exists | none | done | keep; **P2: map unmatched clauses to manual Reference blocks** (code exists for transcripts, `_doc_mapped_steps`; unreviewed) |
+| Multi-pass: pass 1 identify the intended procedure, pass 2 check it (exists as two passes in effect) | corrections must not replace the user's workflow | pass 2 never edits: it only flags, which preserves intent (tested: wording kept) | order errors can be flagged, never repaired automatically | none | done | **Recommended over a single extraction pass**: separation is what prevents silent replacement. No comparison was run against a single-pass model; claim is by construction, not measured |
+| Incomplete vs demonstrably incorrect | different handling | `assumptions` (incomplete) vs `flags` (contradicts documentation) already separate | the boundary depends on catalog coverage | none | done | keep |
+| Alternative valid ways | "Tab vs menu" | `alternatives` list on steps | only what the catalog lists | none | low | P2 |
+| Targeted clarification only when material | avoid guessing and nagging | one aggregated question; asked when a prerequisite is unknown | question text is generic | none | done | keep |
+| Model structured extraction for open prose | breadth | would handle "make it look nice" style text | hallucination risk; quota | quota | medium | P2 behind validators and approval |
+| Lightweight NLP (POS tagger, dependency parser) | clause splitting | rule splitter already handles the probe set after the verb-list fix | new dependency, no demonstrated need | install | medium | **X** |
+
+### C. Direct questions
+
+| Technique | Evidence | Decision |
+|---|---|---|
+| Regex/rule intent classification with auditable `reasons` | class accuracy 93.8% (dev A), 90.7% (B after fixes; 83.7% first look) [MEASURED, author labels] | **keep; simplest reliable technique** |
+| Follow-up / context-dependent detection -> clarification (added) | 4 of 4 probe phrasings fixed; pointer and decline errors removed [MEASURED by test] | **P1 done** |
+| Observed state when supplied (`mode`, `selected_objects`) to answer prerequisites | works for catalog operations; add-on not built | keep; add-on is the real unlock |
+| Lexical retrieval (FTS5) over the manual | gold page cited for 25/26 answerable held-out questions | keep |
+| Best-passage excerpts for concepts | known quality gap | **P1 next** (offline, low effort) |
+| Embedding-based semantic classifier / retrieval | index is 284 pages; lexical retrieval already ranks gold at rank 1 for 25/28 | **P3**: only if held-out failures are semantic. Adds a model download |
+| Structured model output for open "how do I make X" | genuinely needs a model; project goals are routed to tutorials | P2 with approval |
+| Conversation memory | none exists; Clicky keeps 10 text-only turns (§81) | P3: store the last procedure id + step index, not screenshots |
+
+### D. Tutorial discovery
+
+| Technique | Evidence / benefit | Limits | Cost | Decision |
+|---|---|---|---|---|
+| Request parsing: topic, version (`4.2`, `4.x`), level, max duration, "short" (stated assumption) (added) | the four constraints that were silently ignored are now applied or reported [MEASURED by test] | level cannot be checked (index has no level field); never claimed | none | **P1 done** |
+| Deterministic metadata ranking + hard duration filter + version penalty (added/exists) | explainable; excluded matches are named | popularity is not used on purpose | none | keep |
+| Honest empty results and a topic question (added) | "compatible with Blender 4.x" no longer reports a false "no match" | | none | **done** |
+| Metadata-only comparison table with an explicit "not judged" note (added) | answers "compare tutorials" without claiming content judgement | cannot say which teaches better | none | done |
+| Curated catalog growth via the Data API `videos.list` (1 unit per call, up to 50 ids [UNVERIFIED limit]) | real titles, durations, dates, licence, captions flag; no invention | manual selection of candidates; keywords from titles only | free quota | **P1 recommendation: grow the index to 30-60 entries for the FYP's tasks, with reviewer notes on level** |
+| Live search via Data API `search.list` | broader recall | costs about 100 quota units per call at the default 10,000/day [UNVERIFIED]; results need `videos.list` verification; needs approval and a key | quota | P2, only after the catalog proves too small (§74 #6) |
+| Scraping YouTube search pages, other platforms | | against terms; not investigated further | | **X** |
+| Semantic retrieval / embeddings over titles | | at <=100 entries, stemmed term matching suffices; adds a model | download | X |
+| Transcript analysis to check "does it cover technique X" | would improve coverage ranking | needs a transcript per candidate (opt-in fetch each); do it only for the **selected** tutorial via `locate_topic` | network per video | P2 for the selected one, never for every candidate |
+| Model-assisted ranking | | risks invented justifications | quota | P3, and only on retrieved records |
+
+**Discovery vs extraction stays separate:** a recommendation says `convertible: needs_user_transcript_or_video_model`, `trust: tutorial_metadata`, and the notes say metadata only. Handoff to ingestion happens only after the user selects one.
+
+## 103. Shared techniques
+
+| Technique | Flows helped | Failure mode addressed | Status |
+|---|---|---|---|
+| Deterministic checks before and after any model call; the router cannot call a model | all | silent spending, ungrounded output | exists |
+| Evidence-backed claims: `evidence`, `source_refs`, `support`, `provenance` | 1, 2 | unsupported steps | exists |
+| Explicit refusal/clarification instead of guessing | all | wrong confident answers (A: 0 false confidence) | extended (follow-ups, URLs, topic) |
+| Version-aware checks (catalog min version, manual branches, request-text version, tutorial version hint) | all | version drift | extended |
+| Cost-aware routing by cheapest sufficient path | all | quota (20 req/day free tier) | exists; 36 of 39 corpus items need no model |
+| Source-aware handoff (`ingestion/handoff.py`) | 1, 4 | broken discovery-to-ingestion joint | **new** |
+| Shared tracking of mode/selection chain across steps | 1, 2, 3 | missing/mis-ordered prerequisites | exists for written; P2 for transcripts |
+| Dependency graph (step needs state produced by an earlier step) | 1, 2 | order errors | the mode chain is a one-dimensional special case; a general `depends_on` is P2 (§104) |
+| Caching and dedup | 1, 4 | repeat calls | caption cache with a 30-day TTL exists; duplicate clause removal exists; a processed-tutorial cache keyed by video id + transcript hash is P2 |
+| Offline fallbacks | all | no network/quota | everything above runs offline |
+| Calibrated confidence | all | overconfidence | `confidence` is explicitly uncalibrated; calibration needs held-out data, not done |
+| Lightweight classifiers / GPU training | 3, vision | | rejected for now by evidence (Part X) |
+
+Competing vs complementary: model structured extraction **competes** with rule extraction only on open prose; used as a second stage with the rules as validators, they complement. Embeddings compete with lexical retrieval; at this scale lexical wins on cost and auditability.
+
+## 104. The common representation: does it fit?
+
+Existing objects: `StepList`/`Step` (procedures), `AnswerBundle` (any response), `TutorialRecommendation` (search results), `Explanation`, `SourceRef`.
+
+| Concept the brief lists | Where it lives today | Verdict |
+|---|---|---|
+| 1. What the user wants | `AnswerBundle.kind` + `reasons`; no structured goal/constraints | **gap**: add `request` summary (goal text, task type, version, level, duration, section) |
+| 2. What a source claims | `Step.evidence`, `support`, `video_start_s/end_s`, `source_refs`, `Explanation.is_excerpt` | adequate |
+| 3. What GuideWire recommends | `Step.goal/actions`, `provenance`, `alternatives`, `assumptions` | adequate |
+| 4. What Blender shows | observed dict into `StepEvaluator` / `apply_context`; not stored on a step | adequate for live use; no persisted record |
+| 5. Whether it was verified | `Step.verifiable` (is a check possible); `review_status`; the evaluator's verdict is returned, not stored | **gap**: a persisted `verification` result (checked_at, observed-source, outcome) when the add-on exists |
+| Hierarchy goal -> subgoal -> action | flat ordered steps; `Explanation.applies_to_steps` links text to steps | acceptable for the FYP; `depends_on` is the cheapest addition |
+| Missing information | `assumptions`, `questions`, `clarification` | adequate |
+| Search results / selected tutorial | `TutorialRecommendation`, separate from steps | **keep separate**; selected-tutorial context is the `SourceRef(kind="tutorial_video")` on the resulting bundle |
+| Section of a source | `Step.video_start_s/end_s`; the requested section is reported in `caveats` | a field would be cleaner |
+
+**Recommended additive changes (a contract change; NOT made: need Mehak/Umaima review and a `SCHEMA_VERSION` bump):** `AnswerBundle.request` (goal, task_type, constraints), `Step.depends_on: list[str]`, `AnswerBundle.source_section`, `Step.verification` (optional). Reuse everything else.
+
+## 105. Recommended pipeline
+
+```mermaid
+flowchart TD
+    I[User input] --> F{Form?}
+    F -- manual JSON --> MS[workflows.normalise_manual_steps] --> V
+    F -- timed text --> TR[transcript_ingest]
+    F -- URL --> U[handoff.classify_url]
+    F -- text --> C[intent.classify]
+    U -- not a single YouTube video --> X1[unsupported + options]
+    U -- video --> SEC[handoff.parse_section]
+    SEC --> PL[handoff.plan_ingestion]
+    PL -- user transcript / cached captions --> TR
+    PL -- none --> NT[needs_transcript: paste, opt-in fetch, or model with approval]
+    C --> FU{follow-up / needs session?}
+    FU -- yes --> CQ[clarification question]
+    FU -- no --> D{discovery request?}
+    D -- yes --> TD[tutorials.discover: parse constraints, rank, filter, compare]
+    TD -- no topic --> CQ
+    TD -- no match --> EX[empty + needs external search]
+    TD -- shortlist --> SEL[user selects] --> PL
+    D -- no --> K{catalog op?}
+    K -- yes --> CAT[catalog answer + prerequisites vs observed state]
+    K -- no --> KB[manual index: excerpt / Reference-block candidate / pointer]
+    C --> W{pasted procedure?} -- yes --> WP[text_steps.parse_written]
+    WP --> V
+    TR --> V
+    CAT --> V
+    V[validate.py + evaluator: schema, shortcuts, menus, prerequisites, mode chain] --> OUT[AnswerBundle: steps + provenance + flags + assumptions + questions]
+    KB --> OUT
+    OUT -. only if the caller approves .-> M[model for unresolved parts, output re-validated against the same source]
+```
+
+Before any model call: form detection, URL classification, intent, catalog, manual retrieval, local transcript/cache lookup, validators. Retrieval happens at the intent stage and again to validate extracted claims. A model is needed only for prose outside the catalog, open project goals, and demonstrated-only actions. Insufficient information always ends in a question, a named `needs`, or an empty result; never a guess. Explanations (concepts, troubleshooting) are `Explanation` objects linked to steps; procedures are `StepList`; they are never forced into each other. Repeat processing: caption cache (30 days), duplicate-clause removal, and (P2) a processed-tutorial cache keyed by video id + transcript hash.
+
+Module map: `router.py` (policy), `intent.py`, `answer_kb.py` (documentation, follow-ups, URLs, discovery), `tutorials.py` (**request parsing and `discover`**), `handoff.py` (**new**), `text_steps.py`, `transcript_ingest.py`, `youtube/captions.py` (opt-in), `knowledge.py`, `catalog.py`, `validate.py`, `evaluator.py`, `kb/*`.
+
+## 106. Changes made and evidence
+
+| Change | Files | Evidence |
+|---|---|---|
+| One clause, one step when a key and a purpose disagree; verbs `extrude, bevel, inset, subdivide, merge, fill, apply, rename, hide, remove, insert, smooth` start a clause; leading sequencing words dropped | `text_steps.py`, `intent.py` | 3 tests; user wording and evidence preserved (tested) |
+| Follow-up / session-dependent requests -> clarification, never page pointers or a decline; "does nothing / no effect" -> state question | `answer_kb.py`, `intent.py` | 5 tests |
+| URL classification (single video / other YouTube page / other site), refusal for unsupported links, `t=`/range/"first N min"/topic section requests reported | `handoff.py`, `answer_kb.py` | 9 tests |
+| Discovery: version, level, duration, "short" parsed from the request; limits applied; excluded matches named; missing topic -> question; metadata-only comparison; honest caption wording | `tutorials.py`, `answer_kb.py` | 8 tests |
+| Request-text Blender version used by the router when the app supplies none | `router.py` | 1 test |
+| Discovery-to-ingestion handoff: local transcript -> cache -> optional injected fetch, section slicing with absolute times, topic window location, chapter preference, failure reasons, provenance (`SourceRef` tutorial_video), auto-caption and version-mismatch caveats; never fetches by itself | `handoff.py` | 13 tests incl. missing captions, blocked fetch, expired cache, invalid source, unreadable transcript, no network/model import |
+
+**Measured:** full offline suite **272 passed** (226 before Part X, +6 in Part X, +40 here), 2 live tests deselected. 39-case offline corpus unchanged. Question sets re-run after the change: **A dev 93.8% (28/28 answerable answered), B 90.7% (26/26)**, identical to the previous numbers; one regression I introduced in the first draft (a level-only request now asked for a topic) was caught by set A and corrected. **These sets do not contain follow-ups, URL cases, constraints or handoffs**, so the new behaviours are covered by author-written regression tests, which show the defects are fixed, not how often they occur for real users.
+
+## 107. Acceptance criteria for the next stage (measurable)
+
+1. A new 40-request **flows corpus** written before further tuning, balanced over the four flows, with at least 8 follow-up, 6 URL/section and 10 discovery-constraint cases, plus a second annotator on 25%: class accuracy >= 90%, **0 irrelevant pointers**, 0 false confidence.
+2. Held-out transcripts: >= 10 videos by >= 5 authors with human step labels; transcript route reports recall, precision, timestamp error, and unsupported-claim count (target: 0 quotes absent from source; 0 false visual claims).
+3. Written instructions: >= 30 held-out procedures with injected errors (wrong shortcut, wrong menu, missing prerequisite, wrong order); target: >= 90% of injected errors flagged, 0 silent rewrites (wording preserved in 100%).
+4. Discovery: curated index >= 30 entries; for 20 learning goals, a reviewer marks each shortlist item relevant/irrelevant; report precision@3 and the rate of correct "no match"; 0 invented fields (every field traces to a stored record).
+5. Handoff: all failure paths (no captions, blocked, expired, invalid, empty section) return a stated reason; 0 crashes; 0 network calls from `handoff.py` without an injected fetch.
+6. Latency of non-model paths stays under 100 ms (currently ~1 ms corpus mean, 17-70 ms with the index); model calls per request reported.
+
+## 108. Answers
+
+- **Most promising technique per flow.** (1) Transcript-first ingestion with cue grouping, catalog/manual grounding and quote-checked evidence, plus section targeting; a model only for the unresolved prose. (2) Rule-based clause extraction with a separate non-editing validation pass. (3) Rule intent routing with refusal/clarification as first-class outcomes, then local manual retrieval. (4) A curated, metadata-verified catalog with a deterministic, constraint-aware ranker.
+- **Shared technique with the widest effect.** The **evidence + provenance + explicit-refusal contract** (every claim carries its source and kind; insufficient information becomes a question or a named `needs`) together with the **router that cannot call a model**. It touches all four flows and is what stops confident wrong answers.
+- **Deterministic, not an LLM:** URL and form detection, intent routing, catalog and shortcut/menu/version validation, mode/prerequisite chains, timestamps and evidence quotes, section slicing, constraint parsing and ranking, caching, provenance.
+- **Genuinely needs a model:** turning free prose outside the catalog into steps; open project goals ("make a low-poly tree") beyond tutorial pointers; reading actions that are only demonstrated; resolving "the panel on the right"-style references without state.
+- **Reliability problems first:** (a) held-out labelled data for transcripts and the flows corpus (everything is currently author-checked); (b) context-dependent follow-ups need session state, which does not exist; (c) catalog coverage (14 operations) caps both the written and transcript routes; (d) the Blender add-on for observed state; (e) the 8-entry tutorial index.
+- **Most realistic discovery for the FYP:** a curated catalog of 30-60 real videos whose metadata is read through the official Data API (`videos.list`), reviewed by a team member for level and topic, ranked deterministically with the constraints now implemented; live `search.list` only if the catalog proves too small and with approval; no scraping. Content is examined only after selection, using the user's transcript or the opt-in captions.
+- **Implement now (done):** the fixes in §106. **Next, low risk, still offline:** best-passage concept excerpts; mode-chain checks in the transcript route; mapping unmatched written clauses to manual Reference blocks as flagged candidates; processed-tutorial cache. **Needs your approval:** the schema additions in §104; a text-only model pass with a cost cap; growing the tutorial catalog through the API; any live search.
+- **Defer:** embeddings, video-model second pass, key-overlay OCR, conversation memory beyond "last procedure + step", GPU training (Part X gate).
+
+## 109. Limitations
+- The new behaviours are verified by tests I wrote against defects I found; no new human-labelled evaluation set exists, and no real user data.
+- Section topic location is a lexical heuristic (a mention is not coverage); it returns candidates to confirm.
+- `captions_flag` semantics are inferred from one measured counterexample (§77), not from API documentation re-read this session.
+- Data API quota figures are from memory.
+- `Press Shift+A, add a cube` style duplicates (two catalog-unknown clauses for one action) remain.
+- Nothing was run against live YouTube, Gemini, or a Blender session.
+
+## 110. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Part XI: audit by probing 27 requests across the four flows (10 defects recorded in §101); fixes to the written parser, follow-up handling, URL classification, discovery constraints and request-text version; new `ingestion/handoff.py` connecting a selected tutorial to the offline transcript route; `tests/test_ingestion_flows.py` (40 tests); 272 offline tests pass; question sets A/B unchanged (93.8% / 90.7%); no API, network, download or dependency. Schema changes proposed, not made. |
+
+
+---
+
+# Part XII: Test audit, follow-up questions as a first-class feature, approved integrations (2026-10-11)
+
+Labels: **[MEASURED]** produced by a run here; **[REVIEWED]** my own reading (no second annotator); **[AUTHOR-WRITTEN]** expectations written by the assistant, so a regression measure, not independent accuracy; **[DEV]** tuned on; **[HELD-OUT]** frozen before the code existed; **[LIVE]** a real external call. Git state was checked first; no existing uncommitted work or local data was removed.
+
+## 111. Approvals received and what was done
+
+| Approval | Done |
+|---|---|
+| Schema additions (§104) | **Schema 0.6, additive:** `Step.depends_on`, `Step.verification` (`StepVerification`), `AnswerBundle.request` (`RequestSummary`), `AnswerBundle.source_section` (`SourceSection`), `Route` gains `"session"`. Old example files still validate (tested). `depends_on` is filled by `finish()` (nearest earlier step that sets the mode this step needs; never invented); `verification` by `Session.verify`; `request` by follow-up answers; `source_section` by the handoff. **Mehak and Umaima still need to review the contract.** |
+| Text-only model pass, cost cap, no retries | **One [LIVE] call**, `scripts/run_text_model_pass.py` (provider and validation `max_attempts=1`). Accepted at first attempt; 17.1 s; 7,081 tokens (3,237 in, 2,164 out, 1,680 thinking); model `gemini-3.6-flash`. Dev video only (see §118). Experiment 0 as designed (10 held-out hand-labelled transcripts) is **still blocked: those labels do not exist.** |
+| Grow the catalog via the YouTube API / live search | **[LIVE]** `scripts/grow_tutorial_catalog.py`: 8 searches, 78 videos described, 67 kept, about 802 of 10,000 daily units, no retries. Written to **`knowledge/tutorial_index_candidates.json`, a separate, unreviewed file**; the reviewed index and the frozen evaluation sets were not touched. Details §119. |
+| Playlists (your question) | Expanded through the **official Data API** (`playlistItems.list`, about 1 unit per 50 videos), not third-party scrapers: the same metadata (order, titles, ids, availability) with no terms problem and no breakage risk. Implemented: `ingestion/youtube/api.py`, `classify_url` recognises playlists, the router explains the step without any call, `cli playlist URL` does the (2-unit) call, `playlist_recommendations` joins items with verified metadata. Deleted/private entries are listed, not recommended. Each video then goes through the normal per-video handoff (captions are per video; there is no playlist transcript). Not run [LIVE] against a real playlist: tested with a fake transport only. |
+
+## 112. The test suite as it is
+
+| Fact | Value [MEASURED] |
+|---|---|
+| Executed items | **357** (352 pass, 5 strict expected-failures), plus 2 live tests deselected by default (`-m "not live"`). Distinct test functions: about 260; the gap is parametrisation (the 39-case corpus alone is 39 items). **"357 tests" overstates breadth by about a third.** |
+| Skips | 0 in this checkout, but 4 tests silently depend on git-ignored local artefacts (`knowledge/kb.sqlite`, `local_data/`): on a teammate's clone they skip, not fail. |
+| CI | **None** (`.github` absent). No coverage tool is installed (I did not add a dependency; mutation probing, below, answers the more useful question). |
+| Determinism | No wall-clock dependence found except TTL tests, which pass explicit times; the random-conversation test uses a fixed seed; no test needs network (2 live ones are opt-in); `test_no_socket_is_needed` runs only the first 12 of 39 corpus cases. |
+| Pipeline coverage | Mostly isolated functions plus the router; true end-to-end (URL -> handoff -> session -> follow-up) tests did not exist before this part. |
+
+**Can the suite detect realistic defects? Mutation probe [MEASURED].** I injected 18 plausible defects one at a time (`runs/results/mutation_probe*.txt`): wrong-shortcut check off, prerequisite chain off, transcript steps claiming `both`, whole-unit timestamps, negation off, a question completing a step, tutorials mixing, duration filter ignored, section end ignored, expired cache used, documentation counted as observation, evaluator ignoring unmet predicates, non-YouTube links going to search, the router able to spend a model call, and others.
+- **Before this part's new tests:** 13 of 18 caught. Four survivors were in code that had no tests yet (negation, follow-ups, session). **One survivor was a real gap in the old suite:** the end of a requested section was never tested (`handoff.slice_timed_text`), found and closed.
+- **After:** 18 of 18 caught, after two more tests closed survivors the first run exposed (new-topic detection and section end).
+Limits: 18 hand-picked mutants is a probe, not a mutation score; equivalent mutants were not analysed.
+
+## 113. Weak assertions and gaps, with locations
+
+| Where | Problem | Action |
+|---|---|---|
+| `tests/test_experiment.py::test_interrupted_cells_are_kept_but_not_cached` | Both assertions ended in `or cell["accepted"]`; the cell **is** accepted, so they asserted nothing | **Fixed**: now asserts one accepted attempt, exactly one cache entry and one preserved incomplete record |
+| `tests/test_offline_routes.py::test_no_socket_is_needed` | Only the first 12 of 39 cases; passes by not raising | Open (low risk: the router has no import of network libraries, which is asserted elsewhere) |
+| `tests/test_kb.py::test_held_out_sets_are_frozen` | No `assert` statement; relies on a helper raising | Open, cosmetic |
+| `tests/test_step_record.py::test_examples_exist` | `>= 3` files | Open, cosmetic |
+| `tests/test_accuracy_offline.py` (39 corpus items) | Expectations are properties written by the same author as the rules (`[AUTHOR-WRITTEN]`): a regression net, not accuracy | Stated in §55; the held-out follow-up set below is the first set frozen before its code |
+| `tests/test_extract_and_youtube.py` | The model path is tested with a scripted fake provider, which cannot produce the odd outputs a real model gives; the only real-model evidence is the live runs of Parts II and V and the single run here | Open: a recorded-fixture suite of real responses (R1, R4 exist) is the right mock |
+| Many flag assertions match message substrings (for example "prerequisite not met") | Coupled to wording, not to the structure | Accepted trade-off; the user-visible text is the contract |
+| Old suite on transcripts | No test for negation, spoken wrong shortcuts, prerequisite flags, section end, follow-ups, playlists | Added (§117) or recorded as strict expected-failure |
+
+## 114. Scenario matrix (the four flows)
+
+Status: **PASS** tested and passes; **FIXED** failed in the audit, fixed, now passes; **GAP** confirmed failing, recorded as a strict expected-failure; **N/E** cannot be evaluated yet.
+
+| Scenario | Status | Evidence |
+|---|---|---|
+| Complete tutorial with clear captions and times | PASS | synthetic VTT + dev video (recall 0.55, precision 0.81) |
+| Repetitive / rolling captions | PASS | repeated line gives one step |
+| One action over several caption segments | PASS | one step, start at the first cue |
+| Several actions in one sentence | PASS (3 ordered steps); noisy "starts before step N ends" flags | GAP (overlap noise) |
+| Narration omits a visible action | **N/E** | needs video; a transcript never claims `demonstrated` (tested) |
+| Ambiguous reference ("the other one") | PASS | no step invented, explicit "none was called" |
+| Negated instruction ("never join the objects") | **FIXED** | was turned into a Join step in both the transcript and written routes |
+| Hypothetical ("you could ... but we are not going to") | **FIXED** | was a Join step |
+| "Don't forget to press Tab" | PASS | stays an instruction (control against over-blocking) |
+| Wrong spoken shortcut ("press z for edit mode") | **FIXED** | flagged, wording kept (written route already did) |
+| Missing prerequisite in a transcript | **GAP** | no mode chain in the transcript route |
+| Terse key narration ("hit tab, then 1 ... then g") | **GAP** | no steps (recall miss) |
+| Version-specific narration ("in 2.7 you would ...") | **GAP** | not marked version-specific |
+| Tutorial covers only part of the task | PASS | steps only for what is said; unmatched units reported; no padding |
+| Unavailable captions / blocked / invalid link / expired cache | PASS | stated reasons, no crash |
+| Tutorial vs user version | PASS | stated in caveats |
+| Question about a timestamp | PASS | step at that time with quote; out-of-range asks |
+| Caption text addressed to the system | PASS | no steps, no verified/demonstrated claims |
+| Written: complete, informal, wrong menu, contradiction, alternatives | PASS | wording kept, flags, no rewrite |
+| Written: negation / conditional | **FIXED** | negated clause kept unmapped; "If X, do Y" stays one flagged step |
+| Written: key and spoken name ("Shift+A, add a cube") | **GAP** | two steps for one action (no add-primitive operation) |
+| Questions: concept / procedure / troubleshooting / vague / outside scope | PASS | correct kind each; concepts never forced into steps |
+| Discovery: constraints, no topic, empty result, duplicates, missing metadata, comparison | PASS | §102 tests + 8 API tests |
+| Discovery: real retrieved results | PASS for topicality [REVIEWED], see §119 | 18 of 18 shown results on-topic; suitability, level, correctness not assessable |
+| Discovery -> ingestion with source identity | PASS | `SourceRef(tutorial_video)` and version hint survive into the session (tested) |
+| Final state cannot be verified | PASS | `unverifiable`, never `met` |
+| Playlist link | PASS (offline, fake transport) | **[LIVE] not run** |
+| Real-user phrasing | **N/E** | no real-user data exists |
+
+## 115. Follow-up questions: what exists and how it behaves
+
+**Before:** none. Every message was a standalone request; the earlier fix only stopped follow-ups being answered with irrelevant pointers. There was no conversation state at all.
+
+**Now (`ingestion/session.py`, `ingestion/followup.py`, no model, no network).** State kept, and nothing more: the procedure and its tutorial identity (title, link, recorded version, from the `tutorial_video` source only); per-step status (`pending/done/skipped/failed`) with who said so; the current step; `active`; the user's version; last observed Blender state; the last 6 turns as 120-character summaries. Observed state is stored as `Step.verification` but only the user's explicit statement changes status.
+
+Resolution order: intent (22 ordered patterns) -> is it really a **new** request (names a Blender topic that no step of the loaded procedure is about and has no "this/that/step") -> does any context apply (paused tutorial gets a question, never a guess) -> answer from the current step's goal, evidence quote, catalog operation (explanation, shortcuts, menus, prerequisites), `depends_on` and observed state. Where sources are silent it says so ("the source does not say why") instead of inventing a reason.
+
+| Follow-up | Behaviour |
+|---|---|
+| "Why are we doing this step?" / "Why?" | goal + operation explanation + what it depends on + the source quote and time; says when nothing is documented |
+| "What does this option do?" / "Where is that button?" | operation explanation / menu paths, named UI element, shortcut; if none documented, asks for version and screen |
+| "Keyboard shortcut instead?" / "another way?" | documented shortcut or menu path; "this step already uses Ctrl+J"; "no alternative documented" |
+| "I don't see that option" / "shortcut does nothing" | prerequisites vs observed mode; unmet ones named; asks version/state if unobserved |
+| "What if I already completed this?" | does **not** mark anything; says what to check and how to confirm |
+| "I did that" / "skip this" / "go back to step 2" / "the undo part" | the only things that change status or position |
+| "I made a mistake" | undo procedure from the catalog; step statuses unchanged |
+| "That didn't work" | marks the step `failed` (the user's report), asks what happened |
+| "My result looks different" | compares the last done step's expected state with observed state; stores `verification`; says "cannot compare" when nothing is checkable |
+| "Explain the previous step" / "the rest" / "what next" / "Continue" | previous step; only the pending steps (done and skipped omitted); current step restated and **not** marked done |
+| "Will this work in my version?" | user's version, tutorial's recorded version (never a manual page), major-version warning |
+| "What about the other one?" | no referent: asks which |
+| "What happens at 0:41?" | step covering that time with quote; asks if past the video's end or the procedure has no times |
+| Different topic / task change / switching tutorial | new topic: routed standalone, session untouched. Task change: tutorial **paused**, later short messages get a question. New tutorial: clean slate (no status carried over) |
+
+**Bugs the process found in my own design (fixed):** the session adopted the cited *manual page* as "the tutorial" and said the tutorial was "recorded for Blender main (5.2 LTS)"; "matches what s03 expects" was said when nothing was checkable; "Go back to the undo part" was treated as a new request because undo was not the current step's topic (found by the held-out set).
+
+**Not handled:** pronouns across several earlier turns ("the thing I asked about before"); two tutorials open at once; contradicting corrections ("actually my version is 3.6") are only recorded as the latest `version` if the caller sets it; state that disappears (an observation older than the step) is not aged out; any phrasing outside the 22 patterns falls through to the router.
+
+## 116. Evaluation set and baseline quality report
+
+Sets: `tests/corpus/followups_dev.json` (23 turns, **[DEV]**, tuned on) and `followups_heldout.json` (32 turns in 14 conversations, **[HELD-OUT]**, sha256 frozen before `followup.py` existed, first look recorded below; later numbers are "not clean"). Both **[AUTHOR-WRITTEN]**, no second annotator. Runner: `python -m ingestion.eval.followup_eval --set ... --label ...`.
+
+| Metric (definition) | Result | Label and limits |
+|---|---|---|
+| Follow-up intent accuracy (predicted == labelled, per turn) | held-out first look **32/32**; dev 23/23 | patterns were written by the same author; real phrasing will miss |
+| Context resolution (session / standalone / clarify as labelled) | held-out first look **31/32**, then 32/32 after the fix (not clean); dev 23/23 | the one miss was a real defect |
+| State correctness (status, current step, active, verification, unmet) | 31/32 first look, 32/32 after | |
+| False completions (a question that ended with a step done) | **0** of 55 turns + 150 random conversations (1,200 turns) | the seeded fuzz asserts invariants, not usefulness |
+| Contamination (text of another tutorial in an answer) | **0** | substring check |
+| Grounded answers (source or step pointer present where labelled) | 6/6 held-out, 3/3 dev | "grounded" means a reference is present, not that the sentence is true |
+| Question routing, class accuracy | A 93.8% [DEV], B 90.7% [HELD-OUT, first look 83.7%, post-fix not clean]; 0 false confidence; answerable questions answered 28/28 and 26/26 | unchanged after today's edits (re-run) |
+| Written-instruction corpus | 39/39, 36 of 39 need no model [AUTHOR-WRITTEN] | |
+| Transcript extraction, dev video, rules | narrated recall 0.55 lenient / 0.45 strict; precision 0.81 / 0.63; 80% of times within 3 s, median error 1.8 s; 0 absent quotes; 0 false visual claims; order inversions 0 | **unchanged by the negation and shortcut changes**; development video, 20 reference steps, assistant-read reference (§40) |
+| Transcript extraction, dev video, **one text-model call** | 8 steps; narrated recall 0.55 / 0.30 strict (narrated-only 1.0 of 2); precision 1.00 / 0.875; times within 3 s 100%, median error 1.4 s; 0 absent quotes; 0 false visual claims; 0 timestamps past the end; order inversions 0; prerequisite violations 0; 17.1 s; 7,081 tokens | **single run, one video, development data**, n = 20 reference steps: **no ranking claim.** Observed: the model is more conservative (8 vs 16 steps), ties the rules on lenient recall, is lower on strict recall, higher on precision and timing. Whether the union beats either was not computed |
+| Discovery relevance (topicality) | 18 of 18 results on-topic across 6 requests | [REVIEWED] by title only, one rater, no relevance grades; says nothing about level, accuracy or completeness |
+| Clarification quality | held-out and dev clarify cases all as labelled (6/6); question sets: 0 unnecessary escalations after fixes | "needed vs unnecessary" is judged against author labels |
+| Recovery quality, response usefulness | **not measured**: need human judgement | structural behaviour only (undo steps offered, failure recorded, question asked) |
+| Latency | follow-ups 0.2 ms mean; non-model routes about 1 ms (17-70 ms with the index); model pass 17.1 s | |
+| Cost | $0 for all offline paths; model pass 7,081 tokens on the free tier (price not computed); catalog growth about 802 of 10,000 daily quota units | free-tier status assumed from earlier runs |
+
+## 117. Regression tests added (all offline)
+
+`tests/test_scenarios_e2e.py` (77 items, 5 strict expected-failures), `tests/test_youtube_api.py` (8), `tests/test_ingestion_flows.py` (+0, one expectation updated for playlists), and a strengthened `test_experiment.py` case. Techniques actually used, each for a reason: scenario and conversation-sequence tests (the new feature), regression tests for 9 defects, failure injection (blocked/unavailable captions, API errors with key redaction, no retry), adversarial inputs (caption addressed to the system, negation, conditionals), metamorphic tests (equivalent formats, case and spacing, paraphrase groups), a seeded random-conversation invariant test (stdlib; `hypothesis` was not added), and the mutation probe. Not used: property-based schema fuzzing with a library, snapshot tests, load tests: no demonstrated need.
+
+## 118. Defects found by this audit
+
+Fixed: negated and hypothetical instructions became steps (transcript and written); conditional clause became two steps; spoken wrong shortcut unflagged in transcripts; follow-up wrongly treated as a new topic; session adopted a manual page as the tutorial; misleading "matches" wording; an untested section end; a vacuous test. **Confirmed and left open (strict expected-failures):** terse key narration yields nothing; no prerequisite chain in the transcript route; version-specific narration unflagged; overlap-warning noise for one sentence; "Shift+A, add a cube" gives two steps.
+
+## 119. Catalog growth: what the live results show [LIVE, REVIEWED]
+
+67 unreviewed candidates (all community channels; 3 under the Creative Commons licence, 64 standard YouTube licence; median 7 min, range 1 to 33 min). Observations that matter for design: a **version hint could be read from only 14 of 67 titles** (so "compatible with Blender 4.x" can be checked for about a fifth of candidates); the **captions flag is false for 62 of 67** although auto-captions very probably exist, so the flag predicts almost nothing; **ties rank alphabetically** (several results score identically); 1-minute videos rank beside 14-minute ones and are poor material to follow along with. None of this was changed in the ranker; it should be decided with a human review of the file. Do not promote entries until a team member has checked level, topic fit and version.
+
+## 120. Prioritised test and quality improvements
+
+1. **Independent labels** for the follow-up and transcript sets (a second annotator, 25% overlap), and 10+ held-out transcripts from 5+ authors: the biggest credibility gain, and the precondition for Experiment 0.
+2. A **CI workflow** that runs the offline suite and the frozen-hash checks (none exists).
+3. **Recorded real model responses** as fixtures for `extract.py` (replace the scripted fake).
+4. Close the five strict expected-failures in order of user harm: transcript prerequisite chain, terse key narration, version-specific narration.
+5. A **real-user study set** (even 30 messages from the usability sessions) for intent coverage.
+6. Run `cli playlist` once against a real playlist [LIVE] with your authorisation.
+7. Tighten the three cosmetic weak tests in §113.
+
+## 121. Final report
+
+**Tested and passing:** 352 items (offline), including 77 new scenario/follow-up/schema items, 8 API-helper items and 32 held-out follow-up turns (after one fix). **Failing, deliberately recorded:** 5 strict expected-failures (§118). **Not run / not evaluable:** real users; visually demonstrated actions; Experiment 0 as designed (no held-out labelled transcripts); a live playlist expansion; the two live smoke tests; any Blender session (no add-on, Blender not installed). **Limits:** almost all expectations are written by the assistant; held-out sets were frozen before the code but remain author-written; the model comparison is one run on the development video; relevance judgements are mine; mutation probing used 18 hand-picked defects.
+
+## 122. Status log (continued)
+| Date | Update |
+|---|---|
+| 2026-10-11 | Part XII: audit of 357 test items (mutation probe 13/18 -> 18/18), schema 0.6, session and follow-up handling with a frozen held-out set (first look 31/32), negation/conditional/shortcut fixes in both routes, playlist expansion through the official API, live catalog candidates (about 802 quota units), one live text-only model call (7,081 tokens), 352 offline tests pass, 5 strict expected-failures. |
+
+
+---
+
+# Part XIII: Key-press steps, live playlist check, ranking rework, and the full product audit (2026-10-11)
+
+The product audit, scenario results, Gemini experiment status, defect list and prioritised backlog are in **[docs/audits/GUIDEWIRE_CURRENT_STATE_AND_ROADMAP.md](audits/GUIDEWIRE_CURRENT_STATE_AND_ROADMAP.md)**. Changes made alongside it, at the owner's request:
+
+- **Terse key narration is now one step per key** (`hit tab, then 1 for vertex select, then g to grab` gives "Press Tab", "Press 1", "Press G"); a key already explained by its description ("press g to move it") stays one step. **"Press Shift+A, add a cube"** is one step in the written route (merged only when both clauses are outside the catalog). Dev-video transcript metrics unchanged (recall 0.55 / 0.45, precision 0.81 / 0.63).
+- **Playlist verified live** (12 videos, 2 quota units).
+- **Correction to section 77:** `captions.list` with a plain API key does return caption *tracks* (creator `standard` / automatic `asr`), about 50 units per call (verified live). Downloading caption text still needs OAuth. The platform's `contentDetails.caption` flag is true only when creator captions exist and says nothing about automatic ones; it is no longer used to score, and verified tracks are checked for the shortlist only (`cli find --verify-captions N`).
+- **Ranking rework** (`tutorials.discover`): version read from the title and, failing that, the description (14 -> 31 of 67 candidates), level from the title's own wording (labelled as the author's claim), a penalty for sub-3-minute teasers unless the user asked for short, verified-caption bonus, and stated tie-breaks instead of alphabetical order.
+- **Cache-key bug fixed** in the experiment runner (key tied to the contract version); `--no-retry` switch added; E1 remains 3/6 cells (the last attempt hit HTTP 503).
+- Schema 0.6 additions now populated: `Step.depends_on` (by `finish`), `Step.verification` (by `Session.verify`), `AnswerBundle.request` (follow-ups), `source_section` (handoff); `TutorialRecommendation` gains `caption_kind`, `published`, `level_claim`.
+- Tests: 378 passed, 3 strict expected-failures, 2 live deselected.

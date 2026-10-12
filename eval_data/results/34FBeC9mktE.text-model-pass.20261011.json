@@ -1,0 +1,141 @@
+{
+ "label": "text-only model pass, single run, DEVELOPMENT video (not held out)",
+ "model_id": "gemini-3.6-flash",
+ "prompt_version": "v3",
+ "reference": "34FBeC9mktE.reference.v1.json",
+ "reference_sha256": "f4cbd54e1ef5",
+ "prompt_chars": 5041,
+ "cues": 86,
+ "retries_allowed": 0,
+ "run_utc": "2026-10-11T14:32:16.893768+00:00",
+ "latency_s": 17.1,
+ "status": "accepted",
+ "steps": 8,
+ "narrated_recall_lenient": 0.55,
+ "narrated_recall_strict": 0.3,
+ "narrated_only_recall": 1.0,
+ "precision_lenient": 1.0,
+ "precision_strict": 0.875,
+ "unsupported_evidence_quotes": 0,
+ "false_visual_claims": [],
+ "timestamps_beyond_end": [],
+ "untimed": [],
+ "temporal_within_tol": 1.0,
+ "temporal_median_abs_err_s": 1.4000000000000057,
+ "state_wrong_rate_vs_reference": 0.0,
+ "order_inversion_rate": 0.0,
+ "prerequisite_violation_rate": 0.0,
+ "unmatched_generated": [],
+ "duplicate_generated": [],
+ "steps_detail": [
+  {
+   "id": "s01",
+   "goal": "Switch to Edit mode",
+   "t": [
+    22.8,
+    31.0
+   ],
+   "support": "narrated",
+   "flags": []
+  },
+  {
+   "id": "s02",
+   "goal": "Modify mesh shape by selecting vertices and transforming them",
+   "t": [
+    61.2,
+    70.7
+   ],
+   "support": "narrated",
+   "flags": []
+  },
+  {
+   "id": "s03",
+   "goal": "Toggle back into Object mode",
+   "t": [
+    70.7,
+    73.2
+   ],
+   "support": "narrated",
+   "flags": []
+  },
+  {
+   "id": "s04",
+   "goal": "Rotate object in Object mode",
+   "t": [
+    73.2,
+    77.8
+   ],
+   "support": "narrated",
+   "flags": []
+  },
+  {
+   "id": "s05",
+   "goal": "Undo recent action",
+   "t": [
+    81.2,
+    84.1
+   ],
+   "support": "narrated",
+   "flags": []
+  },
+  {
+   "id": "s06",
+   "goal": "Edit multiple mesh objects simultaneously",
+   "t": [
+    122.6,
+    126.5
+   ],
+   "support": "narrated",
+   "flags": [
+    "same start and expected state as step 1: the two cannot be told apart by state"
+   ]
+  },
+  {
+   "id": "s07",
+   "goal": "Join multiple objects into one mesh object",
+   "t": [
+    157.9,
+    164.9
+   ],
+   "support": "narrated",
+   "flags": []
+  },
+  {
+   "id": "s08",
+   "goal": "Separate selected mesh geometry into a new object",
+   "t": [
+    173.6,
+    183.0
+   ],
+   "support": "narrated",
+   "flags": []
+  }
+ ],
+ "usage": [
+  {
+   "prompt": 3237,
+   "output": 2164,
+   "thoughts": 1680,
+   "total": 7081
+  }
+ ],
+ "http_events": [
+  {
+   "attempt": 1,
+   "status": 200,
+   "latency_s": 17.08
+  }
+ ],
+ "attempt_records": [
+  {
+   "attempt": 1,
+   "usage": {
+    "prompt": 3237,
+    "output": 2164,
+    "thoughts": 1680,
+    "total": 7081
+   },
+   "accepted": true
+  }
+ ]
+}

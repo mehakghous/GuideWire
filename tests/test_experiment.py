@@ -142,5 +142,25 @@ def test_interrupted_cells_are_kept_but_not_cached(tmp_path):
     bad = {"steps": [{"goal": "x", "confidence": 0.5, "video_start_s": 500, "video_end_s": 501}]}
     cell, _, led = make(tmp_path, [[bad, E503("x"), E503("x"), E503("x")], [good()]])
     # attempt 1 invalid (response received), attempt 2 only 503s: incomplete, so not cached and re-run on resume
-    assert not (tmp_path / "cache").exists() or not list((tmp_path / "cache").glob("*.json")) or cell["accepted"]
-    assert list((tmp_path / "incomplete").glob("*.json")) or cell["accepted"]
+    # (the two disjunctions that used to be here passed whenever the cell was accepted, i.e. they asserted nothing)
+    assert cell["accepted"] and len(cell["attempts"]) == 1                          # the resumed run produced the accepted result
+    assert len(list((tmp_path / "cache").glob("*.json"))) == 1                       # cached only once it was accepted
+    assert len(list((tmp_path / "incomplete").glob("*.json"))) == 1                  # the interrupted run is kept for audit
+
+
+def test_cell_key_does_not_move_when_the_stored_contract_version_moves(monkeypatch):
+    # regression (2026-10-11): bumping SCHEMA_VERSION 0.3 -> 0.6 changed every key, so cached E1 cells were re-called
+    import ingestion.experiment as ex
+    args = dict(model="gemini-3.6-flash", prompt_version="v2", video_id="34FBeC9mktE", duration_s=188.0, repeat=1, max_output_tokens=16384,
+                media_resolution=None, title_hint="Object and Edit Mode - Blender 2.80 Fundamentals")
+    k = ex.cell_key(**args)
+    monkeypatch.setattr(ex, "SCHEMA_VERSION", "9.9")
+    assert ex.cell_key(**args) == k == "5e8a8a10dfe13db3"          # the real arm-A repeat-1 cell stored on 2026-10-10
+
+
+def test_model_facing_schema_is_pinned_so_a_change_must_invalidate_the_cache_on_purpose():
+    import hashlib, json
+    from ingestion.experiment import MODEL_SCHEMA_TAG
+    from ingestion.extract import _schema
+    fp = hashlib.sha256(json.dumps(_schema(), sort_keys=True).encode()).hexdigest()[:12]
+    assert fp == "f0439a836521" and MODEL_SCHEMA_TAG == "0.3", "the response schema the model sees changed: bump MODEL_SCHEMA_TAG and update this fingerprint deliberately"

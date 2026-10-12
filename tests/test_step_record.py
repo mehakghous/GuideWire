@@ -41,3 +41,26 @@ def test_end_before_start_rejected():
 def test_unknown_predicate_kind_rejected():
     with pytest.raises(ValidationError):
         StatePredicate(kind="vibes", target="x")
+
+
+def _steps(*orders):
+    return [Step(id=f"s{o}", order=o, goal="g") for o in orders]
+
+
+def test_app_is_blender_only():
+    with pytest.raises(ValidationError):
+        StepList(source_type="written", app="unity", steps=_steps(1))
+
+
+@pytest.mark.parametrize("orders", [(1, 3), (2, 3), (1, 1), (2, 1)])
+def test_check_order_flags_gaps_repeats_and_misordering(orders):
+    sl = StepList(source_type="written", app="blender", steps=_steps(*orders))  # construction stays lenient
+    assert sl.order_problems
+    with pytest.raises(ValueError):
+        sl.check_order()
+
+
+def test_check_order_accepts_contiguous():
+    sl = StepList(source_type="written", app="blender", steps=_steps(1, 2, 3))
+    assert sl.order_problems == []
+    sl.check_order()

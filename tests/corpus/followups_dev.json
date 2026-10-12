@@ -1,0 +1,44 @@
+{
+ "_about": "DEVELOPMENT follow-up conversations: used while building ingestion/followup.py and tuned on. Their pass rate is a regression measure only. The held-out set is followups_heldout.json. Same vocabulary and tutorials A/B/T as the held-out file.",
+ "conversations": [
+  {"id": "D1", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "Why do we need to do this?", "expect": {"intent": "why", "route": "session", "contains": ["merges"], "grounded": true, "not_done": ["s02"]}},
+   {"say": "What does this option do?", "expect": {"intent": "what_does", "route": "session", "contains": ["join"], "grounded": true}},
+   {"say": "Which menu has it?", "expect": {"intent": "where", "route": "session", "contains": ["object > join"]}},
+   {"say": "Is there a hotkey for this?", "expect": {"intent": "shortcut_alt", "route": "session", "contains": ["ctrl+j"]}},
+   {"say": "Any alternative way?", "expect": {"intent": "other_way", "route": "session", "contains": ["object > join"]}}
+  ]},
+  {"id": "D2", "tutorial": "A", "version": "2.80", "done": ["s01"], "current": "s02", "turns": [
+   {"say": "done", "expect": {"intent": "done_stmt", "route": "session", "status_after": {"s02": "done"}, "current_after": "s03"}},
+   {"say": "what's next?", "expect": {"intent": "next", "route": "session", "contains": ["edit mode"], "current_after": "s03", "not_done": ["s03"]}},
+   {"say": "Skip this one", "expect": {"intent": "skip", "route": "session", "status_after": {"s03": "skipped"}, "current_after": "s04"}},
+   {"say": "Show me the remaining steps", "expect": {"intent": "explain_rest", "route": "session", "contains": ["vertices"], "not_contains": ["ctrl+j"]}}
+  ]},
+  {"id": "D3", "tutorial": "A", "version": "2.80", "current": "s04", "observed": {"mode": "OBJECT"}, "turns": [
+   {"say": "I can't find the vertex select option.", "expect": {"intent": "missing_option", "route": "session", "contains": ["edit mode"], "unmet": true}},
+   {"say": "What if I did this already?", "expect": {"intent": "already_done_q", "route": "session", "not_done": ["s04"]}}
+  ]},
+  {"id": "D4", "tutorial": "B", "version": "2.80", "current": "s03", "observed": {"mode": "EDIT_MESH"}, "turns": [
+   {"say": "oops I messed up", "expect": {"intent": "mistake", "route": "session", "kind": "procedure", "contains": ["ctrl+z"]}},
+   {"say": "it didn't work", "expect": {"intent": "didnt_work", "route": "session", "status_after": {"s03": "failed"}}}
+  ]},
+  {"id": "D5", "tutorial": "T", "version": "2.80", "turns": [
+   {"say": "what happens at 0:15", "expect": {"intent": "timestamp", "route": "session", "contains": ["edit mode"], "grounded": true}},
+   {"say": "jump to step 3", "expect": {"intent": "goto", "route": "session", "current_after": "s03"}},
+   {"say": "go over that again", "expect": {"intent": "explain_prev", "route": "session", "contains": ["select"]}}
+  ]},
+  {"id": "D6", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "What is a vertex?", "expect": {"intent": "standalone", "route": "standalone", "current_after": "s02", "not_done": ["s02"]}},
+   {"say": "Why?", "expect": {"intent": "why", "route": "session", "contains": ["merges"]}}
+  ]},
+  {"id": "D7", "tutorial": "B", "version": "2.80", "done": ["s01", "s02", "s03"], "current": "s04", "observed": {"mode": "EDIT_MESH"}, "turns": [
+   {"say": "the result looks wrong", "expect": {"intent": "result_differs", "route": "session", "verification_after": {"s03": "unverifiable"}}},
+   {"say": "Does this work in my version?", "expect": {"intent": "version", "route": "session", "contains": ["2.80"]}}
+  ]},
+  {"id": "D8", "tutorial": "A", "version": "2.80", "current": "s02", "turns": [
+   {"say": "Actually let's make a low-poly tree instead.", "expect": {"intent": "task_change", "route": "standalone", "active_after": false}},
+   {"say": "Continue", "expect": {"intent": "continue", "route": "clarify", "kind": "clarification"}},
+   {"say": "resume the tutorial", "expect": {"intent": "resume", "route": "session", "active_after": true, "contains": ["join"]}}
+  ]}
+ ]
+}

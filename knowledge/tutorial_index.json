@@ -1,0 +1,160 @@
+{
+ "_about": "Curated tutorial index. Metadata (title, channel, duration, licence, caption flag, chapter count, date) was read from the YouTube Data API on the retrieval date. `keywords` were assigned by the author from the TITLE only; they say nothing about what the video actually shows. A captions flag means the platform reports captions exist, not that GuideWire holds a transcript. No entry has been converted to steps.",
+ "retrieved": "2026-10-11",
+ "source": "YouTube Data API videos.list (metadata only)",
+ "entries": [
+  {
+   "id": "34FBeC9mktE",
+   "url": "https://www.youtube.com/watch?v=34FBeC9mktE",
+   "title": "Object and Edit Mode - Blender 2.80 Fundamentals",
+   "channel": "Blender",
+   "duration_s": 188,
+   "licence": "creativeCommon",
+   "captions_flag": false,
+   "chapters": 0,
+   "published": "2019-07-16",
+   "embeddable": true,
+   "blender_version_hint": "2.80",
+   "source_tier": "official",
+   "keywords": [
+    "object mode",
+    "edit mode",
+    "modes"
+   ]
+  },
+  {
+   "id": "hTL6AKR8YDs",
+   "url": "https://www.youtube.com/watch?v=hTL6AKR8YDs",
+   "title": "Select & Transform - Blender 2.80 Fundamentals",
+   "channel": "Blender",
+   "duration_s": 666,
+   "licence": "creativeCommon",
+   "captions_flag": true,
+   "chapters": 0,
+   "published": "2019-07-12",
+   "embeddable": true,
+   "blender_version_hint": "2.80",
+   "source_tier": "official",
+   "keywords": [
+    "select",
+    "selection",
+    "transform",
+    "move",
+    "rotate",
+    "scale"
+   ]
+  },
+  {
+   "id": "8XyIYRW_2xk",
+   "url": "https://www.youtube.com/watch?v=8XyIYRW_2xk",
+   "title": "Interface Overview - Blender 2.80 Fundamentals",
+   "channel": "Blender",
+   "duration_s": 673,
+   "licence": "creativeCommon",
+   "captions_flag": true,
+   "chapters": 0,
+   "published": "2019-07-12",
+   "embeddable": true,
+   "blender_version_hint": "2.80",
+   "source_tier": "official",
+   "keywords": [
+    "interface",
+    "overview",
+    "user interface"
+   ]
+  },
+  {
+   "id": "94kAIpRnhcY",
+   "url": "https://www.youtube.com/watch?v=94kAIpRnhcY",
+   "title": "In-Depth Floor Plan Tutorial Part 1 [UPDATED 2025]",
+   "channel": "Dude Blender",
+   "duration_s": 1383,
+   "licence": "creativeCommon",
+   "captions_flag": true,
+   "chapters": 29,
+   "published": "2025-02-05",
+   "embeddable": true,
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "floor plan"
+   ]
+  },
+  {
+   "id": "mHWfWhvKDqc",
+   "url": "https://www.youtube.com/watch?v=mHWfWhvKDqc",
+   "title": "Main Commands | Blender Beginner Tutorial",
+   "channel": "sofya making art",
+   "duration_s": 361,
+   "licence": "creativeCommon",
+   "captions_flag": true,
+   "chapters": 0,
+   "published": "2023-09-02",
+   "embeddable": true,
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "main commands",
+    "commands",
+    "beginner"
+   ]
+  },
+  {
+   "id": "uR2zcJRNqts",
+   "url": "https://www.youtube.com/watch?v=uR2zcJRNqts",
+   "title": "Blender Beginner Tutorial | Model a Piece of Cake",
+   "channel": "sofya making art",
+   "duration_s": 885,
+   "licence": "creativeCommon",
+   "captions_flag": true,
+   "chapters": 0,
+   "published": "2023-09-09",
+   "embeddable": true,
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "cake",
+    "beginner",
+    "model"
+   ]
+  },
+  {
+   "id": "62PluE5Cn2Y",
+   "url": "https://www.youtube.com/watch?v=62PluE5Cn2Y",
+   "title": "How to Actually Learn Blender in 2026 (Step-by-Step Beginner Guide)",
+   "channel": "cgfocus",
+   "duration_s": 1181,
+   "licence": "creativeCommon",
+   "captions_flag": true,
+   "chapters": 0,
+   "published": "2025-04-18",
+   "embeddable": true,
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "learn blender",
+    "learning",
+    "beginner",
+    "step-by-step guide"
+   ]
+  },
+  {
+   "id": "FDFe5xHj6b0",
+   "url": "https://www.youtube.com/watch?v=FDFe5xHj6b0",
+   "title": "blender beginner tutorial modeling",
+   "channel": "Gamedev Stanis",
+   "duration_s": 611,
+   "licence": "creativeCommon",
+   "captions_flag": false,
+   "chapters": 0,
+   "published": "2020-12-09",
+   "embeddable": true,
+   "blender_version_hint": null,
+   "source_tier": "community",
+   "keywords": [
+    "beginner",
+    "modeling"
+   ]
+  }
+ ]
+}

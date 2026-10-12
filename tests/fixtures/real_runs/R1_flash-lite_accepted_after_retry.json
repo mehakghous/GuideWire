@@ -1,0 +1,84 @@
+{
+  "schema_version": "0.1",
+  "source_type": "youtube",
+  "app": "blender",
+  "app_version_tutorial": "2.80",
+  "video_id": "34FBeC9mktE",
+  "title": "Object and Edit Mode - Blender 2.80 Fundamentals",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Explain Object Mode",
+      "actions": [],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "verifiable": false,
+      "video_start_s": 0.0,
+      "video_end_s": 18.0,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 1.0,
+      "evidence": [
+        "Object mode is the default mode of Blender"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Switch to Edit Mode using the menu",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Object Mode",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Edit Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "verifiable": true,
+      "video_start_s": 18.0,
+      "video_end_s": 32.0,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 1.0,
+      "evidence": [
+        "change this drop-down menu here in the top left hand corner",
+        "press Tab to toggle between edit and object mode"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.5-flash-lite",
+  "extracted_at": "2026-10-10T13:51:37.724820Z"
+}

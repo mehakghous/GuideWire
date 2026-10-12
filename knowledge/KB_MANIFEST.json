@@ -1,0 +1,1486 @@
+{
+ "branches": {
+  "main": {
+   "retrieved": "2026-10-11",
+   "licence": "CC-BY-SA 4.0; credit: Blender Documentation Team (https://docs.blender.org/manual/en/latest/copyright.html)",
+   "pages": [
+    {
+     "path": "editors/3dview/3d_cursor",
+     "bytes": 6182,
+     "sha256": "cc058a8785236dadffb690018c750cd86d444df5cac40f707c60629b78be8cf1"
+    },
+    {
+     "path": "editors/3dview/animation/copy_global_transform",
+     "bytes": 5630,
+     "sha256": "c4f3604ef666d97bc5f54d1e4ea06151908da7c90eb819c8758195b97e5b696d"
+    },
+    {
+     "path": "editors/3dview/animation/index",
+     "bytes": 141,
+     "sha256": "68675800ace21aceb2ada403d644ef47e145362d75cf848f1129e75e39e9bc37"
+    },
+    {
+     "path": "editors/3dview/animation/world_space_animation_copy_paste",
+     "bytes": 2751,
+     "sha256": "74fd8e93349e7c2fd2dccfe178fa08fdfd4be5fa770accedd06ffeda5149317c"
+    },
+    {
+     "path": "editors/3dview/controls/index",
+     "bytes": 177,
+     "sha256": "f5e709b08d1105cba0c8c68750cb569fc6020b679f382fa71088f3d414d4ebb7"
+    },
+    {
+     "path": "editors/3dview/controls/orientation",
+     "bytes": 6200,
+     "sha256": "dd63813be5c42d62245223f4e66e6bc135eac681375b230fdb99743ecee9472a"
+    },
+    {
+     "path": "editors/3dview/controls/pivot_point/3d_cursor",
+     "bytes": 696,
+     "sha256": "3213b1f13bd752801a7e247bbfb29e6d9410fc0ec0a4936a4a15aeb1e0e9636b"
+    },
+    {
+     "path": "editors/3dview/controls/pivot_point/active_element",
+     "bytes": 1573,
+     "sha256": "700c2165785db4be227077839b2a8bfbefa1c96fa5aa4b8908094ac44e407403"
+    },
+    {
+     "path": "editors/3dview/controls/pivot_point/bounding_box_center",
+     "bytes": 2210,
+     "sha256": "0b79f01146cef41e03c6ad8a3f5ff340f33c23fc665338a128fba937ba12bdc6"
+    },
+    {
+     "path": "editors/3dview/controls/pivot_point/index",
+     "bytes": 1071,
+     "sha256": "e28cd5e09565c984ff5e98d13170ebfee1c5046f6a23d48fe48d323fe1032800"
+    },
+    {
+     "path": "editors/3dview/controls/pivot_point/individual_origins",
+     "bytes": 1967,
+     "sha256": "2d5e3be41f3bf9d09f43b6c94060c9929ef3349ca9260c5675f21141518be40b"
+    },
+    {
+     "path": "editors/3dview/controls/pivot_point/median_point",
+     "bytes": 1471,
+     "sha256": "48c1e56899f7afe7edeb8a67e6be5d0bf792e0aacc4474868e880ee5717e876d"
+    },
+    {
+     "path": "editors/3dview/controls/proportional_editing",
+     "bytes": 4939,
+     "sha256": "92635ab22df615c93ba89a6ce1709a9c34a61ffec237dbfda629820b18cb3d44"
+    },
+    {
+     "path": "editors/3dview/controls/snapping",
+     "bytes": 7781,
+     "sha256": "fa4e1c93a92c4089811974e65fdb9b5b259eb524e9ccb15939e840dc417063fa"
+    },
+    {
+     "path": "editors/3dview/display/gizmo",
+     "bytes": 5002,
+     "sha256": "cc25c08ac8e9456fc4c1049946856af6a74564fc1e7ea377cf35cd23f3ce33bd"
+    },
+    {
+     "path": "editors/3dview/display/index",
+     "bytes": 160,
+     "sha256": "d1ea12768f658332b001547c9fa2c03a47721627861b267a3ac4a2e8a2cda1e9"
+    },
+    {
+     "path": "editors/3dview/display/overlays",
+     "bytes": 19057,
+     "sha256": "eb04f20b86f38778eaa84cc3d39bcf0459be341ab144202d7291b219daa9b68e"
+    },
+    {
+     "path": "editors/3dview/display/shading",
+     "bytes": 9174,
+     "sha256": "52233efd421b7fe741474c14e44df6ae080237e7c6b81edd5e49a11b781575e0"
+    },
+    {
+     "path": "editors/3dview/display/visibility",
+     "bytes": 1075,
+     "sha256": "0122872fed07dc1cbec2f7cfc1ff098b85951784443889b42e04e764f3ada073"
+    },
+    {
+     "path": "editors/3dview/index",
+     "bytes": 363,
+     "sha256": "6afb2bb65d0a235910487f1cf32e96d41f3bb2e8309840c0da8211aa9fda98ea"
+    },
+    {
+     "path": "editors/3dview/introduction",
+     "bytes": 4302,
+     "sha256": "cec629f393f0092681cbc433552f97db75bf4254edd1f53206fc8b2036db7935"
+    },
+    {
+     "path": "editors/3dview/modes",
+     "bytes": 6798,
+     "sha256": "b3e956e37a08bc2e7c0d0ffd7d7b67a3806b3d577ecd543c59a44d1d6bc83c20"
+    },
+    {
+     "path": "editors/3dview/navigate/align",
+     "bytes": 2673,
+     "sha256": "4f7658bb71b2de8f98936cebf3b1b258dee0ec372b6327c10974414a63655cb2"
+    },
+    {
+     "path": "editors/3dview/navigate/camera_view",
+     "bytes": 5579,
+     "sha256": "334b962b4e397d83e7a28d9497a92d653e3323f515fb49f942ea33b99c56968c"
+    },
+    {
+     "path": "editors/3dview/navigate/index",
+     "bytes": 272,
+     "sha256": "94902c920219c2d5dcc64d75d5213f97176331b4816a02170b2bac421bbe51d8"
+    },
+    {
+     "path": "editors/3dview/navigate/introduction",
+     "bytes": 1769,
+     "sha256": "ca6859f16eb0cccfb880614b3600ca5609dfb74cf720815ac42bacb7c9c76d2a"
+    },
+    {
+     "path": "editors/3dview/navigate/local_view",
+     "bytes": 2265,
+     "sha256": "2df7edf71566f5ecd2f951096008d80396399866f21f197ba8a470de099a3f77"
+    },
+    {
+     "path": "editors/3dview/navigate/navigation",
+     "bytes": 5832,
+     "sha256": "a9fabb612afc2625d30f17c3f06b39738aa18f24de974673de1253362e1d685e"
+    },
+    {
+     "path": "editors/3dview/navigate/projections",
+     "bytes": 1867,
+     "sha256": "3bc5b58406ecea6cd2399e68a991913a509a182c826e767342e7dd37bc25907a"
+    },
+    {
+     "path": "editors/3dview/navigate/regions",
+     "bytes": 3926,
+     "sha256": "96992e5d39fa76da34751f9784ebd5d3f78939cf81516c27f4980a0324f87bc0"
+    },
+    {
+     "path": "editors/3dview/navigate/viewpoint",
+     "bytes": 836,
+     "sha256": "5fbfbef3f3b60d8e72b1b04b44413d2e92a8bd4e776000aa644d2c83a7601373"
+    },
+    {
+     "path": "editors/3dview/navigate/views",
+     "bytes": 2133,
+     "sha256": "73f6ef65866ae9177d89b775523edc80ffc6306cfd7849f22a8de08b5a50506a"
+    },
+    {
+     "path": "editors/3dview/navigate/walk_fly",
+     "bytes": 5575,
+     "sha256": "96c9084dfaca9426454d19cdb8f9705f85a2700b79fd69eb46741868714e6bf7"
+    },
+    {
+     "path": "editors/3dview/selecting",
+     "bytes": 1489,
+     "sha256": "34a85e8085579e59613e4da14a2e5b3ae722b9a996f18114f0e88d993991e390"
+    },
+    {
+     "path": "editors/3dview/sidebar",
+     "bytes": 7214,
+     "sha256": "f639a567977a66e3bd9d17570f27f3bc249738b50af62d251529d7c26906c686"
+    },
+    {
+     "path": "editors/3dview/startup_scene",
+     "bytes": 1699,
+     "sha256": "67796b5947a6d2c61db49cdf31aa257a57ee108d5a15345fdf9197bc56a0ad9b"
+    },
+    {
+     "path": "editors/3dview/toolbar/add_cone",
+     "bytes": 3358,
+     "sha256": "80f79e55e5327d3e905a2d95cbad4314146ae679276e6c460dcceb7c83d10f42"
+    },
+    {
+     "path": "editors/3dview/toolbar/add_cube",
+     "bytes": 3045,
+     "sha256": "a365c4dd99fda325e34559f0b04de443fe7a18a812f149fa281f30c376c0aa31"
+    },
+    {
+     "path": "editors/3dview/toolbar/add_cylinder",
+     "bytes": 3384,
+     "sha256": "ae6f4d953d0cba53f4c864c1a1f4115d689d3bbe6b681ff5196d5a6436c739bd"
+    },
+    {
+     "path": "editors/3dview/toolbar/add_icosphere",
+     "bytes": 3573,
+     "sha256": "4169e4a06492f6661927a33ab263193098cc409ff8968c1533a53be769a067b4"
+    },
+    {
+     "path": "editors/3dview/toolbar/add_quadsphere",
+     "bytes": 3323,
+     "sha256": "e944715135d827cb6b7420eb85d58f438b0c5cf60f2deefa0bfeced5be82fca2"
+    },
+    {
+     "path": "editors/3dview/toolbar/add_uvsphere",
+     "bytes": 3347,
+     "sha256": "945fabee4198514193bbb6cc5fd9af7e9ce0318f6bdfc15355faafcdbeca4b11"
+    },
+    {
+     "path": "editors/3dview/toolbar/index",
+     "bytes": 1183,
+     "sha256": "a3d0f74d3b5e99089c342f549b7d4d43e792842e9851b8661fc90d2499590f15"
+    },
+    {
+     "path": "editors/3dview/toolbar/measure",
+     "bytes": 2409,
+     "sha256": "e42cebcec10896b0c0593c94fe9427aa348318f0efe3ede3da9a8858530f1b53"
+    },
+    {
+     "path": "editors/3dview/viewport_render",
+     "bytes": 3103,
+     "sha256": "16e394143872e437020b2c11eaf19ad885768b94aa49fc93098f638e8aa32c9c"
+    },
+    {
+     "path": "interface/controls/buttons/buttons",
+     "bytes": 1535,
+     "sha256": "9a9e642b7657a7ada122d2c4571565ba375a24895609c36c01e3b66cc5d6b000"
+    },
+    {
+     "path": "interface/controls/buttons/decorators",
+     "bytes": 1119,
+     "sha256": "1e5383166e13c8b2399019bf8c8c9c740f449798224321c84869a42960e3bd22"
+    },
+    {
+     "path": "interface/controls/buttons/eyedropper",
+     "bytes": 1711,
+     "sha256": "93a530db5d5742f127990c623445d7f270d783a0295db0955bcfe4534b90016d"
+    },
+    {
+     "path": "interface/controls/buttons/fields",
+     "bytes": 6812,
+     "sha256": "bfd5011d29a3e2c4ec61d745bc194879b70258514a585216eea73b62e51908ff"
+    },
+    {
+     "path": "interface/controls/buttons/menus",
+     "bytes": 7881,
+     "sha256": "1c7112c237047de583f7a5cf8b81d4250b9dab9c56d1470f0b58094a0ce7ef91"
+    },
+    {
+     "path": "interface/controls/index",
+     "bytes": 390,
+     "sha256": "36235d7fa6b489ec52c745f9f7be570ff78b0ad6380ee9a2de0ac18e7536e04f"
+    },
+    {
+     "path": "interface/controls/nodes/arranging",
+     "bytes": 1477,
+     "sha256": "b96f17881fee5ff5257268a4e58ebce13c33727d7010abe8bab2731ea3613154"
+    },
+    {
+     "path": "interface/controls/nodes/editing",
+     "bytes": 10257,
+     "sha256": "0dda4f3eea844bb5cec3e98df41fb34561fd9c085fbc389c3e7c046f9589072c"
+    },
+    {
+     "path": "interface/controls/nodes/groups",
+     "bytes": 21307,
+     "sha256": "0ac134897a710928ca9436934aaf80ff63d729fb0fc60913bcf605095bda2a90"
+    },
+    {
+     "path": "interface/controls/nodes/index",
+     "bytes": 1307,
+     "sha256": "de2e6f5edc00365b8f99563f63d506e14f01cb3d63c617280879575453d27139"
+    },
+    {
+     "path": "interface/controls/nodes/node_editors",
+     "bytes": 8506,
+     "sha256": "aecb7d65db8242972a5c166d573613632b2f789b8e24e3f221737ce426491320"
+    },
+    {
+     "path": "interface/controls/nodes/parts",
+     "bytes": 8471,
+     "sha256": "816bf3b53839978e7f55fa3e9900e188fc1ccd8b919fc092340e1733e8880aeb"
+    },
+    {
+     "path": "interface/controls/nodes/selecting",
+     "bytes": 3900,
+     "sha256": "73ee233ed6488c43248fe5e750e80bb5fe8086ffe8eab0458e05bb2a04696676"
+    },
+    {
+     "path": "interface/controls/nodes/types/index",
+     "bytes": 239,
+     "sha256": "52c88e85fa79def96cc0618a6638441ee6a85ac5e4fcb9339c2fa87d4f67233f"
+    },
+    {
+     "path": "interface/controls/nodes/types/layout/frame",
+     "bytes": 2685,
+     "sha256": "305b375d698100883aa4a33372610680bb37cabf83eaec6e032c0efb995e6b9c"
+    },
+    {
+     "path": "interface/controls/nodes/types/layout/index",
+     "bytes": 109,
+     "sha256": "7ebdd9f7847eb4d8b40903be2b9b5642de9e30adb11b5bc9a2434fa876dff26b"
+    },
+    {
+     "path": "interface/controls/nodes/types/layout/reroute",
+     "bytes": 514,
+     "sha256": "dd6f0a94de0077f22c6d39676861c0b1bd65fffbe04b22e67718a38735c33c1c"
+    },
+    {
+     "path": "interface/controls/nodes/types/output/enable_output",
+     "bytes": 1198,
+     "sha256": "1cc60538ea640f45eb9e8698a8a6d8b4473d1d81738e6dd1e606debbb30569a0"
+    },
+    {
+     "path": "interface/controls/nodes/types/output/index",
+     "bytes": 123,
+     "sha256": "c14a824ae019b7e63629cd24c517c27cd5d768f409db81a9bbe59eacdf4992f3"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/combine_bundle",
+     "bytes": 1836,
+     "sha256": "bea20e1f680cfd4bb299b6de6b2956e8d1db2622de406b189f283344e32b6944"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/get_bundle_item",
+     "bytes": 1759,
+     "sha256": "0c2ccb5b1a16f9b19d35023d96c8b84d145fbf47028970872d322ccc7475898a"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/get_nested_bundle_paths",
+     "bytes": 1591,
+     "sha256": "460806e04b0737b35fc45dd2951e54a6bdca7f14351d058f65d840e7ab1e3dff"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/index",
+     "bytes": 3649,
+     "sha256": "e7f4c68999a9574d31ef4e4fb5758b643b19cc149d6cd9dd71192f4d94b317ae"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/join_bundle",
+     "bytes": 987,
+     "sha256": "3ca1d1933bbbcc20096a13254aafe50e1c07e9ded5b4672e70adfae977cbe859"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/separate_bundle",
+     "bytes": 1813,
+     "sha256": "b1bb9f07ced17bb600761706187e5653ccd86c6b25a8f395254559a24af52247"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/store_bundle_item",
+     "bytes": 1541,
+     "sha256": "1852c359f3a0a2af78ace196e7754aad1422200e2a483008167aabacb9a636e9"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/bundles/typed_bundle",
+     "bytes": 963,
+     "sha256": "af618f49b883173b6266416e3b74f31a97bc5918543535f75f18e72cf4671d0d"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/closure/closure",
+     "bytes": 5230,
+     "sha256": "4d422cb7a80973918a3e9f44c0ec439b44d7d27ef0bf77f910e65f29d472144a"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/closure/evaluate_closure",
+     "bytes": 5821,
+     "sha256": "bfef6a07ea0c491330f04f52274eb5f03acb03ecac7afd40cfb4e89e92509e40"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/closure/index",
+     "bytes": 3237,
+     "sha256": "1d4b01c88ab9963ac2dff281ee1469ef65bf302f6697b3f852df26967302add4"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/implicit_conversion",
+     "bytes": 1307,
+     "sha256": "e416b672875d724ada0984ed835ea7b24124ab4d7bb397f5f533b5c8aecd4f8a"
+    },
+    {
+     "path": "interface/controls/nodes/types/utilities/index",
+     "bytes": 253,
+     "sha256": "a942f07abdab7f0aa033ab419a32d8c0bb04bf043efaa92f24c6aa319694bd52"
+    },
+    {
+     "path": "interface/controls/templates/color_palette",
+     "bytes": 1132,
+     "sha256": "15e69e6402bbdb67260ba671f2a94733f61b882a6044451c28e1ab2fb3bc8adc"
+    },
+    {
+     "path": "interface/controls/templates/color_picker",
+     "bytes": 4848,
+     "sha256": "77dc61c1eb6a2b22ffd3aa968a1b179b52d8b55a46682beec15a0be1cf053611"
+    },
+    {
+     "path": "interface/controls/templates/color_ramp",
+     "bytes": 3151,
+     "sha256": "ac616cc5a8415a61aa2fccc0494c2357baa6e2d1bfc5ef434a8198aab7a595f8"
+    },
+    {
+     "path": "interface/controls/templates/curve",
+     "bytes": 5405,
+     "sha256": "3d49a6a2ab745cdb4a56cc11d51306d42ed2e13ca7e2758af22de35a762aedc5"
+    },
+    {
+     "path": "interface/controls/templates/data_block",
+     "bytes": 6013,
+     "sha256": "4ac5ff63d7f688cf399f6a3578dac76b24a7d50b98ea5ada2903f5bfaf66607e"
+    },
+    {
+     "path": "interface/controls/templates/list_view",
+     "bytes": 1716,
+     "sha256": "eb7b48e4f4e68c1e967b7ad9b6beaecfe90bbb360046909213a616dc4c64f55f"
+    },
+    {
+     "path": "interface/controls/templates/tree_view",
+     "bytes": 2454,
+     "sha256": "da81519b8525f789d3a237ca3ae4d64142d3d244af5d8d7a9083064606af480e"
+    },
+    {
+     "path": "interface/selecting",
+     "bytes": 8468,
+     "sha256": "6b2286a66b9e1556dda0feac4800cb917e45533fbff12217754a0b8377d9964e"
+    },
+    {
+     "path": "interface/undo_redo",
+     "bytes": 5376,
+     "sha256": "f9d8d85cdea002c057418813077a31ce189315d24e789da0b0fbf704b0f799bc"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/bevel",
+     "bytes": 10102,
+     "sha256": "cb1effd601631cc0df5e63070a644b89ebbb434a9677bb9bacc06126cfd54b12"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/bridge_edge_loops",
+     "bytes": 4717,
+     "sha256": "89a6609fcacf07138bcf4f1a37feb22844c5767ca37517491c27bba0584690ea"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/edge_data",
+     "bytes": 3896,
+     "sha256": "3728ebdbcaa9e038af614e4e63fd54bc1c0d5efbd1441d20d29b9c6780ab1d77"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/edge_slide",
+     "bytes": 2564,
+     "sha256": "d2fea06b4ff4ab2988eaf243e0690c919b36934d0b84b4e23f1cae613c5c60c5"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/extrude_edges",
+     "bytes": 616,
+     "sha256": "84f3a8171ae17b2289da65bd7553d818f5b6302709fd5a423f949c5f4a0e3a49"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/index",
+     "bytes": 322,
+     "sha256": "ec05d3c4047a120c5b3e0ab8f5251fb361e9f720cd7fbbf06a19a42532f8e823"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/loopcut_slide",
+     "bytes": 4423,
+     "sha256": "c6741ea779c6df220df62c963c662c45fedd381dd0654a3c6ed06840e3e72af5"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/offset_edge_slide",
+     "bytes": 2619,
+     "sha256": "c82d643c41eb730615e6717f38db1c28b5a3bc9861cbb68b9006441cbbdfbd41"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/rotate_edge",
+     "bytes": 1049,
+     "sha256": "6ea4b1836fc9b485d58bb6587b1feeba5326bea9c988829c25f4bfd630b9232e"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/screw",
+     "bytes": 8687,
+     "sha256": "48aa3cf67fcc2c80a4c5b6dec8ff192b8e4a3382a6a62cb7b3c89d69d5f318d1"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/subdivide",
+     "bytes": 9444,
+     "sha256": "bec5101ed72b125bd6f2941c8264680b4404b1b6698909c3168b783c27eccf82"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/subdivide_edge_ring",
+     "bytes": 2206,
+     "sha256": "9394a80980b23864b959162abdf8cafbd725fd564da076181d57a6fa0c104045"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/unsubdivide",
+     "bytes": 441,
+     "sha256": "32f7a045ad1e8f4c039d4ebd6ef5e107a05e6511fd70846b8a3017c42911b707"
+    },
+    {
+     "path": "modeling/meshes/editing/face/beautify_faces",
+     "bytes": 804,
+     "sha256": "22437dbb5c55980c9de8d6ee98dec8bf81886ea1e3f75d634ba5cf0870e32ff8"
+    },
+    {
+     "path": "modeling/meshes/editing/face/extrude_faces",
+     "bytes": 2797,
+     "sha256": "efe0c53af64afa49b1d50c3dd78174c148e5c8590aa0dc62f5f1ef154b78af18"
+    },
+    {
+     "path": "modeling/meshes/editing/face/extrude_faces_normal",
+     "bytes": 2889,
+     "sha256": "8b2b15a90206ab5f4ca9fecef1122b5d6150e23a58221890dda57a757d576d5d"
+    },
+    {
+     "path": "modeling/meshes/editing/face/extrude_individual_faces",
+     "bytes": 1002,
+     "sha256": "a7318763135ad44fb735479192f794819fa5373db888b1674b0f56d3872ebaed"
+    },
+    {
+     "path": "modeling/meshes/editing/face/face_data",
+     "bytes": 1932,
+     "sha256": "96dae824db6bb1a5a03ad62d066c3e2b3a39bdfbe97c1a491038b82df2f4975e"
+    },
+    {
+     "path": "modeling/meshes/editing/face/fill",
+     "bytes": 685,
+     "sha256": "1143fcffdfbe1b010215bc54c2d54556a0f5c6e421ba633e6eeaeb5670fd1a53"
+    },
+    {
+     "path": "modeling/meshes/editing/face/grid_fill",
+     "bytes": 1749,
+     "sha256": "b0238c5a180055234c57b41aa699f1dc3dd0a5764987a39fd96839b7c1bfb446"
+    },
+    {
+     "path": "modeling/meshes/editing/face/index",
+     "bytes": 447,
+     "sha256": "b4fdfeee94d98d965443cd0f27106ed07805c66331dad3df79e376f540217803"
+    },
+    {
+     "path": "modeling/meshes/editing/face/inset_faces",
+     "bytes": 3155,
+     "sha256": "040c1c26da6f94e9650483d3d8e5d85306379d6d9dbcd30a463d129f4c6149d1"
+    },
+    {
+     "path": "modeling/meshes/editing/face/intersect_boolean",
+     "bytes": 2136,
+     "sha256": "a1b9211d52ca0b51002b50365694ecdb317e05c00bd7623a713ab290a18b72ee"
+    },
+    {
+     "path": "modeling/meshes/editing/face/intersect_knife",
+     "bytes": 2506,
+     "sha256": "dc7cc24fc756aa8b079d9692a19b585a54d9a51497fc97092e778a6c0242ae70"
+    },
+    {
+     "path": "modeling/meshes/editing/face/poke_faces",
+     "bytes": 1250,
+     "sha256": "67559e2df70268db3460bb383683acbe2760350f434b5412d68889aa53cc45ba"
+    },
+    {
+     "path": "modeling/meshes/editing/face/shading",
+     "bytes": 1325,
+     "sha256": "6a3437e8d79190ec3f9fcd1d9062006cf589e7245ef695703f333ecfe4cbe8d4"
+    },
+    {
+     "path": "modeling/meshes/editing/face/solidify_faces",
+     "bytes": 1108,
+     "sha256": "e561b54825ec98560ef139c2baaad1a156511a2169cb7649031c35bb1f564056"
+    },
+    {
+     "path": "modeling/meshes/editing/face/triangles_quads",
+     "bytes": 2285,
+     "sha256": "ddaa060dfbe4c7ab7f98e8c9842c0c63dc53cbc04136526133b6e9f84efdebc7"
+    },
+    {
+     "path": "modeling/meshes/editing/face/triangulate_faces",
+     "bytes": 374,
+     "sha256": "92fa706fc5d96f4a305513b004526a6806ecd03728d0bfc2701f380d8e3afa3a"
+    },
+    {
+     "path": "modeling/meshes/editing/face/weld_edges_faces",
+     "bytes": 918,
+     "sha256": "17f2b200d527104257dd44224bb7ce6733a948e678116e3c9c5db81f8ad4285d"
+    },
+    {
+     "path": "modeling/meshes/editing/face/wireframe",
+     "bytes": 294,
+     "sha256": "d90d1aad19f7670d941cf959f588e743b20056a6a973f8e93bc45170e6058701"
+    },
+    {
+     "path": "modeling/meshes/editing/index",
+     "bytes": 209,
+     "sha256": "8800a5154504f4d89b8deb875454ee5e249e5a16bb9bfc9855ed33532ca43b2d"
+    },
+    {
+     "path": "modeling/meshes/editing/introduction",
+     "bytes": 591,
+     "sha256": "eb77b23be3c983a5cd382a63a6219e1a2c9645c8f010f7ff9bc42bce93f78118"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/bisect",
+     "bytes": 2087,
+     "sha256": "474566239468828390f4f5e208c1709b3061a6e3c30f7e7a9a8627992e889cc9"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/cleanup",
+     "bytes": 5195,
+     "sha256": "9ffbe0ca43fff6739ff1b5bbaec404b77c88cfdba43cb4e59529000660ae1505"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/convex_hull",
+     "bytes": 1420,
+     "sha256": "7b7a0f7c3b1d11ff6709f9c434c03e8704235242890df2c5d2a0feda9ab2949b"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/delete",
+     "bytes": 8509,
+     "sha256": "93a4d665d29f297d7218a0726c34a751af0f99c77e43216591dd4c55da557235"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/duplicate",
+     "bytes": 587,
+     "sha256": "a270ae768e49f63ae9bb1e9ada41f2ef76dfe93e8864b6bfa086861dc4a8fb31"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/extrude",
+     "bytes": 1972,
+     "sha256": "8163200e7a855a2e6955712965289fcb76094a9d0d2289e412d61ca0f8c566e8"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/index",
+     "bytes": 444,
+     "sha256": "9e97bf525ffba1861cd4b55fdddd552d1e4bddd8d650e75d76b18be0d369737a"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/knife_project",
+     "bytes": 2420,
+     "sha256": "e42ab4bc1c7112572a51ed6fc76483078e96ac2e83ef2a0ee49e64b106d1522d"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/knife_topology_tool",
+     "bytes": 6243,
+     "sha256": "d70c6ac5160e7754cee15b872c0c15d2b80ed93cf0c9e437f7a6b1e881f83e9c"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/merge",
+     "bytes": 2305,
+     "sha256": "af9f0268a9f1367641074d1f4edf1ae14dbce63cc05d43588fe876709b2a9b31"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/mirror",
+     "bytes": 3169,
+     "sha256": "ea159c3fbf29a371608efa3d223e0f19e2ca20dcc2f9f6cb408da4ffb4005bc9"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/normals",
+     "bytes": 10462,
+     "sha256": "16adc4331cfd38ff8882c02dad87e0f5c561114005a153f8f36fe67dcb73e39e"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/separate",
+     "bytes": 1050,
+     "sha256": "cc918e414043b9caf9781ca8394b8fb70ced06036b28c7f42580965bd01626a7"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/set_attribute",
+     "bytes": 864,
+     "sha256": "46bca1bfc1077133302b012dfbf8b8b473a59ebe2a2732d1c33c19ff65eedb8b"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/shading",
+     "bytes": 885,
+     "sha256": "19fb6b91e0cfc74509e3eafc12ed64f83898baeef1c123b97419f06aad1e782a"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/snap_symmetry",
+     "bytes": 1846,
+     "sha256": "b471e4189641443410b81d5397ecfe9e879bd51ed1b1f545729fce4b58a7877d"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/sort_elements",
+     "bytes": 1676,
+     "sha256": "f7a158486345f85370a991c98fb81d11ca7ffe043ab8d187cfffeb54fb70e49d"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/split",
+     "bytes": 2097,
+     "sha256": "d0ec24b7d57ef818d3ce41519c3dc2f02b8fc67117fd33593f730c50219ede38"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/symmetrize",
+     "bytes": 1647,
+     "sha256": "786675a2e1b09a27a0db55a21c027b3cb925dd553c645a38be32dc6522f2f894"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/basic",
+     "bytes": 3728,
+     "sha256": "86e14c0e6ed99d9447fab73b7de649bc32033d585200fb57ef5831c25b188190"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/bend",
+     "bytes": 2377,
+     "sha256": "d972dc1e64ca381e30d808bd3267348908821e29fe61194f1c279e00f71acae9"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/flatten",
+     "bytes": 1372,
+     "sha256": "fb3b0c0c7288e47adb4d923af1de0e63f4c98bbba4707fd9aeb4d1a6fb749492"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/index",
+     "bytes": 391,
+     "sha256": "054e3a7053fb4d0ad54b05df76ac983f299dd73e821263eb1a07277860cd8f06"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/push_pull",
+     "bytes": 1392,
+     "sha256": "68436bb1fc66952e41566d503ab51b7397734bc43b29fe9d820e81f3744e9d82"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/randomize",
+     "bytes": 913,
+     "sha256": "0e75fee3b811962609750dafe8cf7b3b8ac11af336d41d3798b7d39a67c7ab90"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/relax_edge_loops",
+     "bytes": 1150,
+     "sha256": "464640c7ae9bb0138283872fcb2ee230129c97dd3f6b043ac3103ef20fee5f0a"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/shear",
+     "bytes": 2486,
+     "sha256": "d093a7bb02e5b79eff6368807fe0a0fe6f59651c5b17a028cfde41d74b7f0d9b"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/shrink-fatten",
+     "bytes": 2138,
+     "sha256": "3a6c07f8fef4c0789267f47a02dbc02e7f0e9335d4e06763d9305e67c0da53a2"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/skin_resize",
+     "bytes": 897,
+     "sha256": "2dbda22670232726f406cb7f238abeb4394af9f4d96566d9f9689ccacaf4e9b4"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/space_edge_loops_evenly",
+     "bytes": 1036,
+     "sha256": "89000677dc8634082712134dce8207facfd4a6fdc10e429b012ce7c2bc37d178"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/to_circle",
+     "bytes": 1883,
+     "sha256": "917e2200aa5f592993d172184f0a9d5df025f314bc535ab7e2b8ead1b2101157"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/to_sphere",
+     "bytes": 1652,
+     "sha256": "035e09951557c2f8906beca694fa2c8e75769292078739b3d12a5a08ee3d8db4"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/transform/warp",
+     "bytes": 2402,
+     "sha256": "6bc9e64defa2477dab950f9ee8f7d67ec58e6e612131c54dc8aad04bbbebeeb6"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/weights",
+     "bytes": 72,
+     "sha256": "d104362442b72d54f80a5717bdb9e3bf669dc2fb4ea9d44c2fc444eca1af5927"
+    },
+    {
+     "path": "modeling/meshes/editing/uv",
+     "bytes": 18602,
+     "sha256": "770c996927427ef8bb669c08868a2f6118d66423a672291b3706e0c178373b2d"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/bevel_vertices",
+     "bytes": 102,
+     "sha256": "4b31f8aa2d62eb1d60b3dfe6838a2ddd53a83552799993f79296c35c6b5695d4"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/blend_shape",
+     "bytes": 967,
+     "sha256": "8e09267a08b8118b3ac98974e608b611c4f32244cae361c83bd5daa05001c3e4"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/connect_vertex_pairs",
+     "bytes": 735,
+     "sha256": "0473d21d646139045a2337d6e84329a95893c18631f1c770b64ba8357632b54a"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/connect_vertex_path",
+     "bytes": 1116,
+     "sha256": "1020e7460e9e3cbf26dfe6b1c10df957fc301765e2f91809793c12b558a65e15"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/extrude_cursor",
+     "bytes": 1571,
+     "sha256": "f8beb4f5f3c786782cea0c6d4106c1f79b8a98f229bbc462919a05404a6a8771"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/extrude_vertices",
+     "bytes": 632,
+     "sha256": "860d87b770a0b8a36a2256f6c579c0c926310cd724c679ef17b974b066785487"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/hooks",
+     "bytes": 3927,
+     "sha256": "38104dc847bb735beab509cca84817ce39cb33105fd4242c251219905481ddef"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/index",
+     "bytes": 503,
+     "sha256": "990ec848b8af9bfd6a5847563b83a45a0311ad7201a7804e7f8841019af3dd4e"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/laplacian_smooth",
+     "bytes": 470,
+     "sha256": "bac2b31eae9909631e058a910725f046fe9b4e626cd70f137f2aa1e1ee09f45e"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/make_face_edge",
+     "bytes": 4310,
+     "sha256": "4f0c380d75b3c4261c85616ca563420e86d9a2e5c3c038b4eb13a70e52ae07ca"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/make_vertex_parent",
+     "bytes": 1078,
+     "sha256": "a6f598f656123d524bb6b88e39399a7af01fb85682885fbc4a11e9ba6a61d501"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/propagate_shapes",
+     "bytes": 1033,
+     "sha256": "14f61bd3a9098fa86b7e5d2ad79f85a89935923ca339de8725f2a8f6436ff3d5"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/rip_vertices",
+     "bytes": 2368,
+     "sha256": "a04fe7479680956905370ceb21b593b0c57c4954a07816bce0a8f6b156be692c"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/rip_vertices_extend",
+     "bytes": 1236,
+     "sha256": "979eea6c9548c487f3bb3d8a5e962d024975863b1adaad6cd218e7ec7572035b"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/rip_vertices_fill",
+     "bytes": 594,
+     "sha256": "48799511a88037d054fab0049a5b255e3f3c417b78e5849623cc7af272d31d0f"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/slide_vertices",
+     "bytes": 1969,
+     "sha256": "a0771a31a3b02d221d0d40d6387f31d57d80a453a60fcc142d5546cfe7915634"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/smooth_vertices",
+     "bytes": 1889,
+     "sha256": "e3fc984a0d2026bbf0ba19b47fe8f8bc13b03579536758db84294bc8f2e0ec9a"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/vertex_crease",
+     "bytes": 446,
+     "sha256": "66709543f5c7a2809ce36490e90d40d5582abe39ae17f404e6c1b71434b2a677"
+    },
+    {
+     "path": "modeling/meshes/editing/vertex/vertex_groups",
+     "bytes": 2656,
+     "sha256": "bd59a3907961e24b975d15a7422fa1f25ef56ea00a9993f4fc9c74ff0e6953ab"
+    },
+    {
+     "path": "modeling/meshes/import_images_as_planes",
+     "bytes": 5706,
+     "sha256": "0d9b1a7b5bbeef854f6052c3ef946a22ade7204a41748af5d46c2d3494079e37"
+    },
+    {
+     "path": "modeling/meshes/index",
+     "bytes": 358,
+     "sha256": "de7ffafef2d53dc0ec699ed1ffeba5f63dfc8eaabce2a7987b595f8b48475a32"
+    },
+    {
+     "path": "modeling/meshes/introduction",
+     "bytes": 759,
+     "sha256": "1a5c095ceeee0e6cb98b75283c0330a90b914a434ac93c57bc3c5462e0fc7500"
+    },
+    {
+     "path": "modeling/meshes/mesh_analysis",
+     "bytes": 2728,
+     "sha256": "ac6ea643564f7c323032cc4be9d52fe8fc98c3ff914402f5865d0ffc4a177eee"
+    },
+    {
+     "path": "modeling/meshes/primitives",
+     "bytes": 11233,
+     "sha256": "bf1accc37ce53f921828aca0482e03c2a5c91806fb759de38709d0762e95bcdd"
+    },
+    {
+     "path": "modeling/meshes/properties/custom_data",
+     "bytes": 2333,
+     "sha256": "a67c794c77ae0e297dc7d2a7c0b60afffea042795bd0ac14da31c26661532582"
+    },
+    {
+     "path": "modeling/meshes/properties/index",
+     "bytes": 155,
+     "sha256": "93c380517135623afdfa43305756a098bd5d3b4896746d85aa9bd27adf681ab0"
+    },
+    {
+     "path": "modeling/meshes/properties/object_data",
+     "bytes": 5092,
+     "sha256": "c0216753e7589c89a8654f663775499796b1d012c30b9ba609f7c9466db547d7"
+    },
+    {
+     "path": "modeling/meshes/properties/vertex_groups/assigning_vertex_group",
+     "bytes": 6305,
+     "sha256": "6d350be031fd0fba2feb8d9291cfdc97c3086e8c0482ec4643a52756ac6ae0f3"
+    },
+    {
+     "path": "modeling/meshes/properties/vertex_groups/index",
+     "bytes": 205,
+     "sha256": "b7ed0de4f5f16db496141aedfece547f4755b9b9f753dd4bf7281a505bdd6dcc"
+    },
+    {
+     "path": "modeling/meshes/properties/vertex_groups/introduction",
+     "bytes": 1121,
+     "sha256": "be062b69ae56c1ddfc91e16318e1cd5bfd6f44fe03e935ce65b2d56ad63b70d3"
+    },
+    {
+     "path": "modeling/meshes/properties/vertex_groups/vertex_groups",
+     "bytes": 4050,
+     "sha256": "54794b22428a6b0df2df12479e10443cf1b72e4c6a2ccd911198ad85871f8279"
+    },
+    {
+     "path": "modeling/meshes/properties/vertex_groups/vertex_weights",
+     "bytes": 5007,
+     "sha256": "3323a63ed2ce6ad5badc2e6538ffba21d59895488b60ade1fbe7b37603cd5d8e"
+    },
+    {
+     "path": "modeling/meshes/retopology",
+     "bytes": 7056,
+     "sha256": "bbe96a69c5e4c00bc78ae19aadd675da58e98df82c48d392e20668f4a0e750cf"
+    },
+    {
+     "path": "modeling/meshes/selecting/all_by_trait",
+     "bytes": 3943,
+     "sha256": "3742c79dc4dc7c128afbdcabae2d83aab1208d2b15b194fb6aced9bd7aa65ba8"
+    },
+    {
+     "path": "modeling/meshes/selecting/by_attribute",
+     "bytes": 649,
+     "sha256": "25778138236d28c7dffc33c4a6a2efd73b67e86ea616857824af86195d82cdaa"
+    },
+    {
+     "path": "modeling/meshes/selecting/checker_deselect",
+     "bytes": 1204,
+     "sha256": "ffba70df86fcf10457fc81c0bb69b8b5cf3559417769e7215f4752a183ca10ca"
+    },
+    {
+     "path": "modeling/meshes/selecting/index",
+     "bytes": 326,
+     "sha256": "b3dabb3036922974919e64010ec6e28ee36e7dbe5bf3c4a93d5f9520be6d4c8e"
+    },
+    {
+     "path": "modeling/meshes/selecting/introduction",
+     "bytes": 8298,
+     "sha256": "14107901b79571452fe87611790bc0b401bc769918c2a3cfa1e6ff8f04b0b563"
+    },
+    {
+     "path": "modeling/meshes/selecting/linked",
+     "bytes": 4292,
+     "sha256": "83b2e4ea58d73fa8a00625427b1f4e8e4309d001e0393ac8acb3de13f12d8743"
+    },
+    {
+     "path": "modeling/meshes/selecting/loops",
+     "bytes": 6890,
+     "sha256": "c3c5768b7af28b1a7d21ed929ad4c53634090fe7b4c8579279c7f3da007bc32a"
+    },
+    {
+     "path": "modeling/meshes/selecting/mirror",
+     "bytes": 1030,
+     "sha256": "1ec9b03d93f7a604c05e15d125d929f583f4d6c26cc6c32057fb0af53a3e1711"
+    },
+    {
+     "path": "modeling/meshes/selecting/more_less",
+     "bytes": 2453,
+     "sha256": "5b72a2b494e6985d7f02ad16eb741cc19ea248d4e50e9e3879bbc9c8ab5f3b80"
+    },
+    {
+     "path": "modeling/meshes/selecting/random",
+     "bytes": 872,
+     "sha256": "a05ee3278f4118a780b715beb8d9eedc7ec52e6f84847cae2753cc1fe231ff69"
+    },
+    {
+     "path": "modeling/meshes/selecting/sharp_edges",
+     "bytes": 799,
+     "sha256": "eb71015e772a9ff6e41ea1184076ea9bfc63a419319d160aa3dcae49b1b302e8"
+    },
+    {
+     "path": "modeling/meshes/selecting/side_of_active",
+     "bytes": 958,
+     "sha256": "be2a76bca458cfd3fb04ff1ae599048cdaf14527622ced171c1820140678d56d"
+    },
+    {
+     "path": "modeling/meshes/selecting/similar",
+     "bytes": 3299,
+     "sha256": "107accc80ca003ad896367547fa60e8b416fa77b47f0f700d6a80f3ce33cef29"
+    },
+    {
+     "path": "modeling/meshes/structure",
+     "bytes": 10085,
+     "sha256": "274c5b87410c82b0ced5c3f49bd3e9b53ec9ffd1e62966680050bed92fb31f1d"
+    },
+    {
+     "path": "modeling/meshes/tools/extrude_cursor",
+     "bytes": 3002,
+     "sha256": "c95aa8e018f03305ea3ffb3fb69de5251ae0de17b0265c3c5fe6e9dc70ac8dce"
+    },
+    {
+     "path": "modeling/meshes/tools/extrude_manifold",
+     "bytes": 626,
+     "sha256": "c957ae205cba2f26045b409887f888c170fe57e0a13e7a2af5bda701955a35bc"
+    },
+    {
+     "path": "modeling/meshes/tools/extrude_region",
+     "bytes": 3301,
+     "sha256": "a22f222959e637408bf5a8687d285c8847b85f2b3cfa6e31cfd4d01cb8033f8f"
+    },
+    {
+     "path": "modeling/meshes/tools/index",
+     "bytes": 251,
+     "sha256": "876cc7f90e19bfd979aa22bec38521408797a977c2ba1a12207c4fe3ac34c5bb"
+    },
+    {
+     "path": "modeling/meshes/tools/loop",
+     "bytes": 1769,
+     "sha256": "1531b85d4680ca052633f741345b4b66cbdb88d99d4c01f4934c0d24cd045c42"
+    },
+    {
+     "path": "modeling/meshes/tools/poly_build",
+     "bytes": 1446,
+     "sha256": "28cf00071ec4ea9a0596c13d013a3ae00ed27d32b29044de48b9a78d57b3dc4a"
+    },
+    {
+     "path": "modeling/meshes/tools/spin",
+     "bytes": 5279,
+     "sha256": "5d7a7ce24b1b7b3cadce31884c412c007ddfd8b174cb0457c2d4150ac0d723da"
+    },
+    {
+     "path": "modeling/meshes/tools/tool_settings",
+     "bytes": 4257,
+     "sha256": "fb9dcd87cbe13b474c87c6116af58189c9d59c3af111729ff6ba549f4e798e05"
+    },
+    {
+     "path": "modeling/meshes/tools/toolbar",
+     "bytes": 3796,
+     "sha256": "f8f9fa8b3b69b74ed073f884962606bfcd6258c34622865aab417eef9169788b"
+    },
+    {
+     "path": "modeling/meshes/uv/applying_image",
+     "bytes": 3673,
+     "sha256": "64319c74a43d9130322885e4e05b5ad6bbe69860c9c117a529ccbbe1da9c9182"
+    },
+    {
+     "path": "modeling/meshes/uv/editing",
+     "bytes": 31717,
+     "sha256": "26b978af15ecc092e68324920b14c2f24eb77a18c776408882b098d3f34ba254"
+    },
+    {
+     "path": "modeling/meshes/uv/index",
+     "bytes": 192,
+     "sha256": "c903d9cf81224d5ef7383d03541f04c00648d581cb1bbd4d76f8b551d8dd22fb"
+    },
+    {
+     "path": "modeling/meshes/uv/tools/grab",
+     "bytes": 3579,
+     "sha256": "93b7670177f349a84c89af86743339ed9736e02ebd6e5bd022abdebd8acb1486"
+    },
+    {
+     "path": "modeling/meshes/uv/tools/index",
+     "bytes": 169,
+     "sha256": "4da24aa0a2a7361a8d61bec4eb7bd13df03be728e1347329594529a6468f1775"
+    },
+    {
+     "path": "modeling/meshes/uv/tools/pinch",
+     "bytes": 3661,
+     "sha256": "c8b4a1a0352362a87d4fd064876a8574ce07b3f80e55045afdf6e0710394e4cc"
+    },
+    {
+     "path": "modeling/meshes/uv/tools/relax",
+     "bytes": 5138,
+     "sha256": "047eabc39f344b6d7e6272fec95bf0141b2d68715c639c7e4651b8857ea83398"
+    },
+    {
+     "path": "modeling/meshes/uv/tools/rip",
+     "bytes": 1171,
+     "sha256": "1d13064d6fc14ffa2cce528674a88b8e630fe1db03291d66827b4415c85689be"
+    },
+    {
+     "path": "modeling/meshes/uv/tools/toolbar",
+     "bytes": 1244,
+     "sha256": "f9b95ce02e98008b87b36d623523dfdc8460c33fdba2193296e0480ee306d069"
+    },
+    {
+     "path": "modeling/meshes/uv/unwrapping/index",
+     "bytes": 108,
+     "sha256": "34a6c0fb554aed8e1a8ff575e2c58b7e2627bbec535fdb79d5db10b7cc59d00d"
+    },
+    {
+     "path": "modeling/meshes/uv/unwrapping/introduction",
+     "bytes": 3371,
+     "sha256": "378882531846aff52a11a26ceb5b987c09437545b28da101d75813f01f0d134e"
+    },
+    {
+     "path": "modeling/meshes/uv/unwrapping/seams",
+     "bytes": 4655,
+     "sha256": "8bb261f37ff7aa96e93c346e937eadc92d23614c3b6f32fcc325346d657eee69"
+    },
+    {
+     "path": "modeling/meshes/uv/uv_texture_spaces",
+     "bytes": 3459,
+     "sha256": "9ba3420f7eceff870048b0416e41f25747ba31bace0d91260d7dd95d47fe5d16"
+    },
+    {
+     "path": "modeling/meshes/uv/workflows/index",
+     "bytes": 99,
+     "sha256": "d25a18358b021513cc5da34c04f2faa800b841798b032d31617dbeda5aae2523"
+    },
+    {
+     "path": "modeling/meshes/uv/workflows/layout",
+     "bytes": 3867,
+     "sha256": "2d81f3dfcab61aca0e38073790083b3f90d62b8ae0b72ddb940fb9cba0e79883"
+    },
+    {
+     "path": "modeling/meshes/uv/workflows/udims",
+     "bytes": 4948,
+     "sha256": "1b88c2927aa3286895075f6c4d5e09f4f1457f5d651cbba563440c73fd7b9fc6"
+    },
+    {
+     "path": "scene_layout/object/editing/animation",
+     "bytes": 1587,
+     "sha256": "b261e03f42180ef96c13a506ac01c2e463dd9611ed8dda67af73a7dcbe1c7088"
+    },
+    {
+     "path": "scene_layout/object/editing/apply",
+     "bytes": 9335,
+     "sha256": "e618085a7f909135c527c5edc99ad7e824224298ef912a80df1b9aac66920d18"
+    },
+    {
+     "path": "scene_layout/object/editing/asset",
+     "bytes": 302,
+     "sha256": "ac6b1133e29b34fac6b0262395d02dfae4729f2ce996c298b045efb8d277bfe1"
+    },
+    {
+     "path": "scene_layout/object/editing/cleanup",
+     "bytes": 2289,
+     "sha256": "cc4926da71b64c162def96d3bcf04dc6180395cda2a9e593888ddf8f0f94dd61"
+    },
+    {
+     "path": "scene_layout/object/editing/clear",
+     "bytes": 1406,
+     "sha256": "f493889b87ac073ffafe5a4645cdfc873109cf6cb01585b3b8c92892701271dd"
+    },
+    {
+     "path": "scene_layout/object/editing/constraints",
+     "bytes": 1542,
+     "sha256": "087b18971b399af6d9432f4486389481c8075d3ad818a6385d631d51d4426565"
+    },
+    {
+     "path": "scene_layout/object/editing/convert",
+     "bytes": 2328,
+     "sha256": "88610c4ccc479e409cd39cd05ae9e37be04687fc6d8803c3289a74d21cf402bd"
+    },
+    {
+     "path": "scene_layout/object/editing/delete",
+     "bytes": 599,
+     "sha256": "2994768da5f586cff3cb7bf527af43d4cf661503f712fca53e1cdfc682e939c5"
+    },
+    {
+     "path": "scene_layout/object/editing/duplicate",
+     "bytes": 1693,
+     "sha256": "68148cabb9cafcbb0cb6fc3fc7ffd17a2809744dd2fd14b28a1d5f7ed435ad60"
+    },
+    {
+     "path": "scene_layout/object/editing/duplicate_linked",
+     "bytes": 3145,
+     "sha256": "52e3c784647c905b595fd27aa70a1cbaac6f7c38d5f5ef125ccf5799da8ae4f0"
+    },
+    {
+     "path": "scene_layout/object/editing/index",
+     "bytes": 483,
+     "sha256": "f4c390e9836f2246e138798344c657ac9e26e14405277ccec08b252d7499eb3a"
+    },
+    {
+     "path": "scene_layout/object/editing/join",
+     "bytes": 762,
+     "sha256": "ebbb0a662e1a00256730353d693b09523fa5dcaf71afa3c74657363f53e1e9fa"
+    },
+    {
+     "path": "scene_layout/object/editing/link_transfer/index",
+     "bytes": 310,
+     "sha256": "29d3f199af1d652a305f3a3fa11bfd0d801c278fc7b533c596418bb91ea52a3a"
+    },
+    {
+     "path": "scene_layout/object/editing/link_transfer/link_data",
+     "bytes": 3775,
+     "sha256": "ea487bddcc74fbb413da4798f852dff5b6b43717df77a53f1290d0239f12b1d3"
+    },
+    {
+     "path": "scene_layout/object/editing/link_transfer/transfer_mesh_data",
+     "bytes": 9228,
+     "sha256": "532b84a157ee96ec1f688bb6ffac49a3eeca2166f8d5c2e3aca6b8c8644e1eee"
+    },
+    {
+     "path": "scene_layout/object/editing/link_transfer/transfer_mesh_data_layout",
+     "bytes": 1079,
+     "sha256": "fd160d22761770f306832ecfe46ae68cd7feafe52a2aee2297c783fdff75849d"
+    },
+    {
+     "path": "scene_layout/object/editing/mirror",
+     "bytes": 3749,
+     "sha256": "7f646716b45798eff3daa0925e6bee40c52aef650ea12a2ab6d0412e3a00ea9b"
+    },
+    {
+     "path": "scene_layout/object/editing/modifiers",
+     "bytes": 1017,
+     "sha256": "f9b9c58ef68ad469c77ca875b261317275bb0a54f8fb28316e39938531d31b67"
+    },
+    {
+     "path": "scene_layout/object/editing/parent",
+     "bytes": 15740,
+     "sha256": "a1cdae88f503dcfef1d5103366176afe470893f623dd6a982a7588c006a12c56"
+    },
+    {
+     "path": "scene_layout/object/editing/relations/index",
+     "bytes": 112,
+     "sha256": "70c44c9952255490400478b472d47f5ce9f8e50c823984be729e23039f2c9358"
+    },
+    {
+     "path": "scene_layout/object/editing/relations/make_single_user",
+     "bytes": 1141,
+     "sha256": "36d7fc1e2f78692fc26eb4a5e27865201002a7475fd4941f92b3d8520f8e3567"
+    },
+    {
+     "path": "scene_layout/object/editing/rigid_body",
+     "bytes": 752,
+     "sha256": "29675cea8f27fbfd7fcf0c0c642ef87978bfd8826197f822f0e5c18fe799a324"
+    },
+    {
+     "path": "scene_layout/object/editing/shading",
+     "bytes": 2836,
+     "sha256": "4b1355df75e77bb368f69848d0459d0dd75359414193ac509ffd0cb427a39c38"
+    },
+    {
+     "path": "scene_layout/object/editing/show_hide",
+     "bytes": 374,
+     "sha256": "788e4f96001da6acaff656b8cacde2edca3622d368549693bff9c6916d34d921"
+    },
+    {
+     "path": "scene_layout/object/editing/snap",
+     "bytes": 3843,
+     "sha256": "c7348a30b42b25b23ec8629e5a20916346bd96dc8b679163323dda91e82fbd62"
+    },
+    {
+     "path": "scene_layout/object/editing/track",
+     "bytes": 883,
+     "sha256": "169eb545f8858a489b14f9a73e7aca62d60c5e55e3c42dfb36b0d14cde2b3f28"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/align_objects",
+     "bytes": 1308,
+     "sha256": "96f0cc09343f51bd35d0401fdeb70d4e717bbef0af6a32fe41dbcfa56e8daefe"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/align_transform_orientation",
+     "bytes": 652,
+     "sha256": "2c0955397f2a946149fb83c65e92caa5bacdbe0abb90c3c6c399aedbb601eb3d"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/control/axis_locking",
+     "bytes": 5096,
+     "sha256": "97b667d299c408680dcb17c0fa0ff307fe9ea8666462ee3c64aef96abebc8067"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/control/index",
+     "bytes": 254,
+     "sha256": "36008ca07fffd92aa5be7f85af3602d31d3e7b9c78ed99994cd0d2a1c1628330"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/control/numeric_input",
+     "bytes": 3062,
+     "sha256": "c940fa17d4ffa9d55559110e8915b74d11a0e6a58e3fa788af07d678d82ab0ce"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/control/precision",
+     "bytes": 3712,
+     "sha256": "f4b17bc074fafd7b404ba9e7f094a2e073f84f3241c14a7e91cdb493ec9f43b7"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/index",
+     "bytes": 383,
+     "sha256": "fd5cacf7792fe08802ef76cd4c99279942b10ed0e66a6e7600bfd43a8c5aee33"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/introduction",
+     "bytes": 1120,
+     "sha256": "d0555c73fba45fb969e6a47c289ca3520aa36b65361ee9efa2f259bd82960ae2"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/move",
+     "bytes": 1693,
+     "sha256": "dd97b03008d03449b996076548a27828409c6a585c33124d39680e32d78ab604"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/randomize",
+     "bytes": 1246,
+     "sha256": "da340f16ac19fde9860c29291e9cd52bbcf9f58e42dfcdba664c1cd1c30fe289"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/rotate",
+     "bytes": 2649,
+     "sha256": "93f0e56fa82e4b4d27a7a40bbc9e7bfdf8c723000102dfe06610b4193675466f"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/scale",
+     "bytes": 1852,
+     "sha256": "a8da33399a940eaab43613b45baef14e1b8b451f47ad0fe2a8ec1c0a53251e3d"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/texture_space",
+     "bytes": 413,
+     "sha256": "b9a7aa0bb882a54d2c7747adf89a7d0f5be983fc3167ff0d3baa0ee577f80303"
+    },
+    {
+     "path": "scene_layout/object/index",
+     "bytes": 277,
+     "sha256": "224d7eb404145f37f105a4b121d62e2dd7d323434b07a3c5c80e9f3de5352487"
+    },
+    {
+     "path": "scene_layout/object/introduction",
+     "bytes": 916,
+     "sha256": "38ada54343069a5bd8f3e0d4c3d7905cd2c0c52f7a60405b9bf079566eaad31c"
+    },
+    {
+     "path": "scene_layout/object/origin",
+     "bytes": 1794,
+     "sha256": "d6b642d7bc5c11edc35455f29c4f35e1c006e40a9ca0f217024ac997f4f72697"
+    },
+    {
+     "path": "scene_layout/object/properties/display",
+     "bytes": 2163,
+     "sha256": "bb82291bd539a25866891ac773cc00a8d4455116b267ac2b26e6f8fe0bbfd21b"
+    },
+    {
+     "path": "scene_layout/object/properties/index",
+     "bytes": 243,
+     "sha256": "61fe7da82b0582c52fec8e47c43d5def2ae2483898b85fac20f422b8872b494a"
+    },
+    {
+     "path": "scene_layout/object/properties/instancing/collection",
+     "bytes": 1993,
+     "sha256": "de82f3e688ef6ba69c67481564cbe076cf20366552ce1859b8efbe7d15a20ac8"
+    },
+    {
+     "path": "scene_layout/object/properties/instancing/faces",
+     "bytes": 4389,
+     "sha256": "adcd84a292523d51040ee99a20b670a96ed8c84eaa6e8c0cc84da9e83bf4ffeb"
+    },
+    {
+     "path": "scene_layout/object/properties/instancing/index",
+     "bytes": 728,
+     "sha256": "e8017c69f81a73302484afdee3c185b9ca8a43d862cb161a0319e70a377a3914"
+    },
+    {
+     "path": "scene_layout/object/properties/instancing/verts",
+     "bytes": 6611,
+     "sha256": "b78752a7bcec212d4e975c73181eb14d6fbfd623573f9dd3ab4b3c2023ca5273"
+    },
+    {
+     "path": "scene_layout/object/properties/line_art",
+     "bytes": 1962,
+     "sha256": "5c9fa9385ef7960a9cbea93a3d62fc87594e11e4c68507ae1199ba0f4930892b"
+    },
+    {
+     "path": "scene_layout/object/properties/relations",
+     "bytes": 1633,
+     "sha256": "673b575bb3a75364a54b35267b7c20d8f5f1f1249145ffcddb729e8dab7d226e"
+    },
+    {
+     "path": "scene_layout/object/properties/transforms",
+     "bytes": 5671,
+     "sha256": "de00141ed87c19b23f8944528a6974baf91859e96c283884f9ae8655907dbf2e"
+    },
+    {
+     "path": "scene_layout/object/properties/visibility",
+     "bytes": 1221,
+     "sha256": "1bb5659e407c62397b7086e548c3b8014dee365ea9a798cf7d54a0cbead3046c"
+    },
+    {
+     "path": "scene_layout/object/selecting",
+     "bytes": 8094,
+     "sha256": "b3d71e57f274f0532b8fb6af9908e5435a2c587e79c23e155eabe55d9874f3e6"
+    },
+    {
+     "path": "scene_layout/object/tools/index",
+     "bytes": 159,
+     "sha256": "c86fa0c586387075de87afbd2bf42a61fa3f367efd15505ac192706319a04bac"
+    },
+    {
+     "path": "scene_layout/object/tools/scale_cage",
+     "bytes": 1490,
+     "sha256": "9c013bb13f62a93e0951074a08c6c6046cba353a8e8b775d77367bb6cb709779"
+    },
+    {
+     "path": "scene_layout/object/tools/tool_settings",
+     "bytes": 1816,
+     "sha256": "dbf7b0a7531379ae2541e73a98fe998cfff2d0fef376e2459622cd9fa0027e01"
+    },
+    {
+     "path": "scene_layout/object/tools/toolbar",
+     "bytes": 2090,
+     "sha256": "963776d491b1a5b161b5ca4a53c138074d899d78e6a356ed6a44812e4b097b17"
+    },
+    {
+     "path": "scene_layout/object/types",
+     "bytes": 4713,
+     "sha256": "e9895c070e3b1a46bfe79b10cc380cfdb32c21d633dbf4db44cedcce609ddb00"
+    }
+   ]
+  },
+  "blender-v2.93-release": {
+   "retrieved": "2026-10-11",
+   "licence": "CC-BY-SA 4.0; credit: Blender Documentation Team (https://docs.blender.org/manual/en/latest/copyright.html)",
+   "pages": [
+    {
+     "path": "modeling/meshes/editing/edge/bevel",
+     "bytes": 13796,
+     "sha256": "6e847e2c1af592cb4d6d4693d3e5d129b5db2ce02a84e39b3bf7deeb250e2d05"
+    },
+    {
+     "path": "modeling/meshes/editing/edge/loopcut_slide",
+     "bytes": 4127,
+     "sha256": "01b33e3fd585fd4d3ae4c340abf65c4915c68f10d97a574a21394acc999eb618"
+    },
+    {
+     "path": "scene_layout/object/editing/join",
+     "bytes": 791,
+     "sha256": "a177d3cbf6ee7b0366eadfa55ac040f57d0e88399ede268caa44fb1d4ccf435f"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/merge",
+     "bytes": 1610,
+     "sha256": "0c6a674a1daa857a13e508ce90fabf51ba2819a5d5eff2e8df86b6422a8d344e"
+    },
+    {
+     "path": "editors/3dview/controls/proportional_editing",
+     "bytes": 5597,
+     "sha256": "e3e3d152855fa2932439953202cd235c083ea1c4ab7f4d36283001a0476108e5"
+    },
+    {
+     "path": "interface/undo_redo",
+     "bytes": 5566,
+     "sha256": "91422faaf55b98eb8ed19e09590f5f20dfcbfc162ff47fab424fe5f4cab0fb2d"
+    },
+    {
+     "path": "modeling/meshes/editing/mesh/separate",
+     "bytes": 858,
+     "sha256": "178bdfa8abfc58070568dfeecdca8a49a6d2cf4f9b4f948f217eea024fadbf50"
+    },
+    {
+     "path": "editors/3dview/modes",
+     "bytes": 4832,
+     "sha256": "86a9fd92e0e5a4feda9b984d819edd07feef4f8571301f56e8fa2834e271f8a3"
+    },
+    {
+     "path": "scene_layout/object/editing/transform/move",
+     "bytes": 1696,
+     "sha256": "d8f091795fc93058297b7c13e9ecf3751240f04509164d8029f652ecad8d0ef1"
+    },
+    {
+     "path": "modeling/meshes/editing/face/extrude_faces",
+     "bytes": 2565,
+     "sha256": "2bb8a9037ce59b3c8d4ee105e80f1f7620691d42762d2f2868ad3b9d617c7a0f"
+    }
+   ]
+  }
+ }
+}

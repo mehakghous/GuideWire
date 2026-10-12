@@ -47,19 +47,26 @@ def _steps(*orders):
     return [Step(id=f"s{o}", order=o, goal="g") for o in orders]
 
 
+<<<<<<< HEAD
 def test_app_is_one_of_the_three_supported():
     for app in ("blender", "maya", "houdini"):
         StepList(source_type="written", app=app, steps=_steps(1))
+=======
+def test_app_is_blender_only():
+>>>>>>> 73f5ac8 (StepList: restrict app to blender; add opt-in check_order for editors)
     with pytest.raises(ValidationError):
         StepList(source_type="written", app="unity", steps=_steps(1))
 
 
+<<<<<<< HEAD
 def test_craft_step_is_never_verifiable():
     p = StatePredicate(kind="mode", target="OBJECT")
     assert Step(id="a", order=1, goal="g", expected_state=[p]).verifiable
     assert not Step(id="a", order=1, goal="g", expected_state=[p], kind="craft").verifiable
 
 
+=======
+>>>>>>> 73f5ac8 (StepList: restrict app to blender; add opt-in check_order for editors)
 @pytest.mark.parametrize("orders", [(1, 3), (2, 3), (1, 1), (2, 1)])
 def test_check_order_flags_gaps_repeats_and_misordering(orders):
     sl = StepList(source_type="written", app="blender", steps=_steps(*orders))  # construction stays lenient

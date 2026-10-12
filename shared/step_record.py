@@ -140,7 +140,7 @@ class Step(BaseModel):
 class StepList(BaseModel):
     schema_version: str = SCHEMA_VERSION
     source_type: SourceType
-    app: AppName
+    AppName = Literal["blender", "maya", "houdini"]
     app_version_tutorial: str | None = None
     video_id: str | None = None
     title: str | None = None

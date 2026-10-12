@@ -120,7 +120,7 @@ class Step(BaseModel):
 class StepList(BaseModel):
     schema_version: str = SCHEMA_VERSION
     source_type: SourceType
-    app: str                            # "blender" | "unity" | "davinci_resolve"
+    app: Literal["blender"]             # GuideWire is scoped to Blender
     app_version_tutorial: str | None = None
     video_id: str | None = None
     title: str | None = None
@@ -130,3 +130,16 @@ class StepList(BaseModel):
     video_duration_s: float | None = None
     warnings: list[str] = Field(default_factory=list)  # list-level findings (coverage gaps etc.)
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @property
+    def order_problems(self) -> list[str]:
+        """Empty when `order` runs 1..n with no gaps or repeats. Not enforced at construction (the ingestion
+        validator reports BAD_ORDER as an Issue); callers that edit steps, e.g. the review UI, check it explicitly."""
+        orders = [s.order for s in self.steps]
+        if orders == list(range(1, len(orders) + 1)):
+            return []
+        return [f"step order must be 1..n consecutive, got {orders}"]
+
+    def check_order(self) -> None:
+        if self.order_problems:
+            raise ValueError(self.order_problems[0])

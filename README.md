@@ -118,3 +118,15 @@
 
 # SRS, SDS and diagrams are kept in `/docs`. Log every change in the Document History table.
 
+## Standardized Environment for GuideWire
+To ensure consistent screen observation and UI element recognition, GuideWire uses the following standardized environment for its Blender implementation.
+
+- Software: Blender 5.2 LTS
+- Interface: Default startup workspace and layout
+- Display Resolution: 1920 × 1080 pixels
+- Operating System Display Scaling: 100%
+- UI Customization: No custom workspace layouts or panel rearrangements
+
+All team members should use these settings when developing, testing, and demonstrating the Blender integration.
+
+These constraints provide a consistent baseline for screen capture, computer vision, and contextual desktop guidance.

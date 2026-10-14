@@ -195,7 +195,7 @@ def sanitize_and_annotate(
         if step.expected_state and not informative:
             flag(step, "uninformative_state",
                  "expected state already holds before this step, so completing it cannot be verified")
-        step.verifiable = bool(informative)
+        step.verifiable = bool(informative) and step.kind == "mechanics"
 
         for a in step.actions:
             if a.ui_element and not _ui_name_known(a.ui_element, profile):

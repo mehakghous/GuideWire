@@ -1,5 +1,4 @@
 """Tests for the opt-in caption adapter. A fake caption source is injected: no network, no third-party library needed."""
-import json
 import subprocess
 import sys
 from dataclasses import dataclass

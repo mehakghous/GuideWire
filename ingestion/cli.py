@@ -24,6 +24,12 @@ def _offline(args) -> int:
     """Commands that never touch the network or a model."""
     from .router import route
 
+    if args.cmd == "purge":
+        from .retention import purge_derived
+        from .youtube.captions import ROOT
+        removed = purge_derived(ROOT)
+        print(f"removed {len(removed)} file(s) older than 30 days", *removed, sep="\n  ")
+        return 0
     if args.cmd == "captions":
         from .youtube.captions import CaptionsUnavailable, fetch_captions, purge_expired
         from .youtube.metadata import parse_video_id
@@ -39,6 +45,20 @@ def _offline(args) -> int:
         b = route(res.text, version=args.version, input_type="transcript", duration_s=args.duration)
         print(b.model_dump_json(indent=2))
         return 0
+    if args.cmd == "chat":
+        from .service import Service, chat
+        svc = Service.open(args.session, version=args.version, use_kb=not args.no_kb)
+        if args.script:
+            lines = Path(args.script).read_text(encoding="utf-8").splitlines()
+        elif sys.stdin.isatty():
+            print("GuideWire chat. Ask a question, paste steps, or /help. /quit to leave.", file=sys.stderr)
+            lines = iter(lambda: input("> "), None)
+        else:
+            lines = sys.stdin
+        try:
+            return chat(svc, lines, as_json=args.json)
+        except (EOFError, KeyboardInterrupt):
+            return 0
     if args.cmd == "find":
         from .tutorials import discover, load_index, verify_captions
         entries = load_index(args.index) if args.index else load_index()
@@ -100,9 +120,23 @@ def _offline(args) -> int:
     return 0
 
 
+OFFLINE_COMMANDS = ("purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+
+
+def _one_line(e: BaseException) -> str:
+    """A bad file, bad JSON or a rejected step list as ONE readable line (no traceback, no multi-page pydantic dump)."""
+    if isinstance(e, FileNotFoundError):
+        return f"file not found: {e.filename or e}"
+    if isinstance(e, json.JSONDecodeError):
+        return f"not valid JSON ({e.msg} at line {e.lineno}, column {e.colno})"
+    first = str(e).strip().splitlines()[0] if str(e).strip() else type(e).__name__
+    return first[:300]
+
+
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
     ap = argparse.ArgumentParser(prog="ingestion")
+    ap.add_argument("--debug", action="store_true", help="show the full traceback instead of a one-line error")
     sub = ap.add_subparsers(dest="cmd", required=True)
     w = sub.add_parser("written", help="convert written instructions (a text file) to steps")
     w.add_argument("file")
@@ -116,6 +150,12 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--selected", help="observed selected object types, comma separated, e.g. MESH,MESH")
     a.add_argument("--kb", help="path to the knowledge index (default: knowledge/kb.sqlite if it exists)")
     a.add_argument("--no-kb", action="store_true", help="catalog and parsers only; ignore the documentation index and tutorial index")
+    ch = sub.add_parser("chat", help="OFFLINE: talk to GuideWire in the terminal; load a tutorial and ask follow-up questions (session saved with --session)")
+    ch.add_argument("--session", help="JSON file that keeps the conversation between runs")
+    ch.add_argument("--script", help="read the messages from a file, one per line, instead of the keyboard")
+    ch.add_argument("--version", help="your Blender version, e.g. 2.80")
+    ch.add_argument("--json", action="store_true", help="print each reply as JSON (what a UI would receive)")
+    ch.add_argument("--no-kb", action="store_true")
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")
@@ -135,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--duration", type=float)
     c.add_argument("--version")
     c.add_argument("--purge", action="store_true", help="only delete cached captions older than 30 days, then exit")
+    sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
     m = sub.add_parser("validate", help="OFFLINE: validate and annotate a manually entered step list (JSON)")
     m.add_argument("file")
     m.add_argument("--version")
@@ -150,8 +191,14 @@ def main(argv: list[str] | None = None) -> int:
     for noisy in ("httpx", "httpcore", "google_genai", "google.genai"):  # request logs can carry secrets
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
-    if args.cmd in ("ask", "transcript", "validate", "captions", "playlist", "find"):
-        return _offline(args)
+    if args.cmd in OFFLINE_COMMANDS:
+        try:
+            return _offline(args)
+        except (OSError, ValueError, KeyError, LookupError, RuntimeError) as e:     # JSONDecodeError, pydantic ValidationError and ValidationFailure are ValueErrors
+            if args.debug:
+                raise
+            print(f"error: {_one_line(e)}  (use --debug for the traceback)", file=sys.stderr)
+            return 2
     from .runlog import RunLog
 
     hook = RunLog(args.run_log, cmd=args.cmd) if args.run_log else None

@@ -90,7 +90,6 @@ def classify(text: str) -> Intent:
                 explain_requested=bool(_EXPLAIN.search(t)), asks_shortcut=bool(_SHORTCUT.search(t)))
     clauses = split_clauses(text)
     n_imp = sum(_is_imperative(c) for c in clauses)
-    is_question = t.endswith("?") or bool(_HOWTO.match(t)) or bool(_CONCEPT.match(t)) or bool(_TROUBLE.search(t))
     procedural = (not t.endswith("?")) and not _HOWTO.match(t) and (n_imp >= 2 or (n_imp >= 1 and len(clauses) >= 2)
                                                                     or bool(_NUMBERED.search(text)) or (n_imp == 1 and len(toks) >= 3 and _is_imperative(clauses[0])))
     howto = bool(_HOWTO.match(t)) or (t.startswith("how") and "?" in text)

@@ -3,7 +3,6 @@ predicted steps (labelled as such; none of them is a model output)."""
 import json
 from pathlib import Path
 
-import pytest
 
 from ingestion.eval.coverage import (
     covers, demonstration_gap, evaluate_coverage, recall_in_window, recall_outside_window,

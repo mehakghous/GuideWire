@@ -23,8 +23,7 @@ from shared.step_record import Action, Step, StepList
 
 from .catalog import normalise_shortcut, BY_ID, Operation
 from .negation import negated_at
-from .knowledge import finish, make_step, ref
-from .timecode import parse_timestamp
+from .knowledge import finish, make_step
 from .transcript import Cue, parse_cues
 
 _LINE = re.compile(r"^\s*(?:[*\-•]\s*)?`?(?:(\d{1,2}):)?(\d{1,2}):(\d{2})(?:[.,](\d{1,3}))?`?\s*(.*)$")
@@ -256,7 +255,7 @@ def _doc_mapped_steps(u: "Unit", kb, version) -> list[tuple[Step, float, float]]
     """Steps for tools the speaker NAMES that are not in the hand-written catalog, taken from the manual's Reference block.
     High-precision rule, deliberately: a multi-word page title must appear as a phrase in the unit; a one-word title must appear right
     after an instruction verb ('use the Knife tool'). Anything else is left unmatched rather than guessed. Unreviewed, narrated only."""
-    from .kb.candidates import candidate_from_hit, candidate_steps, extra_profile
+    from .kb.candidates import candidate_from_hit, candidate_steps
 
     low = " ".join(u.text.lower().split())
     out = []

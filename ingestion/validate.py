@@ -17,6 +17,7 @@ from typing import Literal
 
 from shared.step_record import StatePredicate, Step, StepList
 
+from .features import load_catalog
 from .profiles import AppProfile, norm
 
 TS_TOLERANCE_S = 1.0          # allowed rounding past the stated video duration
@@ -37,6 +38,7 @@ PENALTY = {
     "duplicate_goal": 0.7,
     "missing_time": 0.9,
     "overlap": 0.9,
+    "feature_needs_extra": 0.9,
 }
 
 
@@ -83,6 +85,8 @@ def find_errors(sl: StepList, video_duration_s: float | None = None) -> list[Iss
                         "TS_BEYOND_END", "error",
                         f"{name} {t:g}s is beyond the video duration {video_duration_s:g}s", s.id,
                     ))
+        if s.feature_id and s.feature_id not in load_catalog():
+            out.append(Issue("UNKNOWN_FEATURE", "error", f"feature_id {s.feature_id!r} is not in the rigging feature catalog", s.id))
         if s.video_start_s is not None:
             if last_start is not None and s.video_start_s + TS_TOLERANCE_S < last_start:
                 out.append(Issue(
@@ -202,6 +206,13 @@ def sanitize_and_annotate(
                 flag(step, "unknown_ui",
                      f"UI name '{a.ui_element}' is not in the {profile.name} vocabulary (it may be real "
                      "but missing from the list): please check")
+
+        if step.feature_id and step.feature_id in load_catalog():
+            f = load_catalog().get(step.feature_id)
+            code = f.support_code(sl.app)
+            if code in ("U", "C"):
+                what = "has no tool" if code == "U" else "needs an add-on or a script"
+                flag(step, "feature_needs_extra", f"{f.id} ({f.name}) {what} in {sl.app}: the tutorial is using something outside the application")
 
         if step.support in ("demonstrated", "narrated", "both") and not step.evidence:
             flag(step, "no_evidence", f"claims support='{step.support}' but gives no evidence")

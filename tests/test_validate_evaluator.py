@@ -88,3 +88,17 @@ def test_evaluator_property_and_none_selection():
     s2 = step(expected_state=[P(kind="selection_type", target="NONE")])
     assert evaluate_step(s2, {"selection_types": []}).status == "met"
     assert evaluate_step(s2, OBS).status == "unmet"
+
+
+def test_feature_id_must_be_in_the_catalog_and_gaps_in_the_app_are_flagged():
+    from ingestion.profiles import BLENDER
+    from ingestion.validate import find_errors, sanitize_and_annotate
+    ok = StepList(source_type="written", app="blender", steps=[Step(id="s1", order=1, goal="Create a joint chain", feature_id="SKEL-01")])
+    assert find_errors(ok) == []
+    bad = StepList(source_type="written", app="blender", steps=[Step(id="s1", order=1, goal="x", feature_id="ZZZZ-99")])
+    assert [i.code for i in find_errors(bad)] == ["UNKNOWN_FEATURE"]
+    lost = StepList(source_type="written", app="blender", steps=[Step(id="s1", order=1, goal="Retarget the walk", feature_id="LAYR-06")])
+    step = sanitize_and_annotate(lost, BLENDER).steps[0]
+    assert any("LAYR-06" in f and "no tool" in f for f in step.flags) and step.confidence < 0.5
+    with pytest.raises(ValueError):
+        Step(id="s1", order=1, goal="x", feature_id="skel-1")        # wrong shape is refused by the schema itself

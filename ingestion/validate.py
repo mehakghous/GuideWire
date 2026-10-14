@@ -116,7 +116,7 @@ def _canonical_target(p: StatePredicate, profile: AppProfile) -> str | None:
     if p.kind == "selection_type":
         t = p.target.strip().upper()
         return t if t in profile.selection_types else None
-    pools = {"active_tool": profile.tools, "workspace": profile.workspaces, "panel_open": profile.panels}
+    pools = {"active_tool": profile.tools, "workspace": profile.workspaces, "panel_open": profile.panels, "node_exists": profile.nodes}
     if p.kind in pools:
         t = p.target.strip().lower()
         for cand in pools[p.kind]:

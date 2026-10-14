@@ -97,11 +97,12 @@ _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Ke
 
 
 def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSION) -> str:
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
   selection_type: {sorted(profile.selection_types)}
-  panel_open: {sorted(profile.panels)}
+  panel_open: {sorted(profile.panels)}{node_line}
   property_equals: name = property path, expected_value = expected value (only when a value is explicitly given).
   Predicate JSON looks like {{"kind": "mode", "name": "EDIT_MESH"}} or
   {{"kind": "property_equals", "name": "object.location.x", "expected_value": 2.0}}.

@@ -12,7 +12,8 @@ A plain message goes to the follow-up resolver when a tutorial is loaded, otherw
     /load steps FILE              follow written instructions from a text file
     /state                        show the tutorial, step statuses and what is known about Blender
     /observe mode=EDIT_MESH selected_objects=MESH   record what Blender reports (or `clear`); stored, never used to complete a step
-    /version 4.2                  set your Blender version
+    /app maya                     the application you are working in: blender (default), maya or houdini
+    /version 4.2                  set your application version
     /reset                        forget the tutorial and the conversation
 Only an explicit user statement ("I did that", "skip this") changes step status; a question never does.
 """
@@ -27,10 +28,11 @@ from pathlib import Path
 from shared.answer import AnswerBundle
 
 from . import session as S
+from .features import APPS
 from .followup import respond
 from .router import route
 
-LIST_KEYS = {"selected_objects", "selection_types", "open_panels"}
+LIST_KEYS = {"selected_objects", "selection_types", "open_panels", "nodes"}
 
 
 def _default_kb():
@@ -92,7 +94,7 @@ class Service:
     # ------------------------------------------------------------------ state
     def state(self) -> dict:
         s = self.session
-        return {"loaded": s.steps is not None, "active": s.active, "tutorial": s.tutorial, "version": s.version, "current": s.current,
+        return {"loaded": s.steps is not None, "active": s.active, "tutorial": s.tutorial, "version": s.version, "app": s.app, "current": s.current,
                 "status": dict(s.status), "steps": [{"id": x.id, "goal": x.goal, "status": s.status.get(x.id)} for x in (s.steps.steps if s.steps else [])],
                 "observed": s.observed, "has_pending_answer": bool(self.last_bundle and self.last_bundle.steps)}
 
@@ -141,6 +143,11 @@ class Service:
             if cmd == "/reset":
                 self.session, self.last_bundle = S.Session(version=self.session.version), None
                 return self._result("reset", "command", None, "Forgot the tutorial and the conversation.")
+            if cmd == "/app" and args:
+                if args[0].lower() not in APPS:
+                    raise ValueError(f"unknown application {args[0]!r}; choose from {', '.join(APPS)}")
+                self.session.app = args[0].lower()
+                return self._result("app", "command", None, f"Working in {self.session.app}. Load written steps with /load steps FILE.")
             if cmd == "/version" and args:
                 self.session.version = args[0]
                 return self._result("version", "command", None, f"Blender version set to {args[0]}.")
@@ -166,10 +173,10 @@ class Service:
                     text = Path(args[1]).read_text(encoding="utf-8")
                     if kind == "transcript":
                         dur = float(args[2]) if len(args) > 2 else None
-                        b = route(text, version=self.session.version, input_type="transcript", duration_s=dur)
+                        b = route(text, version=self.session.version, input_type="transcript", duration_s=dur)      # transcripts are Blender-only so far
                         tut = {"title": Path(args[1]).name, "source_type": "transcript", "version_hint": None}
                     else:
-                        b = route(text, version=self.session.version)
+                        b = route(text, version=self.session.version, app=self.session.app)
                         tut = {"title": Path(args[1]).name, "source_type": "written", "version_hint": None}
                     if not b.steps:
                         raise ValueError("no steps could be built from that file: " + (b.fallback_reason or b.clarification or "nothing recognised"))

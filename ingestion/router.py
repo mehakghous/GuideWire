@@ -19,6 +19,7 @@ from shared.answer import AnswerBundle, Explanation, SourceRef
 from shared.step_record import Step
 
 from .catalog import BY_ID, Operation, version_status
+from .rigging_text import MIN_CLAUSES, clauses_of, looks_like_rigging, rigging_to_steplist
 from .intent import classify
 from .knowledge import finish, how_to_steps
 from .text_steps import written_to_steplist
@@ -75,7 +76,8 @@ _VERSION_IN_TEXT = re.compile(r"\bblender\s*v?(\d{1,2}\.\d{1,2})\b", re.I)
 
 def route(text: str, *, version: str | None = None, observed: dict | None = None,
           store: ReviewedWorkflowStore | None = None, input_type: str | None = None,
-          duration_s: float | None = None, kb=None, tutorials: list[dict] | None = None) -> AnswerBundle:
+          duration_s: float | None = None, kb=None, tutorials: list[dict] | None = None,
+          app: str = "blender") -> AnswerBundle:
     stripped = text.strip()
     # ---- 0. input form
     if input_type == "manual_steps" or (input_type is None and stripped.startswith("{") and '"steps"' in stripped):
@@ -87,6 +89,15 @@ def route(text: str, *, version: str | None = None, observed: dict | None = None
                             explanations=r.explanations, caveats=r.limitations,
                             reasons=[f"transcript parsed offline: {r.stats}"],
                             fallback_reason=None if r.steplist else "no instructional operation recognised in the transcript; a model could read it, none was called")
+
+    # ---- rigging and animation instructions: every Maya/Houdini procedure, and Blender text that mostly names rigging features
+    if input_type == "rigging_text" or (input_type is None and not stripped.startswith("{") and (app != "blender" or looks_like_rigging(stripped, app))):
+        if len(clauses_of(stripped)) < MIN_CLAUSES:
+            return AnswerBundle(kind="clarification", route="clarify", reasons=[f"app is {app}: only pasted multi-step procedures are supported there so far"],
+                                clarification=f"For {app} I can turn a pasted procedure into steps. Put each step on its own line (at least two).")
+        sl, rr = rigging_to_steplist(stripped, app, version)
+        return AnswerBundle(kind="procedure", route="rigging_text", steps=sl, assumptions=rr.assumptions, caveats=rr.caveats,
+                            reasons=[f"rigging/animation procedure for {app}: {len(sl.steps)} steps, {len(rr.unmatched)} unmatched"])
 
     it = classify(stripped)
     reasons = list(it.reasons)

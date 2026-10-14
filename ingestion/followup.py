@@ -138,7 +138,7 @@ def respond(session: Session, text: str, *, kb=None, tutorials: list[dict] | Non
     step = session.current_step if session.steps else None
 
     def standalone(why: str) -> Reply:
-        b = route(text, version=session.version, observed=session.observed, kb=kb, tutorials=tutorials)
+        b = route(text, version=session.version, observed=session.observed, kb=kb, tutorials=tutorials, app=session.app)
         b.reasons.append(why)
         b.request = RequestSummary(goal=text, task_type="unclear", context="standalone", constraints={"version": session.version})
         session.note(text, intent, "standalone", None)

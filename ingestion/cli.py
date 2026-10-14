@@ -30,6 +30,13 @@ def _offline(args) -> int:
         removed = purge_derived(ROOT)
         print(f"removed {len(removed)} file(s) older than 30 days", *removed, sep="\n  ")
         return 0
+    if args.cmd == "features":
+        from shared.step_record import StepList
+        from .feature_report import feature_report
+        d = json.loads(Path(args.file).read_text(encoding="utf-8"))
+        sl = StepList.model_validate(d["steps"] if isinstance(d.get("steps"), dict) else d)      # a step list, or an answer bundle holding one
+        print(feature_report(sl).render())
+        return 0
     if args.cmd == "captions":
         from .youtube.captions import CaptionsUnavailable, fetch_captions, purge_expired
         from .youtube.metadata import parse_video_id
@@ -106,7 +113,7 @@ def _offline(args) -> int:
             db = Path(args.kb) if args.kb else DEFAULT_DB
             if db.exists():
                 kb, tut = KnowledgeBase(db), load_index()
-        b = route(args.text, version=args.version, observed=obs, kb=kb, tutorials=tut)
+        b = route(args.text.replace("\\n", "\n"), version=args.version, observed=obs, kb=kb, tutorials=tut, app=args.app)
     elif args.cmd == "transcript":
         b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="transcript", duration_s=args.duration)
     else:
@@ -120,7 +127,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -146,6 +153,7 @@ def main(argv: list[str] | None = None) -> int:
     a = sub.add_parser("ask", help="OFFLINE: answer a request from the catalog / parsers; never calls a model")
     a.add_argument("text")
     a.add_argument("--version", help="your Blender version, e.g. 2.80")
+    a.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"], help="the application the steps are for (Maya and Houdini: paste a multi-step rigging/animation procedure, one step per line or '\n')")
     a.add_argument("--mode", help="observed mode, e.g. OBJECT or EDIT_MESH")
     a.add_argument("--selected", help="observed selected object types, comma separated, e.g. MESH,MESH")
     a.add_argument("--kb", help="path to the knowledge index (default: knowledge/kb.sqlite if it exists)")
@@ -175,6 +183,8 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--duration", type=float)
     c.add_argument("--version")
     c.add_argument("--purge", action="store_true", help="only delete cached captions older than 30 days, then exit")
+    ft = sub.add_parser("features", help="OFFLINE: which rigging/animation features a step list (JSON) teaches, and which prerequisites it assumes")
+    ft.add_argument("file")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
     m = sub.add_parser("validate", help="OFFLINE: validate and annotate a manually entered step list (JSON)")
     m.add_argument("file")
@@ -183,7 +193,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--app", default="blender")
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
-        p.add_argument("--prompt-version", default="v2", choices=["v2", "v3"],
+        p.add_argument("--prompt-version", default="v2", choices=["v2", "v3", "v4"],
                        help="v2 = baseline used in all recorded live runs; v3 = unevaluated candidate")
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)

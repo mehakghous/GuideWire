@@ -101,3 +101,40 @@ def test_client_retries_overload_with_one_key_and_never_retries_quota():
     c, _ = make([QuotaError("429")])
     with pytest.raises(QuotaError):
         GatewayClient(Spy(c), "t1", sleep=sleeps.append).extract(text="press tab")
+
+
+def test_json_looking_question_is_422_not_500():
+    c, _ = make()
+    for q in ('{"steps": oops', '{"steps": [{"id": "a", "order": 0, "goal": "x"}], "source_type": "written", "app": "blender"}'):
+        assert c.post("/v1/answer", json={"question": q}, headers=H).status_code == 422
+
+
+def test_same_key_with_a_different_request_is_409_and_long_keys_are_refused():
+    c, prov = make()
+    assert post(c, {"text": "press tab"}, key="k").status_code == 200
+    assert post(c, {"text": "add a cube"}, key="k").status_code == 409
+    assert len(prov.calls) == 1
+    assert post(c, {"text": "press tab"}, key="k" * 129).status_code == 400
+
+
+def test_two_identical_requests_at_once_pay_once():
+    import threading
+    import time as _t
+
+    class Slow(ScriptedProvider):
+        def generate_json(self, **kw):
+            _t.sleep(0.2)
+            return super().generate_json(**kw)
+
+    prov = Slow([GOOD] * 3)
+    c = TestClient(create_app(provider_factory=lambda: prov, tokens={"t1": "u1"}))
+    codes = []
+    ts = [threading.Thread(target=lambda: codes.append(post(c, {"text": "press tab"}, key="same").status_code)) for _ in range(2)]
+    [t.start() for t in ts]
+    [t.join() for t in ts]
+    assert codes == [200, 200] and len(prov.calls) == 1
+
+
+def test_busy_gateway_refuses_with_503_instead_of_queueing():
+    c, _ = make(max_extractions=0)
+    assert post(c, {"text": "press tab"}).status_code == 503

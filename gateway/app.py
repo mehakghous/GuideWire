@@ -7,7 +7,9 @@ shortcut: counters, tokens and the idempotency store are in memory (one worker),
 """
 from __future__ import annotations
 
+import hashlib
 import os
+import threading
 import time
 from collections import defaultdict, deque
 from dataclasses import asdict
@@ -47,13 +49,16 @@ def tokens_from_env() -> dict[str, str]:
 
 
 def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = None, yt_get=None, metadata_fetch: Callable = fetch_metadata, now: Callable[[], float] = time.time,
-               rate_per_min: int = 30, paid_per_day: int = 200) -> FastAPI:
+               rate_per_min: int = 30, paid_per_day: int = 200, max_extractions: int = 4) -> FastAPI:
     app = FastAPI(title="GuideWire AI Gateway")
     tokens = tokens_from_env() if tokens is None else tokens
     recent: dict[str, deque] = defaultdict(deque)           # user -> request times in the last minute
     paid: dict[tuple[str, int], int] = defaultdict(int)     # (user, day) -> paid calls
     searches: dict[int, int] = defaultdict(int)             # day -> YouTube searches, all users share the API quota
-    idem: dict[tuple[str, str], tuple[float, dict]] = {}
+    idem: dict[tuple[str, str], tuple[float, str, dict]] = {}   # (user, key) -> (time, request fingerprint, answer)
+    key_locks: dict[tuple[str, str], threading.Lock] = {}      # shortcut: a lock whose request failed stays until restart, a few bytes per key
+    guard = threading.Lock()
+    slots = threading.BoundedSemaphore(max_extractions)         # slow provider calls must not use up every worker thread
 
     def user(authorization: str | None = Header(default=None)) -> str:
         uid = tokens.get((authorization or "").removeprefix("Bearer ").strip())
@@ -83,14 +88,15 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
             raise HTTPException(429, "daily limit reached for this account")
         paid[(uid, day)] += 1
 
-    def replay(uid: str, key: str | None) -> dict | None:
-        if not key:
-            raise HTTPException(400, "Idempotency-Key header is required")
-        for k, (t, _) in list(idem.items()):
-            if now() - t > IDEM_TTL_S:
-                del idem[k]
-        hit = idem.get((uid, key))
-        return hit[1] if hit else None
+    def lock_for(uid: str, key: str | None) -> threading.Lock:
+        if not key or len(key) > 128:
+            raise HTTPException(400, "Idempotency-Key header is required (1 to 128 characters)")
+        with guard:
+            for k, (t, _, _) in list(idem.items()):
+                if now() - t > IDEM_TTL_S:
+                    del idem[k]
+                    key_locks.pop(k, None)
+            return key_locks.setdefault((uid, key), threading.Lock())
 
     def provider_call(fn):
         try:
@@ -108,27 +114,40 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
     def extract(body: ExtractIn, uid: str = Depends(user), idempotency_key: str | None = Header(default=None)):
         if bool(body.video_url) == bool(body.text):
             raise HTTPException(422, "send exactly one of video_url or text")
-        done = replay(uid, idempotency_key)
-        if done:
-            return done
-        vid = None
-        if body.video_url:
+        lock = lock_for(uid, idempotency_key)
+        fp = hashlib.sha256(body.model_dump_json().encode()).hexdigest()
+        with lock:                                           # a second identical request waits here, then replays instead of paying again
+            hit = idem.get((uid, idempotency_key))
+            if hit:
+                if hit[1] != fp:
+                    raise HTTPException(409, "this Idempotency-Key was already used for a different request")
+                return hit[2]
+            vid = None
+            if body.video_url:
+                try:
+                    vid = parse_video_id(body.video_url)     # rejects anything that is not a YouTube video URL
+                except ValueError as e:
+                    raise HTTPException(422, str(e))
+            if not slots.acquire(blocking=False):
+                raise HTTPException(503, "gateway is busy, retry shortly")
             try:
-                vid = parse_video_id(body.video_url)         # rejects anything that is not a YouTube video URL
-            except ValueError as e:
-                raise HTTPException(422, str(e))
-        charge(uid)
-        provider = provider_factory()
-        sl = provider_call(lambda: extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint)
-                           if vid else extract_from_text(provider, body.text, app=body.app))
-        out = sl.model_dump(mode="json")
-        idem[(uid, idempotency_key)] = (now(), out)
-        return out
+                charge(uid)
+                provider = provider_factory()
+                sl = provider_call(lambda: extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint)
+                                   if vid else extract_from_text(provider, body.text, app=body.app))
+            finally:
+                slots.release()
+            out = sl.model_dump(mode="json")
+            idem[(uid, idempotency_key)] = (now(), fp, out)
+            return out
 
     @app.post("/v1/answer")
     def answer(body: AnswerIn, uid: str = Depends(user)):
         # offline knowledge-base route, no paid call; documentation text is never stored (SEC-10)
-        return route(body.question, version=body.version).model_dump(mode="json")
+        try:
+            return route(body.question, version=body.version).model_dump(mode="json")
+        except ValueError as e:                              # JSON-looking text that is not a valid step list (JSONDecodeError and pydantic errors are ValueErrors)
+            raise HTTPException(422, str(e).splitlines()[0][:200])
 
     @app.get("/v1/youtube/metadata")
     def metadata(video_id: str, uid: str = Depends(user)):

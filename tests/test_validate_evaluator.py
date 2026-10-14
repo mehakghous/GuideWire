@@ -112,3 +112,12 @@ def test_a_step_teaching_a_craft_feature_is_craft_and_never_verifiable():
     step = sanitize_and_annotate(sl, BLENDER).steps[0]
     assert step.kind == "craft" and not step.verifiable and any("not graded" in f for f in step.flags)
     assert evaluate_step(step, {"mode": "POSE"}).status == "unverifiable"
+
+
+def test_version_notes_from_the_catalog_are_added_once_for_the_right_app():
+    from ingestion.profiles import BLENDER, HOUDINI
+    from ingestion.validate import sanitize_and_annotate
+    mk = lambda app: StepList(source_type="written", app=app, steps=[Step(id="s1", order=1, goal="Make a bone collection", feature_id="CTRL-06")])
+    b = sanitize_and_annotate(mk("blender"), BLENDER).steps[0]
+    assert b.version_dependent == ["Blender 4.0 replaced bone layers with bone collections"]
+    assert sanitize_and_annotate(mk("houdini"), HOUDINI).steps[0].version_dependent == []

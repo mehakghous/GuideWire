@@ -137,3 +137,20 @@ CRAFT_FEATURES = {
     "FACE-05": "an expression library is judged by how the face reads",
     "CLNP-04": "arcs and spacing are judged by eye",
 }
+
+
+# Version differences the matrix documents, per feature and app. A step teaching one of these gets the note in `version_dependent`, so the
+# learner sees it before following a tutorial recorded on another release (SRS SAF-11). Only notes the matrix states are listed here.
+VERSION_NOTES: dict[str, dict[str, str]] = {
+    "CTRL-06": {"blender": "Blender 4.0 replaced bone layers with bone collections"},
+    "GAME-02": {"blender": "Blender 4.0 replaced bone layers with bone collections"},
+    "ANIM-03": {"blender": "Blender 5.2 keys with Only Insert Available by default"},
+    "ANIM-05": {"blender": "Blender 5.2 adds in-between tools"},
+    "ORNT-02": {"houdini": "Houdini 22 Orient Joints v2 works on a partial skeleton"},
+    "SKEL-07": {"houdini": "Houdini 22 moved templates and recipes to APEX"},
+    "CTRL-08": {"houdini": "Houdini 22 builds rigs with APEX components and the Autorig Builder"},
+    "IKFK-06": {"houdini": "Houdini 22 has an IK/FK Blend component (v2)"},
+    "IKFK-09": {"houdini": "Houdini 22 Rest Twist counters knee flipping"},
+    "CNST-01": {"houdini": "Houdini 22 has a new multi-constraint method"},
+    "SKIN-09": {"houdini": "Houdini 22 Delta Mush is version 3.0"},
+}

@@ -17,7 +17,7 @@ from typing import Literal
 
 from shared.step_record import StatePredicate, Step, StepList
 
-from .features import CRAFT_FEATURES, load_catalog
+from .features import CRAFT_FEATURES, VERSION_NOTES, load_catalog
 from .profiles import AppProfile, norm
 
 TS_TOLERANCE_S = 1.0          # allowed rounding past the stated video duration
@@ -212,6 +212,9 @@ def sanitize_and_annotate(
 
         if step.feature_id and step.feature_id in load_catalog():
             f = load_catalog().get(step.feature_id)
+            note = VERSION_NOTES.get(f.id, {}).get(sl.app)
+            if note and note not in step.version_dependent:
+                step.version_dependent.append(note)
             code = f.support_code(sl.app)
             if code in ("U", "C"):
                 what = "has no tool" if code == "U" else "needs an add-on or a script"

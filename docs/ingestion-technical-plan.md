@@ -1946,3 +1946,19 @@ Backlog items GW-001, GW-010 and GW-040 of [the audit](audits/GUIDEWIRE_CURRENT_
 # Part XV: Catalog pitfalls in steps, independent labelling workflow, recall instrumentation (2026-10-12)
 
 See the audit's section 14 (progress log) and section 15 (GW-043). Summary: `Step.common_mistakes` is now filled from an explicit `PITFALLS` table; `version_dependent` is intentionally empty; a CSV labelling workflow (`docs/labelling_guide.md`, `ingestion/eval/labels.py`, `scripts/prepare_labelling.py`, `eval_data/labels/`), annotator agreement, and `python -m ingestion.eval.heldout` (pooled and per-video recall by evidence type, pipeline funnel, one category per miss) are ready; the 13 sheets are blank until people fill them. Tests: 442 pass, 3 strict expected-failures.
+
+
+## 17. Rigging and animation written instructions (2026-10-15)
+
+Written procedures for Maya and Houdini (and Blender text that mostly names rigging features) go to a second deterministic route, `rigging_text`
+(`ingestion/rigging_text.py`), chosen in `router.route(..., app=...)`. Each line or numbered item becomes one step whose goal is the user's own wording.
+A clause is tagged with a catalog feature only when `terms.suggest_feature` finds one clear best match; otherwise it stays a flagged, unvalidated step.
+A clause that says to create a node type the app profile knows ("Create an IK handle", "Add a Rig Doctor") expects `node_exists` afterwards;
+nothing else is claimed verifiable. The validator adds craft marking, version notes and "no tool in this app" flags; `feature_report` adds the
+prerequisites the text never covers as `assumptions`. A single line is not a procedure: it gets a clarification, not a guess.
+
+The session now remembers `app` (`/app maya`, saved in the session file; old files default to blender) and loading a step list sets it from the list.
+`/observe nodes=joint,ikHandle` records which node types exist, so `Session.verify` can judge `node_exists` steps.
+
+Limits: the matching is cautious, so many real steps stay unmatched until prompt v4 or a person sets `feature_id`. Transcripts, `/load transcript`
+and the knowledge base remain Blender-only. Maya and Houdini vocabularies are not checked against an install, and nothing here talks to either application.

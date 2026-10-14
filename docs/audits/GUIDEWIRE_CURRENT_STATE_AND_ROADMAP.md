@@ -27,7 +27,7 @@ Audit date 2026-10-11. Branch `ayesha/ingestion-foundation` (HEAD `a348464`), wo
 |---|---|---|---|
 | Question routing (how-to, concept, shortcut, troubleshooting, vague, unsupported) | `cli ask` → `router.route` | **Implemented, verified; limited to the catalog + manual index** | CLI runs below; class accuracy 93.8% dev / 90.7% held-out (author labels) |
 | Local manual index (284 pages, SQLite FTS5) | `cli ask` (needs `knowledge/kb.sqlite`, git-ignored build artefact) | Implemented; **absent on a fresh clone until built** | [S] `ingestion/kb/*`; 4 tests skip without it |
-| Written instructions → steps | `cli ask "<instructions>"` | Implemented, verified; catalog-limited | negation, conditionals, key+description merge, wrong-shortcut and menu flags tested |
+| Written instructions → steps | `cli ask "<instructions>"` | Implemented, verified; Blender modelling is catalog-limited. Rigging/animation procedures for Maya, Houdini and Blender: `cli ask --app maya "step1\nstep2"` (route `rigging_text`), verified by unit, router, CLI and chat tests; no application is installed here, so nothing was tested inside Maya or Houdini | negation, conditionals, key+description merge, wrong-shortcut and menu flags tested |
 | Transcript (SRT/VTT/timed text) → narrated steps | `cli transcript FILE` | Implemented, verified; **dev-video recall 0.55 / precision 0.81** (optimistic; tuned on it) | `transcript_eval` |
 | Key-press narration → one step per key | same | **New today**, tested | `hit tab, then 1 …, then g …` → 3 steps |
 | Manual step list validation | `cli validate FILE` | Implemented, verified | |

@@ -19,6 +19,7 @@ from shared.answer import AnswerBundle
 from shared.step_record import Step, StepList, StepVerification
 
 from .evaluator import evaluate_step
+from .features import APPS
 
 Status = str   # "pending" | "done" | "skipped" | "failed"
 MAX_TURNS = 6
@@ -41,6 +42,7 @@ class TurnNote:
 @dataclass
 class Session:
     version: str | None = None
+    app: str = "blender"                    # blender | maya | houdini: which application the user is working in
     observed: dict | None = None
     tutorial: dict | None = None            # id, title, url, version_hint, source_type: carried from the selected tutorial
     steps: StepList | None = None
@@ -64,6 +66,7 @@ class Session:
             if s0 is not None:
                 tutorial = {"title": s0.title, "url": s0.url, "version_hint": s0.version, "source_type": sl.source_type}
         self.steps = sl.model_copy(deep=True)
+        self.app = sl.app
         # NOT sl.app_version_tutorial: for pasted instructions that field holds the USER's own version, which would turn into
         # "the tutorial was recorded for Blender <your version>". A recorded version only ever comes from a tutorial source.
         self.tutorial = tutorial or {"title": sl.title, "source_type": sl.source_type, "version_hint": None}
@@ -150,7 +153,7 @@ class Session:
 
 # ---- persistence: a session is plain JSON, so a conversation survives a restart and the UI can read it
 def to_dict(s: Session) -> dict:
-    return {"format": 1, "version": s.version, "observed": s.observed, "tutorial": s.tutorial, "task": s.task, "active": s.active, "current": s.current,
+    return {"format": 1, "version": s.version, "app": s.app, "observed": s.observed, "tutorial": s.tutorial, "task": s.task, "active": s.active, "current": s.current,
             "status": s.status, "status_by": s.status_by, "corrections": s.corrections, "turns": [asdict(t) for t in s.turns],
             "steps": s.steps.model_dump(mode="json") if s.steps else None}
 
@@ -158,7 +161,9 @@ def to_dict(s: Session) -> dict:
 def from_dict(d: dict) -> Session:
     if d.get("format") != 1:
         raise ValueError(f"unknown session format: {d.get('format')!r}")
-    s = Session(version=d.get("version"), observed=d.get("observed"), tutorial=d.get("tutorial"), task=d.get("task"), active=bool(d.get("active")),
+    if d.get("app", "blender") not in APPS:
+        raise ValueError(f"session file names an unknown application: {d.get('app')!r}")
+    s = Session(version=d.get("version"), app=d.get("app", "blender"), observed=d.get("observed"), tutorial=d.get("tutorial"), task=d.get("task"), active=bool(d.get("active")),
                 current=d.get("current"), status=dict(d.get("status") or {}), status_by=dict(d.get("status_by") or {}), corrections=list(d.get("corrections") or []))
     s.steps = StepList.model_validate(d["steps"]) if d.get("steps") else None
     s.turns.extend(TurnNote(**t) for t in d.get("turns", []))

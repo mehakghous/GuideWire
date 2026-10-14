@@ -7,6 +7,7 @@ feature id sends the learner to the wrong guidance. A model (part 5) or a person
 from __future__ import annotations
 
 import re
+from functools import lru_cache
 
 from .features import APPS, Feature, load_catalog
 
@@ -27,7 +28,8 @@ _SYNONYMS = {"bone": "joint", "bones": "joint", "joints": "joint", "armature": "
              "vertex groups": "weights", "weight": "weights", "constraints": "constraint", "controls": "control", "controllers": "control"}
 _STOP = frozenset("a an the of to and or in on for with from by at as is it this that then set up add make create use using new your".split())
 MIN_SCORE = 0.6
-MIN_MARGIN = 0.15
+MIN_MARGIN = 0.12
+SINGLE_WORD = 0.85              # a one-word reference ("joint") matches too many features to count as fully as a two-word one
 
 
 def term(concept: str, app: str) -> str:
@@ -35,17 +37,22 @@ def term(concept: str, app: str) -> str:
     return CONCEPTS[concept][app]
 
 
+def _stem(w: str) -> str:
+    return w[:-1] if len(w) > 3 and w.endswith("s") and not w.endswith("ss") else w       # arcs -> arc, joints -> joint
+
+
+@lru_cache(maxsize=4096)
 def _tokens(text: str) -> frozenset[str]:
     t = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
     for src, dst in sorted(_SYNONYMS.items(), key=lambda kv: -len(kv[0])):
         t = re.sub(rf"\b{re.escape(src)}\b", dst, t)
-    return frozenset(w for w in t.split() if w not in _STOP and not w.isdigit())
+    return frozenset(_stem(w) for w in t.split() if w not in _STOP and not w.isdigit())
 
 
 def _score(goal: frozenset[str], feature: Feature, app: str) -> float:
     phrase = re.sub(r"\([^)]*\)", "", feature.support[app].split("–", 1)[-1]).split(";")[0].split(",")[0]     # first tool phrase for this app, no parentheses
     refs = (_tokens(feature.name), _tokens(phrase), _tokens(phrase.split(">")[-1]))                           # name, whole phrase, the tool itself (last menu item)
-    return max((len(goal & r) / len(r) for r in refs if r), default=0.0)
+    return max((len(goal & r) / len(r) * (1.0 if len(r) > 1 else SINGLE_WORD) for r in refs if r), default=0.0)
 
 
 def suggest_feature(text: str, app: str) -> str | None:

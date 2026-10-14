@@ -102,3 +102,13 @@ def test_feature_id_must_be_in_the_catalog_and_gaps_in_the_app_are_flagged():
     assert any("LAYR-06" in f and "no tool" in f for f in step.flags) and step.confidence < 0.5
     with pytest.raises(ValueError):
         Step(id="s1", order=1, goal="x", feature_id="skel-1")        # wrong shape is refused by the schema itself
+
+
+def test_a_step_teaching_a_craft_feature_is_craft_and_never_verifiable():
+    from ingestion.profiles import BLENDER
+    from ingestion.validate import sanitize_and_annotate
+    sl = StepList(source_type="written", app="blender", steps=[
+        Step(id="s1", order=1, goal="Review the arcs", feature_id="CLNP-04", expected_state=[P(kind="mode", target="POSE")])])
+    step = sanitize_and_annotate(sl, BLENDER).steps[0]
+    assert step.kind == "craft" and not step.verifiable and any("not graded" in f for f in step.flags)
+    assert evaluate_step(step, {"mode": "POSE"}).status == "unverifiable"

@@ -126,3 +126,14 @@ def _feature(d: dict) -> Feature:
 def load_catalog(path: Path = CATALOG_PATH) -> Catalog:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     return Catalog([_feature(d) for d in data["features"]])
+
+
+# Features whose result is judged by eye, so a step teaching them is craft: GuideWire shows the tutorial's reference playback and asks the
+# learner to compare, and never grades it (SRS SAF-05). PROPOSED list: the matrix gives measurable tolerances for most features, so only the
+# ones whose point is a creative choice are here. Review and extend it as tutorials arrive.
+CRAFT_FEATURES = {
+    "ANIM-04": "story poses are a performance choice",
+    "CURV-04": "easing is chosen by eye",
+    "FACE-05": "an expression library is judged by how the face reads",
+    "CLNP-04": "arcs and spacing are judged by eye",
+}

@@ -17,7 +17,7 @@ from typing import Literal
 
 from shared.step_record import StatePredicate, Step, StepList
 
-from .features import load_catalog
+from .features import CRAFT_FEATURES, load_catalog
 from .profiles import AppProfile, norm
 
 TS_TOLERANCE_S = 1.0          # allowed rounding past the stated video duration
@@ -182,6 +182,9 @@ def sanitize_and_annotate(
     seen_sigs: dict[tuple, Step] = {}
     prev: Step | None = None
     for step in sl.steps:
+        if step.feature_id in CRAFT_FEATURES and step.kind != "craft":
+            step.kind = "craft"                               # decided by the catalog, not the model; recorded so the learner can see why
+            step.flags.append(f"{step.feature_id} is craft ({CRAFT_FEATURES[step.feature_id]}): compare with the tutorial's playback, it is not graded")
         for which in ("expected_state", "start_state"):
             kept = []
             for p in getattr(step, which):

@@ -60,3 +60,13 @@ def test_cli_score_and_instructions_work_on_a_saved_step_list(tmp_path, capsys):
     assert cli.main(["review", "show", str(f)]) == 0
     shown = capsys.readouterr().out
     assert "[shown] Open Skeleton > Orient Joint." in shown and "[catalog] Check that" in shown
+
+
+def test_cli_score_can_compare_several_files(tmp_path, capsys):
+    from ingestion import cli
+    a, b = tmp_path / "a.json", tmp_path / "b.json"
+    a.write_text(before().model_dump_json(), encoding="utf-8")
+    b.write_text(after().model_dump_json(), encoding="utf-8")
+    assert cli.main(["score", str(a), str(b), "--rubric", "tests/fixtures/rubrics/maya_fkik_leg.json"]) == 0
+    out = capsys.readouterr().out
+    assert out.count("overall") == 2 and f"== {a}" in out and f"== {b}" in out

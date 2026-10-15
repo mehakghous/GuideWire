@@ -45,7 +45,7 @@ PRICES = {                    # USD per 1M tokens (input, output incl. thinking)
 # The cache key must change when what the MODEL sees changes (prompt text, response schema), not when the stored StepList contract gains fields.
 # Keying on SCHEMA_VERSION silently invalidated every cached result when the contract moved 0.3 -> 0.6 (found 2026-10-11: cached cells were re-called).
 # "0.3" is the tag the E1 cells were stored under; bump it ONLY together with a change to the model-facing schema (tests/test_experiment.py pins its fingerprint).
-MODEL_SCHEMA_TAG = "0.7"  # 0.7: DraftStep.result/how_to/check. 0.6: DraftStep.feature_id. 0.5: PredicateKind node_exists. 0.4: DraftStep.kind (mechanics|craft); cells cached under 0.3 are no longer reused
+MODEL_SCHEMA_TAG = "0.8"  # 0.8: how_to, check, result, times, actions and expected_state are REQUIRED in the model-facing schema. 0.7: DraftStep.result/how_to/check. 0.6: DraftStep.feature_id. 0.5: PredicateKind node_exists. 0.4: DraftStep.kind (mechanics|craft); cells cached under 0.3 are no longer reused
 ARMS = {"A": {"prompt_version": "v2"}, "B": {"prompt_version": "v3"}}
 
 

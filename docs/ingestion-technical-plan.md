@@ -2129,3 +2129,48 @@ Recorded: 108,268 prompt + 1,188 output + 1,642 thinking tokens = 0.092 USD at t
 
 ### 25.7 Limits
 Everything in 25.5 is offline. No instruction has been tried in Maya. The composer repeats what the model said it saw; if the model misread the screen the line is wrong with evidence attached. Feature tags were not judged for meaning. Request understanding is a phrase table, so unusual wording falls back to the keyword stages. Maya and Houdini vocabularies are unverified against an install.
+
+### Prompt v5 live attempts (2026-10-16)
+Two attempts of three HTTP calls each (about 4 minutes apart) on `dc3iRo0hb3g` with `--prompt-version v5` all ended in HTTP 503 "high demand". Nothing was charged; no v5 output exists, so the v5 columns of the rubric table remain unmeasured.
+To retry when capacity returns: `python -m ingestion.cli video https://www.youtube.com/watch?v=dc3iRo0hb3g --app maya --prompt-version v5 --run-log runs/live_maya_v5.jsonl -o v5.json`, then `python -m ingestion.cli score before.json v5.json --rubric tests/fixtures/rubrics/maya_fkik_leg.json`.
+
+
+## 26. Rigging knowledge base, real-speech transcripts and the v5 live result (2026-10-16)
+
+### 26.1 Audit: the gaps this closes
+Before today the system knew the feature catalog (what exists, and in which app it is native) but nothing about HOW people say things, WHERE the tools are, WHAT goes wrong, or HOW to check a step. Concretely: the matcher knew tool names only from the matrix text; the composer's checks were one generic sentence per feature; nothing answered "my knee flips"; the Maya vocabulary was a short hand-written list; and the transcript reader had never been run on real speech.
+
+### 26.2 What was researched, and what could not be
+Sources: Autodesk Maya help (Orient Joint Options, Parent Constraint, IK Handle Tool, Smooth Bind, Freeze Transformations, Set Driven Key window, Add Attribute Options, Paint Skin Weights); the Blender manual rigging pages (fetched with the project's own low-rate fetcher, 116 new pages, the index is now 410 pages); community threads (Autodesk Community, Polycount, Blender Artists, a Blender bug report, UCLA and University of Washington course notes); and the narration of three real tutorials.
+Could not be obtained: **Reddit threads** and **Blender Stack Exchange** pages (the search tool never returned them), and anything checked inside a running Maya or Blender. Houdini was not researched. The knowledge file says so, and returns nothing for Houdini instead of guessing.
+
+### 26.3 The knowledge base (`knowledge/rigging_knowledge.json`, `ingestion/rigging_knowledge.py`)
+21 entries (Maya 17, Blender 4), 31 sources, each statement tagged with a trust tier (`official` vendor documentation, `community` forum advice, `tutorial` said or shown in a tutorial, `author` unverified) and source ids. Per entry: everyday phrases, UI path and option names, prerequisites, ordered outline, facts, plain-language checks, common mistakes, symptom-to-fix troubleshooting, and recorded source disagreements. `load()` refuses a file that cites an unknown source, calls something `official` without an official source, names an unknown feature or app, or repeats an id (tests mutate the file to prove it). Conflicts are recorded, not resolved: the pole-vector selection order and the Add Attribute menu location are two real disagreements between sources. To add knowledge: add the source, add the entry with tiers, run `pytest tests/test_rigging_knowledge.py`.
+
+### 26.4 Where it is used
+- Feature tagging (`terms.suggest_feature`): everyday phrases are tried first.
+- Request understanding (`intent_rigging.interpret`): when the phrase table has nothing, the knowledge base says what the person is asking about; the reading is shown to them.
+- Troubleshooting answers (`router`, route `rigging_knowledge`): cause, ordered fixes, the trust tier, and each source (labelled `manual`, `forum` or `tutorial_video`); if the match is for the other application, that is said.
+- Composed steps (`instructions.py`): app-specific checks with their sources, common mistakes with their tier and source, "Before this" prerequisites and a note where sources disagree.
+- Validator: the documented menu and option names are part of the app vocabulary (fewer false "unknown UI name" flags).
+- Prompt v6: the documented menu paths and options for the application (about 500 extra tokens, about 0.0004 USD per call). Community advice is never put in a prompt.
+- Transcript reader: intros, outros and recaps are explanations (at the ends of the video, or when they name no feature); "now check that it works" talk becomes a `check` line on the step before; "control and shift key" is the keyboard.
+
+### 26.5 Measurements (offline; every number reproducible with the commands in the README)
+Real spoken tutorials: three English auto-caption transcripts (Maya, 12 + 12 + 17 minutes), 52 labelled moments, one labeller, the last 13 labels made after seeing the reader's output (biased toward agreement). Fixture: `tests/fixtures/rubrics/real_speech_labels.json` (ids, times, labels; no caption text).
+
+| Reader | Tag precision | Recall | False steps |
+|---|---|---|---|
+| Original (last commit) | 42.3% (11/26) | 21.2% (11/52) | 6 |
+| Today, knowledge switched off | 51.6% (16/31) | 30.8% (16/52) | 5 |
+| Today, knowledge on | **63.6% (28/44)** | **53.8% (28/52)** | 6 |
+
+Everyday requests (16, written by the assistant after the knowledge base, so a development set and an upper bound): 9/16 understood without the knowledge base, 16/16 with it (two phrases were added while tuning on this set). Real symptom wording (9 forum-thread titles and error messages from the research): 9/9 find the right entry; unrelated text, the wrong application and Houdini find nothing.
+Mistakes the real speech exposed and the fixes: "create"/"add"/"make" were treated as filler so "Create Joints" became the single word "joint" and matched any sentence mentioning a joint (16 of 21 steps in one video were tagged "create a joint chain"); "orient constraint" was read as joint orientation; the keyboard "control key" as rig controls; intros and "assume you know how to ..." as steps.
+
+### 26.6 The live prompt v5 result (one paid call, 0.096 USD, 28 s)
+The model returned 11 steps and **ignored every new field** (no `how_to`, `check`, `result`, times or expected state) even though the prompt asked for them: it fills optional JSON-schema fields only when it has to. Rubric: v5 live 58.6%, below v4 plus the composer (62.5%), with two more steps (freeze transforms, constrain the switch control to the hip) and fewer evidence fragments. Fix: those fields are now REQUIRED in the schema the model sees (`extract.MODEL_REQUIRED`, `MODEL_SCHEMA_TAG` 0.8). This has NOT been re-run live. Feature tags also differed between runs (step 5 was CNST-04, then CNST-01): one run is not a stable measurement.
+Also learned: the original test video's only caption track is Korean auto-captions, so its narration is not English.
+
+### 26.7 Limits
+One labeller, small sets, auto-captions with recognition errors ("Fries the transformations"); the reader still tags about a third of moments wrongly or not at all; menu paths marked `tutorial` or `author` are not vendor documentation; Autodesk pages are 2009 to 2026 versions as stated per source; nothing was tried inside Maya or Blender; Houdini, Reddit and Stack Exchange are not covered; the captions adapter uses an unofficial endpoint (against YouTube's terms, development only; its cache is deleted after 30 days).

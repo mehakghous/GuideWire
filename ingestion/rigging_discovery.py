@@ -136,7 +136,7 @@ def parse_goal(query: str, app: str | None = None, version: str | None = None) -
         m = _VERSION[app].search(q)
         version = m.group(1) if m else None
     cat = load_catalog()
-    it = interpret(q)                                                   # outcomes in plain words: "make the legs move properly"
+    it = interpret(q, app)                                                   # outcomes in plain words: "make the legs move properly"
     stages, codes = [], []
     for pat, cs, name in _STAGES:
         if pat.search(q):

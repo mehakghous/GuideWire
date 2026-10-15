@@ -44,11 +44,12 @@ _OUTCOMES: list[tuple[re.Pattern, str, tuple[str, ...], tuple[str, ...], tuple[s
     (re.compile(r"\b(?:ready|set up|setup|prepare|prep|get)\b.{0,30}\banimat\w*|animation.?ready|rigged? (?:and )?ready", re.I),
      "get the character ready for animation", ("SKEL", "ORNT", "IKFK", "CTRL", "SKIN"), (), ("character", "rigging")),
 ]
+USE_KNOWLEDGE = True                                       # False = the regex phrase table only (the baseline in measurements)
 _BROAD_ASK = ("'Ready for animation' can mean two different things: a complete rig with controls an animator can grab, or just the skeleton and skinning so the mesh moves. "
               "Which do you want: (1) a full rig with controls, or (2) skeleton and skinning only?")
 
 
-def interpret(query: str) -> Interpretation:
+def interpret(query: str, app: str | None = None) -> Interpretation:
     q = query or ""
     out = Interpretation()
     for name, rx in _PARTS:
@@ -62,6 +63,19 @@ def interpret(query: str) -> Interpretation:
             areas += [a for a in ar if a not in areas]
             feats += [f for f in ft if f not in feats]
             words += [w for w in wd if w not in words]
+    if not labels and USE_KNOWLEDGE:                         # nothing in the phrase table: ask the researched knowledge base what people call this
+        from .rigging_knowledge import load as knowledge
+        kb = knowledge()
+        for a in ([app] if app else ["maya", "blender"]):
+            e = kb.match_phrase(q, a, min_cover=0.6)
+            if e is not None:
+                topic = e.id.split(".", 1)[1].replace("_", " ")
+                labels.append(f"{topic} ({a})")
+                areas += [c for c in dict.fromkeys(f.split("-")[0] for f in e.features) if c not in areas]
+                feats += [f for f in e.features[:2] if f not in feats]
+                words += [w for w in topic.split() if w not in words]
+                out.notes.append(f"This matches what {a} learners ask about '{topic}'.")
+                break
     out.areas, out.features, out.words, out.label = tuple(areas), tuple(feats), tuple(words), "; ".join(labels)
     ready = any("ready for animation" in lb for lb in labels)
     if ready and not out.part and not _WHOLE.search(q) and not re.search(r"\b(?:controls?|skinning|skin|skeleton|ik|fk)\b", q, re.I):

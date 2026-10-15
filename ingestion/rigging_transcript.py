@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 
 from shared.answer import Explanation
-from shared.step_record import Action, StatePredicate, Step, StepList
+from shared.step_record import Action, HowTo, StatePredicate, Step, StepList
 
 from .features import load_catalog
 from .instructions import speech_details
@@ -27,7 +27,10 @@ _ACTION = re.compile(r"\b(?:create|creating|add|adding|insert|make|making|build|
                      r"mirror|orient|parent|constrain|key|keyframe|bake|export|import|rotate|move|drag|draw|name|rename|let'?s|we'?ll|we'?re going to|"
                      r"i'?m going to|you can|you'?ll|want to|have to|need to|go ahead)\b", re.I)
 _FILLER = re.compile(r"^(?:(?:okay|ok|so|now|alright|right|well|and|then|next|first|also|just|um|uh|yeah|guys|everyone|hello|hi)\b[,.\s]*)+", re.I)
+_CHATTER = re.compile(r"\b(?:welcome|in this (?:video|tutorial|lesson)|(?:show|showing) you how to|going to (?:show|assume)|i (?:will|am going to) be (?:showing|using)|hope (?:that|this)|let me know|thanks? for watching|subscribe|see you|last (?:video|tutorial)|previous (?:video|tutorial)|went over|we (?:learned|covered|went)|assume (?:that )?you (?:do )?know|any questions|in the description|check out)\b", re.I)
+_TESTING = re.compile(r"\b(?:let\'?s test|to test|test (?:it|this|the|out)|check (?:if|that|whether)|just check|make sure (?:it|that|everything) (?:is )?(?:working|works)|you\'?ll notice|you will notice|see (?:if|that) it works|works (?:like|as|correctly)|now if i|if i (?:go|move|grab|take|click)|you can see|as you can see)\b", re.I)
 MERGE_GAP_S = 15.0
+EDGE_S = 45.0                       # the first and last seconds of a video, where greetings, recaps and sign-offs live
 # a spoken unit often holds several instructions ("create a joint chain now go to skeleton and orient joint"): cut it where the speaker moves on
 _BOUNDARY = re.compile(r"(?<=[.!?;])\s+|\b(?:and then|and now|then|next|now|after that|afterwards|finally)\b[,\s]*", re.I)
 _VERSION_WORDS = re.compile(r"\b(?:old(?:er)? versions?|previous versions?|earlier versions?|used to|no longer|legacy|deprecated)\b", re.I)
@@ -63,7 +66,7 @@ def _segments(u: Unit, app: str) -> list[tuple[str, float, float, str]]:
         seg = flat[a:b].strip(" ,.;")
         if not seg:
             continue
-        if pieces and not _matches(seg, app) and len(seg) < 90:
+        if pieces and not _matches(seg, app) and len(seg) < 90 and not _CHATTER.search(seg):
             pieces[-1][0] += " " + seg
             pieces[-1][2] = b
         else:
@@ -99,6 +102,14 @@ def ingest_rigging_transcript(text: str, app: str, *, duration_s: float | None =
             nodes = _created_nodes(text_, app)
             # free speech shares many words with catalog names ("edit mode ... move"): a piece must also use rigging/animation vocabulary to count
             fid = suggest_feature(text_, app) if any(rx.search(text_) for rx in _AREA_WORDS.values()) else None
+            edge_s = min(EDGE_S, 0.1 * duration_s) if duration_s else EDGE_S             # 10% of a short clip, at most 45 s
+            edge = t0 < edge_s or (duration_s is not None and t0 > duration_s - edge_s)
+            if _CHATTER.search(text_) and (edge or fid is None):             # intro, outro, recap, "I assume you know ...": talk, not an instruction (only at the ends, or when it names no feature)
+                expl.append(Explanation(text=text_, provenance="transcript_rules", start_s=t0, end_s=t1))
+                continue
+            if _TESTING.search(text_) and steps and not nodes and (fid is None or fid == steps[-1].feature_id):     # "now if I move it you can see ...": how to CHECK the previous step, not a new step
+                steps[-1].check.append(HowTo(text=_trim(text_), support="said", evidence=said[:240]))
+                continue
             if not _ACTION.search(text_):
                 if fid:
                     expl.append(Explanation(text=text_, provenance="transcript_rules", start_s=t0, end_s=t1))     # talks about a feature, tells you to do nothing

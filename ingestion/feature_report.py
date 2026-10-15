@@ -35,9 +35,15 @@ class FeatureReport:
         out += [f"  UNKNOWN feature id {f}" for f in self.unknown]
         out += [f"  {name(f)} is craft: compared by eye, not graded" for f in self.craft]
         out += [f"  {name(f)} has no tool in {self.app}: needs an add-on or a different workflow" for f in self.unsupported]
-        for f, miss in self.missing_prerequisites.items():
-            out.append(f"  {name(f)} assumes you already did: " + "; ".join(name(m) for m in miss))
+        if self.all_missing:
+            out.append("  assumes you already did: " + "; ".join(name(m) for m in self.all_missing))
         return "\n".join(out)
+
+    @property
+    def all_missing(self) -> list[str]:
+        """Every uncovered prerequisite once, in teaching order (not repeated for each feature that needs it)."""
+        need = {m for miss in self.missing_prerequisites.values() for m in miss}
+        return [f.id for f in load_catalog().features if f.id in need]
 
 
 def feature_report(sl: StepList) -> FeatureReport:

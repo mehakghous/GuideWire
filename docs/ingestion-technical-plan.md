@@ -2054,3 +2054,26 @@ Two live searches (maya queries, 19 videos with metadata) were read by hand. Wha
 - Raw results are saved to `runs/cache/discovery_*.json` (git-ignored, purged after 30 days by `cli purge`) and can be re-ranked with `find --replay FILE` at no cost.
 Observed and not acted on: none of the 19 titles states the user's Maya version except one; several are non-English (no language preference exists yet); none is from an official channel.
 Still unknown: whether the top results actually teach what their titles suggest. That is what extracting their steps will show.
+
+
+## 24. First video to steps, and transcripts for Maya, Houdini and Blender (2026-10-16)
+
+### 24.1 Gemini video route, prompt v4, one real video
+`dc3iRo0hb3g` (Sang Sang, Maya Character Rigging Part 9, 19 min), `--app maya --prompt-version v4`, model gemini-3.6-flash. The first call failed with 503 (high demand, three attempts, no charge); a retry
+two minutes later succeeded on its first attempt: 108,268 prompt tokens, 1,188 output, 1,642 thinking tokens, about 0.09 USD at the recorded price list (notional). Ten steps, all `feature_id`s valid:
+create joint chain (SKEL-01), place joints (SKEL-02), rename (SKEL-03), orient (ORNT-02), duplicate chain for IK and FK (SKEL-05), parent-constrain between the chains (CNST-04), create a switch control (CTRL-01),
+add the FK_IK_Switch attribute (CTRL-04), connect it to the constraint weights (IKFK-06), test the blend (IKFK-06). By reading the steps against the title they follow the video's stated subject.
+Faults found by looking:
+- No step has a video time range (the model left the optional timestamps out), so the player cannot seek to a step. Prompt v4 now says every step needs both times.
+- No step has an expected state: nothing is checkable. Prompt v4 now says to add `node_exists` when a step creates a listed node type (joint, ikHandle, skinCluster ...).
+- Feature tags are plausible but two are loose: "duplicate the chain to make IK and FK chains" is tagged SKEL-05 (insert/delete/reparent), and "parent constrain between IK and FK chains" CNST-04 (weighted multi-target blending). Only the model's own reading of the catalog list; to be judged against your labels.
+- The prerequisite report listed the same missing items once per feature; it now lists each once.
+Not yet done: a second paid call to see whether the two prompt fixes work (about 0.09 USD, needs your OK); anything beyond one video.
+
+### 24.2 Transcript route for any application
+`ingestion/rigging_transcript.py` reads a user-supplied transcript for Maya, Houdini or Blender rigging/animation tutorials. A spoken piece becomes a step when it has an action cue and either names one catalog feature clearly
+(and uses rigging vocabulary) or says to create a node type the app profile knows. Units are cut at caption boundaries and at "then / next / now", and a cut that matches nothing is glued back onto the piece before it.
+Neighbouring pieces about one feature merge. Times and verbatim evidence come from the cues; steps are narrated only; version cues name another version of the same application. `route(..., input_type="transcript", app=...)`,
+`cli transcript --app`, `cli captions --app` and chat `/app` + `/load transcript` use it. A Blender transcript with no modelling-catalog steps falls back to it. A free-speech false positive found while testing ("edit mode ... move whole objects"
+matched a bone-placement feature) is closed by requiring rigging vocabulary in the piece. `suggest_feature` now weights the tool name above the whole menu path ("go to skeleton and orient joint" is Orient Joints, not Create Joints).
+Limits: rule-based and cautious, so it will miss real instructions phrased unusually; Houdini and Maya vocabularies are unchecked against an install; no real transcript of a rigging tutorial has been run through it yet (tests use written examples).

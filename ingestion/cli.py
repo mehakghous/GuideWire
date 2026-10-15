@@ -103,7 +103,7 @@ def _offline(args) -> int:
             print(f"error: {e}", file=sys.stderr)
             return 1
         print(f"captions: {res.source} ({res.language}), from_cache={res.from_cache}, tracks={res.tracks}", file=sys.stderr)
-        b = route(res.text, version=args.version, input_type="transcript", duration_s=args.duration)
+        b = route(res.text, version=args.version, input_type="transcript", duration_s=args.duration, app=args.app)
         print(b.model_dump_json(indent=2))
         return 0
     if args.cmd == "chat":
@@ -197,7 +197,7 @@ def _offline(args) -> int:
                 kb, tut = KnowledgeBase(db), load_index()
         b = route(args.text.replace("\\n", "\n"), version=args.version, observed=obs, kb=kb, tutorials=tut, app=args.app, store=_reviewed_store(args))
     elif args.cmd == "transcript":
-        b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="transcript", duration_s=args.duration)
+        b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="transcript", duration_s=args.duration, app=args.app)
     else:
         b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="manual_steps")
     out = b.model_dump_json(indent=2)
@@ -261,11 +261,13 @@ def main(argv: list[str] | None = None) -> int:
     t = sub.add_parser("transcript", help="OFFLINE: parse a user-supplied SRT/VTT or timestamped transcript into narrated steps")
     t.add_argument("file")
     t.add_argument("--duration", type=float)
+    t.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"], help="the application the tutorial is for")
     t.add_argument("--version")
     t.add_argument("-o", "--out")
     c = sub.add_parser("captions", help="OPT-IN: fetch captions for ONE public video (third-party library, undocumented endpoint), then run the offline transcript route")
     c.add_argument("video", help="YouTube URL or id")
     c.add_argument("--duration", type=float)
+    c.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"], help="the application the tutorial is for")
     c.add_argument("--version")
     c.add_argument("--purge", action="store_true", help="only delete cached captions older than 30 days, then exit")
     rv = sub.add_parser("review", help="OFFLINE: review a generated step list: show it, edit it, promote it to a reviewed workflow users are then served")

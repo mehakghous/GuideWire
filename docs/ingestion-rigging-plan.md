@@ -106,3 +106,14 @@ sensible on the real 294-page index (spot-checked by hand, 3 questions). Indepen
 
 
 Tests added after the live runs (18 in total in `tests/test_rigging_discovery.py`): query without filler, auto-rig penalty and the exception, series note, stage credit, area wording, save and replay without quota.
+
+
+## Milestone 10: first video extraction (live) and multi-application transcripts
+
+| Criterion | Status |
+|---|---|
+| One real rigging video to steps through Gemini with prompt v4 | Done once (technical plan 24.1): 10 steps, valid feature ids, no times, no expected state |
+| Prompt fixes for times and `node_exists` | Written; not yet re-tested live (needs a second paid call) |
+| Prerequisites reported once, not once per feature | Verified (unit) |
+| Transcript to steps for Maya, Houdini, Blender rigging; CLI and chat; old Blender behaviour unchanged | Verified (`tests/test_rigging_transcript.py`, 9 tests, full suite 552 passed) |
+| Transcript route run on a real rigging transcript | Not done: needs a transcript (yours, or the opt-in captions adapter) |

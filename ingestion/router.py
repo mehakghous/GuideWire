@@ -19,7 +19,7 @@ from shared.answer import AnswerBundle, Explanation, SourceRef
 from shared.step_record import Step
 
 from .catalog import BY_ID, Operation, version_status
-from .rigging_text import MIN_CLAUSES, clauses_of, looks_like_rigging, rigging_to_steplist
+from .rigging_text import MIN_CLAUSES, clauses_of, looks_like_rigging, prerequisite_notes, rigging_to_steplist
 from .intent import classify
 from .knowledge import finish, how_to_steps
 from .text_steps import written_to_steplist
@@ -84,9 +84,10 @@ def route(text: str, *, version: str | None = None, observed: dict | None = None
         sl, notes = normalise_manual_steps(json.loads(stripped), version)
         return AnswerBundle(kind="procedure", route="manual_steps", steps=sl, caveats=notes, reasons=["manual step list validated against the shared schema"])
     if input_type == "transcript" or (input_type is None and _looks_like_timed_text(stripped)):
-        r = ingest_transcript(stripped, duration_s=duration_s, version=version)
+        r = ingest_transcript(stripped, duration_s=duration_s, version=version, app=app)
+        notes = prerequisite_notes(r.steplist) if r.steplist is not None and r.steplist.app != "blender" else ([], [])        # prerequisites the narration never covers
         return AnswerBundle(kind="procedure" if r.steplist else "unsupported", route="transcript_parser", steps=r.steplist,
-                            explanations=r.explanations, caveats=r.limitations,
+                            explanations=r.explanations, caveats=r.limitations + notes[1], assumptions=notes[0],
                             reasons=[f"transcript parsed offline: {r.stats}"],
                             fallback_reason=None if r.steplist else "no instructional operation recognised in the transcript; a model could read it, none was called")
 

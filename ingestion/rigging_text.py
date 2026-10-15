@@ -53,6 +53,14 @@ def _created_nodes(clause: str, app: str) -> list[str]:
     return sorted(n for n in get_profile(app).nodes if re.search(rf" {re.escape(_node_words(n))}s? ", words))
 
 
+def prerequisite_notes(sl: StepList) -> tuple[list[str], list[str]]:
+    """(assumptions, caveats): what the steps assume was already done, and features the application has no tool for."""
+    rep = feature_report(sl)
+    cat = load_catalog()
+    return (["The steps assume you already did: " + "; ".join(f"{m} {cat.get(m).name}" for m in rep.all_missing)] if rep.all_missing else [],
+            [f"{cat.get(f).id} has no tool in {sl.app}: the instructions need an add-on or a different workflow" for f in rep.unsupported])
+
+
 def rigging_to_steplist(text: str, app: str, version: str | None = None) -> tuple[StepList, RiggingResult]:
     cl = clauses_of(text)
     if len(cl) < MIN_CLAUSES:
@@ -71,11 +79,7 @@ def rigging_to_steplist(text: str, app: str, version: str | None = None) -> tupl
     sl = StepList(source_type="written", app=app, app_version_tutorial=version, steps=steps, prompt_version="deterministic-rigging-v1")
     sanitize_and_annotate(sl, get_profile(app))
     check_structure(sl)
-    rep = feature_report(sl)
-    cat = load_catalog()
-    res.assumptions = [f"{cat.get(f).id} {cat.get(f).name} assumes you already did: " + "; ".join(f"{m} {cat.get(m).name}" for m in miss)
-                       for f, miss in rep.missing_prerequisites.items()]
-    res.caveats = [f"{cat.get(f).id} has no tool in {app}: the instructions need an add-on or a different workflow" for f in rep.unsupported]
+    res.assumptions, res.caveats = prerequisite_notes(sl)
     if res.unmatched:
         res.caveats.append(f"{len(res.unmatched)} of {len(cl)} steps were not matched to a known feature and stay unvalidated")
     return sl, res

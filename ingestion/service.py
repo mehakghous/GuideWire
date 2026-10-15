@@ -31,6 +31,7 @@ from . import session as S
 from .features import APPS
 from .followup import respond
 from .router import route
+from .workflows import DEFAULT_STORE, ReviewedWorkflowStore
 
 LIST_KEYS = {"selected_objects", "selection_types", "open_panels", "nodes"}
 
@@ -68,6 +69,7 @@ class Service:
     session_path: Path | None = None
     kb: object | None = None
     tutorials: list | None = None
+    store: ReviewedWorkflowStore | None = None     # reviewed workflows, if any have been promoted (knowledge/reviewed)
     last_bundle: AnswerBundle | None = None
 
     # ------------------------------------------------------------------ construction and persistence
@@ -81,7 +83,7 @@ class Service:
                 sess.version = version
         else:
             sess = S.Session(version=version)
-        return cls(sess, path, kb, tut)
+        return cls(sess, path, kb, tut, ReviewedWorkflowStore(DEFAULT_STORE) if use_kb and DEFAULT_STORE.exists() else None)
 
     def save(self) -> None:
         if not self.session_path:
@@ -110,7 +112,7 @@ class Service:
             return self._result("empty", "clarify", None, "Say something, or /help.")
         if text.startswith("/"):
             return self.command(text)
-        reply = respond(self.session, text, kb=self.kb, tutorials=self.tutorials)
+        reply = respond(self.session, text, kb=self.kb, tutorials=self.tutorials, store=self.store)
         if reply.bundle.steps and reply.route != "session":
             self.last_bundle = reply.bundle
         out = self._result(reply.intent, reply.route, reply.bundle)
@@ -176,7 +178,7 @@ class Service:
                         b = route(text, version=self.session.version, input_type="transcript", duration_s=dur)      # transcripts are Blender-only so far
                         tut = {"title": Path(args[1]).name, "source_type": "transcript", "version_hint": None}
                     else:
-                        b = route(text, version=self.session.version, app=self.session.app)
+                        b = route(text, version=self.session.version, app=self.session.app, store=self.store)
                         tut = {"title": Path(args[1]).name, "source_type": "written", "version_hint": None}
                     if not b.steps:
                         raise ValueError("no steps could be built from that file: " + (b.fallback_reason or b.clarification or "nothing recognised"))

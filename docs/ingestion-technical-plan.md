@@ -1962,3 +1962,19 @@ The session now remembers `app` (`/app maya`, saved in the session file; old fil
 
 Limits: the matching is cautious, so many real steps stay unmatched until prompt v4 or a person sets `feature_id`. Transcripts, `/load transcript`
 and the knowledge base remain Blender-only. Maya and Houdini vocabularies are not checked against an install, and nothing here talks to either application.
+
+
+## 18. Review and promote (GW-012, 2026-10-15)
+
+`cli review` is the human step between a generated step list and a workflow users are served:
+`review show FILE` (steps with their flags), `review edit FILE --set-goal N=TEXT --remove N --move N:M` (the input list is never mutated; ids stay,
+`order` is renumbered, a step cannot move before a step it depends on, an edit that breaks structure is refused), `review promote FILE --by NAME
+--request TEXT | --ops a,b [--min-version V --max-version V]` (marks every step `reviewed` only here and only with a named reviewer; stores it under
+`knowledge/reviewed`), `review list`. `router.route(store=...)` serves a stored workflow first for catalog how-to/procedure text and for rigging
+procedures (`route=reviewed_workflow`, provenance `reviewed_workflow`) when the version is known and inside the declared range; `ask` and the chat
+`Service` pass the store automatically when `knowledge/reviewed` exists. Code: `ingestion/workflows.py` (`edit_steps`, `promote`, `entries`, `load_steplist`).
+
+Found on the way and fixed: `parse_version` only understood "X.Y", so a Maya version such as "2025" counted as unknown and a reviewed workflow was never served;
+it now reads "2025" as (2025, 0) and "20.5.410" as (20, 5).
+
+Not done on purpose: no workflow is promoted. GW-012 also asks to promote the 13 catalog procedures "after a human check"; that check is yours.

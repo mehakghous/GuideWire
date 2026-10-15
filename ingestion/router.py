@@ -95,6 +95,9 @@ def route(text: str, *, version: str | None = None, observed: dict | None = None
         if len(clauses_of(stripped)) < MIN_CLAUSES:
             return AnswerBundle(kind="clarification", route="clarify", reasons=[f"app is {app}: only pasted multi-step procedures are supported there so far"],
                                 clarification=f"For {app} I can turn a pasted procedure into steps. Put each step on its own line (at least two).")
+        hit = store.find(text_key(stripped), version) if store is not None else None
+        if hit is not None:
+            return AnswerBundle(kind="procedure", route="reviewed_workflow", steps=hit, reasons=[f"reviewed workflow {text_key(stripped)}"])
         sl, rr = rigging_to_steplist(stripped, app, version)
         return AnswerBundle(kind="procedure", route="rigging_text", steps=sl, assumptions=rr.assumptions, caveats=rr.caveats,
                             reasons=[f"rigging/animation procedure for {app}: {len(sl.steps)} steps, {len(rr.unmatched)} unmatched"])

@@ -25,12 +25,12 @@ from .step_record import StepList
 Kind = Literal["procedure", "concept", "troubleshooting", "mixed", "clarification", "unsupported", "needs_model",
                "tutorial_recommendation", "needs_state", "decline"]
 Route = Literal["session", "reviewed_workflow", "catalog", "text_parser", "transcript_parser", "manual_steps", "clarify", "fallback_required",
-                "docs_index", "outside_index", "tutorial_index", "tutorial_import", "decline", "rigging_text"]
+                "docs_index", "outside_index", "tutorial_index", "tutorial_import", "decline", "rigging_text", "rigging_knowledge"]
 Trust = Literal["reviewed", "catalog", "doc_extracted", "doc_passage", "index_pointer", "tutorial_metadata", "none"]
 
 
 class SourceRef(BaseModel):
-    kind: Literal["manual", "tutorial_video", "user", "template"]
+    kind: Literal["manual", "tutorial_video", "user", "template", "forum"]            # forum: community advice (forum thread, bug report, course notes)
     title: str
     url: str | None = None
     version: str | None = None        # which version of the source was read, e.g. "main (Blender 5.2 LTS manual)"

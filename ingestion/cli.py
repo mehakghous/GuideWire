@@ -15,7 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import ExtractionError, extract_from_text, extract_from_video
+from .extract import PROMPT_VERSIONS, ExtractionError, extract_from_text, extract_from_video
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -99,6 +99,12 @@ def _offline(args) -> int:
         from .eval.actionability import load_rubric, score
         from .instructions import compose_instructions
         from .workflows import load_steplist
+        if args.cmd == "score" and args.more:                          # several files: one block each, for before/after
+            rub = load_rubric(args.rubric) if args.rubric else None
+            for f in [args.file, *args.more]:
+                print(f"== {f}")
+                print(score(load_steplist(f), rub).render())
+            return 0
         sl = load_steplist(args.file)
         if args.cmd == "instructions":                                  # add how-to / check lines to a saved step list (no model, no network)
             n = compose_instructions(sl)
@@ -309,6 +315,7 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--max-version")
     sc = sub.add_parser("score", help="OFFLINE: score a step list against the actionability rubric (structure only: it cannot tell whether the content is true)")
     sc.add_argument("file")
+    sc.add_argument("more", nargs="*", help="more step lists to score the same way, to compare")
     sc.add_argument("--rubric", help="a reference checklist JSON (see tests/fixtures/rubrics) for the completeness score")
     ins = sub.add_parser("instructions", help="OFFLINE: add how-to and check lines (from the steps' own evidence) to a saved step list")
     ins.add_argument("file")
@@ -323,7 +330,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--app", default="blender")
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
-        p.add_argument("--prompt-version", default="v2", choices=["v2", "v3", "v4"],
+        p.add_argument("--prompt-version", default="v2", choices=list(PROMPT_VERSIONS),
                        help="v2 = baseline used in all recorded live runs; v3 = unevaluated candidate")
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)

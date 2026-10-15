@@ -69,16 +69,45 @@ def _derive(step: Step) -> tuple[list[Action], list[HowTo]]:
     return actions, lines
 
 
-def _checks(step: Step) -> list[HowTo]:
+def _cite(kb, st) -> str:
+    """'official: Maya: Orient Joint Options | community: ...' : the tier and title of every source behind a statement, so a learner can see how far to trust it."""
+    return " | ".join(f"{st.tier}: {kb.sources[s]['title']}" for s in st.sources) or f"{st.tier}: no source"
+
+
+def _checks(step: Step, app: str) -> list[HowTo]:
+    from .rigging_knowledge import load as knowledge
+    kb = knowledge()
     out: list[HowTo] = []
     for p in step.expected_state:
         if p.kind == "node_exists":
             out.append(HowTo(text=f"Check that a {p.target} now exists (Outliner or Node Editor).", support="catalog", evidence=f"expected state: node_exists={p.target}"))
         elif p.kind == "mode":
             out.append(HowTo(text=f"Check that you are in {p.target.replace('_', ' ').title()} mode.", support="catalog", evidence=f"expected state: mode={p.target}"))
-    if step.feature_id in LEARNER_CHECKS:
+    researched = [(e, v) for e in kb.for_feature(step.feature_id, app) for v in e.verify] if step.feature_id else []
+    for e, v in researched[:2]:                                          # app-specific and sourced (knowledge/rigging_knowledge.json) beats the generic line
+        out.append(HowTo(text=v.text, support="catalog", evidence=_cite(kb, v)))
+    if not researched and step.feature_id in LEARNER_CHECKS:
         out.append(HowTo(text=f"Check that {LEARNER_CHECKS[step.feature_id]}.", support="catalog", evidence=f"catalog guidance for {step.feature_id}; the video did not necessarily show this"))
     return out
+
+
+def _from_knowledge(step: Step, app: str) -> None:
+    """Common mistakes (with their tier and source), what to have done first, and a note where sources disagree, for the feature this step teaches."""
+    from .rigging_knowledge import load as knowledge
+    kb = knowledge()
+    for e in kb.for_feature(step.feature_id, app) if step.feature_id else []:
+        for m in e.mistakes:
+            line = f"{m.text} ({_cite(kb, m)})"
+            if line not in step.common_mistakes:
+                step.common_mistakes.append(line)
+        for pre in e.prerequisites:
+            line = f"Before this: {pre}"
+            if line not in step.assumptions:
+                step.assumptions.append(line)
+        for c in e.conflicts:
+            line = f"sources disagree: {c['text']}"
+            if line not in step.flags:
+                step.flags.append(line)
 
 
 def compose_instructions(sl: StepList) -> int:
@@ -94,7 +123,8 @@ def compose_instructions(sl: StepList) -> int:
             known = {(a.verb, a.ui_element, a.value) for a in st.actions}
             st.actions += [a for a in actions if (a.verb, a.ui_element, a.value) not in known]
         if not st.check:
-            st.check = _checks(st)
+            st.check = _checks(st, sl.app)
+        _from_knowledge(st, sl.app)
         changed += (st.result, len(st.how_to), len(st.check), len(st.actions)) != before and (len(st.how_to) + len(st.check) > before[1] + before[2])
     return changed
 

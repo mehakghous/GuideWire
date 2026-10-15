@@ -52,7 +52,7 @@ def test_checks_are_labelled_as_catalog_guidance_not_as_shown():
     sl = after()
     chk = [h for st in sl.steps for h in st.check]
     assert chk and all(h.support == "catalog" for h in chk)
-    assert "Check that the joints form one chain" in sl.steps[0].check[0].text
+    assert "the joints form one chain" in sl.steps[0].check[0].text and "tutorial:" in sl.steps[0].check[0].evidence       # researched, app-specific, with its sources
     assert not any("1e-4" in h.text or "within" in h.text for h in chk)                                # the matrix's test tolerances are not shown to learners
 
 
@@ -103,3 +103,33 @@ def test_model_written_how_to_lines_pass_through_extraction():
 def test_the_model_cannot_claim_catalog_support(bad):
     with pytest.raises(Exception):
         DraftStepList.model_validate({"steps": [{"goal": "g", "confidence": 0.5, "how_to": [bad]}]})
+
+
+def test_the_fields_the_model_skipped_in_the_first_live_v5_run_are_required_in_the_schema_it_sees():
+    """Live finding (2026-10-16): optional how_to / check / result / times / expected_state came back absent from a model that was told to fill them."""
+    from ingestion.extract import MODEL_REQUIRED, _schema
+    req = set(_schema()["$defs"]["DraftStep"]["required"])
+    assert {"how_to", "check", "result", "video_start_s", "video_end_s", "expected_state", "actions"} <= req and set(MODEL_REQUIRED) <= req
+    # ... but the parser stays lenient: older outputs and fakes without them still load
+    DraftStepList.model_validate({"steps": [{"goal": "g", "confidence": 0.5}]})
+
+
+def test_prompt_v6_lists_the_documented_names_for_the_app_and_nothing_else_changes():
+    p6, p5 = build_system_prompt(get_profile("maya"), "v6"), build_system_prompt(get_profile("maya"), "v5")
+    assert p6.startswith(p5) and "Primary Axis" in p6[len(p5):] and "Maintain Offset" in p6[len(p5):] and "Never write a name that the video does not show" in p6
+    assert "Bone Heat" not in p6 and "flips" not in p6                              # community advice is never put in a prompt, only names
+    assert len(p6) - len(p5) < 3000                                                  # about 500 tokens: negligible next to a video's 100,000
+    b6 = build_system_prompt(get_profile("blender"), "v6")
+    assert "Armature Deform" in b6 and "Primary Axis" not in b6                     # each application gets its own names
+    assert build_system_prompt(get_profile("blender"), "v2") == build_system_prompt(get_profile("blender"), "v2").replace("Menu locations", "Menu locations")   # v2 untouched
+
+
+def test_knowledge_adds_researched_checks_mistakes_and_prerequisites_to_composed_steps():
+    sl = after()
+    orient = sl.steps[3]
+    assert any("Toggle Local Axes Visibility" in h.text for h in orient.check) and "official:" in orient.check[0].evidence
+    assert any("flip axes" in m and "community:" in m for m in orient.common_mistakes)
+    assert any(a.startswith("Before this:") for a in orient.assumptions)
+    attr = sl.steps[7]                                                                      # "Add FK_IK_Switch attribute": the sources disagree about where the command lives
+    assert any(f.startswith("sources disagree") and "Modify > Add Attribute" in f for f in attr.flags)
+    assert not any(f.startswith("sources disagree") for f in sl.steps[3].flags)            # and a step with no disagreement gets no such note

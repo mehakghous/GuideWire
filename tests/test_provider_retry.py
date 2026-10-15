@@ -81,3 +81,14 @@ def test_cli_says_nothing_was_charged_when_the_model_is_at_capacity(monkeypatch,
     monkeypatch.setattr(c, "GeminiProvider", Boom)
     assert cli.main(["video", "https://www.youtube.com/watch?v=dc3iRo0hb3g", "--no-metadata", "--app", "maya"]) == 1
     assert "at capacity" in capsys.readouterr().err
+
+
+def test_every_prompt_version_the_code_has_is_accepted_by_the_extraction_commands():
+    """Twice a new prompt version was added and the CLI still refused it (v4, v5): the allowed list now comes from the code."""
+    from ingestion import cli
+    from ingestion.extract import PROMPT_VERSIONS
+    import pytest as _pytest
+    for v in PROMPT_VERSIONS:
+        with _pytest.raises(SystemExit) as e:             # parse only; --help exits 0 after the parser accepted the whole command line
+            cli.main(["video", "https://www.youtube.com/watch?v=dc3iRo0hb3g", "--prompt-version", v, "--help"])
+        assert e.value.code == 0

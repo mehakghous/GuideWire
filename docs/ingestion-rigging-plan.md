@@ -132,3 +132,19 @@ Tests added after the live runs (18 in total in `tests/test_rigging_discovery.py
 | Prompt v5 produces actionable steps from a real video | NOT measured: needs one paid call (about 0.09 USD at today's price) |
 | Bounded retry with jitter; overload, quota and invalid distinguished | Verified (`tests/test_provider_retry.py`) |
 | Instructions validated inside Maya | Not done: Maya is not installed here |
+
+
+## Milestone 12: rigging knowledge base, real-speech transcripts, v5 live result (implemented; measured offline)
+
+| Criterion | Status |
+|---|---|
+| Real beginner questions, terminology, mistakes and expert fixes captured as structured, sourced, tiered knowledge | Done for Maya (17 entries) and Blender (4); Houdini, Reddit and Stack Exchange NOT covered |
+| Refuses to load knowledge that cites an unknown source or claims official without one | Verified (mutation tests) |
+| Used by tagging, request understanding, troubleshooting, composed steps, validator vocabulary, prompt v6, transcript reader | Verified (unit and integration tests) |
+| Transcript reader on REAL speech | Precision 42.3% -> 63.6%, recall 21.2% -> 53.8% on 52 labelled moments (one labeller; biased last pass) |
+| Plain-language requests | 9/16 -> 16/16 on a development set written after the knowledge base (upper bound) |
+| Real symptom wording finds the right answer | 9/9, with unrelated, wrong-app and Houdini text returning nothing |
+| Prompt v5 on a real video | Run once (0.096 USD): the model ignored the new optional fields; they are now required (MODEL_SCHEMA_TAG 0.8); NOT re-run |
+| Prompt v6 (documented names) on a real video | Written and tested offline; NOT run live |
+| Cost estimate | `docs/cost-estimate.md` (rule of thumb 0.005 USD per video minute in 2026, 0.01 from 2027) |
+| Instructions validated inside Maya or Blender | Not done |

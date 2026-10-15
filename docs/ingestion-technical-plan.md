@@ -1978,3 +1978,30 @@ Found on the way and fixed: `parse_version` only understood "X.Y", so a Maya ver
 it now reads "2025" as (2025, 0) and "20.5.410" as (20, 5).
 
 Not done on purpose: no workflow is promoted. GW-012 also asks to promote the 13 catalog procedures "after a human check"; that check is yours.
+
+
+## 19. Transcript mode-prerequisite chain (GW-003, 2026-10-15)
+
+`transcript_ingest` now tracks the mode the narration has put the user in. A step that needs Edit or Object Mode (from the catalog) gets a flag when no
+earlier step in the transcript enters a mode ("it may have been entered before this part, or a step is missing"), or when the narration left you in the
+other mode ("prerequisite not met ... a step may be missing"). Steps that themselves change mode, and Tab (whose result depends on the unknown current mode),
+are never flagged for a missing prerequisite. Only flags are added: no step is created, removed or merged, so recall is unchanged by construction.
+The strict xfail `test_gap_transcript_flags_a_missing_prerequisite` is now a normal test, with a second test for the chain.
+
+
+## 20. Version cues in narration (GW-004, 2026-10-15)
+
+A transcript step whose spoken sentence names another Blender version ("in blender 2.7 you would ...") or contrasts with one ("older versions", "used to",
+"no longer", "legacy", "deprecated") gets a `version cue` flag. A version the speaker names that equals the user's own is not a cue. Only flags are added.
+Also tightened in GW-003's check: a bare operation that needs Object Mode is no longer flagged as missing a prerequisite when no mode was stated, because Blender
+starts in Object Mode; a wrong-mode prerequisite is still flagged. The strict xfail for this gap is now a normal test, plus a negative test.
+
+
+## 21. Overlap noise (GW-005, 2026-10-15)
+
+`validate.sanitize_and_annotate` no longer warns "starts before step N ends" for two steps cut from the same spoken passage (they share a `transcript:a-bs` source
+span, so equal times are expected). Overlap between steps from different passages is still flagged. All three strict xfails of the audit are now ordinary passing tests.
+
+Known, not fixed: in a sentence that yields several steps, each step still compares every key the speaker said against its own operation's shortcut, so
+"press tab ... press g to move it" puts "the speaker says 'g', but the manual gives tab" on the Enter Edit Mode step. The key should be matched to the operation it
+belongs to. Not in the roadmap yet; proposed as GW-090 (P2, S).

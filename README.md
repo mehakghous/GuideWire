@@ -52,6 +52,7 @@ python -m ingestion.cli --help
 python -m ingestion.cli purge   # delete YouTube-derived run logs and caches older than 30 days
 python -m ingestion.cli ask --app maya "Create joints down the arm\nCreate an IK handle on the leg"   # written rigging steps -> validated step list
 python -m ingestion.cli features steps.json   # which features a step list teaches, and what it assumes
+python -m ingestion.cli review show steps.json   # then: review edit ... / review promote steps.json --by YOU --request "<text>"
 ```
 
 AI Gateway (needs `GATEWAY_TOKENS` and the provider keys in `.env`; one worker only, see `gateway/app.py`):

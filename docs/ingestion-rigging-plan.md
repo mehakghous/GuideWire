@@ -51,3 +51,17 @@ In chat: `/app maya`, `/load steps FILE`, `/observe nodes=joint`; the session fi
 | CLI `ask --app` works | Verified (CLI test, manual run) |
 | Chat: `/app`, load, observe nodes, verify met/unmet, restart keeps app and position; old sessions open | Verified (service test) |
 | Works inside real Maya / Houdini | Blocked: neither is installed here; nothing reads a live scene |
+
+
+## Milestone 4: review and promote (GW-012) (Implemented, verified by tests; the store is empty)
+
+`python -m ingestion.cli review show|edit|promote|list`, see technical plan section 18. Tests: `tests/test_review.py` (11).
+
+| Criterion | Status |
+|---|---|
+| A reviewer can see steps and flags, change goals, remove and reorder steps | Verified (unit, CLI) |
+| Bad edits (unknown step, empty goal, no steps left, move before a dependency) are refused with a reason; input untouched | Verified (unit) |
+| Promotion needs a named person, marks steps reviewed only then, and a refused promotion stores nothing | Verified (unit, CLI) |
+| A promoted workflow is served by `ask`/`chat` only for a known version inside its range | Verified (router, service) |
+| Works for Blender catalog text and for Maya/Houdini rigging text | Verified for rigging text; the catalog path is covered by the existing reviewed-workflow tests |
+| Real reviewed workflows exist | Not done: needs a human reviewer |

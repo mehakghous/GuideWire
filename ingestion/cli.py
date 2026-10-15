@@ -20,6 +20,57 @@ from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
 
+def _reviewed_store(args):
+    """The reviewed-workflow store, when one has been promoted into (knowledge/reviewed) and the documentation index is not switched off."""
+    from .workflows import DEFAULT_STORE, ReviewedWorkflowStore
+    return ReviewedWorkflowStore(DEFAULT_STORE) if DEFAULT_STORE.exists() and not getattr(args, "no_kb", False) else None
+
+
+def _pairs(items: list[str] | None, sep: str, what: str) -> list[tuple[str, str]]:
+    out = []
+    for it in items or []:
+        a, s, b = it.partition(sep)
+        if not s:
+            raise ValueError(f"{what}: expected N{sep}VALUE, got {it!r}")
+        out.append((a.strip(), b))
+    return out
+
+
+def _review(args) -> int:
+    """Human review of a generated step list: show it, edit it, promote it into the reviewed-workflow store (GW-012)."""
+    from .workflows import (DEFAULT_STORE, ReviewedWorkflowStore, edit_steps, entries, load_steplist, op_key, promote, text_key)
+    store = ReviewedWorkflowStore(args.store or DEFAULT_STORE)
+    if args.rcmd == "list":
+        rows = entries(store)
+        for r in rows:
+            print(f"{r['key']}  {r['app']}  {r['steps']} steps  by {r['reviewed_by']} on {r['reviewed_at'][:10]}  versions {r['min_version']}..{r['max_version'] or 'any'}")
+        print(f"{len(rows)} reviewed workflow(s) in {store.dir}")
+        return 0
+    sl = load_steplist(args.file)
+    if args.rcmd == "show":
+        print(f"{sl.title or args.file}  app={sl.app}  steps={len(sl.steps)}")
+        for s in sl.steps:
+            print(f"{s.order:>3}. [{s.review_status}] {s.goal}   (confidence {s.confidence}" + (f", {s.feature_id}" if s.feature_id else "") + (", craft" if s.kind == "craft" else "") + ")")
+            for f in s.flags:
+                print(f"       ! {f}")
+        return 0
+    if args.rcmd == "edit":
+        goals = {int(k): v for k, v in _pairs(args.set_goal, "=", "--set-goal")}
+        moves = [(int(a), int(b)) for a, b in _pairs(args.move, ":", "--move")]
+        new = edit_steps(sl, goals=goals, remove={int(x) for x in args.remove or []}, moves=moves)
+        Path(args.out or args.file).write_text(new.model_dump_json(indent=2), encoding="utf-8")
+        print(f"{len(new.steps)} steps written to {args.out or args.file}")
+        return 0
+    if args.rcmd == "promote":
+        if bool(args.request) == bool(args.ops):
+            raise ValueError("give exactly one of --request (the question or text users will send) or --ops (catalog operation ids)")
+        key = text_key(args.request) if args.request else op_key([o.strip() for o in args.ops.split(",") if o.strip()])
+        path = promote(store, key, sl, reviewed_by=args.by, min_version=args.min_version, max_version=args.max_version)
+        print(f"promoted {len(sl.steps)} steps as {key}: {path}")
+        return 0
+    return 2
+
+
 def _offline(args) -> int:
     """Commands that never touch the network or a model."""
     from .router import route
@@ -31,12 +82,12 @@ def _offline(args) -> int:
         print(f"removed {len(removed)} file(s) older than 30 days", *removed, sep="\n  ")
         return 0
     if args.cmd == "features":
-        from shared.step_record import StepList
         from .feature_report import feature_report
-        d = json.loads(Path(args.file).read_text(encoding="utf-8"))
-        sl = StepList.model_validate(d["steps"] if isinstance(d.get("steps"), dict) else d)      # a step list, or an answer bundle holding one
-        print(feature_report(sl).render())
+        from .workflows import load_steplist
+        print(feature_report(load_steplist(args.file)).render())          # a step list, or an answer bundle holding one
         return 0
+    if args.cmd == "review":
+        return _review(args)
     if args.cmd == "captions":
         from .youtube.captions import CaptionsUnavailable, fetch_captions, purge_expired
         from .youtube.metadata import parse_video_id
@@ -113,7 +164,7 @@ def _offline(args) -> int:
             db = Path(args.kb) if args.kb else DEFAULT_DB
             if db.exists():
                 kb, tut = KnowledgeBase(db), load_index()
-        b = route(args.text.replace("\\n", "\n"), version=args.version, observed=obs, kb=kb, tutorials=tut, app=args.app)
+        b = route(args.text.replace("\\n", "\n"), version=args.version, observed=obs, kb=kb, tutorials=tut, app=args.app, store=_reviewed_store(args))
     elif args.cmd == "transcript":
         b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="transcript", duration_s=args.duration)
     else:
@@ -127,7 +178,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("review", "features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -183,6 +234,24 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--duration", type=float)
     c.add_argument("--version")
     c.add_argument("--purge", action="store_true", help="only delete cached captions older than 30 days, then exit")
+    rv = sub.add_parser("review", help="OFFLINE: review a generated step list: show it, edit it, promote it to a reviewed workflow users are then served")
+    rv.add_argument("--store", help="folder of reviewed workflows (default: knowledge/reviewed)")
+    rs = rv.add_subparsers(dest="rcmd", required=True)
+    rs.add_parser("list", help="reviewed workflows already stored")
+    for name, h in (("show", "print a step list (a JSON file, e.g. from `ask ... > steps.json`) with flags"), ("edit", "change goals, remove or move steps"), ("promote", "mark every step reviewed and store it")):
+        p = rs.add_parser(name, help=h)
+        p.add_argument("file")
+        if name == "edit":
+            p.add_argument("--set-goal", action="append", metavar="N=TEXT", help="new goal for step N (repeatable)")
+            p.add_argument("--remove", action="append", metavar="N", help="remove step N (repeatable)")
+            p.add_argument("--move", action="append", metavar="N:M", help="move step N to position M, applied in order (repeatable)")
+            p.add_argument("-o", "--out", help="write here instead of editing the file in place")
+        if name == "promote":
+            p.add_argument("--by", required=True, help="the person who reviewed the steps")
+            p.add_argument("--request", help="the text users will send; the workflow is served when it matches")
+            p.add_argument("--ops", help="catalog operation ids, comma separated (Blender catalog route)")
+            p.add_argument("--min-version", default="2.80")
+            p.add_argument("--max-version")
     ft = sub.add_parser("features", help="OFFLINE: which rigging/animation features a step list (JSON) teaches, and which prerequisites it assumes")
     ft.add_argument("file")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")

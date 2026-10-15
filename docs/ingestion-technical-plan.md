@@ -2005,3 +2005,17 @@ span, so equal times are expected). Overlap between steps from different passage
 Known, not fixed: in a sentence that yields several steps, each step still compares every key the speaker said against its own operation's shortcut, so
 "press tab ... press g to move it" puts "the speaker says 'g', but the manual gives tab" on the Enter Edit Mode step. The key should be matched to the operation it
 belongs to. Not in the roadmap yet; proposed as GW-090 (P2, S).
+
+
+## 22. Passage ranking for concept answers (GW-023, 2026-10-15)
+
+A concept answer from the local manual index used to quote the page lead whatever was asked. `KnowledgeBase.passage(hit, query_terms)` now returns the paragraph of the
+matched page that covers more of the question's terms than the lead does (title words are ignored because they match every paragraph; a matching section heading counts
+half), trimmed at a sentence boundary, verbatim; `None` keeps the lead. `answer_kb` uses it for the single-page concept path. Checked on the real manual (294 pages):
+"what does the falloff do in proportional editing" now quotes the Falloff paragraph; "what is proportional editing" keeps the lead.
+
+Evidence: `tests/test_passages.py`, 20 synthetic questions over 5 synthetic pages (`tests/kb_passages`): 20/20 correct passage with ranking, 0/20 with the lead.
+Both pages and questions are written by the same author, so this shows the mechanism works, not the hit rate on real questions; that needs independent questions (GW-041).
+Limit: the existing sufficiency gate still decides whether a page answers at all (it needs enough query terms in the page title), so a question about a section option that
+does not name the page ("what does the boundary option do") is declined before any excerpt is chosen. Not changed here.
+Comparison and needs-state answers still quote the lead.

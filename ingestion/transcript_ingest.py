@@ -305,7 +305,10 @@ def _version_cues(said: str, version: str | None) -> list[str]:
 
 
 def ingest_transcript(text: str, *, duration_s: float | None = None, version: str | None = None,
-                      video_id: str | None = None, title: str | None = None, kb=None) -> TranscriptResult:
+                      video_id: str | None = None, title: str | None = None, kb=None, app: str = "blender") -> TranscriptResult:
+    if app != "blender":
+        from .rigging_transcript import ingest_rigging_transcript
+        return ingest_rigging_transcript(text, app, duration_s=duration_s, version=version, video_id=video_id, title=title)
     cues = parse_timed_text(text, duration_s)
     cues, cstats = clean_cues(cues)
     units = group_units(cues)
@@ -396,4 +399,9 @@ def ingest_transcript(text: str, *, duration_s: float | None = None, version: st
         res.steplist = finish(steps, "transcript", title=title, version=version, duration_s=duration_s)
         res.steplist.video_id = video_id
         res.steplist.video_duration_s = duration_s
+    else:                                                     # nothing from the modelling catalog: it may be a Blender rigging/animation tutorial
+        from .rigging_transcript import ingest_rigging_transcript
+        alt = ingest_rigging_transcript(text, "blender", duration_s=duration_s, version=version, video_id=video_id, title=title)
+        if alt.steplist is not None:
+            return alt
     return res

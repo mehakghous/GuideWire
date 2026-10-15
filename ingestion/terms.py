@@ -51,8 +51,10 @@ def _tokens(text: str) -> frozenset[str]:
 
 def _score(goal: frozenset[str], feature: Feature, app: str) -> float:
     phrase = re.sub(r"\([^)]*\)", "", feature.support[app].split("–", 1)[-1]).split(";")[0].split(",")[0]     # first tool phrase for this app, no parentheses
-    refs = (_tokens(feature.name), _tokens(phrase), _tokens(phrase.split(">")[-1]))                           # name, whole phrase, the tool itself (last menu item)
-    return max((len(goal & r) / len(r) * (1.0 if len(r) > 1 else SINGLE_WORD) for r in refs if r), default=0.0)
+    # (reference words, weight): the feature's name, the whole menu path (its menu words also occur in speech about OTHER tools: "go to skeleton and orient joint"),
+    # and the tool itself (last menu item), which is the strongest evidence
+    refs = ((_tokens(feature.name), 1.0), (_tokens(phrase), 0.9), (_tokens(phrase.split(">")[-1]), 1.1))
+    return max((len(goal & r) / len(r) * w * (1.0 if len(r) > 1 else SINGLE_WORD) for r, w in refs if r), default=0.0)
 
 
 def suggest_feature(text: str, app: str) -> str | None:

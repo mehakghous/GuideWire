@@ -175,7 +175,7 @@ class Service:
                     text = Path(args[1]).read_text(encoding="utf-8")
                     if kind == "transcript":
                         dur = float(args[2]) if len(args) > 2 else None
-                        b = route(text, version=self.session.version, input_type="transcript", duration_s=dur)      # transcripts are Blender-only so far
+                        b = route(text, version=self.session.version, input_type="transcript", duration_s=dur, app=self.session.app)
                         tut = {"title": Path(args[1]).name, "source_type": "transcript", "version_hint": None}
                     else:
                         b = route(text, version=self.session.version, app=self.session.app, store=self.store)

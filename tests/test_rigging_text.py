@@ -23,7 +23,7 @@ def test_maya_steps_get_features_nodes_craft_and_are_valid():
     assert sl.steps[0].verifiable and not sl.steps[3].verifiable                      # nothing observable is claimed for "bind skin"
     assert sl.steps[4].kind == "craft" and any("not graded" in f for f in sl.steps[4].flags)
     assert all(s.goal and s.evidence == [s.goal] and s.review_status == "drafted_automatically" for s in sl.steps)     # user's wording kept, labelled as drafted
-    assert any("assumes you already did" in a and "PREP-05" in a for a in res.assumptions)
+    assert len(res.assumptions) == 1 and "assume you already did" in res.assumptions[0] and "PREP-05" in res.assumptions[0]       # one line, not one per feature
 
 
 def test_unmatched_clauses_stay_as_flagged_steps_and_are_counted():

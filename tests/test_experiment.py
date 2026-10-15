@@ -155,7 +155,7 @@ def test_cell_key_does_not_move_when_the_stored_contract_version_moves(monkeypat
                 media_resolution=None, title_hint="Object and Edit Mode - Blender 2.80 Fundamentals")
     k = ex.cell_key(**args)
     monkeypatch.setattr(ex, "SCHEMA_VERSION", "9.9")
-    assert ex.cell_key(**args) == k == "30e669cf106f93e7"          # pinned under MODEL_SCHEMA_TAG 0.6 (the 2026-10-10 cell was "5e8a8a10dfe13db3" under 0.3)
+    assert ex.cell_key(**args) == k == "b24f238f1e9044a6"          # pinned under MODEL_SCHEMA_TAG 0.7 (the 2026-10-10 cell was "5e8a8a10dfe13db3" under 0.3)
 
 
 def test_model_facing_schema_is_pinned_so_a_change_must_invalidate_the_cache_on_purpose():
@@ -163,4 +163,13 @@ def test_model_facing_schema_is_pinned_so_a_change_must_invalidate_the_cache_on_
     from ingestion.experiment import MODEL_SCHEMA_TAG
     from ingestion.extract import _schema
     fp = hashlib.sha256(json.dumps(_schema(), sort_keys=True).encode()).hexdigest()[:12]
-    assert fp == "8e745f0274ee" and MODEL_SCHEMA_TAG == "0.6", "the response schema the model sees changed: bump MODEL_SCHEMA_TAG and update this fingerprint deliberately"
+    assert fp == "57c9f2f2c292" and MODEL_SCHEMA_TAG == "0.7", "the response schema the model sees changed: bump MODEL_SCHEMA_TAG and update this fingerprint deliberately"
+
+
+def test_price_changes_on_1_january_2027_as_the_pricing_page_states():
+    from datetime import date
+    from ingestion.experiment import price_of
+    assert price_of("gemini-3.6-flash", date(2026, 12, 31)) == (0.75, 3.75) and price_of("gemini-3.6-flash", date(2027, 1, 1)) == (1.50, 7.50)
+    # the recorded Maya Part 9 call: 108,268 prompt + 1,188 output + 1,642 thinking tokens
+    cost = lambda d: (108268 * price_of("gemini-3.6-flash", d)[0] + (1188 + 1642) * price_of("gemini-3.6-flash", d)[1]) / 1e6
+    assert round(cost(date(2026, 10, 16)), 3) == 0.092 and round(cost(date(2027, 2, 1)), 3) == 0.184

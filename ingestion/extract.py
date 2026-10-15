@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from shared.step_record import Action, PredicateKind, StatePredicate, Step, StepKind, StepList, Support
 
+from .instructions import compose_instructions
 from .profiles import AppProfile, get_profile
 from .providers.base import LLMProvider, ProviderError, QuotaError
 from .timecode import parse_timestamp
@@ -31,7 +32,7 @@ from .validate import Issue, ValidationFailure, check_structure, sanitize_and_an
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5")
 
 
 class ExtractionError(RuntimeError):
@@ -59,6 +60,13 @@ class DraftPredicate(BaseModel):
         )
 
 
+class DraftHowTo(BaseModel):
+    """Model-facing instruction line. `catalog` is not offered to the model: only we may add guidance the video did not show."""
+    text: str
+    support: Literal["shown", "said"]
+    evidence: str | None = Field(default=None, description="what you saw or heard that supports this line: a quote, or a short description of the screen")
+
+
 class DraftStep(BaseModel):
     """Shape the model is asked to produce (ids/order/flags are assigned by us)."""
 
@@ -73,6 +81,9 @@ class DraftStep(BaseModel):
     common_mistakes: list[str] = Field(default_factory=list)
     confidence: float = Field(ge=0.0, le=1.0)
     kind: StepKind = Field(default="mechanics", description='"craft" when the result is judged by eye (timing, arcs, weight, feel) and has no checkable end state; otherwise "mechanics"')
+    result: str | None = Field(default=None, description="one sentence: what the learner has after this step")
+    how_to: list[DraftHowTo] = Field(default_factory=list, description="ordered imperative lines: what to select, which menu or panel to open, which setting to enter, only what the video shows or says")
+    check: list[DraftHowTo] = Field(default_factory=list, description="how the learner can tell it worked, only if the video shows or says it")
     feature_id: str | None = Field(default=None, description="id from the feature list in the prompt (e.g. SKEL-01) when the step teaches that feature, else null")
     support: Support = "unknown"
     visual_evidence: str | None = None  # what is visible on screen (cursor target, key overlay, mode, shape)
@@ -123,7 +134,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-    if version in ("v3", "v4"):
+    if version in ("v3", "v4", "v5"):
         base = f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
 A tutorial has TWO sources of instruction. Extract BOTH:
@@ -162,8 +173,22 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-        return base + (_rigging_rules(profile) if version == "v4" else "")
+        return base + (_rigging_rules(profile) if version in ("v4", "v5") else "") + (_ACTIONABLE_RULES if version == "v5" else "")
     raise ValueError(f"unknown prompt version {version!r}; choose from {PROMPT_VERSIONS}")
+
+
+_ACTIONABLE_RULES = """
+ACTIONABLE STEPS. A beginner must be able to perform each step in the application without reopening the video.
+- One step = one operation the learner performs and can check. Split a compound action ("duplicate the chain and rename it") into separate steps. Never replace a run of operations with one summary.
+- how_to: ordered, short, imperative lines covering, wherever the video shows or says them: what to select (the object, joint or control, and in which window); the exact menu path, shelf
+  button, tool, panel or shortcut, written as shown ("Skeleton > Orient Joint"); every setting and value typed or chosen; every name typed. Give each line support "shown" (visible on screen)
+  or "said" (only narrated) and an evidence quote or a short description of the screen.
+- NEVER write a menu location, button, shortcut, value or name that the video does not show or say, even if it is standard practice. If a needed detail cannot be read, omit it and add
+  "detail not visible in the video" to the step's assumptions.
+- check: how the learner can tell the step worked, only if the video shows or says it. Do not add generic checks.
+- result: one sentence saying what the learner has after the step.
+- No steps for introductions, recaps or talk with nothing to do.
+"""
 
 
 def _rigging_rules(profile: AppProfile) -> str:
@@ -250,10 +275,12 @@ def _run(
                 draft, source_type=source_type, app=app, video_id=video_id,
                 model_id=provider.model_id, prompt_version=prompt_version,
             )
+            compose_instructions(sl)                       # before validation, so unknown menu names get the usual "please check" flag
             sl = sanitize_and_annotate(sl, profile, video_duration_s)
             last_partial = sl
             check_structure(sl, video_duration_s)
             rec["accepted"] = True
+            rec["events"] = list(getattr(provider, "events", []))[-3:]               # HTTP attempts and their latency: cost AND time are now recorded
             if on_attempt:
                 on_attempt(rec)
             return sl
@@ -332,7 +359,7 @@ def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str 
     """The per-request (user) prompt for a video. Exposed so experiments can hash it for cache keys."""
     from .transcript import transcript_for_prompt
 
-    if prompt_version in ("v3", "v4"):
+    if prompt_version in ("v3", "v4", "v5"):
         time_fmt = "as MM:SS (or H:MM:SS)"
         dur_txt = (f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to "
                    f"{_mmss(duration_s)}." if duration_s else "")

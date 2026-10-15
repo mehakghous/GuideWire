@@ -14,6 +14,7 @@ from shared.answer import Explanation
 from shared.step_record import Action, StatePredicate, Step, StepList
 
 from .features import load_catalog
+from .instructions import speech_details
 from .profiles import get_profile
 from .rigging_discovery import _AREA_WORDS
 from .rigging_text import _created_nodes
@@ -122,6 +123,9 @@ def ingest_rigging_transcript(text: str, app: str, *, duration_s: float | None =
                 assumptions=["Narrated only: nothing here shows the action was performed on screen.",
                              *(["The matching catalog feature is a guess from the wording."] if fid else [])],
                 flags=[] if fid else ["not matched to a known rigging feature: kept as spoken and not validated against the catalog"])
+            acts, lines = speech_details(said, app)                         # menu paths and settings the speaker names, from the piece's own captions
+            st.actions += acts
+            st.how_to += lines
             st.flags += _cues(text_, app, version)
             steps.append(st)
     res = TranscriptResult(steplist=None, explanations=expl, unmatched_units=unmatched, stats={

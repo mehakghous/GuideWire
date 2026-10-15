@@ -154,3 +154,34 @@ VERSION_NOTES: dict[str, dict[str, str]] = {
     "CNST-01": {"houdini": "Houdini 22 has a new multi-constraint method"},
     "SKIN-09": {"houdini": "Houdini 22 Delta Mush is version 3.0"},
 }
+
+
+# What a learner can look at to tell a step worked, in plain words and not tied to one application. This is guidance written for the catalog, NOT something a tutorial
+# showed, so the instruction composer labels every line from here `catalog`. The matrix's acceptance criteria are for test engineers (tolerances like 1e-4), not for learners.
+LEARNER_CHECKS: dict[str, str] = {
+    "SKEL-01": "the joints form one chain, each parented to the one before it (look in the Outliner or hierarchy)",
+    "SKEL-02": "from the front and side views, each joint sits inside the mesh at the bend point (hip, knee, ankle)",
+    "SKEL-03": "every joint name is unique and starts with its side (for example L_ or left_)",
+    "SKEL-04": "the mirrored side has matching joints, with the sides swapped in the names",
+    "SKEL-05": "each joint sits under the right parent in the hierarchy",
+    "ORNT-02": "with local rotation axes shown, every joint's primary axis points down the bone toward its child",
+    "IKFK-01": "rotating a parent joint carries its child joints with it",
+    "IKFK-02": "moving the IK handle makes the chain bend to follow it",
+    "IKFK-03": "moving the IK target or control moves the end of the chain with it",
+    "IKFK-04": "moving the pole vector turns the knee or elbow toward it without flipping",
+    "IKFK-06": "switching the control between its two values changes the rig smoothly from one mode to the other, with no jump in the limb",
+    "CTRL-01": "each control is visible, selectable and named for the part it drives",
+    "CTRL-02": "moving or rotating the control moves or rotates its joint",
+    "CTRL-03": "the control's channels read zero (scale one) in the rest pose",
+    "CTRL-04": "the new attribute shows on the control (Channel Box or Attribute Editor) with the range you set",
+    "CTRL-05": "a locked channel refuses to change",
+    "CNST-01": "moving the driver moves the driven object with it",
+    "CNST-02": "moving the driver moves only the channels you constrained",
+    "CNST-03": "moving the target turns the object to face it",
+    "CNST-04": "changing the weights moves the result between the targets",
+    "SKIN-01": "posing a joint makes the mesh follow it",
+    "SKIN-03": "posing the joint deforms the painted area the way you intended",
+    "SKIN-04": "every vertex's weights add up to one and no vertex is left unweighted",
+    "ANIM-01": "moving to another frame and back shows the key is still there",
+    "EXPT-01": "re-importing the exported file keeps the hierarchy, the names and the skinning",
+}

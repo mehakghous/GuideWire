@@ -2019,3 +2019,38 @@ Both pages and questions are written by the same author, so this shows the mecha
 Limit: the existing sufficiency gate still decides whether a page answers at all (it needs enough query terms in the page title), so a question about a section option that
 does not name the page ("what does the boundary option do") is declined before any excerpt is chosen. Not changed here.
 Comparison and needs-state answers still quote the lead.
+
+
+## 23. Finding tutorials for a rigging goal (2026-10-15)
+
+Priority change: the headline flow is prompt -> tutorial -> steps, so discovery and extraction for character rigging and animation now come before the remaining side items.
+
+`ingestion/rigging_discovery.py`: `parse_goal` reads the application, its version (Maya "2024", Houdini "20.5"), the stages named (rigging, skinning, IK/FK, facial, animation,
+walk cycle, retargeting, export, constraints) and builds a PLAN from the feature catalog: the features the goal asks for (supported in that app), in teaching order, with the
+category areas they fall in and, separately, the prerequisites they assume (scene set-up, rest pose). `search_queries` makes at most two YouTube searches. `discover_rigging`
+searches, reads metadata (1 unit per 50 videos), drops candidates that are about another application, embeddable=False or not public, or whose title and chapters say
+nothing about the stages asked for, then ranks the rest: areas touched (the strongest factor), the application named in the title, version match, a 8-90 minute length,
+official channel, Creative Commons, chapters. Each result lists the plan features its title/chapters mention (`matched_terms`) and the areas it does not touch.
+`videos_metadata` now also returns `chapter_titles`. `cli find` takes `--app` and `--live`; without `--live` nothing is spent and the result says so.
+
+Limits (stated in every result): relevance is judged from metadata only, so "mentions" is not "teaches"; the plan is the catalog's idea of a rigging workflow, not a
+judgement of what this user needs; no live run has been made against the real API yet (tests use injected search); the chat service does not call it yet.
+
+Next in this line: (2) run it live once for a real goal and read the results; (3) take a chosen result to steps: video route with prompt v4 (Gemini, costs money), or a user/adapter
+transcript; (4) check the extracted steps against the plan (which areas are covered, which prerequisites are missing) and report it; (5) chat integration (`/find`, `/load video`).
+
+
+### 23.1 First live runs (2026-10-15, 402 quota units, goal "rig a biped character in Maya 2024 with IK legs and skinning")
+
+Two live searches (maya queries, 19 videos with metadata) were read by hand. What they showed, and what changed:
+- A filler word ("and") leaked into the search string: stop words added.
+- The catalog-feature match was too strict for titles ("Rigging for Beginners: IK Legs in Maya" matched no area): coverage now also uses area wording (IK/FK, skin, joints, controls ...).
+- Length: the first version rewarded 8-90 minutes for everyone. Length is now judged against the goal: a single topic expects 3-40 min, two areas 8-75, three or four 20 min-3 h, five or more
+  (a whole-character rig) at least 30 min with no upper bound, "complete / start to finish" at least 90 min. Length only scores (a long video is never penalised for a big goal);
+  only a limit the user states ("under 20 minutes") excludes.
+- Automatic rigging tools (Quick Rig, auto rig, Advanced Skeleton, Rigify, Mixamo) have few manual steps to extract: -1 and a note, unless the goal asks for them. A 3-minute Quick Rig video had ranked second.
+- A title that names the stage asked for ("rigging for beginners in Maya 2024") gets +1 even when no specific area is named; the only title saying "Maya 2024" rose from 4th to 3rd.
+- Multi-part courses ("Part 9", "Part 10") are named as parts of a series. Combining parts is a later feature (F10).
+- Raw results are saved to `runs/cache/discovery_*.json` (git-ignored, purged after 30 days by `cli purge`) and can be re-ranked with `find --replay FILE` at no cost.
+Observed and not acted on: none of the 19 titles states the user's Maya version except one; several are non-English (no language preference exists yet); none is from an official channel.
+Still unknown: whether the top results actually teach what their titles suggest. That is what extracting their steps will show.

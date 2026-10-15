@@ -39,6 +39,7 @@ PENALTY = {
     "missing_time": 0.9,
     "overlap": 0.9,
     "feature_needs_extra": 0.9,
+    "ungrounded_how_to": 0.85,
 }
 
 
@@ -225,6 +226,10 @@ def sanitize_and_annotate(
             if code in ("U", "C"):
                 what = "has no tool" if code == "U" else "needs an add-on or a script"
                 flag(step, "feature_needs_extra", f"{f.id} ({f.name}) {what} in {sl.app}: the tutorial is using something outside the application")
+
+        loose = [h for h in (*step.how_to, *step.check) if h.support in ("shown", "said") and not (h.evidence or "").strip()]
+        if loose:
+            flag(step, "ungrounded_how_to", f"{len(loose)} instruction line(s) claim to be {loose[0].support} in the source but give no evidence for it")
 
         if step.support in ("demonstrated", "narrated", "both") and not step.evidence:
             flag(step, "no_evidence", f"claims support='{step.support}' but gives no evidence")

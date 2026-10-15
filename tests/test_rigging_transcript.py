@@ -81,3 +81,14 @@ def test_chat_loads_a_transcript_for_the_chosen_app_and_keeps_it_through_a_resta
     out = s.message(f'/load transcript "{f}" 60')
     assert s.session.app == "maya" and "Loaded" in out["text"] and s.session.steps.steps[0].feature_id == "SKEL-01"
     assert Service.open(sess, use_kb=False).session.steps.steps[0].feature_id == "SKEL-01"
+
+
+def test_spoken_menu_paths_settings_and_names_become_said_lines_with_their_time():
+    t = ("00:02 now go to skeleton and orient joint\n00:09 set the primary axis to x and the secondary axis to y\n"
+         "00:20 then create an ik handle and name it left_leg_ik\n00:30 we are just chatting about nothing, go to lunch")
+    sl = route(t, input_type="transcript", app="maya", duration_s=60).steps
+    lines = [(h.support, h.text) for s in sl.steps for h in s.how_to]
+    assert ("said", "Open Skeleton > Orient Joint.") in lines and ("said", "Set Primary Axis to X.") in lines and ("said", "Name it left_leg_ik.") in lines
+    assert all(h.evidence for s in sl.steps for h in s.how_to)
+    assert not any("lunch" in h.text.lower() for s in sl.steps for h in s.how_to)           # chatter is never turned into a menu path
+    assert all(s.video_start_s is not None for s in sl.steps)                               # and each step still points at its moment in the video

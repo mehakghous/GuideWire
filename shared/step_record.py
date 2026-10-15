@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.9"  # 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
+SCHEMA_VERSION = "0.10"  # 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
 
 PredicateKind = Literal[
     "mode",            # target: interaction mode, e.g. OBJECT, EDIT_MESH, SCULPT
@@ -83,6 +83,17 @@ class StepVerification(BaseModel):
     detail: str | None = None
 
 
+HowToSupport = Literal["shown", "said", "catalog"]
+
+
+class HowTo(BaseModel):
+    """One line a learner can act on. `support` says where it comes from: shown = visible on screen in the source (as read by a model or a person),
+    said = only narrated, catalog = guidance from the feature catalog that the source did NOT demonstrate. Never claims more than its support."""
+    text: str = Field(min_length=1)
+    support: HowToSupport
+    evidence: str | None = None          # the quoted words or the on-screen detail behind it; required in practice for shown/said (the validator flags a missing one)
+
+
 class Step(BaseModel):
     id: str
     order: int = Field(ge=1)
@@ -106,6 +117,9 @@ class Step(BaseModel):
     provenance: Provenance | None = None
     source_refs: list[str] = Field(default_factory=list)  # e.g. "catalog:object.join@main", "transcript:154.9-166.0s"
     assumptions: list[str] = Field(default_factory=list)  # prerequisites assumed but NOT established by the input
+    result: str | None = None            # the intended result of the step, in the learner's terms
+    how_to: list[HowTo] = Field(default_factory=list)   # ordered sub-actions: what to select, open, set, enter
+    check: list[HowTo] = Field(default_factory=list)    # how the learner can tell it worked
     visual_evidence: str | None = None  # what is visible on screen at that moment (cursor target, key overlay, mode, shape)
     evidence: list[str] = Field(default_factory=list)
     flags: list[str] = Field(default_factory=list)  # validator warnings shown to the learner

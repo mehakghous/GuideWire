@@ -117,3 +117,18 @@ Tests added after the live runs (18 in total in `tests/test_rigging_discovery.py
 | Prerequisites reported once, not once per feature | Verified (unit) |
 | Transcript to steps for Maya, Houdini, Blender rigging; CLI and chat; old Blender behaviour unchanged | Verified (`tests/test_rigging_transcript.py`, 9 tests, full suite 552 passed) |
 | Transcript route run on a real rigging transcript | Not done: needs a transcript (yours, or the opt-in captions adapter) |
+
+
+## Milestone 11: better discovery and actionable steps (implemented, verified offline; prompt v5 not run live)
+
+| Criterion | Status |
+|---|---|
+| Diagnosis of the Maya run traced to code | Done (technical plan 25.1) |
+| Recency as a configurable, explainable signal that never beats relevance on its own | Verified (`tests/test_discovery_quality.py`) |
+| Upload date distinguished from recording date and software version; missing dates neutral | Verified |
+| Plain-language requests without specialist terms; narrow stays narrow; one question when ambiguous | Verified (everyday phrasings and technical ones) |
+| Steps carry how-to lines, checks and results with support labels and evidence | Verified (`tests/test_instructions.py`) |
+| Before/after quality measurement | Done on the real response: 43.8 -> 62.5 (rubric, structure only) |
+| Prompt v5 produces actionable steps from a real video | NOT measured: needs one paid call (about 0.09 USD at today's price) |
+| Bounded retry with jitter; overload, quota and invalid distinguished | Verified (`tests/test_provider_retry.py`) |
+| Instructions validated inside Maya | Not done: Maya is not installed here |

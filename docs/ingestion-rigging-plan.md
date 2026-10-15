@@ -65,3 +65,19 @@ In chat: `/app maya`, `/load steps FILE`, `/observe nodes=joint`; the session fi
 | A promoted workflow is served by `ask`/`chat` only for a known version inside its range | Verified (router, service) |
 | Works for Blender catalog text and for Maya/Houdini rigging text | Verified for rigging text; the catalog path is covered by the existing reviewed-workflow tests |
 | Real reviewed workflows exist | Not done: needs a human reviewer |
+
+
+## Milestone 5: transcript prerequisite chain, GW-003 (Implemented, verified by tests)
+
+Criteria: xfail becomes a pass (Verified); a transcript that enters Edit Mode first is not flagged (Verified); one that went back to Object Mode is flagged
+(Verified); no step is added or removed (by construction; the existing recall and corpus tests still pass). Details: technical plan section 19.
+
+
+## Milestone 6: version cues in transcripts, GW-004 (Implemented, verified by tests)
+
+Criteria: xfail becomes a pass (Verified); the user's own version and plain narration are not flagged (Verified); "used to / older versions" wording is flagged (Verified).
+
+
+## Milestone 7: overlap noise, GW-005 (Implemented, verified by tests)
+
+Criteria: xfail becomes a pass (Verified); real overlap between separate passages is still flagged (Verified). Known follow-up: wrong-shortcut flags on multi-step sentences (technical plan section 21).

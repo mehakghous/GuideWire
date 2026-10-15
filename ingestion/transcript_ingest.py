@@ -284,6 +284,26 @@ def _doc_mapped_steps(u: "Unit", kb, version) -> list[tuple[Step, float, float]]
     return out
 
 
+_MODE_NAME = {"EDIT_MESH": "Edit", "OBJECT": "Object"}
+_BLENDER_VERSION = re.compile(r"\bblender\s*v?(\d{1,2}(?:\.\d{1,2})?)\b", re.I)
+_OTHER_VERSION_WORDS = re.compile(r"\b(?:old(?:er)? versions?|previous versions?|earlier versions?|used to|no longer|legacy|deprecated)\b", re.I)
+
+
+def _version_cues(said: str, version: str | None) -> list[str]:
+    """Flags for narration that points at another Blender version ("in blender 2.7 you would ...", "older versions", "used to"), GW-004.
+    A version the speaker names that equals the user's own (same major.minor) is not a cue."""
+    from .catalog import parse_version
+    out = []
+    mine = parse_version(version)
+    for m in _BLENDER_VERSION.finditer(said):
+        v = parse_version(m.group(1))
+        if v is not None and v != mine:
+            out.append(f"version cue: the speaker mentions Blender {m.group(1)} here; this step may be different in your version")
+    if not out and (w := _OTHER_VERSION_WORDS.search(said)):
+        out.append(f"version cue: the speaker contrasts this with another version ('{w.group(0)}'); this step may be different in your version")
+    return out
+
+
 def ingest_transcript(text: str, *, duration_s: float | None = None, version: str | None = None,
                       video_id: str | None = None, title: str | None = None, kb=None) -> TranscriptResult:
     cues = parse_timed_text(text, duration_s)
@@ -294,6 +314,7 @@ def ingest_transcript(text: str, *, duration_s: float | None = None, version: st
     unmatched: list[Unit] = []
     negated_units = 0
     last_by_op: dict[str, Step] = {}
+    mode: str | None = None          # the mode the narration has put the user in so far; None = never stated in this transcript
     for u in units:
         ops = _choose(u.text)
         has_action = bool(_CUE_ACTION.search(u.text.lower()))
@@ -348,6 +369,21 @@ def ingest_transcript(text: str, *, duration_s: float | None = None, version: st
             for k in user_shortcuts(said):
                 if op.shortcuts and k not in {normalise_shortcut(x) for x in op.shortcuts}:
                     st.flags.append(f"the speaker says '{k}', but the manual gives {', '.join(op.shortcuts)} for this operation (their wording is kept, nothing was changed)")
+            for note in _version_cues(u.text, version):
+                st.flags.append(note)
+            need = None if (op.sets_mode or op.id == "mode.toggle") else op.needs_mode      # changing mode is never "missing a prerequisite" for lack of a stated one
+            if need and mode is None:
+                if need != "OBJECT":                  # Object Mode is where Blender starts, so a bare selection is not "missing" it
+                    st.flags.append(f"prerequisite: this needs {_MODE_NAME[need]} Mode and no earlier step in this transcript enters it; "
+                                    "it may have been entered before this part, or a step is missing")
+            elif need and mode != need:
+                st.flags.append(f"prerequisite not met: this needs {_MODE_NAME[need]} Mode but the steps before it leave you in {_MODE_NAME.get(mode, mode)} Mode; a step may be missing")
+            if op.sets_mode:
+                mode = op.sets_mode
+            elif op.id == "mode.toggle" and mode in _MODE_NAME:
+                mode = "EDIT_MESH" if mode == "OBJECT" else "OBJECT"
+            elif op.id == "mode.toggle":
+                mode = None
             steps.append(st)
             last_by_op[op.id] = st
     res = TranscriptResult(steplist=None, explanations=expl, unmatched_units=unmatched, stats={

@@ -171,7 +171,7 @@ Experiment status: **incomplete, 3/6 cells, 0 new results**. The requested rule 
 | D4 | Platform "captions" flag treated as availability: false for 62/67 live candidates and for a video with an automatic track | `captions.list` on `34FBeC9mktE` returned `asr` while the flag is false | **Fixed** (not scored; verified tracks via API; TRUE kept as "creator captions exist") |
 | D5 | Negated/hypothetical/conditional instructions became steps; wrong spoken shortcut unflagged; session used a manual page as "the tutorial"; "go back to the undo part" treated as new request | see tests named in plan §118 | **Fixed** |
 | D6 | Terse key narration and `Shift+A, add a cube` | | **Fixed today** |
-| D7 | Transcript route does not check mode prerequisites | strict xfail | Open (GW-003) |
+| D7 | Transcript route does not check mode prerequisites | strict xfail | Fixed 2026-10-15 (GW-003) |
 | D8 | Curated index still stores the old flag for its 8 entries (`False` for `34FBeC9mktE`, which has an automatic track) | `knowledge/tutorial_index.json` | Open, harmless now that it is not trusted (GW-007) |
 | D9 | Ranking ties used to resolve alphabetically; 1-minute videos ranked beside 14-minute ones | | **Fixed** (stated tie-breaks; short-length penalty) |
 
@@ -193,9 +193,9 @@ Priority: P0 unsafe/unusable core flow; P1 major correctness/reliability on an i
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | GW-001 | Bug | CLI prints raw tracebacks on bad input | §3 rows D2 | Broken | A first-time user sees a stack trace | No error boundary in `_offline` | Catch `OSError/ValueError/JSONDecodeError`, print one line, exit 2 | P1 | S | – | 3 CLI error tests with exit code and message | Fix now |
 | GW-002 | Bug | Experiment cache key tied to contract version | §6 | **Fixed in audit** | Silent re-spend/invalid comparisons | key used `SCHEMA_VERSION` | `MODEL_SCHEMA_TAG` + pinned fingerprint | P1 | S | – | 2 regression tests (done) | Done |
-| GW-003 | Bug | Transcript route lacks prerequisite chain | xfail | Partial | Missing-Edit-Mode steps unflagged in tutorials | `text_steps` chain not reused | Run `link_dependencies` + the mode-chain check in `transcript_ingest` | P2 | M | – | xfail → pass; no change in dev-video recall | Next |
-| GW-004 | Quality | Version-specific narration not flagged | xfail | Partial | User follows steps for the wrong version | no cue detector | Flag cues containing "in Blender 2.x / used to / old versions" | P2 | S | – | xfail → pass | Next |
-| GW-005 | Quality | Overlap-warning noise from one sentence | xfail | Partial | Spurious warnings | validator treats shared span as overlap | Exempt steps sharing a source span | P3 | S | – | xfail → pass | Later |
+| GW-003 | Bug | Transcript route lacks prerequisite chain | xfail | Partial | Missing-Edit-Mode steps unflagged in tutorials | `text_steps` chain not reused | Run `link_dependencies` + the mode-chain check in `transcript_ingest` | P2 | M | – | xfail → pass; no change in dev-video recall | Done 2026-10-15 |
+| GW-004 | Quality | Version-specific narration not flagged | xfail | Partial | User follows steps for the wrong version | no cue detector | Flag cues containing "in Blender 2.x / used to / old versions" | P2 | S | – | xfail → pass | Done 2026-10-15 |
+| GW-005 | Quality | Overlap-warning noise from one sentence | xfail | Partial | Spurious warnings | validator treats shared span as overlap | Exempt steps sharing a source span | P3 | S | – | xfail → pass | Done 2026-10-15 |
 | GW-006 | Reliability | Gemini 503 overload prevents finishing E1 | §6 | Blocked (external) | Experiment evidence stays tiny | Free-tier capacity, no control | Re-run when healthy; billing is your decision | P2 | S | service/billing | cells A2, A3, B3 accepted | Research first |
 | GW-007 | Data | Curated index flags legacy | D8 | Improvement | none now | flag semantics | Replace with verified caption kind for the 8 entries (about 400 units) | P3 | S | quota | entries carry `caption_kind` | Later |
 

@@ -81,3 +81,9 @@ Criteria: xfail becomes a pass (Verified); the user's own version and plain narr
 ## Milestone 7: overlap noise, GW-005 (Implemented, verified by tests)
 
 Criteria: xfail becomes a pass (Verified); real overlap between separate passages is still flagged (Verified). Known follow-up: wrong-shortcut flags on multi-step sentences (technical plan section 21).
+
+
+## Milestone 8: passage ranking, GW-023 (Implemented, verified by tests)
+
+Criteria: right paragraph for 20 synthetic questions, 20/20 against 0/20 for the lead (Verified, synthetic); lead kept when it already answers (Verified); excerpt verbatim, length-limited, source is the page (Verified);
+sensible on the real 294-page index (spot-checked by hand, 3 questions). Independent gold questions: Not done (GW-041).

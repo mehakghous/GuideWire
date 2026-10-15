@@ -87,3 +87,22 @@ Criteria: xfail becomes a pass (Verified); real overlap between separate passage
 
 Criteria: right paragraph for 20 synthetic questions, 20/20 against 0/20 for the lead (Verified, synthetic); lead kept when it already answers (Verified); excerpt verbatim, length-limited, source is the page (Verified);
 sensible on the real 294-page index (spot-checked by hand, 3 questions). Independent gold questions: Not done (GW-041).
+
+
+## Milestone 9: rigging goal to ranked tutorials (Implemented, verified with injected search; not yet run live)
+
+`python -m ingestion.cli find --app maya "rig a biped character in Maya 2024" [--live]`. Tests: `tests/test_rigging_discovery.py` (12).
+
+| Criterion | Status |
+|---|---|
+| Goal gives app, version, stages, a dependency-ordered plan, assumed prerequisites | Verified (unit) |
+| No application named: ask, spend nothing | Verified (unit) |
+| At most 2 searches; quota counted; duplicate videos looked up once | Verified (unit) |
+| Other-application, unembeddable and unrelated videos are excluded with a reason; best match first; older versions penalised not removed | Verified (unit, fake search) |
+| `--live` uses the Data API and reports the cost; API errors are one line | Verified with the API stubbed |
+| Real YouTube results are sensible for a real goal | Run twice live on 2026-10-15 (402 units) and read by hand; four ranking faults fixed (technical plan 23.1). Judged from titles only; whether they teach it is unknown |
+| Length judged against the goal, not fixed | Verified (unit tests; real results re-ranked by replay) |
+| Chat integration (`/find`, `/load video`) | Not done |
+
+
+Tests added after the live runs (18 in total in `tests/test_rigging_discovery.py`): query without filler, auto-rig penalty and the exception, series note, stage credit, area wording, save and replay without quota.

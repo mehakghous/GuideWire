@@ -20,6 +20,9 @@ from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
 
+DISCOVERY_CACHE = Path(__file__).resolve().parents[1] / "runs" / "cache"      # raw live search results; tests point this elsewhere
+
+
 def _reviewed_store(args):
     """The reviewed-workflow store, when one has been promoted into (knowledge/reviewed) and the documentation index is not switched off."""
     from .workflows import DEFAULT_STORE, ReviewedWorkflowStore
@@ -118,6 +121,34 @@ def _offline(args) -> int:
         except (EOFError, KeyboardInterrupt):
             return 0
     if args.cmd == "find":
+        from .rigging_discovery import discover_rigging, parse_goal
+        if args.app in ("maya", "houdini") or parse_goal(args.text, args.app).stages:       # rigging and animation goals: any application
+            search = metadata = rec = None
+            if args.replay:                                         # a saved live run: ranking can be tuned with no quota
+                from .rigging_discovery import replay
+                search, metadata = replay(args.replay)
+            elif args.live:
+                from .rigging_discovery import Recording
+                from .youtube import api
+                rec = Recording(lambda q, n: api.search_videos(q, max_results=n), api.videos_metadata)
+                search, metadata = rec.search, rec.metadata
+            try:
+                rd = discover_rigging(args.text, app=args.app, version=args.version, limit=args.limit, search=search, metadata=metadata)
+            except Exception as e:
+                if args.live and type(e).__name__ == "YouTubeApiError":
+                    print(f"error: {e}", file=sys.stderr)
+                    return 1
+                raise
+            g = rd.goal
+            if rec is not None and rec.meta:
+                import hashlib, time
+                saved = DISCOVERY_CACHE / f"discovery_{hashlib.sha256(args.text.encode()).hexdigest()[:8]}_{int(time.time())}.json"
+                rec.save(saved, args.text)
+                print(f"raw search results saved to {saved} (replay with --replay, no quota)", file=sys.stderr)
+            print(json.dumps({"goal": {"app": g.app, "version": g.version, "stages": g.stages, "areas": g.areas, "plan": g.plan, "prerequisites": g.prerequisites},
+                              "queries": rd.queries, "quota_units_used": rd.quota_units, "results": [r.model_dump() for r in rd.recommendations],
+                              "notes": rd.notes, "excluded": rd.excluded}, indent=1))
+            return 0
         from .tutorials import discover, load_index, verify_captions
         entries = load_index(args.index) if args.index else load_index()
         if args.candidates:
@@ -218,6 +249,9 @@ def main(argv: list[str] | None = None) -> int:
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")
+    fd.add_argument("--app", choices=["blender", "maya", "houdini"], help="the application (rigging/animation goals; otherwise read from the request)")
+    fd.add_argument("--live", action="store_true", help="rigging goals: also search YouTube (Data API: 100 quota units per search, at most 2 searches, plus 1 for metadata)")
+    fd.add_argument("--replay", metavar="FILE", help="rigging goals: rank a saved live run (runs/cache/discovery_*.json) again; no quota used")
     fd.add_argument("--limit", type=int, default=3)
     fd.add_argument("--index", help="a tutorial index JSON (default: knowledge/tutorial_index.json)")
     fd.add_argument("--candidates", action="store_true", help="also search the UNREVIEWED candidates file")

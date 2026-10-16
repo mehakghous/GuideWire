@@ -26,6 +26,7 @@ from shared.step_record import Action, PredicateKind, StatePredicate, Step, Step
 from .instructions import compose_instructions
 from .profiles import AppProfile, get_profile
 from .providers.base import LLMProvider, ProviderError, QuotaError
+from .scene_chain import derive_state
 from .timecode import parse_timestamp
 from .validate import Issue, ValidationFailure, check_structure, sanitize_and_annotate
 
@@ -305,6 +306,7 @@ def _run(
                 model_id=provider.model_id, prompt_version=prompt_version,
             )
             compose_instructions(sl)                       # before validation, so unknown menu names get the usual "please check" flag
+            derive_state(sl)
             sl = sanitize_and_annotate(sl, profile, video_duration_s)
             last_partial = sl
             check_structure(sl, video_duration_s)

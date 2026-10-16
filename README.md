@@ -55,6 +55,7 @@ python -m ingestion.cli features steps.json   # which features a step list teach
 python -m ingestion.cli find --app maya "make the legs move properly" [--live] [--recency off|low|normal|high]   # plain-language goal -> ranked tutorials
 python -m ingestion.cli score steps.json --rubric tests/fixtures/rubrics/maya_fkik_leg.json   # actionability rubric (structure only)
 python -m ingestion.cli instructions steps.json   # add how-to / check lines from a step list own evidence
+python -m ingestion.cli chain steps.json [-o out.json]   # fill missing expected states from the knowledge base; check each step starts from what earlier steps made
 python -m ingestion.cli ask --app maya "my knee flips when I move the ik handle"   # a described problem -> sourced cause and fix (route rigging_knowledge)
 python -m ingestion.cli captions VIDEO_ID --app maya --duration SECONDS   # DEV ONLY (unofficial endpoint): a real tutorial transcript -> steps
 python -m ingestion.cli review show steps.json   # then: review edit ... / review promote steps.json --by YOU --request "<text>"

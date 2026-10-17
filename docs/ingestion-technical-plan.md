@@ -1946,3 +1946,134 @@ Backlog items GW-001, GW-010 and GW-040 of [the audit](audits/GUIDEWIRE_CURRENT_
 # Part XV: Catalog pitfalls in steps, independent labelling workflow, recall instrumentation (2026-10-12)
 
 See the audit's section 14 (progress log) and section 15 (GW-043). Summary: `Step.common_mistakes` is now filled from an explicit `PITFALLS` table; `version_dependent` is intentionally empty; a CSV labelling workflow (`docs/labelling_guide.md`, `ingestion/eval/labels.py`, `scripts/prepare_labelling.py`, `eval_data/labels/`), annotator agreement, and `python -m ingestion.eval.heldout` (pooled and per-video recall by evidence type, pipeline funnel, one category per miss) are ready; the 13 sheets are blank until people fill them. Tests: 442 pass, 3 strict expected-failures.
+
+
+## 17. Rigging and animation written instructions (2026-10-15)
+
+Written procedures for Maya and Houdini (and Blender text that mostly names rigging features) go to a second deterministic route, `rigging_text`
+(`ingestion/rigging_text.py`), chosen in `router.route(..., app=...)`. Each line or numbered item becomes one step whose goal is the user's own wording.
+A clause is tagged with a catalog feature only when `terms.suggest_feature` finds one clear best match; otherwise it stays a flagged, unvalidated step.
+A clause that says to create a node type the app profile knows ("Create an IK handle", "Add a Rig Doctor") expects `node_exists` afterwards;
+nothing else is claimed verifiable. The validator adds craft marking, version notes and "no tool in this app" flags; `feature_report` adds the
+prerequisites the text never covers as `assumptions`. A single line is not a procedure: it gets a clarification, not a guess.
+
+The session now remembers `app` (`/app maya`, saved in the session file; old files default to blender) and loading a step list sets it from the list.
+`/observe nodes=joint,ikHandle` records which node types exist, so `Session.verify` can judge `node_exists` steps.
+
+Limits: the matching is cautious, so many real steps stay unmatched until prompt v4 or a person sets `feature_id`. Transcripts, `/load transcript`
+and the knowledge base remain Blender-only. Maya and Houdini vocabularies are not checked against an install, and nothing here talks to either application.
+
+
+## 18. Review and promote (GW-012, 2026-10-15)
+
+`cli review` is the human step between a generated step list and a workflow users are served:
+`review show FILE` (steps with their flags), `review edit FILE --set-goal N=TEXT --remove N --move N:M` (the input list is never mutated; ids stay,
+`order` is renumbered, a step cannot move before a step it depends on, an edit that breaks structure is refused), `review promote FILE --by NAME
+--request TEXT | --ops a,b [--min-version V --max-version V]` (marks every step `reviewed` only here and only with a named reviewer; stores it under
+`knowledge/reviewed`), `review list`. `router.route(store=...)` serves a stored workflow first for catalog how-to/procedure text and for rigging
+procedures (`route=reviewed_workflow`, provenance `reviewed_workflow`) when the version is known and inside the declared range; `ask` and the chat
+`Service` pass the store automatically when `knowledge/reviewed` exists. Code: `ingestion/workflows.py` (`edit_steps`, `promote`, `entries`, `load_steplist`).
+
+Found on the way and fixed: `parse_version` only understood "X.Y", so a Maya version such as "2025" counted as unknown and a reviewed workflow was never served;
+it now reads "2025" as (2025, 0) and "20.5.410" as (20, 5).
+
+Not done on purpose: no workflow is promoted. GW-012 also asks to promote the 13 catalog procedures "after a human check"; that check is yours.
+
+
+## 19. Transcript mode-prerequisite chain (GW-003, 2026-10-15)
+
+`transcript_ingest` now tracks the mode the narration has put the user in. A step that needs Edit or Object Mode (from the catalog) gets a flag when no
+earlier step in the transcript enters a mode ("it may have been entered before this part, or a step is missing"), or when the narration left you in the
+other mode ("prerequisite not met ... a step may be missing"). Steps that themselves change mode, and Tab (whose result depends on the unknown current mode),
+are never flagged for a missing prerequisite. Only flags are added: no step is created, removed or merged, so recall is unchanged by construction.
+The strict xfail `test_gap_transcript_flags_a_missing_prerequisite` is now a normal test, with a second test for the chain.
+
+
+## 20. Version cues in narration (GW-004, 2026-10-15)
+
+A transcript step whose spoken sentence names another Blender version ("in blender 2.7 you would ...") or contrasts with one ("older versions", "used to",
+"no longer", "legacy", "deprecated") gets a `version cue` flag. A version the speaker names that equals the user's own is not a cue. Only flags are added.
+Also tightened in GW-003's check: a bare operation that needs Object Mode is no longer flagged as missing a prerequisite when no mode was stated, because Blender
+starts in Object Mode; a wrong-mode prerequisite is still flagged. The strict xfail for this gap is now a normal test, plus a negative test.
+
+
+## 21. Overlap noise (GW-005, 2026-10-15)
+
+`validate.sanitize_and_annotate` no longer warns "starts before step N ends" for two steps cut from the same spoken passage (they share a `transcript:a-bs` source
+span, so equal times are expected). Overlap between steps from different passages is still flagged. All three strict xfails of the audit are now ordinary passing tests.
+
+Known, not fixed: in a sentence that yields several steps, each step still compares every key the speaker said against its own operation's shortcut, so
+"press tab ... press g to move it" puts "the speaker says 'g', but the manual gives tab" on the Enter Edit Mode step. The key should be matched to the operation it
+belongs to. Not in the roadmap yet; proposed as GW-090 (P2, S).
+
+
+## 22. Passage ranking for concept answers (GW-023, 2026-10-15)
+
+A concept answer from the local manual index used to quote the page lead whatever was asked. `KnowledgeBase.passage(hit, query_terms)` now returns the paragraph of the
+matched page that covers more of the question's terms than the lead does (title words are ignored because they match every paragraph; a matching section heading counts
+half), trimmed at a sentence boundary, verbatim; `None` keeps the lead. `answer_kb` uses it for the single-page concept path. Checked on the real manual (294 pages):
+"what does the falloff do in proportional editing" now quotes the Falloff paragraph; "what is proportional editing" keeps the lead.
+
+Evidence: `tests/test_passages.py`, 20 synthetic questions over 5 synthetic pages (`tests/kb_passages`): 20/20 correct passage with ranking, 0/20 with the lead.
+Both pages and questions are written by the same author, so this shows the mechanism works, not the hit rate on real questions; that needs independent questions (GW-041).
+Limit: the existing sufficiency gate still decides whether a page answers at all (it needs enough query terms in the page title), so a question about a section option that
+does not name the page ("what does the boundary option do") is declined before any excerpt is chosen. Not changed here.
+Comparison and needs-state answers still quote the lead.
+
+
+## 23. Finding tutorials for a rigging goal (2026-10-15)
+
+Priority change: the headline flow is prompt -> tutorial -> steps, so discovery and extraction for character rigging and animation now come before the remaining side items.
+
+`ingestion/rigging_discovery.py`: `parse_goal` reads the application, its version (Maya "2024", Houdini "20.5"), the stages named (rigging, skinning, IK/FK, facial, animation,
+walk cycle, retargeting, export, constraints) and builds a PLAN from the feature catalog: the features the goal asks for (supported in that app), in teaching order, with the
+category areas they fall in and, separately, the prerequisites they assume (scene set-up, rest pose). `search_queries` makes at most two YouTube searches. `discover_rigging`
+searches, reads metadata (1 unit per 50 videos), drops candidates that are about another application, embeddable=False or not public, or whose title and chapters say
+nothing about the stages asked for, then ranks the rest: areas touched (the strongest factor), the application named in the title, version match, a 8-90 minute length,
+official channel, Creative Commons, chapters. Each result lists the plan features its title/chapters mention (`matched_terms`) and the areas it does not touch.
+`videos_metadata` now also returns `chapter_titles`. `cli find` takes `--app` and `--live`; without `--live` nothing is spent and the result says so.
+
+Limits (stated in every result): relevance is judged from metadata only, so "mentions" is not "teaches"; the plan is the catalog's idea of a rigging workflow, not a
+judgement of what this user needs; no live run has been made against the real API yet (tests use injected search); the chat service does not call it yet.
+
+Next in this line: (2) run it live once for a real goal and read the results; (3) take a chosen result to steps: video route with prompt v4 (Gemini, costs money), or a user/adapter
+transcript; (4) check the extracted steps against the plan (which areas are covered, which prerequisites are missing) and report it; (5) chat integration (`/find`, `/load video`).
+
+
+### 23.1 First live runs (2026-10-15, 402 quota units, goal "rig a biped character in Maya 2024 with IK legs and skinning")
+
+Two live searches (maya queries, 19 videos with metadata) were read by hand. What they showed, and what changed:
+- A filler word ("and") leaked into the search string: stop words added.
+- The catalog-feature match was too strict for titles ("Rigging for Beginners: IK Legs in Maya" matched no area): coverage now also uses area wording (IK/FK, skin, joints, controls ...).
+- Length: the first version rewarded 8-90 minutes for everyone. Length is now judged against the goal: a single topic expects 3-40 min, two areas 8-75, three or four 20 min-3 h, five or more
+  (a whole-character rig) at least 30 min with no upper bound, "complete / start to finish" at least 90 min. Length only scores (a long video is never penalised for a big goal);
+  only a limit the user states ("under 20 minutes") excludes.
+- Automatic rigging tools (Quick Rig, auto rig, Advanced Skeleton, Rigify, Mixamo) have few manual steps to extract: -1 and a note, unless the goal asks for them. A 3-minute Quick Rig video had ranked second.
+- A title that names the stage asked for ("rigging for beginners in Maya 2024") gets +1 even when no specific area is named; the only title saying "Maya 2024" rose from 4th to 3rd.
+- Multi-part courses ("Part 9", "Part 10") are named as parts of a series. Combining parts is a later feature (F10).
+- Raw results are saved to `runs/cache/discovery_*.json` (git-ignored, purged after 30 days by `cli purge`) and can be re-ranked with `find --replay FILE` at no cost.
+Observed and not acted on: none of the 19 titles states the user's Maya version except one; several are non-English (no language preference exists yet); none is from an official channel.
+Still unknown: whether the top results actually teach what their titles suggest. That is what extracting their steps will show.
+
+
+## 24. First video to steps, and transcripts for Maya, Houdini and Blender (2026-10-16)
+
+### 24.1 Gemini video route, prompt v4, one real video
+`dc3iRo0hb3g` (Sang Sang, Maya Character Rigging Part 9, 19 min), `--app maya --prompt-version v4`, model gemini-3.6-flash. The first call failed with 503 (high demand, three attempts, no charge); a retry
+two minutes later succeeded on its first attempt: 108,268 prompt tokens, 1,188 output, 1,642 thinking tokens, about 0.09 USD at the recorded price list (notional). Ten steps, all `feature_id`s valid:
+create joint chain (SKEL-01), place joints (SKEL-02), rename (SKEL-03), orient (ORNT-02), duplicate chain for IK and FK (SKEL-05), parent-constrain between the chains (CNST-04), create a switch control (CTRL-01),
+add the FK_IK_Switch attribute (CTRL-04), connect it to the constraint weights (IKFK-06), test the blend (IKFK-06). By reading the steps against the title they follow the video's stated subject.
+Faults found by looking:
+- No step has a video time range (the model left the optional timestamps out), so the player cannot seek to a step. Prompt v4 now says every step needs both times.
+- No step has an expected state: nothing is checkable. Prompt v4 now says to add `node_exists` when a step creates a listed node type (joint, ikHandle, skinCluster ...).
+- Feature tags are plausible but two are loose: "duplicate the chain to make IK and FK chains" is tagged SKEL-05 (insert/delete/reparent), and "parent constrain between IK and FK chains" CNST-04 (weighted multi-target blending). Only the model's own reading of the catalog list; to be judged against your labels.
+- The prerequisite report listed the same missing items once per feature; it now lists each once.
+Not yet done: a second paid call to see whether the two prompt fixes work (about 0.09 USD, needs your OK); anything beyond one video.
+
+### 24.2 Transcript route for any application
+`ingestion/rigging_transcript.py` reads a user-supplied transcript for Maya, Houdini or Blender rigging/animation tutorials. A spoken piece becomes a step when it has an action cue and either names one catalog feature clearly
+(and uses rigging vocabulary) or says to create a node type the app profile knows. Units are cut at caption boundaries and at "then / next / now", and a cut that matches nothing is glued back onto the piece before it.
+Neighbouring pieces about one feature merge. Times and verbatim evidence come from the cues; steps are narrated only; version cues name another version of the same application. `route(..., input_type="transcript", app=...)`,
+`cli transcript --app`, `cli captions --app` and chat `/app` + `/load transcript` use it. A Blender transcript with no modelling-catalog steps falls back to it. A free-speech false positive found while testing ("edit mode ... move whole objects"
+matched a bone-placement feature) is closed by requiring rigging vocabulary in the piece. `suggest_feature` now weights the tool name above the whole menu path ("go to skeleton and orient joint" is Orient Joints, not Create Joints).
+Limits: rule-based and cautious, so it will miss real instructions phrased unusually; Houdini and Maya vocabularies are unchecked against an install; no real transcript of a rigging tutorial has been run through it yet (tests use written examples).

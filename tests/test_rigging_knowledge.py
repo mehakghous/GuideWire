@@ -9,9 +9,9 @@ from ingestion.rigging_knowledge import PATH, Knowledge, KnowledgeError, load
 DATA = json.loads(PATH.read_text(encoding="utf-8"))
 
 
-def test_the_shipped_file_obeys_its_own_rules_and_covers_both_apps():
+def test_the_shipped_file_obeys_its_own_rules_and_covers_all_three_apps():
     k = load()
-    assert len(k.entries) >= 14 and {a for e in k.entries for a in e.apps} == {"maya", "blender"}
+    assert len(k.entries) >= 14 and {a for e in k.entries for a in e.apps} == {"maya", "blender", "houdini"}
     assert all(s["url"].startswith("https://") and s["tier"] in ("official", "community", "tutorial") for s in k.sources.values())
     assert sum(s["tier"] == "official" for s in k.sources.values()) >= 12                          # real vendor documentation is the base
 
@@ -70,6 +70,8 @@ REAL_SYMPTOMS = [
     ("Bone Heat Weighting: failed to find solution for one or more bones", "blender", "blender.armature_deform_parent"),
     ("my knee flips when I move the ik handle", "maya", "maya.ik_handle"),
     ("can't rotate joint around x", "maya", "maya.orient_joint"),
+    ("weights bleed between fingers", "houdini", "houdini.capture_weights"),
+    ("the jacket does not line up with the body after fbx import", "houdini", "houdini.capture_weights"),
 ]
 
 
@@ -83,7 +85,8 @@ def test_unrelated_or_wrong_app_text_finds_nothing():
     k = load()
     assert k.troubleshoot("what is the weather like", "maya") is None
     assert k.troubleshoot("bone heat weighting failed", "maya") is None            # that is a Blender message
-    assert k.troubleshoot("knee flips", "houdini") is None                          # Houdini is not researched: nothing is invented
+    assert k.troubleshoot("knee flips", "houdini") is None                          # Houdini has two entries (APEX AutoRig, capture): a Maya symptom finds nothing
+    assert k.troubleshoot("weights bleed between fingers", "maya") is None
 
 
 def test_ui_names_come_from_the_documented_paths_and_options():
@@ -160,3 +163,27 @@ def test_tag_quality_on_real_spoken_tutorials_beats_the_recorded_baseline():
     s = score_tags(sls, lab)
     # the original reader on this label set (last commit, 2026-10-16): precision 42.3%, recall 21.2%
     assert s.precision >= 60.0 and s.recall >= 50.0 and s.false_steps <= 8
+
+
+def test_effects_must_belong_to_the_entry_and_name_something_it_makes():
+    d = json.loads(PATH.read_text(encoding="utf-8"))
+    d["entries"][0]["effects"] = {"CNST-01": {"makes": ["parentConstraint"]}}   # orient_joint does not teach CNST-01
+    with pytest.raises(KnowledgeError, match="effects"):
+        Knowledge(d)
+
+
+def test_houdini_entries_cite_the_official_docs_and_say_the_forum_advice_is_community():
+    k = load()
+    ids = {e.id: e for e in k.entries if "houdini" in e.apps}
+    assert set(ids) == {"houdini.apex_autorig", "houdini.capture_weights"}
+    assert all(s.tier == "official" for e in ids.values() for s in e.facts)
+    ts = ids["houdini.capture_weights"].troubleshooting
+    assert {t["tier"] for t in ts} == {"community"} and all(k.sources[s]["url"].startswith("https://www.sidefx.com/forum") for t in ts for s in t["sources"])
+    assert {"APEX AutoRig Component", "Component Source", "Joint Capture Biharmonic"} <= k.ui_names("houdini")
+
+
+def test_houdini_steps_are_tagged_from_the_documented_names():
+    from ingestion.terms import suggest_feature
+    assert suggest_feature("now we pack the character with apex pack character", "houdini") == "CTRL-08"
+    assert suggest_feature("create capture weights with joint capture biharmonic", "houdini") == "SKIN-01"
+    assert suggest_feature("add a cube", "houdini") is None

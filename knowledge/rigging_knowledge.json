@@ -1,5 +1,5 @@
 {
-  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini (unresearched), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16.",
+  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini beyond two entries (APEX AutoRig, capture weights; no Houdini animation, retargeting or Rig Doctor), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16.",
   "retrieved": "2026-10-16",
   "tiers": {
     "official": "vendor documentation",
@@ -175,6 +175,34 @@
     "B10": {
       "title": "Guide: blender weight painting problems (secondary source, lower trust)",
       "url": "https://app.cinevva.com/guides/blender-weight-painting-problems",
+      "tier": "community"
+    },
+    "H1": {
+      "title": "SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig)",
+      "url": "https://sidefx.com/docs/houdini/character/kinefx/rigcharacter.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-16"
+    },
+    "H2": {
+      "title": "SideFX Houdini docs: KineFX capture (Joint Capture Biharmonic and related nodes)",
+      "url": "https://sidefx.com/docs/houdini/character/kinefx/capture.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-16"
+    },
+    "H3": {
+      "title": "SideFX Houdini docs: Capture Geometry shelf tool",
+      "url": "https://www.sidefx.com/docs/houdini/shelf/capturegeometry.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-16"
+    },
+    "H4": {
+      "title": "SideFX forum: How to fix KineFX incorrect weights in shallow space mesh? (finger and eye weights bleeding)",
+      "url": "https://www.sidefx.com/forum/topic/86205",
+      "tier": "community"
+    },
+    "H5": {
+      "title": "SideFX forum: FBX character looks wrong in FBX Character Import (piece captured in a different rest pose)",
+      "url": "https://www.sidefx.com/forum/post/347964/",
       "tier": "community"
     }
   },
@@ -431,7 +459,25 @@
             "C2"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "IKFK-02": {
+          "makes": [
+            "ikHandle"
+          ],
+          "needs": [
+            "joint"
+          ]
+        },
+        "IKFK-03": {
+          "makes": [
+            "ikHandle"
+          ],
+          "needs": [
+            "joint"
+          ]
+        }
+      }
     },
     {
       "id": "maya.preferred_angle",
@@ -559,7 +605,17 @@
             "C2"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "IKFK-04": {
+          "makes": [
+            "poleVectorConstraint"
+          ],
+          "needs": [
+            "ikHandle"
+          ]
+        }
+      }
     },
     {
       "id": "maya.parent_constraint",
@@ -641,7 +697,14 @@
             "M2"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "CNST-01": {
+          "makes": [
+            "parentConstraint"
+          ]
+        }
+      }
     },
     {
       "id": "maya.ikfk_switch",
@@ -896,7 +959,17 @@
             "C4"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "SKIN-01": {
+          "makes": [
+            "skinCluster"
+          ],
+          "needs": [
+            "joint"
+          ]
+        }
+      }
     },
     {
       "id": "maya.paint_skin_weights",
@@ -1526,7 +1599,14 @@
             "C2"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "SKEL-01": {
+          "makes": [
+            "joint"
+          ]
+        }
+      }
     },
     {
       "id": "maya.name_joints",
@@ -1787,6 +1867,358 @@
           "sources": []
         }
       ]
+    },
+    {
+      "id": "houdini.apex_autorig",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CTRL-08",
+        "SKEL-07",
+        "IKFK-02",
+        "IKFK-06",
+        "IKFK-08",
+        "CTRL-02"
+      ],
+      "phrases": [
+        "build a rig automatically in houdini",
+        "add ik to the legs and arms",
+        "add fk controls to the skeleton",
+        "set up ik fk blend",
+        "make a reverse foot",
+        "pack the character for rigging",
+        "rig the skeleton with apex",
+        "apex autorig component",
+        "apex pack character",
+        "multi ik component"
+      ],
+      "ui": [
+        {
+          "path": "APEX Pack Character (SOP)",
+          "tier": "official",
+          "source": "H1",
+          "options": [
+            "Shape Path",
+            "Skeleton Path"
+          ],
+          "options_tier": "official",
+          "options_source": "H1"
+        },
+        {
+          "path": "APEX AutoRig Component (SOP)",
+          "tier": "official",
+          "source": "H1",
+          "options": [
+            "Component Source",
+            "FK Transform",
+            "Bone Deform",
+            "Transform Driver",
+            "Spline",
+            "Multi IK",
+            "Twist",
+            "IK / FK Blend",
+            "Reverse Foot",
+            "Look At",
+            "Full Body IK",
+            "Segments"
+          ],
+          "options_tier": "official",
+          "options_source": "H1"
+        },
+        {
+          "path": "APEX Configure Controls (SOP)",
+          "tier": "official",
+          "source": "H1"
+        }
+      ],
+      "prerequisites": [
+        "A skeleton and the skin shape exist and are packed into one character with APEX Pack Character (defaults: Shape Path /Base.shp, Skeleton Path /Base.skel).",
+        "The skeleton points carry the tags the components look for (the docs add them with Attribute Adjust Tags); components select joints by tag."
+      ],
+      "outline": [
+        {
+          "text": "Pack the shape and skeleton with APEX Pack Character and check the result in the rig tree view.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "Add an APEX AutoRig Component with Component Source FK Transform, then one with Bone Deform.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "Add controls and the spine, then Multi IK for arms and legs, then Twist, IK / FK Blend and Reverse Foot as needed.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "Finish with APEX Configure Controls to set control shape, size and colour.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Each AutoRig component adds one kind of rig function, chosen with its Component Source parameter; the docs chain one AutoRig node per function.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "Multi IK Segments take tag names (for example *arm *leg), not #tag patterns.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "Reverse Foot uses Segments, Ankle, Ball and IK Driven; IK Driven defaults to #ik_tip.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "Bone Deform uses a Rest Skeleton, Rest Geo and Output Geo.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After packing, the rig tree view shows the shape and skeleton folders.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        },
+        {
+          "text": "The FK Transform component creates Base.rig in the character; pose the rig to test it.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Writing #tag in the Multi IK Segments field: it expects the plain tag names.",
+          "tier": "official",
+          "sources": [
+            "H1"
+          ]
+        }
+      ],
+      "conflicts": []
+    },
+    {
+      "id": "houdini.capture_weights",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKIN-01",
+        "SKIN-02",
+        "SKIN-03",
+        "SKIN-13"
+      ],
+      "phrases": [
+        "attach the mesh to the skeleton in houdini",
+        "skin the character",
+        "make the mesh follow the bones",
+        "capture the skin weights",
+        "bind the geometry to the joints",
+        "my fingers move with the wrong bone",
+        "weights bleed between fingers",
+        "create capture weights",
+        "joint capture biharmonic"
+      ],
+      "ui": [
+        {
+          "path": "Joint Capture Biharmonic (SOP)",
+          "tier": "official",
+          "source": "H2",
+          "options": [
+            "Capture Geo Role"
+          ],
+          "options_tier": "official",
+          "options_source": "H2"
+        },
+        {
+          "path": "Joint Deform (SOP)",
+          "tier": "official",
+          "source": "H2"
+        },
+        {
+          "path": "Rig Pose (SOP)",
+          "tier": "official",
+          "source": "H2",
+          "options": [
+            "Show Handle"
+          ],
+          "options_tier": "official",
+          "options_source": "H2"
+        },
+        {
+          "path": "Characters tab > Capture Geometry (shelf tool)",
+          "tier": "official",
+          "source": "H3",
+          "options": [
+            "Method",
+            "Type",
+            "Biharmonic",
+            "Proximity",
+            "Regions",
+            "Use Capture Pose",
+            "Capture Frame",
+            "Max Iterations",
+            "High Precision"
+          ],
+          "options_tier": "official",
+          "options_source": "H3"
+        }
+      ],
+      "prerequisites": [
+        "The skin geometry is polygonal and the skeleton is a SOP skeleton.",
+        "The skeleton is in a pose with the bones angled slightly, and the geometry curved slightly, so the capture knows which way each joint bends."
+      ],
+      "outline": [
+        {
+          "text": "Create capture weights with Joint Capture Biharmonic (organic shapes), or Joint Capture Proximity (simple shapes), giving it the skin geometry and the skeleton.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "Connect Joint Deform after the capture node.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "Pose with Rig Pose (display flag on Joint Deform, then Show Handle) and watch the deformation.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Joint Capture Biharmonic gives smoothed weights from joint position and volume and suits soft organic deformation; Joint Capture Proximity is faster and distance-based; Capture Packed Geometry gives rigid 100% weights per piece; Joint Capture Paint paints weights by hand.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "The weights are stored on the boneCapture attribute and are normalised per point.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "The Capture Geometry shelf tool offers Type Biharmonic, Proximity or Regions; Max Iterations and High Precision only matter for Biharmonic.",
+          "tier": "official",
+          "sources": [
+            "H3"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "In Rig Pose, move a joint: the nearby skin follows it and does not tear.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "Display the capture node to see joint regions, or read the boneCapture attribute in the geometry spreadsheet.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Using NURBS shapes as capture shapes: only polygonal geometry works.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "Clicking Reload Node Names on the Merge Packed node after assigning shapes: it reverts the shape names and breaks the assignments.",
+          "tier": "official",
+          "sources": [
+            "H2"
+          ]
+        },
+        {
+          "text": "Leaving the bones perfectly straight: angle them slightly so the capture knows which way to bend.",
+          "tier": "official",
+          "sources": [
+            "H3"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "fingers move with the wrong finger",
+            "weights bleed between fingers",
+            "eyelids move with the eye bone",
+            "mesh tears when one joint rotates",
+            "finger weights overlap in houdini"
+          ],
+          "cause": "The default enlargement of the tet mesh used by the biharmonic capture makes close-together parts (fingers, eyelids) overlap, so neighbouring bones claim each other's points.",
+          "fix": [
+            "Lower the enlargement of the tet embed (one user got to 0.2; it reduced but did not remove the overlap) or use tet conform.",
+            "Use proximity capture for the hands, or space the fingers further apart in the T-pose.",
+            "Leave eyes and face bones out of the first capture and weight them in a second pass.",
+            "For a hero character, paint the weights by hand."
+          ],
+          "tier": "community",
+          "sources": [
+            "H4"
+          ]
+        },
+        {
+          "symptom_phrases": [
+            "jacket does not line up with the body",
+            "fbx character looks wrong in houdini",
+            "separate piece captured in a different rest pose"
+          ],
+          "cause": "A piece (for example a jacket) was captured in a different rest pose from the body, and KineFX did not handle the mismatch in that thread.",
+          "fix": [
+            "Adjust that piece's rest pose in Houdini so it matches the body.",
+            "Or fix the geometry in the source application and capture it again.",
+            "The thread ends without a confirmed fix; report it to SideFX with the file."
+          ],
+          "tier": "community",
+          "sources": [
+            "H5"
+          ]
+        }
+      ],
+      "conflicts": []
     }
   ]
 }

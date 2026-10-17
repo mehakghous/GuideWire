@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from shared.step_record import Action, Step, StatePredicate as P
 
 from ingestion.catalog import BY_ID, Prereq, normalise_shortcut, tokens
-from ingestion.profiles import BLENDER, AppProfile, norm
+from ingestion.profiles import AppProfile, norm
 
 from .index import Hit, KnowledgeBase
 
@@ -114,7 +114,6 @@ def select_variants(c: Candidate, question: str) -> list[Variant]:
     scored = []
     for v in c.variants:
         words = tokens(" ".join(x for x in (v.menu or "", v.label or "") if x).replace(">", " "))
-        generic = {"bevel", "extrude", "merge", "delete", "duplicate", "add", "mesh", "object", "edge", "edges", "vertex", "vertices", "face", "faces"}
         n = len((words & q) & {"vertex", "vertices", "edge", "edges", "face", "faces", "vertice", "vertic"})
         scored.append((n, v))
     best = max((n for n, _ in scored), default=0)

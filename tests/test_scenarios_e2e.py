@@ -2,7 +2,6 @@
 Expectations are about USER-VISIBLE outcomes (which steps, what is flagged, what is refused), not about internals.
 `xfail(strict=True)` marks a CONFIRMED gap: it documents the failure, stays visible in the report, and turns red the day it is fixed
 (so it cannot be forgotten and cannot silently start passing). They are not hidden passes."""
-import hashlib
 import json
 import random
 from pathlib import Path
@@ -10,14 +9,14 @@ from pathlib import Path
 import pytest
 
 from ingestion.eval.followup_eval import build_session, evaluate
-from ingestion.followup import INTENT_PATTERNS, classify_followup, respond
+from ingestion.followup import classify_followup, respond
 from ingestion.handoff import plan_ingestion
 from ingestion.knowledge import link_dependencies
 from ingestion.router import route
 from ingestion.session import Session
 from ingestion.text_steps import parse_written
 from shared.answer import AnswerBundle, RequestSummary
-from shared.step_record import SCHEMA_VERSION, Action, StatePredicate, Step, StepList, StepVerification
+from shared.step_record import SCHEMA_VERSION, StatePredicate, Step, StepList, StepVerification
 from tests.test_kb import TUT
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -234,7 +233,6 @@ def test_a_concept_question_is_not_forced_into_steps():
 
 # ================================================================== 4. session, follow-ups, interruptions
 def _sess(key="A", version="2.80"):
-    from ingestion.eval.followup_eval import build_session
     return build_session({"tutorial": key, "version": version})
 
 
@@ -396,7 +394,8 @@ def test_follow_up_development_set_has_no_failures():
 def test_follow_up_heldout_set_is_frozen_and_currently_passes():
     # first look was 31/32 (see the plan); the fix made later numbers 'not clean', so this is a regression guard, not an accuracy claim
     f = CORPUS / "followups_heldout.json"
-    assert hashlib.sha256(f.read_bytes()).hexdigest() == (CORPUS / "followups_heldout.sha256").read_text().strip()
+    from ingestion.hashing import matches_frozen
+    assert matches_frozen(f, CORPUS / "followups_heldout.sha256")[0]
     res = evaluate(f, "test")
     assert [r for r in res["rows"] if not r["pass"]] == []
     assert res["summary"]["false_completions"] == 0 and res["summary"]["contamination"] == 0
@@ -404,7 +403,7 @@ def test_follow_up_heldout_set_is_frozen_and_currently_passes():
 
 # ================================================================== 6. schema 0.6
 def test_schema_version_and_backward_compatibility():
-    assert SCHEMA_VERSION == "0.6"
+    assert SCHEMA_VERSION == "0.7"
     for p in sorted((ROOT / "shared" / "examples").glob("*.json")):
         sl = StepList.model_validate(json.loads(p.read_text(encoding="utf-8")))
         assert all(s.depends_on == [] and s.verification is None for s in sl.steps)       # old files still validate, new fields default empty

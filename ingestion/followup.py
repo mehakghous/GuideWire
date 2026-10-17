@@ -208,8 +208,10 @@ def respond(session: Session, text: str, *, kb=None, tutorials: list[dict] | Non
         session.mark(step.id, "failed", "user")
         unmet, unknown, _ = _prereq_report(op, session.observed)
         q = ["What happened instead (an error message, nothing, or something different)?", "Which mode are you in, and what is selected?"]
-        return _mk(session, text, intent, step, kind="clarification", questions=q, clarification=q[0], unmet=unmet,
-                   explanations=[ex(f"Marked {step.id} as failed (your report). It expects: " + (", ".join(human_state(p.kind, p.target) for p in step.expected_state) or "no checkable result") + ".")])
+        said = f"Marked {step.id} as failed (your report). It expects: " + (", ".join(human_state(p.kind, p.target) for p in step.expected_state) or "no checkable result") + "."
+        if step.common_mistakes:
+            said += " Things that commonly go wrong here: " + " ".join(step.common_mistakes)
+        return _mk(session, text, intent, step, kind="clarification", questions=q, clarification=q[0], unmet=unmet, explanations=[ex(said)])
     if intent == "timestamp":
         m = INTENT_PATTERNS[[n for n, _ in INTENT_PATTERNS].index("timestamp")][1].search(text)
         parts = [int(x) for x in m.group(1).split(":")]
@@ -300,9 +302,11 @@ def respond(session: Session, text: str, *, kb=None, tutorials: list[dict] | Non
         steps, _, cav = how_to_steps(und, session.version, session.observed)
         from .knowledge import finish
         sl = finish(steps, "catalog", version=session.version)
-        return _mk(session, text, intent, step, kind="procedure", steps=sl, sources=list(und.sources),
-                   explanations=[Explanation(text=f"Press Ctrl+Z (Edit > Undo) to undo the mistake; Edit > Undo History lets you jump back several actions. Then repeat {step.id}: {step.goal}.",
-                                             applies_to_steps=sid, sources=list(und.sources))], caveats=cav[:2])
+        expl = [Explanation(text=f"Press Ctrl+Z (Edit > Undo) to undo the mistake; Edit > Undo History lets you jump back several actions. Then repeat {step.id}: {step.goal}.",
+                            applies_to_steps=sid, sources=list(und.sources))]
+        if step.common_mistakes:
+            expl.append(Explanation(text=f"Known pitfalls for {step.id}: " + " ".join(step.common_mistakes), applies_to_steps=sid, sources=list(srcs)))
+        return _mk(session, text, intent, step, kind="procedure", steps=sl, sources=list(und.sources), explanations=expl, caveats=cav[:2])
     if intent == "result_differs":
         last = next((s for s in reversed(session.steps.steps) if session.status[s.id] == "done"), step)
         v = session.verify(last)
@@ -349,8 +353,15 @@ def respond(session: Session, text: str, *, kb=None, tutorials: list[dict] | Non
             parts.append(f"The tutorial was recorded for Blender {hint}.")
             if session.version and hint.split(".")[0] != session.version.split(".")[0]:
                 parts.append("The major versions differ, so menu names, shortcuts and defaults may differ; check each step.")
+        if step.version_dependent:
+            parts.append("Known to differ between versions: " + " ".join(step.version_dependent))
+        elif op:
+            parts.append("No difference between Blender versions is recorded for this step.")
         if op:
             st, note = version_status(op, session.version)
             parts.append(note)
+            gaps = [u for u in op.unverified if "2.80" in u or "version" in u.lower()]
+            if gaps:
+                parts.append("Not verified: " + " ".join(gaps))
         return _mk(session, text, intent, step, sources=srcs, explanations=[ex(" ".join(parts))], questions=[] if session.version else ["Which Blender version are you using?"])
     return standalone("follow-up pattern matched but no handler applied")

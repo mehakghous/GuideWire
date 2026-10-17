@@ -1,6 +1,5 @@
 """Offline tests for the knowledge layer. The synthetic fixture under tests/kb_fixture imitates the layout of the manual but contains only text
 written for this repository, so no CC-BY-SA text is committed. Tests that need the REAL local index skip when knowledge/kb.sqlite is absent."""
-import hashlib
 import json
 import socket
 from pathlib import Path
@@ -291,8 +290,9 @@ needs_real = pytest.mark.skipif(not REAL.exists(), reason="real knowledge index 
 
 
 def frozen(name):
-    want = (ROOT / "tests" / "corpus" / f"{name}.sha256").read_text().split()[0]
-    assert hashlib.sha256((ROOT / "tests" / "corpus" / f"{name}.json").read_bytes()).hexdigest() == want, f"{name} changed after it was frozen"
+    from ingestion.hashing import matches_frozen
+    ok, _ = matches_frozen(ROOT / "tests" / "corpus" / f"{name}.json", ROOT / "tests" / "corpus" / f"{name}.sha256")
+    assert ok, f"{name} changed after it was frozen"
 
 
 def test_held_out_sets_are_frozen():

@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT))
 
 from dotenv import load_dotenv  # noqa: E402
 
-from ingestion.tutorials import level_claim_from_title, load_index, version_hint_from_title  # noqa: E402
+from ingestion.tutorials import load_index, version_hint_from_title  # noqa: E402
 from ingestion.youtube import api  # noqa: E402
 
 QUERIES = [

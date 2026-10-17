@@ -1,0 +1,7 @@
+target-version = "py311"
+line-length = 200
+extend-exclude = ["knowledge", "local_data", "runs", "venv", ".venv"]
+
+[lint]
+# Real defects only (syntax errors, undefined names, unused imports/variables, redefinitions). Style is not enforced.
+select = ["E9", "F"]

@@ -16,7 +16,7 @@ from shared.step_record import StepList
 
 from .catalog import parse_version
 from .profiles import BLENDER
-from .validate import ValidationFailure, check_structure, sanitize_and_annotate
+from .validate import check_structure, sanitize_and_annotate
 
 
 def op_key(op_ids: list[str]) -> str:

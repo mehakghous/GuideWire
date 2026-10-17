@@ -12,7 +12,7 @@ verification on the step but only the user (or an explicit confirmation) marks a
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 
 from shared.answer import AnswerBundle
@@ -57,13 +57,16 @@ class Session:
         sl = steps.steps if isinstance(steps, AnswerBundle) else steps
         if sl is None or not sl.steps:
             raise ValueError("nothing to follow: the procedure has no steps")
-        if tutorial is None and isinstance(steps, AnswerBundle):
-            # only a TUTORIAL source identifies the tutorial; a manual page cited as documentation is not "the tutorial"
+        if tutorial is None and isinstance(steps, AnswerBundle) and sl.source_type in ("transcript", "youtube"):
+            # only a procedure BUILT FROM a tutorial is "the tutorial". Catalog and written procedures also cite a tutorial video (as documentation
+            # that confirms a behaviour) and a manual page; neither makes pasted instructions "that tutorial"
             s0 = next((x for x in steps.sources if x.kind == "tutorial_video"), None)
             if s0 is not None:
                 tutorial = {"title": s0.title, "url": s0.url, "version_hint": s0.version, "source_type": sl.source_type}
         self.steps = sl.model_copy(deep=True)
-        self.tutorial = tutorial or {"title": sl.title, "source_type": sl.source_type, "version_hint": sl.app_version_tutorial}
+        # NOT sl.app_version_tutorial: for pasted instructions that field holds the USER's own version, which would turn into
+        # "the tutorial was recorded for Blender <your version>". A recorded version only ever comes from a tutorial source.
+        self.tutorial = tutorial or {"title": sl.title, "source_type": sl.source_type, "version_hint": None}
         self.status = {s.id: "pending" for s in self.steps.steps}
         self.status_by, self.turns, self.corrections = {}, deque(maxlen=MAX_TURNS), []
         self.current = self.steps.steps[0].id
@@ -143,3 +146,22 @@ class Session:
 
     def note(self, user: str, intent: str, route: str, step: str | None) -> None:
         self.turns.append(TurnNote(user[:120], intent, route, step))
+
+
+# ---- persistence: a session is plain JSON, so a conversation survives a restart and the UI can read it
+def to_dict(s: Session) -> dict:
+    return {"format": 1, "version": s.version, "observed": s.observed, "tutorial": s.tutorial, "task": s.task, "active": s.active, "current": s.current,
+            "status": s.status, "status_by": s.status_by, "corrections": s.corrections, "turns": [asdict(t) for t in s.turns],
+            "steps": s.steps.model_dump(mode="json") if s.steps else None}
+
+
+def from_dict(d: dict) -> Session:
+    if d.get("format") != 1:
+        raise ValueError(f"unknown session format: {d.get('format')!r}")
+    s = Session(version=d.get("version"), observed=d.get("observed"), tutorial=d.get("tutorial"), task=d.get("task"), active=bool(d.get("active")),
+                current=d.get("current"), status=dict(d.get("status") or {}), status_by=dict(d.get("status_by") or {}), corrections=list(d.get("corrections") or []))
+    s.steps = StepList.model_validate(d["steps"]) if d.get("steps") else None
+    s.turns.extend(TurnNote(**t) for t in d.get("turns", []))
+    if s.steps and (s.current not in {x.id for x in s.steps.steps} or set(s.status) != {x.id for x in s.steps.steps}):
+        raise ValueError("session file is inconsistent: statuses or the current step do not match the steps")
+    return s

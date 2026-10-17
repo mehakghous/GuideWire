@@ -48,6 +48,9 @@ def _observe(p: StatePredicate, obs: dict[str, Any]) -> bool | object:
     if p.kind == "panel_open":
         v = obs.get("open_panels", _MISSING)
         return _MISSING if v is _MISSING else p.target in v
+    if p.kind == "node_exists":
+        v = obs.get("nodes", _MISSING)          # node/object types present, e.g. ["joint", "ikHandle"] or ["Skeleton", "Rig Doctor"]
+        return _MISSING if v is _MISSING else p.target in v
     if p.kind == "property_equals":
         props = obs.get("properties", _MISSING)
         if props is _MISSING or p.target not in props:

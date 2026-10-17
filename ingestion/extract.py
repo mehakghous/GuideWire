@@ -31,7 +31,7 @@ from .validate import Issue, ValidationFailure, check_structure, sanitize_and_an
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3")
+PROMPT_VERSIONS = ("v2", "v3", "v4")
 
 
 class ExtractionError(RuntimeError):
@@ -73,6 +73,7 @@ class DraftStep(BaseModel):
     common_mistakes: list[str] = Field(default_factory=list)
     confidence: float = Field(ge=0.0, le=1.0)
     kind: StepKind = Field(default="mechanics", description='"craft" when the result is judged by eye (timing, arcs, weight, feel) and has no checkable end state; otherwise "mechanics"')
+    feature_id: str | None = Field(default=None, description="id from the feature list in the prompt (e.g. SKEL-01) when the step teaches that feature, else null")
     support: Support = "unknown"
     visual_evidence: str | None = None  # what is visible on screen (cursor target, key overlay, mode, shape)
     evidence: list[str] = Field(default_factory=list)
@@ -97,11 +98,12 @@ _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Ke
 
 
 def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSION) -> str:
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
   selection_type: {sorted(profile.selection_types)}
-  panel_open: {sorted(profile.panels)}
+  panel_open: {sorted(profile.panels)}{node_line}
   property_equals: name = property path, expected_value = expected value (only when a value is explicitly given).
   Predicate JSON looks like {{"kind": "mode", "name": "EDIT_MESH"}} or
   {{"kind": "property_equals", "name": "object.location.x", "expected_value": 2.0}}.
@@ -121,8 +123,8 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-    if version == "v3":
-        return f"""You convert software tutorials into precise, ordered step records for {profile.name}.
+    if version in ("v3", "v4"):
+        base = f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
 A tutorial has TWO sources of instruction. Extract BOTH:
   (a) what the instructor SAYS;
@@ -160,7 +162,23 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
+        return base + (_rigging_rules(profile) if version == "v4" else "")
     raise ValueError(f"unknown prompt version {version!r}; choose from {PROMPT_VERSIONS}")
+
+
+def _rigging_rules(profile: AppProfile) -> str:
+    """v4 addition for character rigging and animation tutorials: the feature list the model may tag steps with."""
+    from .features import CRAFT_FEATURES, load_catalog
+    cat = load_catalog()
+    feats = "\n".join(f"  {f.id}: {f.name}" for f in cat.supported(profile.name, ("N", "P", "C")))
+    return f"""
+This is a character rigging and animation tutorial for {profile.name}.
+- feature_id: when a step teaches one of the features below, set feature_id to its id exactly; otherwise null. Never invent an id.
+{feats}
+- kind: "craft" when the result is judged by eye (timing, arcs, weight, feel; for example {", ".join(sorted(CRAFT_FEATURES))}); otherwise "mechanics".
+  A craft step has no expected_state.
+- Name the rig's parts as the tutorial does ("bone" in Blender, "joint" in Maya and Houdini). Do not translate between applications.
+"""
 
 
 def _schema() -> dict:
@@ -311,7 +329,7 @@ def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str 
     """The per-request (user) prompt for a video. Exposed so experiments can hash it for cache keys."""
     from .transcript import transcript_for_prompt
 
-    if prompt_version == "v3":
+    if prompt_version in ("v3", "v4"):
         time_fmt = "as MM:SS (or H:MM:SS)"
         dur_txt = (f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to "
                    f"{_mmss(duration_s)}." if duration_s else "")

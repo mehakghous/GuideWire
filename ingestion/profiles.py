@@ -25,6 +25,7 @@ class AppProfile:
     selection_types: frozenset[str]
     ui_names: frozenset[str] = field(default_factory=frozenset)  # normalised labels
     panels: frozenset[str] = field(default_factory=frozenset)
+    nodes: frozenset[str] = field(default_factory=frozenset)  # node/object types a node_exists predicate may name (Maya, Houdini)
     mode_aliases: dict[str, str] = field(default_factory=dict)  # upper_snake alias -> canonical mode
 
     def has_ui_name(self, label: str) -> bool:
@@ -100,7 +101,64 @@ BLENDER = AppProfile(
     }),
 )
 
-PROFILES: dict[str, AppProfile] = {"blender": BLENDER}
+# MAYA and HOUDINI: written from the feature matrix (knowledge/rigging_features.json) and recalled knowledge, NOT checked against an install.
+# Unknown names produce warnings, never failures (same policy as Blender). Houdini is node-based, so its checkable state is mostly
+# "this node exists" (node_exists), not a mode; Maya mixes both.
+_MAYA_UI = """
+File;Edit;Create;Select;Modify;Display;Windows;Skeleton;Skin;Constrain;Control;Deform;Animation;Rigging;Modeling;Rendering;FX;
+Create Joints;Insert Joint;Remove Joint;Reroot Skeleton;Mirror Joint;Orient Joint;Create IK Handle;IK Spline Handle;Set Preferred Angle;
+Bind Skin;Detach Skin;Paint Skin Weights;Mirror Skin Weights;Copy Skin Weights;Prune Small Weights;Normalize Weights;Component Editor;
+Parent Constraint;Point Constraint;Orient Constraint;Scale Constraint;Aim Constraint;Pole Vector Constraint;Channel Box;Attribute Editor;
+Outliner;Hypergraph;Node Editor;Graph Editor;Dope Sheet;Time Editor;Time Slider;Range Slider;Animation Layer Editor;Trax Editor;
+Set Key;Auto Key;Key Selected;Bake Simulation;Euler Filter;Simplify Curve;Motion Trail;Ghost Selected;Playblast;HumanIK;Characterize;Retarget;
+Quick Rig;Blend Shape;Shape Editor;Delta Mush;Lattice;Cluster;Wrap;Jiggle;Freeze Transformations;Delete by Type;History;Group;Locator;NURBS Circle;
+Quick Select Sets;Display Layers;Move Tool;Rotate Tool;Scale Tool;Select Tool;Lasso Tool;Game Exporter;Send to Unreal;FBX Export;Alembic Cache;
+"""
+
+_HOUDINI_UI = """
+File;Edit;Render;Windows;Help;Build;Animate;Rigging;Network View;Scene View;Parameters;Geometry Spreadsheet;Animation Editor;Take List;
+Skeleton;Edit Skeleton;Rig Doctor;Orient Joints;Skeleton Mirror;Rig Pose;Rig Stash Pose;Rig Match Pose;Rig Vellum;IK Chains;Full Body IK;
+Bone Deform;Joint Deform;Bone Capture Proximity;Joint Capture Biharmonic;Capture Layer Paint;Capture Mirror;Delta Mush;Map Points;
+Biped Retarget;Animation from Skeleton;FBX Character Import;FBX Animation Import;Mocap Import;Mocap Stream;FBX Character Output;FBX Animation Output;
+GLTF Character Output;Character Blend Shapes;Configure Controls;Character Picker;Autorig Builder;APEX;Motion Mixer;Motion Clips;Animation Catalog;
+Transform Driver;Look At;Secondary Motion;Ragdoll;Rest Twist;IK FK Blend;Bake;Retime;Flipbook;Pack Folder;Character Pack;Object Merge;Null;Transform;
+Set Key;Auto Key;Keyframe;Graph Debugger;
+"""
+
+MAYA = AppProfile(
+    name="maya",
+    modes=frozenset({"OBJECT", "COMPONENT", "VERTEX", "EDGE", "FACE", "JOINT", "ANIMATION", "RIGGING", "MODELING"}),
+    tools=frozenset({"Move Tool", "Rotate Tool", "Scale Tool", "Select Tool", "Lasso Tool", "Paint Skin Weights Tool", "Create Joints Tool",
+                     "Insert Joint Tool", "IK Handle Tool", "Soft Modification Tool", "Sculpt Geometry Tool"}),
+    workspaces=frozenset({"Modeling", "Sculpting", "Rigging", "Animation", "Rendering", "FX", "Motion Graphics", "Time Editor", "Graph Editor"}),
+    selection_types=frozenset({"NONE", "MESH", "JOINT", "CURVE", "LIGHT", "CAMERA", "LOCATOR", "IK_HANDLE", "CONTROL", "VERTEX", "EDGE", "FACE"}),
+    ui_names=frozenset(norm(n) for n in _MAYA_UI.replace("\n", "").split(";") if n.strip()),
+    mode_aliases={"OBJECT_MODE": "OBJECT", "COMPONENT_MODE": "COMPONENT", "ANIMATION_MENU_SET": "ANIMATION", "RIGGING_MENU_SET": "RIGGING"},
+    panels=frozenset({"Channel Box", "Attribute Editor", "Outliner", "Graph Editor", "Dope Sheet", "Time Editor", "Node Editor", "Hypergraph",
+                      "Component Editor", "Animation Layer Editor", "HumanIK"}),
+    nodes=frozenset({"joint", "ikHandle", "ikEffector", "skinCluster", "blendShape", "parentConstraint", "pointConstraint", "orientConstraint",
+                     "scaleConstraint", "aimConstraint", "poleVectorConstraint", "animLayer", "nurbsCurve", "locator", "deltaMush", "lattice",
+                     "jiggle", "motionTrail", "HIKCharacterNode"}),
+)
+
+HOUDINI = AppProfile(
+    name="houdini",
+    modes=frozenset({"SELECT", "EDIT_SKELETON", "ANIMATE", "HANDLE"}),
+    tools=frozenset({"Select", "Edit Skeleton", "Rig Pose", "Animate", "Handle", "Translate", "Rotate", "Scale"}),
+    workspaces=frozenset({"Build", "Animate", "Rigging", "Tech", "Solaris"}),
+    selection_types=frozenset({"NONE", "POINT", "PRIMITIVE", "JOINT", "NODE", "CONTROL"}),
+    ui_names=frozenset(norm(n) for n in _HOUDINI_UI.replace("\n", "").split(";") if n.strip()),
+    mode_aliases={"EDIT SKELETON": "EDIT_SKELETON", "ANIMATE_STATE": "ANIMATE"},
+    panels=frozenset({"Network View", "Scene View", "Parameters", "Geometry Spreadsheet", "Animation Editor", "Take List", "Graph Debugger"}),
+    nodes=frozenset({"Skeleton", "Rig Doctor", "Orient Joints", "Skeleton Mirror", "Rig Pose", "Rig Stash Pose", "Rig Match Pose", "IK Chains",
+                     "Full Body IK", "Bone Deform", "Joint Deform", "Bone Capture Proximity", "Joint Capture Biharmonic", "Capture Layer Paint",
+                     "Capture Mirror", "Map Points", "Biped Retarget", "Animation from Skeleton", "FBX Character Import", "FBX Animation Import",
+                     "Mocap Import", "Mocap Stream", "FBX Character Output", "FBX Animation Output", "GLTF Character Output",
+                     "Character Blend Shapes", "Configure Controls", "Motion Mixer", "Motion Clips", "Delta Mush", "Look At", "Secondary Motion",
+                     "Ragdoll", "Pack Folder", "Character Pack", "Object Merge", "Null", "Transform"}),
+)
+
+PROFILES: dict[str, AppProfile] = {"blender": BLENDER, "maya": MAYA, "houdini": HOUDINI}
 
 
 def get_profile(app: str) -> AppProfile:
@@ -109,7 +167,7 @@ def get_profile(app: str) -> AppProfile:
     except KeyError:
         raise ValueError(
             f"No profile for app '{app}'. Supported: {sorted(PROFILES)}. "
-            "Unity/DaVinci Resolve profiles are not implemented yet."
+            "Other applications are out of scope."
         ) from None
 
 

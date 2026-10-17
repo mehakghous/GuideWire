@@ -1,3 +1,4 @@
+
 import json
 from pathlib import Path
 
@@ -6,13 +7,17 @@ from pydantic import ValidationError
 
 from shared.step_record import Step, StatePredicate, StepList
 
-EXAMPLES = sorted((Path(__file__).parent.parent / "shared" / "examples").glob("*.json"))
+EXAMPLES = sorted(
+    (Path(__file__).parent.parent / "shared" / "examples").glob("*.json")
+)
 
 
 @pytest.mark.parametrize("path", EXAMPLES, ids=lambda p: p.name)
 def test_examples_validate(path):
     sl = StepList.model_validate(json.loads(path.read_text(encoding="utf-8")))
-    assert sl.steps and [s.order for s in sl.steps] == list(range(1, len(sl.steps) + 1))
+    assert sl.steps and [s.order for s in sl.steps] == list(
+        range(1, len(sl.steps) + 1)
+    )
 
 
 def test_examples_exist():
@@ -22,13 +27,20 @@ def test_examples_exist():
 def test_verifiable_is_derived():
     s = Step(id="a", order=1, goal="g", verifiable=True)
     assert s.verifiable is False
-    s2 = Step(id="a", order=1, goal="g", expected_state=[StatePredicate(kind="mode", target="OBJECT")])
+
+    s2 = Step(
+        id="a",
+        order=1,
+        goal="g",
+        expected_state=[StatePredicate(kind="mode", target="OBJECT")],
+    )
     assert s2.verifiable is True
 
 
 def test_value_only_for_property_equals():
     with pytest.raises(ValidationError):
         StatePredicate(kind="mode", target="OBJECT", value="x")
+
     with pytest.raises(ValidationError):
         StatePredicate(kind="property_equals", target="a.b")
 
@@ -50,25 +62,39 @@ def _steps(*orders):
 def test_app_is_one_of_the_three_supported():
     for app in ("blender", "maya", "houdini"):
         StepList(source_type="written", app=app, steps=_steps(1))
+
     with pytest.raises(ValidationError):
         StepList(source_type="written", app="unity", steps=_steps(1))
 
 
 def test_craft_step_is_never_verifiable():
     p = StatePredicate(kind="mode", target="OBJECT")
-    assert Step(id="a", order=1, goal="g", expected_state=[p]).verifiable
-    assert not Step(id="a", order=1, goal="g", expected_state=[p], kind="craft").verifiable
+    assert Step(
+        id="a", order=1, goal="g", expected_state=[p]
+    ).verifiable
+    assert not Step(
+        id="a", order=1, goal="g", expected_state=[p], kind="craft"
+    ).verifiable
 
 
 @pytest.mark.parametrize("orders", [(1, 3), (2, 3), (1, 1), (2, 1)])
 def test_check_order_flags_gaps_repeats_and_misordering(orders):
-    sl = StepList(source_type="written", app="blender", steps=_steps(*orders))  # construction stays lenient
+    sl = StepList(
+        source_type="written",
+        app="blender",
+        steps=_steps(*orders),
+    )
     assert sl.order_problems
+
     with pytest.raises(ValueError):
         sl.check_order()
 
 
 def test_check_order_accepts_contiguous():
-    sl = StepList(source_type="written", app="blender", steps=_steps(1, 2, 3))
+    sl = StepList(
+        source_type="written",
+        app="blender",
+        steps=_steps(1, 2, 3),
+    )
     assert sl.order_problems == []
     sl.check_order()

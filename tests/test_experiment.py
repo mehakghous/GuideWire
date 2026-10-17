@@ -155,12 +155,12 @@ def test_cell_key_does_not_move_when_the_stored_contract_version_moves(monkeypat
                 media_resolution=None, title_hint="Object and Edit Mode - Blender 2.80 Fundamentals")
     k = ex.cell_key(**args)
     monkeypatch.setattr(ex, "SCHEMA_VERSION", "9.9")
-    assert ex.cell_key(**args) == k == "5e8a8a10dfe13db3"          # the real arm-A repeat-1 cell stored on 2026-10-10
+    assert ex.cell_key(**args) == k == "d1b5a5548994e14d"          # pinned under MODEL_SCHEMA_TAG 0.4 (the 2026-10-10 cell was "5e8a8a10dfe13db3" under 0.3)
 
 
 def test_model_facing_schema_is_pinned_so_a_change_must_invalidate_the_cache_on_purpose():
-    import hashlib, json
+    import hashlib
     from ingestion.experiment import MODEL_SCHEMA_TAG
     from ingestion.extract import _schema
     fp = hashlib.sha256(json.dumps(_schema(), sort_keys=True).encode()).hexdigest()[:12]
-    assert fp == "f0439a836521" and MODEL_SCHEMA_TAG == "0.3", "the response schema the model sees changed: bump MODEL_SCHEMA_TAG and update this fingerprint deliberately"
+    assert fp == "2fc920eaa5aa" and MODEL_SCHEMA_TAG == "0.4", "the response schema the model sees changed: bump MODEL_SCHEMA_TAG and update this fingerprint deliberately"

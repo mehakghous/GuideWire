@@ -16,10 +16,10 @@ import re
 
 from shared.answer import AnswerBundle, Explanation, SourceRef
 
-from .catalog import BY_ID, match_aliases, parse_version
+from .catalog import BY_ID, parse_version
 from .intent import Intent
 from .kb.candidates import Candidate, candidate_from_hit, candidate_steps, extra_profile, validate_candidate
-from .kb.index import Hit, KnowledgeBase, SearchResult, terms
+from .kb.index import Hit, KnowledgeBase, terms
 from .knowledge import finish
 from .profiles import BLENDER
 from . import tutorials as T

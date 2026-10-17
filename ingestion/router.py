@@ -74,6 +74,40 @@ def _shortcut_text(op: Operation) -> str:
 _VERSION_IN_TEXT = re.compile(r"\bblender\s*v?(\d{1,2}\.\d{1,2})\b", re.I)
 
 
+def _src(kb, sid: str) -> SourceRef:
+    s = kb.sources[sid]
+    kind = "manual" if s["tier"] == "official" else ("tutorial_video" if s["tier"] == "tutorial" else "forum")
+    return SourceRef(kind=kind, title=s["title"], url=s["url"], version=s.get("version"), verified_on=kb_retrieved())
+
+
+def kb_retrieved() -> str:
+    from .rigging_knowledge import PATH
+    return json.loads(PATH.read_text(encoding="utf-8")).get("retrieved", "")
+
+
+def _rigging_troubleshooting(text: str, app: str) -> AnswerBundle | None:
+    from .rigging_knowledge import load as knowledge
+    kb = knowledge()
+    for a in [app, *[x for x in ("maya", "blender") if x != app]]:                # the person's own application first, then the others
+        hit = kb.troubleshoot(text, a)
+        if hit is None:
+            continue
+        entry, item = hit
+        srcs = [_src(kb, s) for s in item["sources"]]
+        steps = " ".join(f"{i}. {f}" for i, f in enumerate(item["fix"], 1))
+        who = "the application vendor" if item["tier"] == "official" else "forum or Q&A advice: practical but not guaranteed, and often written for older versions"
+        caveats = [f"Trust: {item['tier']} ({who}). Check the menu names against your version."]
+        if a != app:
+            caveats.append(f"This is {a} advice but you are working in {app}. If that is wrong, say which application you use.")
+        for c in entry.conflicts:
+            caveats.append("Sources disagree: " + c["text"])
+        return AnswerBundle(kind="troubleshooting", route="rigging_knowledge", trust="none",
+                            explanations=[Explanation(text=f"Likely cause: {item['cause']}", sources=srcs, provenance="documentation"),
+                                          Explanation(text=f"What to try: {steps}", sources=srcs, provenance="documentation")],
+                            sources=srcs, caveats=caveats, reasons=[f"matched a known symptom in the {a} knowledge base entry {entry.id}"])
+    return None
+
+
 def route(text: str, *, version: str | None = None, observed: dict | None = None,
           store: ReviewedWorkflowStore | None = None, input_type: str | None = None,
           duration_s: float | None = None, kb=None, tutorials: list[dict] | None = None,
@@ -90,6 +124,12 @@ def route(text: str, *, version: str | None = None, observed: dict | None = None
                             explanations=r.explanations, caveats=r.limitations + notes[1], assumptions=notes[0],
                             reasons=[f"transcript parsed offline: {r.stats}"],
                             fallback_reason=None if r.steplist else "no instructional operation recognised in the transcript; a model could read it, none was called")
+
+    # ---- a symptom people describe ("my knee flips", "the mesh does not follow the skeleton"): answer from the researched knowledge base, with the tier and source of every line
+    if input_type is None and not stripped.startswith("{") and len(stripped) < 400:
+        tb = _rigging_troubleshooting(stripped, app)
+        if tb is not None:
+            return tb
 
     # ---- rigging and animation instructions: every Maya/Houdini procedure, and Blender text that mostly names rigging features
     if input_type == "rigging_text" or (input_type is None and not stripped.startswith("{") and (app != "blender" or looks_like_rigging(stripped, app))):

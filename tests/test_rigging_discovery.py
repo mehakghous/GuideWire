@@ -139,7 +139,7 @@ def test_a_long_tutorial_is_not_penalised_for_a_big_goal_and_a_short_one_is_for_
     d = discover_rigging("complete character rigging in Maya", search=search, metadata=lambda ids: metas)
     long_, short_ = d.recommendations
     assert long_.duration_s == 300 * 60 and "long for this goal" not in long_.note                                  # five hours for a whole rig is expected
-    assert short_.duration_s == 600 and "short for this goal" in short_.note and long_.score > short_.score
+    assert short_.duration_s == 600 and "too short to teach it step by step" in short_.note and long_.score > short_.score
 
 
 def test_only_a_stated_limit_excludes_by_length():

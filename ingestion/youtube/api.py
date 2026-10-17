@@ -75,7 +75,7 @@ def videos_metadata(ids: list[str], *, api_key: str | None = None, get: Get | No
         from ..tutorials import version_hint_from_title        # lazy: tutorials does not import this module
         out.append({"version_in_description": version_hint_from_title((sn.get("description") or "")[:600]), "id": it["id"], "url": f"https://www.youtube.com/watch?v={it['id']}", "title": sn.get("title"), "channel": sn.get("channelTitle"),
                     "duration_s": dur, "licence": st.get("license"), "captions_flag": (cd.get("caption") == "true") if cd.get("caption") is not None else None,
-                    "chapters": len(parse_chapters(sn.get("description", ""))), "chapter_titles": [c.title for c in parse_chapters(sn.get("description", ""))], "published": (sn.get("publishedAt") or "")[:10] or None,
+                    "chapters": len(parse_chapters(sn.get("description", ""))), "chapter_titles": [c.title for c in parse_chapters(sn.get("description", ""))], "description_head": (sn.get("description") or "")[:600], "published": (sn.get("publishedAt") or "")[:10] or None,
                     "embeddable": st.get("embeddable"), "privacy": st.get("privacyStatus")})
     return out
 

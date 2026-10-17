@@ -117,3 +117,34 @@ Tests added after the live runs (18 in total in `tests/test_rigging_discovery.py
 | Prerequisites reported once, not once per feature | Verified (unit) |
 | Transcript to steps for Maya, Houdini, Blender rigging; CLI and chat; old Blender behaviour unchanged | Verified (`tests/test_rigging_transcript.py`, 9 tests, full suite 552 passed) |
 | Transcript route run on a real rigging transcript | Not done: needs a transcript (yours, or the opt-in captions adapter) |
+
+
+## Milestone 11: better discovery and actionable steps (implemented, verified offline; prompt v5 not run live)
+
+| Criterion | Status |
+|---|---|
+| Diagnosis of the Maya run traced to code | Done (technical plan 25.1) |
+| Recency as a configurable, explainable signal that never beats relevance on its own | Verified (`tests/test_discovery_quality.py`) |
+| Upload date distinguished from recording date and software version; missing dates neutral | Verified |
+| Plain-language requests without specialist terms; narrow stays narrow; one question when ambiguous | Verified (everyday phrasings and technical ones) |
+| Steps carry how-to lines, checks and results with support labels and evidence | Verified (`tests/test_instructions.py`) |
+| Before/after quality measurement | Done on the real response: 43.8 -> 62.5 (rubric, structure only) |
+| Prompt v5 produces actionable steps from a real video | NOT measured: needs one paid call (about 0.09 USD at today's price) |
+| Bounded retry with jitter; overload, quota and invalid distinguished | Verified (`tests/test_provider_retry.py`) |
+| Instructions validated inside Maya | Not done: Maya is not installed here |
+
+
+## Milestone 12: rigging knowledge base, real-speech transcripts, v5 live result (implemented; measured offline)
+
+| Criterion | Status |
+|---|---|
+| Real beginner questions, terminology, mistakes and expert fixes captured as structured, sourced, tiered knowledge | Done for Maya (17 entries) and Blender (4); Houdini, Reddit and Stack Exchange NOT covered |
+| Refuses to load knowledge that cites an unknown source or claims official without one | Verified (mutation tests) |
+| Used by tagging, request understanding, troubleshooting, composed steps, validator vocabulary, prompt v6, transcript reader | Verified (unit and integration tests) |
+| Transcript reader on REAL speech | Precision 42.3% -> 63.6%, recall 21.2% -> 53.8% on 52 labelled moments (one labeller; biased last pass) |
+| Plain-language requests | 9/16 -> 16/16 on a development set written after the knowledge base (upper bound) |
+| Real symptom wording finds the right answer | 9/9, with unrelated, wrong-app and Houdini text returning nothing |
+| Prompt v5 on a real video | Run once (0.096 USD): the model ignored the new optional fields; they are now required (MODEL_SCHEMA_TAG 0.8); NOT re-run |
+| Prompt v6 (documented names) on a real video | Written and tested offline; NOT run live |
+| Cost estimate | `docs/cost-estimate.md` (rule of thumb 0.005 USD per video minute in 2026, 0.01 from 2027) |
+| Instructions validated inside Maya or Blender | Not done |

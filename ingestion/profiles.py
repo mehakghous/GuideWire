@@ -112,6 +112,7 @@ Parent Constraint;Point Constraint;Orient Constraint;Scale Constraint;Aim Constr
 Outliner;Hypergraph;Node Editor;Graph Editor;Dope Sheet;Time Editor;Time Slider;Range Slider;Animation Layer Editor;Trax Editor;
 Set Key;Auto Key;Key Selected;Bake Simulation;Euler Filter;Simplify Curve;Motion Trail;Ghost Selected;Playblast;HumanIK;Characterize;Retarget;
 Quick Rig;Blend Shape;Shape Editor;Delta Mush;Lattice;Cluster;Wrap;Jiggle;Freeze Transformations;Delete by Type;History;Group;Locator;NURBS Circle;
+Parent;Maintain Offset;Add Attribute;Attribute Name;Minimum;Maximum;Search For;Replace With;Search and Replace Names;Type;Primary Axis;Secondary Axis;Orient Joint Options;Connection Editor;Reverse;Move;Rotate;Scale;
 Quick Select Sets;Display Layers;Move Tool;Rotate Tool;Scale Tool;Select Tool;Lasso Tool;Game Exporter;Send to Unreal;FBX Export;Alembic Cache;
 """
 
@@ -161,9 +162,18 @@ HOUDINI = AppProfile(
 PROFILES: dict[str, AppProfile] = {"blender": BLENDER, "maya": MAYA, "houdini": HOUDINI}
 
 
+_EXTENDED: dict[str, AppProfile] = {}
+
+
 def get_profile(app: str) -> AppProfile:
+    """The app's profile with the menu and option names the researched documentation gives (knowledge/rigging_knowledge.json) added to its vocabulary."""
     try:
-        return PROFILES[app]
+        base = PROFILES[app]
+        if app not in _EXTENDED:
+            from dataclasses import replace
+            from .rigging_knowledge import load as knowledge
+            _EXTENDED[app] = replace(base, ui_names=base.ui_names | frozenset(norm(n) for n in knowledge().ui_names(app)))
+        return _EXTENDED[app]
     except KeyError:
         raise ValueError(
             f"No profile for app '{app}'. Supported: {sorted(PROFILES)}. "

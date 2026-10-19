@@ -46,6 +46,7 @@ class ChainReport:
     total: int = 0                                          # mechanics steps
     verifiable: int = 0                                     # of those, with an expected state that is not already true at the start
     order_errors: list[str] = field(default_factory=list)   # "s03 needs joint, but only step s09 makes it"
+    order_steps: dict[str, list[str]] = field(default_factory=dict)   # step id -> its order error, so the step itself can carry the warning
     assumed: dict[str, str] = field(default_factory=dict)   # node type -> first step that needs it with no step making it
     uncheckable: list[str] = field(default_factory=list)    # mechanics step ids with nothing a program could verify
 
@@ -70,6 +71,7 @@ def chain_report(sl: StepList) -> ChainReport:
             later = next((sl.steps[j].id for j in range(i + 1, len(sl.steps)) if n in made[j]), None)
             if later:
                 r.order_errors.append(f"{st.id} needs {n}, but only step {later} makes it")
+                r.order_steps.setdefault(st.id, []).append(f"needs {n}, but only step {later} makes it")
             else:
                 r.assumed.setdefault(n, st.id)
             scene.add(n)                                    # reported once
@@ -79,4 +81,15 @@ def chain_report(sl: StepList) -> ChainReport:
             r.verifiable += st.verifiable
             if not st.verifiable:
                 r.uncheckable.append(st.id)
+    return r
+
+
+def flag_order_errors(sl: StepList) -> ChainReport:
+    """Put each order error on the step that has it, once, and return the report. Run after validation so a re-run adds nothing."""
+    r = chain_report(sl)
+    for st in sl.steps:
+        if st.id in r.order_steps:
+            flag = f"order: this step {'; '.join(r.order_steps[st.id])}; the tutorial may be out of order or a step is missing before it"
+            if flag not in st.flags:
+                st.flags.append(flag)
     return r

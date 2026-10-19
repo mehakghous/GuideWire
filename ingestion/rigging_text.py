@@ -16,6 +16,7 @@ from .feature_report import feature_report
 from .features import load_catalog
 from .intent import split_clauses
 from .profiles import get_profile, norm
+from .scene_chain import derive_state, flag_order_errors
 from .terms import suggest_feature
 from .text_steps import user_menu_paths
 from .validate import check_structure, sanitize_and_annotate
@@ -77,9 +78,11 @@ def rigging_to_steplist(text: str, app: str, version: str | None = None) -> tupl
             expected_state=[StatePredicate(kind="node_exists", target=t) for t in _created_nodes(c, app)],
             flags=[] if fid else ["not matched to a known rigging feature: kept as written and not validated against the catalog"]))
     sl = StepList(source_type="written", app=app, app_version_tutorial=version, steps=steps, prompt_version="deterministic-rigging-v1")
+    derive_state(sl)
     sanitize_and_annotate(sl, get_profile(app))
     check_structure(sl)
     res.assumptions, res.caveats = prerequisite_notes(sl)
+    res.caveats += [f"order: {e}; check the order of your steps" for e in flag_order_errors(sl).order_errors]
     if res.unmatched:
         res.caveats.append(f"{len(res.unmatched)} of {len(cl)} steps were not matched to a known feature and stay unvalidated")
     return sl, res

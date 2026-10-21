@@ -1,0 +1,146 @@
+id,category,name,priority,phase,mvp,offline_test_mentions,blender_catalog,blender_kb_entries,blender_kb_depth,blender_parser,blender_derived_state,blender_real_app_check,blender_live_run,maya_catalog,maya_kb_entries,maya_kb_depth,maya_parser,maya_derived_state,maya_real_app_check,maya_live_run,houdini_catalog,houdini_kb_entries,houdini_kb_depth,houdini_parser,houdini_derived_state,houdini_real_app_check,houdini_live_run
+PREP-01,Character preparation and scene setup,"Set scene units, scale and up-axis",P0,1,yes,3,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+PREP-02,Character preparation and scene setup,Import or create the character mesh,P0,1,yes,2,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+PREP-03,Character preparation and scene setup,Check mesh readiness for deformation,P2,1,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+PREP-04,Character preparation and scene setup,Apply or freeze transforms and clear history,P0,1,yes,0,N,0,none,name,,not run,none,N,1,basic,kb-phrase,,not run,none,N,0,none,name,,not run,none
+PREP-05,Character preparation and scene setup,Establish a rest (bind) pose,P0,1,yes,6,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+PREP-06,Character preparation and scene setup,"Organise scene hierarchy, naming and layers",P1,1,yes,0,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
+PREP-07,Character preparation and scene setup,Create proxy or low-resolution mesh for animation,P3,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKEL-01,"Skeleton, joint and bone creation",Create a joint or bone chain,P0,1,yes,25,N,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,not run,R6,N,0,none,name,,not run,none
+SKEL-02,"Skeleton, joint and bone creation",Place joints on anatomical landmarks,P0,1,yes,1,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
+SKEL-03,"Skeleton, joint and bone creation",Name joints following a convention,P0,1,yes,1,N,1,verify,name,,not run,none,N,1,verify,kb-phrase,,not run,R6,N,0,none,name,,not run,none
+SKEL-04,"Skeleton, joint and bone creation",Mirror a skeleton half,P1,1,yes,1,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKEL-05,"Skeleton, joint and bone creation","Insert, delete and reparent joints",P1,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKEL-06,"Skeleton, joint and bone creation",Build a hand and finger skeleton,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKEL-07,"Skeleton, joint and bone creation",Auto-generate a skeleton or rig from a template,P2,4,,0,N,0,none,name,,not run,none,P,1,basic,kb-phrase,,not run,none,N,1,verify,name,,not run,none
+ORNT-01,Hierarchy and joint orientation,Maintain the parent-child hierarchy and root,P0,1,yes,1,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ORNT-02,Hierarchy and joint orientation,Orient joints consistently (aim/up axes),P0,1,yes,5,N,1,verify,kb-phrase,,not run,none,N,1,trouble,kb-phrase,,not run,R6,N,0,none,name,,not run,none
+ORNT-03,Hierarchy and joint orientation,Visualise and verify local axes,P1,1,yes,0,N,0,none,name,,not run,none,N,1,trouble,name,,not run,none,N,0,none,name,,not run,none
+ORNT-04,Hierarchy and joint orientation,Reset to rest transforms (zero pose),P1,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ORNT-05,Hierarchy and joint orientation,Validate skeleton structure,P2,2,,1,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
+IKFK-01,Forward and inverse kinematics,Pose an FK chain,P0,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+IKFK-02,Forward and inverse kinematics,Create an IK chain,P1,2,yes,10,N,1,trouble,kb-phrase,,not run,none,N,1,trouble,kb-phrase,yes,not run,none,N,1,verify,name,,not run,none
+IKFK-03,Forward and inverse kinematics,Create and configure the IK target/handle,P1,2,yes,0,N,1,trouble,name,,not run,none,N,1,trouble,none,yes,not run,none,N,0,none,name,,not run,none
+IKFK-04,Forward and inverse kinematics,Set pole target / bend direction,P1,2,yes,0,N,1,trouble,none,,not run,none,N,2,verify,kb-phrase,yes,not run,none,N,0,none,name,,not run,none
+IKFK-05,Forward and inverse kinematics,"Configure chain length, stretch and solver options",P2,2,,0,N,1,trouble,name,,not run,none,N,1,trouble,name,,not run,none,N,0,none,name,,not run,none
+IKFK-10,Forward and inverse kinematics,Spline IK for spine/tail chains,P2,4,,0,N,0,none,none,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+IKFK-06,Forward and inverse kinematics,Switch between IK and FK,P1,2,,2,P,0,none,name,,not run,none,P,2,verify,kb-phrase,,not run,R6,N,1,verify,name,,not run,none
+IKFK-07,Forward and inverse kinematics,Snap IK to FK and FK to IK (pose matching),P2,4,,0,P,0,none,name,,not run,none,C,1,verify,name,,not run,none,P,0,none,name,,not run,none
+IKFK-08,Forward and inverse kinematics,Foot roll / reverse-foot setup,P2,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,1,verify,none,,not run,none
+IKFK-09,Forward and inverse kinematics,Diagnose and fix common IK problems,P2,2,,0,C,1,trouble,name,,not run,none,C,1,basic,kb-phrase,,not run,none,N,0,none,name,,not run,none
+CTRL-01,Rig controls and controller creation,Create control shapes (curves/custom shapes),P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,R6,N,0,none,name,,not run,none
+CTRL-02,Rig controls and controller creation,Bind controls to joints (FK control rigs),P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,1,verify,name,,not run,none
+CTRL-03,Rig controls and controller creation,Zero-offset groups and control hierarchy,P1,2,yes,0,P,0,none,name,,not run,none,N,2,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none
+CTRL-04,Rig controls and controller creation,Add custom attributes and properties to controls,P1,2,yes,1,N,0,none,name,,not run,none,N,2,verify,kb-phrase,,not run,R6,N,0,none,name,,not run,none
+CTRL-05,Rig controls and controller creation,"Lock, hide and limit channels",P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CTRL-06,Rig controls and controller creation,"Selection sets, visibility groups and character picker",P2,2,,1,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CTRL-07,Rig controls and controller creation,Rig UI/picker panels,P3,4,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
+CTRL-08,Rig controls and controller creation,Modular rig components / autorig,P2,4,,1,N,0,none,name,,not run,none,P,1,basic,name,,not run,none,N,1,verify,kb-phrase,,not run,none
+CTRL-09,Rig controls and controller creation,Use bendy/segmented limbs (twist & stretch),P3,4,,0,N,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+CNST-01,Constraints and relationships,Parent / child-of constraint,P1,2,yes,2,N,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,not run,R6,N,0,none,name,,not run,none
+CNST-02,Constraints and relationships,"Point, orient and scale (copy transform) constraints",P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none
+CNST-03,Constraints and relationships,Aim / look-at / track constraint,P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CNST-04,Constraints and relationships,Weighted multi-target blending,P2,2,,1,N,0,none,name,,not run,none,N,2,verify,name,,not run,none,N,0,none,name,,not run,none
+CNST-05,Constraints and relationships,Dynamic parenting / space switching,P2,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+CNST-06,Constraints and relationships,Transform limits and geometry constraints,P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+CNST-07,Constraints and relationships,Troubleshoot constraint conflicts and dependency cycles,P3,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-01,"Skin binding, weight painting and deformation",Bind mesh to skeleton (automatic weights),P0,2,yes,16,N,1,trouble,kb-phrase,,not run,none,N,1,trouble,kb-phrase,yes,not run,none,N,1,trouble,kb-phrase,,not run,none
+SKIN-02,"Skin binding, weight painting and deformation",Choose bind method and max influences,P1,2,yes,0,P,0,none,name,,not run,none,N,1,trouble,name,,not run,none,N,1,trouble,name,,not run,none
+SKIN-03,"Skin binding, weight painting and deformation",Paint and edit skin weights,P1,2,yes,1,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,none,N,1,trouble,name,,not run,none
+SKIN-04,"Skin binding, weight painting and deformation",Normalise weights and clamp influences,P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
+SKIN-05,"Skin binding, weight painting and deformation",Mirror skin weights,P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-06,"Skin binding, weight painting and deformation",Copy / transfer weights between meshes,P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+SKIN-07,"Skin binding, weight painting and deformation",Add/remove influences and re-bind,P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+SKIN-08,"Skin binding, weight painting and deformation",Select deformation method (linear vs dual quaternion),P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-09,"Skin binding, weight painting and deformation",Smooth/corrective deformers (delta mush),P2,2,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-10,"Skin binding, weight painting and deformation","Add helper, twist and roll joints",P3,4,,0,P,0,none,none,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-11,"Skin binding, weight painting and deformation",Save and load weights,P2,2,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-12,"Skin binding, weight painting and deformation","Non-skeletal deformers (lattice, cluster, wrap)",P3,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-13,"Skin binding, weight painting and deformation",Weight painting diagnostics (visualisation),P2,2,,0,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,P,1,trouble,name,,not run,none
+FACE-01,Facial rigging and facial animation,Define facial target set (FACS/visemes),P2,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+FACE-02,Facial rigging and facial animation,"Facial joint rig (jaw, eyes, tongue)",P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+FACE-03,Facial rigging and facial animation,Eye look-at and blink rig,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+FACE-04,Facial rigging and facial animation,"Face control UI (sliders, 2D controls)",P2,4,,0,C,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+FACE-05,Facial rigging and facial animation,Lip-sync / expression library,P3,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+FACE-06,Facial rigging and facial animation,Import facial animation capture,P3,4,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none
+BSHP-01,"Blend shapes, morph targets and correctives",Create blend shape / shape key targets,P1,4,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+BSHP-02,"Blend shapes, morph targets and correctives",Sculpt/edit and mirror targets,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+BSHP-03,"Blend shapes, morph targets and correctives",Pose-driven corrective shapes,P2,4,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+BSHP-04,"Blend shapes, morph targets and correctives",Drive shapes with controls or drivers,P1,4,yes,0,N,0,none,name,,not run,none,N,2,verify,name,,not run,none,N,0,none,name,,not run,none
+BSHP-05,"Blend shapes, morph targets and correctives",Combination/in-between shapes,P3,4,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+ANIM-01,Animation fundamentals and keyframing,Set keyframes on controls,P0,1,yes,1,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ANIM-02,Animation fundamentals and keyframing,Set frame rate and time range,P0,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ANIM-03,Animation fundamentals and keyframing,Auto-key and keying sets,P1,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ANIM-04,Animation fundamentals and keyframing,Block poses (stepped / pose-to-pose),P1,3,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ANIM-05,Animation fundamentals and keyframing,Create breakdowns and in-betweens,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+ANIM-06,Animation fundamentals and keyframing,"Copy, paste and mirror poses; pose library",P2,3,,0,N,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+ANIM-07,Animation fundamentals and keyframing,Edit and retime keys,P1,3,yes,0,N,0,none,none,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+ANIM-08,Animation fundamentals and keyframing,Preview/ playblast animation,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-01,"Timeline, dope sheet, graph editor and curves",Timeline scrubbing and frame range,P0,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-02,"Timeline, dope sheet, graph editor and curves",Dope sheet key management,P1,3,yes,0,N,0,none,none,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-03,"Timeline, dope sheet, graph editor and curves",Graph editor curve editing,P1,3,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-04,"Timeline, dope sheet, graph editor and curves",Interpolation and tangent types,P1,3,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-05,"Timeline, dope sheet, graph editor and curves","Curve filters (Euler, simplify, clean)",P2,3,,0,N,0,none,none,,not run,none,N,0,none,none,,not run,none,P,0,none,name,,not run,none
+CURV-06,"Timeline, dope sheet, graph editor and curves",Looping/cycle curve modifiers,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-07,"Timeline, dope sheet, graph editor and curves",Rotation modes and gimbal handling,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CURV-08,"Timeline, dope sheet, graph editor and curves",Retime/time-warp animation,P3,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+PATH-01,"Motion paths, trails and ghosting",Display motion paths,P2,3,,0,N,0,none,none,,not run,none,N,0,none,none,,not run,none,N,0,none,none,,not run,none
+PATH-02,"Motion paths, trails and ghosting",Edit trajectories directly,P3,3,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+PATH-03,"Motion paths, trails and ghosting",Ghosting / onion skin,P3,3,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,C,0,none,name,,not run,none
+LAYR-01,"Animation layers, clips, blending and retargeting",Animation layers (additive/override),P2,4,,0,P,0,none,name,,not run,none,N,0,none,none,,not run,none,N,0,none,none,,not run,none
+LAYR-02,"Animation layers, clips, blending and retargeting","Clips, strips and non-linear editing",P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LAYR-03,"Animation layers, clips, blending and retargeting",Blend and transition between clips,P3,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LAYR-04,"Animation layers, clips, blending and retargeting",Bake animation,P1,3,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LAYR-05,"Animation layers, clips, blending and retargeting",Skeleton mapping / characterisation,P2,4,,0,C,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LAYR-06,"Animation layers, clips, blending and retargeting",Retarget animation between characters,P2,4,,9,U,0,none,n/a,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LAYR-07,"Animation layers, clips, blending and retargeting","Fix retarget results (offsets, foot lock, cleanup)",P3,4,,0,C,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+LOCO-01,"Walk cycles, locomotion and procedural motion","Block a walk cycle (contact, down, pass, up)",P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LOCO-02,"Walk cycles, locomotion and procedural motion",Loop a cycle with root offset,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+LOCO-03,"Walk cycles, locomotion and procedural motion",Root motion extraction,P3,4,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,P,0,none,name,,not run,none
+LOCO-04,"Walk cycles, locomotion and procedural motion",Path-following locomotion,P3,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+LOCO-05,"Walk cycles, locomotion and procedural motion",Foot lock and planting,P3,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+LOCO-06,"Walk cycles, locomotion and procedural motion",Procedural locomotion,P3,4,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
+SECM-01,Secondary motion and physics-assisted animation,"Overlap/follow-through (spring, jiggle)",P3,4,,0,C,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SECM-02,Secondary motion and physics-assisted animation,"Dynamic chains (tails, hair, cloth)",P3,4,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SECM-03,Secondary motion and physics-assisted animation,Ragdoll / physics-assisted pose,P3,4,,0,C,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+SECM-04,Secondary motion and physics-assisted animation,Soft-tissue / muscle simulation,P3,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+SECM-05,Secondary motion and physics-assisted animation,Bake secondary motion to keys,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+MOCP-01,Motion capture and imported animation,Import motion capture / external animation,P2,4,,0,N,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+MOCP-02,Motion capture and imported animation,Resolve rest-pose and axis mismatches,P2,4,,0,C,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+MOCP-03,Motion capture and imported animation,Clean and reduce mocap data,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+MOCP-04,Motion capture and imported animation,Edit mocap non-destructively,P3,4,,0,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+MOCP-05,Motion capture and imported animation,Live mocap streaming,P3,4,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
+TEST-01,"Rig testing, deformation testing and debugging",Deformation test poses (range of motion),P1,5,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+TEST-02,"Rig testing, deformation testing and debugging",Control behaviour tests,P2,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,R6,P,0,none,name,,not run,none
+TEST-03,"Rig testing, deformation testing and debugging",Rig performance profiling,P3,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+TEST-04,"Rig testing, deformation testing and debugging",Rig validation checklist,P2,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,P,0,none,name,,not run,none
+TEST-05,"Rig testing, deformation testing and debugging",Debug and trace rig logic,P3,5,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+CLNP-01,"Animation cleanup, polish and quality validation",Reduce keyframes,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+CLNP-02,"Animation cleanup, polish and quality validation",Euler/gimbal filtering,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+CLNP-03,"Animation cleanup, polish and quality validation",Detect foot sliding and pops,P3,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none
+CLNP-04,"Animation cleanup, polish and quality validation",Arc and spacing review,P3,5,,4,P,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+CLNP-05,"Animation cleanup, polish and quality validation",Final animation QA checklist,P2,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none
+GAME-01,Rigs for real-time engines and game pipelines,Game skeleton budget,P2,5,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+GAME-02,Rigs for real-time engines and game pipelines,Separate deformation and control rigs,P2,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+GAME-03,Rigs for real-time engines and game pipelines,Engine-compatible skeleton and naming,P2,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+GAME-04,Rigs for real-time engines and game pipelines,Root bone and root motion,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+GAME-05,Rigs for real-time engines and game pipelines,Animation clips and ranges for export,P2,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+EXPT-01,"Export, interchange and pipeline integration",Export skinned character (FBX),P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+EXPT-02,"Export, interchange and pipeline integration",Export animation only,P1,3,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+EXPT-03,"Export, interchange and pipeline integration",Export glTF/GLB,P2,5,,0,N,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
+EXPT-04,"Export, interchange and pipeline integration",Export/exchange via USD (UsdSkel),P3,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+EXPT-05,"Export, interchange and pipeline integration",Cache (Alembic) and bake deformation,P3,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
+EXPT-06,"Export, interchange and pipeline integration",Round-trip validation,P2,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none
+EXPT-07,"Export, interchange and pipeline integration","Save, reopen, version",P0,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+EXPT-08,"Export, interchange and pipeline integration",Asset packaging and reuse,P3,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+AUTO-01,"Automation, scripting and extensibility (added)",Script access to scene data,P0,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+AUTO-02,"Automation, scripting and extensibility (added)",Event/notification hooks,P1,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+AUTO-03,"Automation, scripting and extensibility (added)",Batch automation,P2,3,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+AUTO-04,"Automation, scripting and extensibility (added)",Custom tools / UI panels,P3,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+AUTO-05,"Automation, scripting and extensibility (added)",Licensing and distribution constraints,P1,1,yes,0,N,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+XAPP-01,Cross-application workflow (added),Common skeleton schema,P1,1,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none
+XAPP-02,Cross-application workflow (added),Cross-app skeleton mapping,P2,5,,0,C,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
+XAPP-03,Cross-application workflow (added),Animation interchange with validation,P2,5,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+XAPP-04,Cross-application workflow (added),Rig compatibility check,P3,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none
+XAPP-05,Cross-application workflow (added),"Axis, unit and rotation-order normalisation",P1,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+XAPP-06,Cross-application workflow (added),Terminology mapping,P1,1,yes,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,C,0,none,name,,not run,none

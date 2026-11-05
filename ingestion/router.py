@@ -18,7 +18,8 @@ import re
 from shared.answer import AnswerBundle, Explanation, SourceRef
 from shared.step_record import Step
 
-from .catalog import BY_ID, Operation, match_aliases, version_status
+from .catalog import BY_ID, Operation, version_status
+from .rigging_text import MIN_CLAUSES, clauses_of, looks_like_rigging, prerequisite_notes, rigging_to_steplist
 from .intent import classify
 from .knowledge import finish, how_to_steps
 from .text_steps import written_to_steplist
@@ -73,20 +74,74 @@ def _shortcut_text(op: Operation) -> str:
 _VERSION_IN_TEXT = re.compile(r"\bblender\s*v?(\d{1,2}\.\d{1,2})\b", re.I)
 
 
+def _src(kb, sid: str) -> SourceRef:
+    s = kb.sources[sid]
+    kind = "manual" if s["tier"] == "official" else ("tutorial_video" if s["tier"] == "tutorial" else "forum")
+    return SourceRef(kind=kind, title=s["title"], url=s["url"], version=s.get("version"), verified_on=kb_retrieved())
+
+
+def kb_retrieved() -> str:
+    from .rigging_knowledge import PATH
+    return json.loads(PATH.read_text(encoding="utf-8")).get("retrieved", "")
+
+
+def _rigging_troubleshooting(text: str, app: str) -> AnswerBundle | None:
+    from .rigging_knowledge import load as knowledge
+    kb = knowledge()
+    for a in [app, *[x for x in ("maya", "blender") if x != app]]:                # the person's own application first, then the others
+        hit = kb.troubleshoot(text, a)
+        if hit is None:
+            continue
+        entry, item = hit
+        srcs = [_src(kb, s) for s in item["sources"]]
+        steps = " ".join(f"{i}. {f}" for i, f in enumerate(item["fix"], 1))
+        who = "the application vendor" if item["tier"] == "official" else "forum or Q&A advice: practical but not guaranteed, and often written for older versions"
+        caveats = [f"Trust: {item['tier']} ({who}). Check the menu names against your version."]
+        if a != app:
+            caveats.append(f"This is {a} advice but you are working in {app}. If that is wrong, say which application you use.")
+        for c in entry.conflicts:
+            caveats.append("Sources disagree: " + c["text"])
+        return AnswerBundle(kind="troubleshooting", route="rigging_knowledge", trust="none",
+                            explanations=[Explanation(text=f"Likely cause: {item['cause']}", sources=srcs, provenance="documentation"),
+                                          Explanation(text=f"What to try: {steps}", sources=srcs, provenance="documentation")],
+                            sources=srcs, caveats=caveats, reasons=[f"matched a known symptom in the {a} knowledge base entry {entry.id}"])
+    return None
+
+
 def route(text: str, *, version: str | None = None, observed: dict | None = None,
           store: ReviewedWorkflowStore | None = None, input_type: str | None = None,
-          duration_s: float | None = None, kb=None, tutorials: list[dict] | None = None) -> AnswerBundle:
+          duration_s: float | None = None, kb=None, tutorials: list[dict] | None = None,
+          app: str = "blender") -> AnswerBundle:
     stripped = text.strip()
     # ---- 0. input form
     if input_type == "manual_steps" or (input_type is None and stripped.startswith("{") and '"steps"' in stripped):
         sl, notes = normalise_manual_steps(json.loads(stripped), version)
         return AnswerBundle(kind="procedure", route="manual_steps", steps=sl, caveats=notes, reasons=["manual step list validated against the shared schema"])
     if input_type == "transcript" or (input_type is None and _looks_like_timed_text(stripped)):
-        r = ingest_transcript(stripped, duration_s=duration_s, version=version)
+        r = ingest_transcript(stripped, duration_s=duration_s, version=version, app=app)
+        notes = prerequisite_notes(r.steplist) if r.steplist is not None and r.steplist.app != "blender" else ([], [])        # prerequisites the narration never covers
         return AnswerBundle(kind="procedure" if r.steplist else "unsupported", route="transcript_parser", steps=r.steplist,
-                            explanations=r.explanations, caveats=r.limitations,
+                            explanations=r.explanations, caveats=r.limitations + notes[1], assumptions=notes[0],
                             reasons=[f"transcript parsed offline: {r.stats}"],
                             fallback_reason=None if r.steplist else "no instructional operation recognised in the transcript; a model could read it, none was called")
+
+    # ---- a symptom people describe ("my knee flips", "the mesh does not follow the skeleton"): answer from the researched knowledge base, with the tier and source of every line
+    if input_type is None and not stripped.startswith("{") and len(stripped) < 400:
+        tb = _rigging_troubleshooting(stripped, app)
+        if tb is not None:
+            return tb
+
+    # ---- rigging and animation instructions: every Maya/Houdini procedure, and Blender text that mostly names rigging features
+    if input_type == "rigging_text" or (input_type is None and not stripped.startswith("{") and (app != "blender" or looks_like_rigging(stripped, app))):
+        if len(clauses_of(stripped)) < MIN_CLAUSES:
+            return AnswerBundle(kind="clarification", route="clarify", reasons=[f"app is {app}: only pasted multi-step procedures are supported there so far"],
+                                clarification=f"For {app} I can turn a pasted procedure into steps. Put each step on its own line (at least two).")
+        hit = store.find(text_key(stripped), version) if store is not None else None
+        if hit is not None:
+            return AnswerBundle(kind="procedure", route="reviewed_workflow", steps=hit, reasons=[f"reviewed workflow {text_key(stripped)}"])
+        sl, rr = rigging_to_steplist(stripped, app, version)
+        return AnswerBundle(kind="procedure", route="rigging_text", steps=sl, assumptions=rr.assumptions, caveats=rr.caveats,
+                            reasons=[f"rigging/animation procedure for {app}: {len(sl.steps)} steps, {len(rr.unmatched)} unmatched"])
 
     it = classify(stripped)
     reasons = list(it.reasons)

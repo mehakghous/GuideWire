@@ -1,0 +1,26 @@
+{
+  "_about": "Reference checklist for the Maya FK/IK leg tutorial (video dc3iRo0hb3g). 'items' come from what the first live run's own evidence says the video does (model-read, NOT checked by a person against the video). 'reference_only' are details from the project's quality example for orienting joints (select the root joint, open the Rigging menu set, apply, check the axes): a QUALITY TARGET, not ground truth, reported separately and not counted in completeness. A keyword group matches when all its words occur in the text of the step list.",
+  "video_id": "dc3iRo0hb3g",
+  "items": [
+    {"name": "create the leg joint chain", "any_of": [["joint", "chain"], ["create", "joints"]]},
+    {"name": "position the joints on the mesh", "any_of": [["position", "joints"], ["align", "mesh"]]},
+    {"name": "rename the joints", "any_of": [["rename", "joints"]]},
+    {"name": "orient the joints", "any_of": [["orient"]]},
+    {"name": "set primary and secondary axes", "any_of": [["primary", "axis", "secondary"]]},
+    {"name": "duplicate the chain for IK and FK", "any_of": [["duplicate"]]},
+    {"name": "rename the duplicates with search and replace", "any_of": [["search", "replace"]]},
+    {"name": "parent constrain the skin joints to IK and FK", "any_of": [["parent", "constrain"], ["parent", "constraint"]]},
+    {"name": "keep the offset when constraining", "any_of": [["maintain", "offset"]]},
+    {"name": "create the switch control", "any_of": [["switch", "control"], ["text", "control"]]},
+    {"name": "add the switch attribute", "any_of": [["add", "attribute"]]},
+    {"name": "give the attribute a 0 to 1 range", "any_of": [["minimum", "maximum"], ["0", "1", "attribute"]]},
+    {"name": "connect the attribute to the constraint weights", "any_of": [["constraint", "weight"]]},
+    {"name": "use a reverse node for the other weight", "any_of": [["reverse"]]},
+    {"name": "test by scrubbing the switch", "any_of": [["test"], ["scrubbing"]]}
+  ],
+  "reference_only": [
+    {"name": "select the root joint first", "any_of": [["select", "root"]]},
+    {"name": "open the Rigging menu set", "any_of": [["rigging", "menu"]]},
+    {"name": "check the joint axes afterwards", "any_of": [["axes"], ["axis", "check"]]}
+  ]
+}

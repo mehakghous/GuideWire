@@ -13,10 +13,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+import random
 import time
 from typing import Any
 
-from .base import ProviderError, QuotaError
+from .base import OverloadError, ProviderError, QuotaError
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ class GeminiProvider:
         self.events: list[dict[str, Any]] = []  # per HTTP attempt: status, latency, error text
         self.last_raw_text: str | None = None
         self._secret = key
+        self._sleep, self._rand = time.sleep, random.uniform          # injectable, so retry timing is testable
 
     def _redact(self, text: str) -> str:
         return text.replace(self._secret, "[REDACTED]")
@@ -98,12 +100,12 @@ class GeminiProvider:
                     raise QuotaError(f"HTTP 429 (quota/rate limit): {msg}") from e
                 if isinstance(code, int) and 400 <= code < 500 and code != 408:
                     raise ProviderError(f"HTTP {code}: {msg}") from e
-                last = ProviderError(msg)
+                last = OverloadError(msg)
                 log.warning("gemini attempt %d/%d failed: %s", attempt, self._max_attempts, msg[:120])
                 if attempt < self._max_attempts:
-                    time.sleep(5 * 2 ** (attempt - 1))
+                    self._sleep(5 * 2 ** (attempt - 1) * self._rand(0.5, 1.5))        # exponential backoff with jitter, bounded by max_attempts
                 continue
-            self.events.append({"attempt": attempt, "status": 200, "latency_s": round(time.time() - t0, 2)})
+            self.events.append({"attempt": attempt, "status": 200, "latency_s": round(time.time() - t0, 2)})        # also copied into the run log by extract._run
             um = getattr(resp, "usage_metadata", None)
             if um is not None:
                 self.usage.append({
@@ -116,4 +118,4 @@ class GeminiProvider:
             if not resp.text:
                 raise ProviderError("empty model response (possibly blocked or truncated)")
             return json.loads(resp.text)  # JSONDecodeError (a ValueError) propagates to the caller
-        raise ProviderError(f"Gemini request failed after {self._max_attempts} attempts: {last}")
+        raise OverloadError(f"Gemini request failed after {self._max_attempts} attempts: {last}")

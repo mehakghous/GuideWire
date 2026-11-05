@@ -36,7 +36,6 @@ def evaluate_transcript(text: str, reference: Path, duration_s: float | None, ve
         return {**out, "steps": 0}
     rep = evaluate_coverage(gold, sl)
     cues, _ = clean_cues(parse_timed_text(text, duration_s))
-    pre = [s.confidence for s in sl.steps]
     check_evidence(sl, cues)
     unsupported_quotes = sum(1 for s in sl.steps if any("evidence quote" in f for f in s.flags))
     n_not_applicable = [r.id for r in gold.steps if r.is_verified and (r.evidence_type == "demonstrated")]

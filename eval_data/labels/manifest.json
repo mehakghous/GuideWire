@@ -1,0 +1,140 @@
+{
+ "_about": "Held-out tutorials for human labelling (docs/labelling_guide.md). Sheets are blank until a person fills them. 'second' = the double-annotating person: rename the file to their name and edit `annotators` here.",
+ "selection": "scripts/prepare_labelling.py, salt guidewire-heldout-v1",
+ "transcripts_dir": "local_data/labelling",
+ "videos": [
+  {
+   "video_id": "VFMGp0bdJdc",
+   "title": "Blender 3.3 Basics Tutorial - How to Extrude, Inset and Loop Cut (Modeling 101)",
+   "channel": "TutsByKai",
+   "url": "https://www.youtube.com/watch?v=VFMGp0bdJdc",
+   "duration_s": 423,
+   "topic": "blender extrude inset bevel modeling basics",
+   "app_version": "3.3",
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "qB1eg3ef5vs",
+   "title": "Why Your Shading Is Broken (and how to fix it!)",
+   "channel": "Josh - Blender Bros",
+   "url": "https://www.youtube.com/watch?v=qB1eg3ef5vs",
+   "duration_s": 524,
+   "topic": "blender fix shading artifacts smooth shading normals",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "aMGzPiOAqTk",
+   "title": "How to Combine Objects in Blender like a Pro 2025",
+   "channel": "Architecture Topics",
+   "url": "https://www.youtube.com/watch?v=aMGzPiOAqTk",
+   "duration_s": 271,
+   "topic": "blender join objects tutorial",
+   "app_version": "3.x",
+   "captions": "auto",
+   "annotators": [
+    "ayesha",
+    "second"
+   ]
+  },
+  {
+   "video_id": "jdTabPJuqdc",
+   "title": "Easy Realist Low Poly Trees -  Blender 3",
+   "channel": "Grant Abbitt (Gabbitt)",
+   "url": "https://www.youtube.com/watch?v=jdTabPJuqdc",
+   "duration_s": 892,
+   "topic": "blender low poly tree tutorial",
+   "app_version": "3.x",
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "edy-o2uvVYg",
+   "title": "Blender Absolute Beginner:  Object Mode Vs Edit Mode Lesson",
+   "channel": "Dane Sigua",
+   "url": "https://www.youtube.com/watch?v=edy-o2uvVYg",
+   "duration_s": 731,
+   "topic": "blender object mode vs edit mode beginner",
+   "app_version": "3.x",
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "D2AgCcC1hjs",
+   "title": "Blender 3D Modeling software: Glass Perfume Bottle Tutorial",
+   "channel": "IndustrialDesign ",
+   "url": "https://www.youtube.com/watch?v=D2AgCcC1hjs",
+   "duration_s": 324,
+   "topic": "blender realistic glass material tutorial",
+   "app_version": "3.x",
+   "captions": "creator",
+   "annotators": [
+    "ayesha",
+    "second"
+   ]
+  },
+  {
+   "video_id": "EBgHRd5tJfE",
+   "title": "Blender 5.1 Basic Rigging Tutorial | Simple Armature Setup & Automatic Weights (Beginner Guide)",
+   "channel": "Freedom Arts 3D Workflow",
+   "url": "https://www.youtube.com/watch?v=EBgHRd5tJfE",
+   "duration_s": 267,
+   "topic": "blender rigging a character armature beginner",
+   "app_version": "5.1",
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "U63t03RGyC8",
+   "title": "Blender: How to Move, Rotate and Scale (Transformations)",
+   "channel": "One Wheel Studio",
+   "url": "https://www.youtube.com/watch?v=U63t03RGyC8",
+   "duration_s": 241,
+   "topic": "blender select move rotate scale objects beginner",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "atWsdWadG6M",
+   "title": "Blender for Beginners | Part 4 Extrude Inset Bevel & Loop Cuts",
+   "channel": "Dansky",
+   "url": "https://www.youtube.com/watch?v=atWsdWadG6M",
+   "duration_s": 394,
+   "topic": "blender extrude inset bevel modeling basics",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha",
+    "second"
+   ]
+  },
+  {
+   "video_id": "ZdNEqv6M7p8",
+   "title": "The Easy Way to Fix Ugly Shading in Blender",
+   "channel": "DECODED",
+   "url": "https://www.youtube.com/watch?v=ZdNEqv6M7p8",
+   "duration_s": 546,
+   "topic": "blender fix shading artifacts smooth shading normals",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  }
+ ]
+}

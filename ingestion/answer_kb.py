@@ -16,10 +16,10 @@ import re
 
 from shared.answer import AnswerBundle, Explanation, SourceRef
 
-from .catalog import BY_ID, match_aliases, parse_version
+from .catalog import BY_ID, parse_version
 from .intent import Intent
 from .kb.candidates import Candidate, candidate_from_hit, candidate_steps, extra_profile, validate_candidate
-from .kb.index import Hit, KnowledgeBase, SearchResult, terms
+from .kb.index import Hit, KnowledgeBase, terms
 from .knowledge import finish
 from .profiles import BLENDER
 from . import tutorials as T
@@ -75,8 +75,8 @@ def _differs(a: Hit, b: Hit) -> bool:
     return (ra.get("menus"), ra.get("shortcuts"), ra.get("modes")) != (rb.get("menus"), rb.get("shortcuts"), rb.get("modes"))
 
 
-def _excerpt(h: Hit, retrieved: str, applies: list[str] | None = None) -> Explanation:
-    return Explanation(text=h.lead, sources=[_src(h, retrieved)], provenance="documentation", is_excerpt=True, applies_to_steps=applies or [])
+def _excerpt(h: Hit, retrieved: str, applies: list[str] | None = None, passage: str | None = None) -> Explanation:
+    return Explanation(text=passage or h.lead, sources=[_src(h, retrieved)], provenance="documentation", is_excerpt=True, applies_to_steps=applies or [])
 
 
 def _retrieved(kb: KnowledgeBase) -> str:
@@ -211,7 +211,7 @@ def answer_extended(text: str, it: Intent, kb: KnowledgeBase | None, tut_index: 
     howto = bool(_HOWTO.match(t)) or it.kind in ("how_to",)
     if howto and cand is not None:
         return _how_to(cand, top, kb, t, observed, version, vn, ret, reasons + [r.reason])
-    ex = [_excerpt(top, ret)]
+    ex = [_excerpt(top, ret, passage=kb.passage(top, r.terms))]
     cav = ["This is an excerpt from the manual, not a step-by-step procedure."] if howto else []
     return AnswerBundle(kind="concept", route="docs_index", trust="doc_passage", explanations=ex, sources=[_src(top, ret)], caveats=cav,
                         version_note=vn, reasons=reasons + [r.reason] + (["how-to wording, but the page has no Reference block to extract steps from"] if howto else []))

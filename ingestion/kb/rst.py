@@ -91,7 +91,6 @@ def parse_page(path: str, text: str) -> Page:
             sections.append(Section(list(cur_path), txt))
         buf.clear()
 
-    skip_directive_indent = None
     while i < len(lines):
         ln = lines[i]
         if _REF_START.match(ln):

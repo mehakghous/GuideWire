@@ -17,7 +17,7 @@ from pathlib import Path
 
 from shared.answer import TutorialRecommendation
 
-from .catalog import parse_version, tokens
+from .catalog import parse_version
 from .kb.index import stem, terms
 
 ROOT = Path(__file__).resolve().parents[1]

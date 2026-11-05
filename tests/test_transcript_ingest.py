@@ -6,9 +6,8 @@ from pathlib import Path
 import pytest
 
 from ingestion.eval.transcript_eval import evaluate_transcript
-from ingestion.transcript import parse_cues
 from ingestion.transcript_ingest import (
-    choose_ops, clean_cues, group_units, ingest_transcript, parse_timed_text,
+    choose_ops, clean_cues, ingest_transcript, parse_timed_text,
 )
 from ingestion.validate import ValidationFailure
 

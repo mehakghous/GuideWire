@@ -59,3 +59,34 @@ def test_cli_chain_reports_and_writes(tmp_path, capsys):
     text = capsys.readouterr().out
     assert "5/15 verifiable" in text and "6/15" in text
     assert json.loads(out.read_text(encoding="utf-8"))["steps"]
+
+
+def test_order_error_is_flagged_on_the_step_once():
+    from ingestion.scene_chain import flag_order_errors
+    sl = load_steplist(R6)
+    sl.steps = sl.steps[1:] + sl.steps[:1]
+    r = flag_order_errors(sl)
+    assert r.order_errors and set(r.order_steps) <= {s.id for s in sl.steps}
+    flagged = {s.id: [f for f in s.flags if f.startswith("order:")] for s in sl.steps}
+    assert all(len(v) == 1 for sid, v in flagged.items() if sid in r.order_steps)
+    assert not any(v for sid, v in flagged.items() if sid not in r.order_steps)
+    flag_order_errors(sl)                                      # idempotent
+    assert all(len([f for f in s.flags if f.startswith("order:")]) <= 1 for s in sl.steps)
+
+
+def test_written_rigging_steps_get_derived_state_and_order_caveat():
+    from ingestion.rigging_text import rigging_to_steplist
+    ok, res = rigging_to_steplist("Create joints down the arm\nCreate an IK handle on the arm", "maya")
+    assert not [c for c in res.caveats if c.startswith("order:")]
+    assert any(p.kind == "node_exists" for st in ok.steps for p in st.expected_state)
+    bad, res = rigging_to_steplist("Create an IK handle on the arm\nCreate joints down the arm", "maya")
+    assert any(c.startswith("order:") for c in res.caveats)
+    assert any(f.startswith("order:") for st in bad.steps for f in st.flags)
+
+
+def test_transcript_route_reports_out_of_order_narration():
+    from ingestion.rigging_transcript import ingest_rigging_transcript
+    txt = "0:30 let's create an IK handle on the arm\n0:50 now create joints down the arm\n"
+    r = ingest_rigging_transcript(txt, "maya", duration_s=600)
+    assert r.steplist is not None
+    assert any(l.startswith("order:") for l in r.limitations)

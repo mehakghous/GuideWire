@@ -26,7 +26,7 @@ from shared.step_record import Action, PredicateKind, StatePredicate, Step, Step
 from .instructions import compose_instructions
 from .profiles import AppProfile, get_profile
 from .providers.base import LLMProvider, ProviderError, QuotaError
-from .scene_chain import derive_state
+from .scene_chain import derive_state, flag_order_errors
 from .timecode import parse_timestamp
 from .validate import Issue, ValidationFailure, check_structure, sanitize_and_annotate
 
@@ -310,6 +310,7 @@ def _run(
             sl = sanitize_and_annotate(sl, profile, video_duration_s)
             last_partial = sl
             check_structure(sl, video_duration_s)
+            flag_order_errors(sl)
             rec["accepted"] = True
             rec["events"] = list(getattr(provider, "events", []))[-3:]               # HTTP attempts and their latency: cost AND time are now recorded
             if on_attempt:

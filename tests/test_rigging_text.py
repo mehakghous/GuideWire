@@ -20,7 +20,9 @@ def test_maya_steps_get_features_nodes_craft_and_are_valid():
     sl, res = rigging_to_steplist(MAYA, "maya")
     assert sl.app == "maya" and [s.feature_id for s in sl.steps] == ["SKEL-01", "SKEL-04", "IKFK-02", "SKIN-01", "CLNP-04"]
     assert [p.target for p in sl.steps[0].expected_state] == ["joint"] and [p.target for p in sl.steps[2].expected_state] == ["ikHandle"]
-    assert sl.steps[0].verifiable and not sl.steps[3].verifiable                      # nothing observable is claimed for "bind skin"
+    assert sl.steps[0].verifiable and not any("derived" in f for f in sl.steps[0].flags)      # stated in the text: not derived
+    assert [p.target for p in sl.steps[3].expected_state] == ["skinCluster"] and any("derived from the knowledge base" in f for f in sl.steps[3].flags)   # "bind skin": from the documented effect, labelled
+    assert not sl.steps[1].verifiable and not sl.steps[4].verifiable                  # a mirror and a review claim nothing a program could check
     assert sl.steps[4].kind == "craft" and any("not graded" in f for f in sl.steps[4].flags)
     assert all(s.goal and s.evidence == [s.goal] and s.review_status == "drafted_automatically" for s in sl.steps)     # user's wording kept, labelled as drafted
     assert len(res.assumptions) == 1 and "assume you already did" in res.assumptions[0] and "PREP-05" in res.assumptions[0]       # one line, not one per feature

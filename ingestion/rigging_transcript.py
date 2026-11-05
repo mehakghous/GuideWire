@@ -18,6 +18,7 @@ from .instructions import speech_details
 from .profiles import get_profile
 from .rigging_discovery import _AREA_WORDS
 from .rigging_text import _created_nodes
+from .scene_chain import derive_state, flag_order_errors
 from .terms import suggest_feature
 from .transcript_ingest import TranscriptResult, Unit, clean_cues, cue_span, group_units, parse_timed_text
 from .validate import check_structure, sanitize_and_annotate
@@ -148,7 +149,9 @@ def ingest_rigging_transcript(text: str, app: str, *, duration_s: float | None =
     if steps:
         sl = StepList(source_type="transcript", app=app, app_version_tutorial=version, title=title, steps=steps, prompt_version="deterministic-rigging-transcript-v1",
                       video_duration_s=duration_s, video_id=video_id)
+        derive_state(sl)
         sanitize_and_annotate(sl, get_profile(app), duration_s)
         check_structure(sl, duration_s)
+        res.limitations += [f"order: {e}; the narration may skip a step or go out of order" for e in flag_order_errors(sl).order_errors]
         res.steplist = sl
     return res

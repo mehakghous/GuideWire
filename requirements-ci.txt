@@ -1,0 +1,9 @@
+# Dependencies CI needs. Deliberately NOT requirements.txt: PyQt6, opencv-python, mss and bcrypt are never imported by the tested code and are heavy.
+pydantic>=2.6
+python-dotenv
+httpx
+google-genai
+youtube-transcript-api
+pytest
+fastapi
+ruff

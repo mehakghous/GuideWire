@@ -322,3 +322,36 @@ Raw outputs: `runs/results/` (git-ignored), `eval_data/results/34FBeC9mktE.text-
 **Recommendations.** Section 10.
 
 **Open questions.** The five decisions in section 10; whether the supervisor accepts CC-BY-SA excerpts and the opt-in caption adapter in the shipped app; whether the UI team wants the facade as a library call or a local socket.
+
+
+---
+
+## 14. Progress log (after the audit)
+
+| Date | Item | Result |
+|---|---|---|
+| 2026-10-12 | **GW-001** CLI error boundary | **Done.** `transcript`, `validate`, `chat` and the other offline commands print one line and exit 2 (`--debug` restores the traceback). 5 tests. |
+| 2026-10-12 | **GW-010** service layer, terminal chat, session persistence (also covers **GW-024** persistence) | **Done.** `ingestion/service.py` (`Service.message/command/state/load`), `python -m ingestion.cli chat [--session FILE] [--script FILE] [--json]`, JSON session files (atomic write, refused if inconsistent). The milestone-1 conversation (load, ask why/shortcut, report failure, switch task, resume) passes through it. 24 tests. |
+| 2026-10-12 | **GW-040** CI | **Done, except it has not yet run on GitHub** (no push yet). `.github/workflows/ci.yml`: no-tracked-secrets check, `ruff check .` (syntax, undefined names, unused imports/variables), `pytest -q -rs`, frozen-hash checks. Simulated on a clean checkout with a fresh virtualenv and only the CI dependencies (`requirements-ci.txt`), in CRLF and in LF: **406 passed, 4 skipped, lint clean.** `mypy` and coverage are not added. |
+
+Defects found and fixed while doing these: (1) the session labelled pasted instructions with the title of a Blender tutorial video, because the catalog cites that video as documentation; (2) a pasted procedure's "recorded version" was the user's own version echoed back; (3) `/load` broke on paths containing spaces (quoted paths now work); (4) a frozen-hash check that would have failed on any non-Windows checkout because one frozen file was hashed with CRLF bytes (`ingestion/hashing.py` compares under either line ending; freeze records untouched, any content change still fails); (5) 29 dead imports and 4 dead assignments found by the new lint, removed with unchanged evaluation numbers.
+| 2026-10-12 | **GW-025** schema 0.6 sign-off | **Done**: Mehak and Umaima have reviewed and accepted it (reported by the project owner). |
+| 2026-10-12 | **GW-015** catalog knowledge in steps and follow-ups | **Done.** `Operation.pitfalls` (an explicit, tested subset of the caveats) fills `Step.common_mistakes` for catalog, written and transcript steps; "I made a mistake" and "that didn't work" cite them. `Step.version_dependent` stays **empty on purpose**: no catalog entry records a real cross-version difference, and the "unverified" notes are verification gaps, which the version follow-up now lists separately ("No difference between versions is recorded", "Not verified: ..."). |
+| 2026-10-12 | **GW-041** independent labels | **Tooling done; the labels themselves are not (they must come from people).** 10 held-out tutorials chosen by a fixed seeded rule (10 channels, 8 topics, 4-15 min, none from the rule-tuning set), transcripts fetched locally, 13 blank sheets (3 videos double-annotated), `docs/labelling_guide.md`, a sheet checker, an agreement calculator and a held-out evaluation with a recall funnel and a category for every miss. Awaiting annotators. |
+
+## 15. Proposed: GW-043, high-recall tutorial ingestion
+
+**Goal.** Capture as many genuinely relevant actions as possible without inventing or duplicating steps. Recall becomes a primary acceptance metric next to precision, procedural correctness and grounding, measured separately for narrated and for shown-only actions. A first engineering target of at least 90% recall on independently reviewed, held-out tutorials is **a proposal, not a result**. No number from the development video counts toward it.
+
+**Order.** It sits immediately after GW-041 (trustworthy labels): without them a recall "improvement" cannot be told from a change in what the scorer rewards.
+
+| Step | What | Status |
+|---|---|---|
+| 1 | Find what is missed and categorise it | **Instrument built** (`ingestion.eval.heldout`: categories `demonstrated_only`, `not_in_captions`, `outside_catalog`, `looks_equivalent`, `timing_miss`, `recognition_miss`, `lost_after_recognition`); first reading on the development video only |
+| 2 | Generate candidates with complementary methods (rules, a text model on the transcript, documentation retrieval) | not started; the three already exist separately |
+| 3 | Merge and de-duplicate while keeping distinct actions (the current same-operation 10-second merge hides repeated actions such as three separate undos) | not started |
+| 4 | Check every candidate against evidence; uncertain ones go to review, not to the user as verified | evidence-quote checking exists for the model path; review flag to be added |
+| 5 | Measure recall at each stage (captions -> recognised -> emitted) | **Built** (the funnel) |
+| 6 | Test on unseen tutorials with independent references | needs GW-041 labels |
+
+**First reading, development video only (not evidence for the target).** Of 22 narrated-or-both reference actions: 18 appear in the captions, 21 are recognised by a rule, 12 are credited. The 10 not credited: 2 shown-only (not in any transcript), 3 not in the captions, 1 outside the catalog (pressing F to fill), 1 judged equivalent but not credited, and **5 where a matching step exists but at another time, four of them the repeated undo/Tab/undo keypresses at 49-61 s and 72 s**. So on this video most of the loss is after recognition, and repeated identical operations are the biggest single cause: that points at step 3 (merging), not at the extraction rules. One video, one annotator who is the assistant: a lead, not a finding.

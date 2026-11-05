@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.6"  # 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
+SCHEMA_VERSION = "0.7"  # 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
 
 PredicateKind = Literal[
     "mode",            # target: interaction mode, e.g. OBJECT, EDIT_MESH, SCULPT
@@ -42,6 +42,9 @@ Provenance = Literal[
     "catalog_context",    # a step added because observed application state breaks a catalog prerequisite
     "reviewed_workflow",  # a workflow a person reviewed and approved
 ]
+AppName = Literal["blender", "maya", "houdini"]
+# mechanics = has a checkable end state; craft = judged by eye ("make the arc feel natural"): shown against the tutorial, never graded
+StepKind = Literal["mechanics", "craft"]
 # How directly the source supports a step:
 #   demonstrated = shown on screen only; narrated = only said; both = said AND shown;
 #   inferred = the model filled it in; unknown = not stated.
@@ -86,7 +89,8 @@ class Step(BaseModel):
     actions: list[Action] = Field(default_factory=list)
     start_state: list[StatePredicate] = Field(default_factory=list)
     expected_state: list[StatePredicate] = Field(default_factory=list)
-    verifiable: bool = False  # derived: True iff expected_state is non-empty
+    kind: StepKind = "mechanics"
+    verifiable: bool = False  # derived: True iff expected_state is non-empty and the step is not craft
     video_start_s: float | None = Field(default=None, ge=0)
     video_end_s: float | None = Field(default=None, ge=0)
     depends_on: list[str] = Field(default_factory=list)  # ids of earlier steps whose result this step needs (e.g. the step that enters Edit Mode)
@@ -107,7 +111,7 @@ class Step(BaseModel):
 
     @model_validator(mode="after")
     def _derive_verifiable(self) -> "Step":
-        self.verifiable = bool(self.expected_state)
+        self.verifiable = bool(self.expected_state) and self.kind == "mechanics"
         if (
             self.video_start_s is not None
             and self.video_end_s is not None
@@ -120,7 +124,7 @@ class Step(BaseModel):
 class StepList(BaseModel):
     schema_version: str = SCHEMA_VERSION
     source_type: SourceType
-    app: Literal["blender"]             # GuideWire is scoped to Blender
+    app: AppName
     app_version_tutorial: str | None = None
     video_id: str | None = None
     title: str | None = None

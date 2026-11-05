@@ -1926,3 +1926,23 @@ The product audit, scenario results, Gemini experiment status, defect list and p
 - **Cache-key bug fixed** in the experiment runner (key tied to the contract version); `--no-retry` switch added; E1 remains 3/6 cells (the last attempt hit HTTP 503).
 - Schema 0.6 additions now populated: `Step.depends_on` (by `finish`), `Step.verification` (by `Session.verify`), `AnswerBundle.request` (follow-ups), `source_section` (handoff); `TutorialRecommendation` gains `caption_kind`, `published`, `level_claim`.
 - Tests: 378 passed, 3 strict expected-failures, 2 live deselected.
+
+
+---
+
+# Part XIV: Service layer, terminal chat, CLI errors, CI (2026-10-12)
+
+Backlog items GW-001, GW-010 and GW-040 of [the audit](audits/GUIDEWIRE_CURRENT_STATE_AND_ROADMAP.md) (progress log in its section 14).
+
+**Using the chat.** `python -m ingestion.cli chat --version 2.80 --session my_chat.json`, then, for example: paste steps or ask `How do I join two objects?` -> `/load last` -> `Why are we doing this step?` -> `I did that` -> `/observe mode=EDIT_MESH` -> `/state`. `/load transcript "path with spaces.vtt" 188` follows a transcript. `--json` prints what a UI would receive. The same object (`ingestion.service.Service`) is the contract for the UI: `message(text) -> {intent, route, kind, text, bundle, session}`.
+
+**Ownership note.** The README gives the UI and the session engine to Mehak. `Service` and `Session` are the ingestion side's conversation state; whether Mehak's session engine wraps or replaces them is an open question for her (audit section 10, decisions).
+
+**Checks.** 410 offline tests pass, 3 strict expected-failures; CI simulation on a clean checkout: 406 passed / 4 skipped. Question sets, offline corpus and dev-video transcript numbers unchanged (93.8%, 90.7%, 39/39, recall 0.55, precision 0.81).
+
+
+---
+
+# Part XV: Catalog pitfalls in steps, independent labelling workflow, recall instrumentation (2026-10-12)
+
+See the audit's section 14 (progress log) and section 15 (GW-043). Summary: `Step.common_mistakes` is now filled from an explicit `PITFALLS` table; `version_dependent` is intentionally empty; a CSV labelling workflow (`docs/labelling_guide.md`, `ingestion/eval/labels.py`, `scripts/prepare_labelling.py`, `eval_data/labels/`), annotator agreement, and `python -m ingestion.eval.heldout` (pooled and per-video recall by evidence type, pipeline funnel, one category per miss) are ready; the 13 sheets are blank until people fill them. Tests: 442 pass, 3 strict expected-failures.

@@ -47,9 +47,17 @@ def _steps(*orders):
     return [Step(id=f"s{o}", order=o, goal="g") for o in orders]
 
 
-def test_app_is_blender_only():
+def test_app_is_one_of_the_three_supported():
+    for app in ("blender", "maya", "houdini"):
+        StepList(source_type="written", app=app, steps=_steps(1))
     with pytest.raises(ValidationError):
         StepList(source_type="written", app="unity", steps=_steps(1))
+
+
+def test_craft_step_is_never_verifiable():
+    p = StatePredicate(kind="mode", target="OBJECT")
+    assert Step(id="a", order=1, goal="g", expected_state=[p]).verifiable
+    assert not Step(id="a", order=1, goal="g", expected_state=[p], kind="craft").verifiable
 
 
 @pytest.mark.parametrize("orders", [(1, 3), (2, 3), (1, 1), (2, 1)])

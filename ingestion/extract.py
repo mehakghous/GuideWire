@@ -21,7 +21,7 @@ from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from shared.step_record import Action, PredicateKind, StatePredicate, Step, StepList, Support
+from shared.step_record import Action, PredicateKind, StatePredicate, Step, StepKind, StepList, Support
 
 from .profiles import AppProfile, get_profile
 from .providers.base import LLMProvider, ProviderError, QuotaError
@@ -72,6 +72,7 @@ class DraftStep(BaseModel):
     version_dependent: list[str] = Field(default_factory=list)
     common_mistakes: list[str] = Field(default_factory=list)
     confidence: float = Field(ge=0.0, le=1.0)
+    kind: StepKind = Field(default="mechanics", description='"craft" when the result is judged by eye (timing, arcs, weight, feel) and has no checkable end state; otherwise "mechanics"')
     support: Support = "unknown"
     visual_evidence: str | None = None  # what is visible on screen (cursor target, key overlay, mode, shape)
     evidence: list[str] = Field(default_factory=list)

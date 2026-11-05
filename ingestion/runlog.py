@@ -2,7 +2,7 @@
 
 Usage:  log = RunLog("runs/2026-10-10.jsonl");  extract_from_video(..., on_attempt=log)
 Raw responses contain tutorial-derived content but no secrets. Keep the directory out of git
-(`runs/` is git-ignored) and delete derived YouTube data within 30 days (Proposal §4.f).
+(`runs/` is git-ignored) and delete derived YouTube data within 30 days: `python -m ingestion.cli purge`.
 """
 from __future__ import annotations
 

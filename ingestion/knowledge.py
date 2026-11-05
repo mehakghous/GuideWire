@@ -30,6 +30,7 @@ def make_step(i: int, tpl: StepT, op: Operation, provenance: str, *, goal: str |
         confidence=confidence, support="unknown", provenance=provenance,
         source_refs=[ref(op), *extra_refs], assumptions=list(assumptions),
         evidence=[f"catalog entry {op.id}"], review_status="drafted_automatically",
+        common_mistakes=list(op.pitfalls), version_dependent=list(op.version_differences),
     )
 
 

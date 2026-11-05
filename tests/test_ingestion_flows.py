@@ -8,12 +8,12 @@ from pathlib import Path
 import pytest
 
 from ingestion.handoff import (
-    IngestionPlan, Section, classify_url, find_urls, locate_topic, parse_section, plan_ingestion, read_cached_captions, slice_timed_text,
+    Section, classify_url, find_urls, locate_topic, parse_section, plan_ingestion, read_cached_captions, slice_timed_text,
 )
 from ingestion.kb.index import KnowledgeBase
 from ingestion.router import route
 from ingestion.text_steps import parse_written
-from ingestion.tutorials import discover, load_index, parse_request
+from ingestion.tutorials import discover, parse_request
 from ingestion.youtube.captions import CaptionResult, CaptionsBlocked, CaptionsUnavailable
 from tests.test_kb import FIX, SITE, TUT
 

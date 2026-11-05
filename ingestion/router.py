@@ -18,7 +18,7 @@ import re
 from shared.answer import AnswerBundle, Explanation, SourceRef
 from shared.step_record import Step
 
-from .catalog import BY_ID, Operation, match_aliases, version_status
+from .catalog import BY_ID, Operation, version_status
 from .intent import classify
 from .knowledge import finish, how_to_steps
 from .text_steps import written_to_steplist

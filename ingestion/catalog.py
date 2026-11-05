@@ -17,7 +17,7 @@ Source policy (see docs/ingestion-technical-plan.md, section 'Knowledge layer'):
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, replace
 from typing import Callable
 
 from shared.answer import SourceRef
@@ -78,6 +78,9 @@ class Operation:
     min_version: tuple[int, int] = (2, 80)
     verified_versions: tuple[str, ...] = ("main",)
     unverified: tuple[str, ...] = ()
+    pitfalls: tuple[str, ...] = ()               # things that commonly go wrong with this operation (a subset of `caveats`, same wording) -> Step.common_mistakes
+    version_differences: tuple[str, ...] = ()    # documented behaviour that DIFFERS between Blender versions -> Step.version_dependent. Empty for every entry today:
+    #                                              no catalog entry has a recorded cross-version difference (`unverified` is a verification gap, not a difference)
     triggers: tuple[tuple[str, ...], ...] = ()   # troubleshooting only
     remedy_op: str | None = None
 
@@ -296,6 +299,16 @@ OPERATIONS: tuple[Operation, ...] = (
         sources=(_MODES, _JOIN, TUTORIAL), unverified=(_V280,)),
 )
 
+# Which existing caveats are PITFALLS (the rest are documentation gaps or notes about this app's vocabulary and must not be presented as user mistakes).
+# Exact strings, so editing a caveat without revisiting this table fails tests/test_service.py::test_every_pitfall_is_a_real_caveat.
+PITFALLS: dict[str, tuple[str, ...]] = {
+    "mode.enter_edit": ("Armatures use Pose Mode (Ctrl+Tab toggles it with Object Mode), not Edit Mode via Tab for posing.",),
+    "select.elements": ("Switching select mode can change what stays selected: going up keeps only complete elements, going down keeps everything.",),
+    "object.join": ("Materials, vertex groups and UV layers are merged; modifiers, constraints, groups and parent relationships are not carried over to the active object.",),
+    "mesh.separate": ("'By Material' and 'By Loose Parts' ignore the selection and split the whole mesh.",),
+    "mode.multi_edit": ("The Properties editor shows only the active object; selecting an element makes its object active.", "Connecting vertices across different objects does not work."),
+}
+OPERATIONS = tuple(replace(o, pitfalls=PITFALLS[o.id]) if o.id in PITFALLS else o for o in OPERATIONS)
 BY_ID = {o.id: o for o in OPERATIONS}
 assert len(BY_ID) == len(OPERATIONS)
 

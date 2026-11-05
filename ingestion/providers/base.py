@@ -8,6 +8,10 @@ class ProviderError(RuntimeError):
     """The provider failed (network, quota, refusal, unparseable output)."""
 
 
+class OverloadError(ProviderError):
+    """The provider is out of capacity (HTTP 408/5xx or a network failure) and kept failing after the bounded retries. Retry LATER; nothing was charged and the request itself was fine."""
+
+
 class QuotaError(ProviderError):
     """HTTP 429: quota or rate limit. Never retried; experiments stop on it."""
 

@@ -84,3 +84,68 @@ def normalise_manual_steps(obj: str | dict, version: str | None = None) -> tuple
     if n_unv:
         notes.append(f"{n_unv} of {len(sl.steps)} steps have no checkable expected state and will be guided but not verified")
     return sl, notes
+
+
+# ----------------------------------------------------------------------------- human review: list, edit, promote (GW-012)
+DEFAULT_STORE = Path(__file__).resolve().parents[1] / "knowledge" / "reviewed"
+
+
+def load_steplist(path: str | Path) -> StepList:
+    """A step list from a JSON file: either the list itself or an answer bundle (`cli ask` output) that holds one."""
+    d = json.loads(Path(path).read_text(encoding="utf-8"))
+    return StepList.model_validate(d["steps"] if isinstance(d.get("steps"), dict) else d)
+
+
+def edit_steps(sl: StepList, *, goals: dict[int, str] | None = None, remove: set[int] | None = None, moves: list[tuple[int, int]] | None = None) -> StepList:
+    """A reviewer's edits, as a NEW step list (the input is untouched). Numbers are 1-based positions.
+    `goals` and `remove` use the numbering of the list you were shown; `moves` (from, to) are applied one after another to the result.
+    Step ids never change, `order` is renumbered 1..n, and a step may not end up before a step it depends on."""
+    goals, remove, moves = goals or {}, remove or set(), moves or []
+    n = len(sl.steps)
+    for k in [*goals, *remove]:
+        if not 1 <= k <= n:
+            raise ValueError(f"there is no step {k}; this list has {n} steps")
+    steps = [s.model_copy(deep=True) for s in sl.steps]
+    for k, text in goals.items():
+        if not text.strip():
+            raise ValueError(f"step {k}: the new goal is empty")
+        steps[k - 1].goal = text.strip()
+    kept = [s for i, s in enumerate(steps, 1) if i not in remove]
+    if not kept:
+        raise ValueError("removing these would leave no steps")
+    for a, b in moves:
+        if not (1 <= a <= len(kept) and 1 <= b <= len(kept)):
+            raise ValueError(f"cannot move step {a} to position {b}; the list now has {len(kept)} steps")
+        kept.insert(b - 1, kept.pop(a - 1))
+    ids_before = {}
+    for i, s in enumerate(kept, 1):
+        s.order = i
+        s.depends_on = [d for d in s.depends_on if d in {x.id for x in kept}]       # a removed step is no longer a dependency
+        ids_before[s.id] = i
+    for s in kept:
+        late = [d for d in s.depends_on if ids_before[d] >= s.order]
+        if late:
+            raise ValueError(f"step {s.order} ({s.id}) would come before {', '.join(late)}, which it depends on")
+    out = sl.model_copy(update={"steps": kept})
+    check_structure(out, out.video_duration_s)
+    return out
+
+
+def promote(store: ReviewedWorkflowStore, key: str, sl: StepList, *, reviewed_by: str, min_version: str = "2.80", max_version: str | None = None) -> Path:
+    """Store a step list as a reviewed workflow. Marking steps 'reviewed' is the reviewer's explicit act, so it only happens here and only with a name."""
+    if not reviewed_by.strip():
+        raise ValueError("promoting needs the name of the person who reviewed the steps (--by)")
+    check_structure(sl, sl.video_duration_s)
+    done = sl.model_copy(update={"steps": [s.model_copy(update={"review_status": "reviewed"}) for s in sl.steps]})
+    return store.save(key, done, reviewed_by=reviewed_by, min_version=min_version, max_version=max_version)
+
+
+def entries(store: ReviewedWorkflowStore) -> list[dict]:
+    """One summary row per stored reviewed workflow (newest first)."""
+    rows = []
+    for p in sorted(store.dir.glob("*.json")) if store.dir.exists() else []:
+        d = json.loads(p.read_text(encoding="utf-8"))
+        sl = d["steplist"]
+        rows.append({"key": d["key"], "app": sl.get("app"), "steps": len(sl["steps"]), "reviewed_by": d["reviewed_by"], "reviewed_at": d["reviewed_at"],
+                     "min_version": d.get("min_version"), "max_version": d.get("max_version"), "title": sl.get("title")})
+    return sorted(rows, key=lambda r: r["reviewed_at"], reverse=True)

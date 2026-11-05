@@ -33,7 +33,8 @@ LICENCE = "CC-BY-SA 4.0; credit: Blender Documentation Team (https://docs.blende
 
 # The mesh-modelling, object, 3D-viewport and interface subtrees: ~284 pages, ~0.85 MB. Everything else in the manual (modifiers,
 # sculpting, rendering, animation, ...) is deliberately OUT of the local index; questions about it are reported as outside_index.
-CORE_SCOPE = ("modeling/meshes", "scene_layout/object", "editors/3dview", "interface/undo_redo", "interface/selecting", "interface/controls")
+CORE_SCOPE = ("modeling/meshes", "scene_layout/object", "editors/3dview", "interface/undo_redo", "interface/selecting", "interface/controls",
+              "animation/armatures", "animation/constraints", "animation/shape_keys", "animation/keyframes", "animation/drivers", "addons/rigging")      # the last six: rigging and animation (2026-10-16)
 
 
 class FetchStop(RuntimeError):

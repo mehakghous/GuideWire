@@ -1,0 +1,1311 @@
+{
+  "schema_version": "0.10",
+  "source_type": "youtube",
+  "app": "maya",
+  "app_version_tutorial": null,
+  "video_id": "dc3iRo0hb3g",
+  "title": "Maya Character Rigging - Part 9. create FK, IK and Skin leg joint",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Create the initial leg skin joint chain from hip to toe tip",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Skeleton > Create Joints",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Side View Window",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Enter"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        },
+        {
+          "kind": "active_tool",
+          "target": "Select Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "verifiable": true,
+      "video_start_s": 91.0,
+      "video_end_s": 134.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A five-joint leg skeleton chain is created consisting of hip, knee, ankle, ball, and toe joints.",
+      "how_to": [
+        {
+          "text": "Open Skeleton > Create Joints menu item.",
+          "support": "shown",
+          "evidence": "Instructor opens Skeleton > Create Joints."
+        },
+        {
+          "text": "In the Side view, click sequentially at the hip position, knee position, ankle position, ball position, and toe tip position.",
+          "support": "shown",
+          "evidence": "Instructor places joint centers in Side view."
+        },
+        {
+          "text": "Press Enter to finalize the joint chain creation.",
+          "support": "shown",
+          "evidence": "Chain is completed upon pressing Enter."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a 5-joint chain is visible inside the character leg mesh.",
+          "support": "shown",
+          "evidence": "Joint hierarchy is visible inside character leg in viewports."
+        }
+      ],
+      "visual_evidence": "Joint tool is used in Side view to place joints at hip, knee, ankle, ball, and toe tip.",
+      "evidence": [
+        "Skeleton menu > Create Joints"
+      ],
+      "flags": [
+        "UI name 'Side View Window' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Rename the skin leg joints following a naming convention",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Outliner",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Outliner > Joint Name",
+          "keys": [],
+          "value": "left_hip_skin_jnt"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "verifiable": false,
+      "video_start_s": 220.0,
+      "video_end_s": 287.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The joints in the skin leg chain are renamed with 'left_' prefix and '_skin_jnt' suffix.",
+      "how_to": [
+        {
+          "text": "In the Outliner, double-click the root joint and rename it to 'left_hip_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Renames root joint to left_hip_skin_jnt in Outliner."
+        },
+        {
+          "text": "Double-click the knee joint and rename it to 'left_knee_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Renames knee joint to left_knee_skin_jnt."
+        },
+        {
+          "text": "Double-click the ankle joint and rename it to 'left_ankle_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Renames ankle joint to left_ankle_skin_jnt."
+        },
+        {
+          "text": "Double-click the ball joint and rename it to 'left_ball_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Renames ball joint to left_ball_skin_jnt."
+        },
+        {
+          "text": "Double-click the toe tip joint and rename it to 'left_toe_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Renames toe joint to left_toe_skin_jnt."
+        }
+      ],
+      "check": [
+        {
+          "text": "Inspect the Outliner to confirm all 5 joints in the chain reflect the new names.",
+          "support": "shown",
+          "evidence": "Outliner displays left_hip_skin_jnt hierarchy."
+        }
+      ],
+      "visual_evidence": "Joint names in Outliner are edited to left_hip_skin_jnt, left_knee_skin_jnt, left_ankle_skin_jnt, left_ball_skin_jnt, left_toe_skin_jnt.",
+      "evidence": [
+        "left_hip_skin_jnt, left_knee_skin_jnt, left_ankle_skin_jnt, left_ball_skin_jnt, left_toe_skin_jnt"
+      ],
+      "flags": [
+        "UI name 'Outliner > Joint Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Orient the skin leg joint chain axes",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_skin_jnt",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Skeleton > Orient Joint",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Orient Joint Options > Apply",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-02",
+      "verifiable": false,
+      "video_start_s": 288.0,
+      "video_end_s": 349.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Letting Maya orient automatically on a curved chain can flip axes, because it does not know which way is 'up' for the joints; choose a Secondary Axis World Orientation to fix the up direction. (community: University of Washington CSE 460: Orienting joints | community: Maya: Orient Joint Options)",
+        "Orienting the joints after skinning moves the rest pose of the skeleton; orient before binding. (author: no source)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The joint chain exists and is parented root to tip.",
+        "Before this: Select the root joint of the chain first, and turn on 'Orient children of selected joints' if the whole chain should change."
+      ],
+      "result": "The local axes of the skin joint chain are oriented consistently down the joint chain.",
+      "how_to": [
+        {
+          "text": "Select 'left_hip_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Selects left_hip_skin_jnt in viewport/Outliner."
+        },
+        {
+          "text": "Open the option box for Skeleton > Orient Joint.",
+          "support": "shown",
+          "evidence": "Opens Orient Joint options window."
+        },
+        {
+          "text": "Set Primary Axis to X, Secondary Axis to Y, and click Apply.",
+          "support": "shown",
+          "evidence": "Primary Axis X, Secondary Axis Y configured, then Apply clicked."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify local rotation axes point X down each bone towards its child joint.",
+          "support": "shown",
+          "evidence": "Local axes gizmos show X aiming down the bone."
+        }
+      ],
+      "visual_evidence": "Orient Joint options box is opened and applied to selected joint chain.",
+      "evidence": [
+        "Skeleton > Orient Joint options box"
+      ],
+      "flags": [
+        "UI name 'Outliner > left_hip_skin_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Orient Joint Options > Apply' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Duplicate joint chain and rename to IK leg joint chain",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_skin_jnt",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Ctrl",
+            "d"
+          ],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Modify > Search and Replace Names",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Search and Replace Names > Apply",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "verifiable": false,
+      "video_start_s": 350.0,
+      "video_end_s": 387.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An identical IK joint chain (left_hip_IK_jnt) is created.",
+      "how_to": [
+        {
+          "text": "Select 'left_hip_skin_jnt' and press Ctrl+D to duplicate the entire joint hierarchy.",
+          "support": "shown",
+          "evidence": "Presses Ctrl+D to duplicate left_hip_skin_jnt."
+        },
+        {
+          "text": "Open Modify > Search and Replace Names.",
+          "support": "shown",
+          "evidence": "Opens Modify > Search and Replace Names dialog."
+        },
+        {
+          "text": "Type 'skin' in Search For and 'IK' in Replace With, then click Apply.",
+          "support": "shown",
+          "evidence": "Enters skin and IK into Search and Replace dialog and applies."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check Outliner for new hierarchy rooted at 'left_hip_IK_jnt'.",
+          "support": "shown",
+          "evidence": "Outliner shows left_hip_IK_jnt hierarchy."
+        }
+      ],
+      "visual_evidence": "Skin joint chain is duplicated and renamed using Search and Replace Names to replace skin with IK.",
+      "evidence": [
+        "Modify > Search and Replace Names"
+      ],
+      "flags": [
+        "expected state already holds before this step, so completing it cannot be verified",
+        "UI name 'Outliner > left_hip_skin_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Search and Replace Names > Apply' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Duplicate joint chain again and rename to FK leg joint chain",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_skin_jnt",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Ctrl",
+            "d"
+          ],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Modify > Search and Replace Names",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Search and Replace Names > Apply",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "verifiable": false,
+      "video_start_s": 388.0,
+      "video_end_s": 407.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.387,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An identical FK joint chain (left_hip_FK_jnt) is created.",
+      "how_to": [
+        {
+          "text": "Select 'left_hip_skin_jnt' (or 'left_hip_IK_jnt') and duplicate it with Ctrl+D.",
+          "support": "shown",
+          "evidence": "Presses Ctrl+D to create duplicate chain."
+        },
+        {
+          "text": "Open Modify > Search and Replace Names.",
+          "support": "shown",
+          "evidence": "Opens Search and Replace dialog."
+        },
+        {
+          "text": "Set Search For to 'IK' (or 'skin') and Replace With to 'FK', then click Apply.",
+          "support": "shown",
+          "evidence": "Replaces string to produce left_hip_FK_jnt hierarchy."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify Outliner contains three distinct joint chains: skin, IK, and FK.",
+          "support": "shown",
+          "evidence": "Outliner shows left_hip_skin_jnt, left_hip_IK_jnt, and left_hip_FK_jnt chains."
+        }
+      ],
+      "visual_evidence": "Joint chain is duplicated and renamed using Search and Replace Names to create FK joint chain.",
+      "evidence": [
+        "Modify > Search and Replace Names"
+      ],
+      "flags": [
+        "expected state already holds before this step, so completing it cannot be verified",
+        "UI name 'Outliner > left_hip_skin_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Search and Replace Names > Apply' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "goal is almost identical to step 4",
+        "same start and expected state as step 4: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Parent constraint skin joints to IK joints",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Constrain > Parent",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_IK_jnt",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_skin_jnt",
+          "keys": [
+            "Shift"
+          ],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Parent Constraint Options > Add",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "parentConstraint",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CNST-01",
+      "verifiable": true,
+      "video_start_s": 408.0,
+      "video_end_s": 464.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Forgetting Maintain Offset makes the constrained object jump to the target when the constraint is created. (author: Maya: Constrain > Parent (options))"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Parent constraint nodes are attached to all skin leg joints with the IK leg joints as drivers.",
+      "how_to": [
+        {
+          "text": "Open Constrain > Parent option box and ensure Maintain Offset is enabled.",
+          "support": "shown",
+          "evidence": "Opens Parent Constraint option box with Maintain Offset checked."
+        },
+        {
+          "text": "Select 'left_hip_IK_jnt', then Shift-select 'left_hip_skin_jnt', and click Add.",
+          "support": "shown",
+          "evidence": "Selects IK driver joint then skin joint and applies Parent constraint."
+        },
+        {
+          "text": "Repeat parent constraint for knee, ankle, ball, and toe joints.",
+          "support": "shown",
+          "evidence": "Applies parent constraint sequentially for knee, ankle, ball, and toe joints."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check each skin joint in Outliner to confirm a parentConstraint node is created under it.",
+          "support": "shown",
+          "evidence": "parentConstraint nodes appear under skin joints in Outliner."
+        }
+      ],
+      "visual_evidence": "Parent constraint is applied between corresponding IK and Skin joints.",
+      "evidence": [
+        "Constrain > Parent"
+      ],
+      "flags": [
+        "UI name 'Outliner > left_hip_IK_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Outliner > left_hip_skin_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Parent Constraint Options > Add' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Parent constraint skin joints to FK joints",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_FK_jnt",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_skin_jnt",
+          "keys": [
+            "Shift"
+          ],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Constrain > Parent",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "parentConstraint",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CNST-01",
+      "verifiable": false,
+      "video_start_s": 465.0,
+      "video_end_s": 488.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Forgetting Maintain Offset makes the constrained object jump to the target when the constraint is created. (author: Maya: Constrain > Parent (options))"
+      ],
+      "confidence": 0.455,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "FK leg joints are added as second target drivers on each skin joint parent constraint.",
+      "how_to": [
+        {
+          "text": "Select 'left_hip_FK_jnt', then Shift-select 'left_hip_skin_jnt'.",
+          "support": "shown",
+          "evidence": "Selects FK joint then skin joint."
+        },
+        {
+          "text": "Click Constrain > Parent.",
+          "support": "shown",
+          "evidence": "Executes Constrain > Parent."
+        },
+        {
+          "text": "Repeat parent constraint for corresponding knee, ankle, ball, and toe joints.",
+          "support": "shown",
+          "evidence": "Applies parent constraints for remaining joints."
+        }
+      ],
+      "check": [
+        {
+          "text": "Inspect Channel Box for skin joints to see both IK and FK target weights listed under parentConstraint.",
+          "support": "shown",
+          "evidence": "Channel Box shows weight inputs for both IK and FK targets."
+        }
+      ],
+      "visual_evidence": "Parent constraint is applied between corresponding FK and Skin joints.",
+      "evidence": [
+        "Constrain > Parent"
+      ],
+      "flags": [
+        "UI name 'Outliner > left_hip_FK_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Outliner > left_hip_skin_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "goal is almost identical to step 6"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Create 3D Type control shape for FK-IK switch label",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Create > 3D Type",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Type Attribute Editor > Text Input",
+          "keys": [],
+          "value": "FK-IK"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "verifiable": false,
+      "video_start_s": 543.0,
+      "video_end_s": 629.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A 3D text mesh object displaying 'FK-IK' is created in the scene.",
+      "how_to": [
+        {
+          "text": "Select Create > 3D Type from the top menu.",
+          "support": "shown",
+          "evidence": "Selects Create > 3D Type."
+        },
+        {
+          "text": "In the Attribute Editor for the Type node, replace default text with 'FK-IK'.",
+          "support": "shown",
+          "evidence": "Types FK-IK into Type text box."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm 3D text reading 'FK-IK' appears in the viewport.",
+          "support": "shown",
+          "evidence": "FK-IK text mesh is visible in 3D viewport."
+        }
+      ],
+      "visual_evidence": "3D Type object is created and edited to display FK-IK text.",
+      "evidence": [
+        "Create > 3D Type"
+      ],
+      "flags": [
+        "UI name 'Create > 3D Type' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Type Attribute Editor > Text Input' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Position and freeze transforms for the FK-IK switch object near the leg",
+      "actions": [
+        {
+          "verb": "drag",
+          "ui_element": "3D Viewport",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Modify > Center Pivot",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Modify > Freeze Transformations",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "verifiable": false,
+      "video_start_s": 690.0,
+      "video_end_s": 788.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The FK-IK switch object is placed beside the character hip with zeroed transformations.",
+      "how_to": [
+        {
+          "text": "Scale and move the 'FK-IK' text object to align next to the upper leg/hip area.",
+          "support": "shown",
+          "evidence": "Moves and scales FK-IK text object next to hip mesh."
+        },
+        {
+          "text": "Click Modify > Center Pivot.",
+          "support": "shown",
+          "evidence": "Applies Modify > Center Pivot."
+        },
+        {
+          "text": "Click Modify > Freeze Transformations.",
+          "support": "shown",
+          "evidence": "Applies Modify > Freeze Transformations."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify Channel Box translate/rotate values for switch object are 0 and scale values are 1.",
+          "support": "shown",
+          "evidence": "Channel Box shows clean zeroed transforms."
+        }
+      ],
+      "visual_evidence": "FK-IK text object is positioned near the hip and transforms are frozen.",
+      "evidence": [
+        "Modify > Center Pivot, Modify > Freeze Transformations"
+      ],
+      "flags": [
+        "UI name '3D Viewport' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Modify > Center Pivot' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Rename switch control object in Outliner",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Outliner > Object Name",
+          "keys": [],
+          "value": "l_switch_GEO"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "verifiable": false,
+      "video_start_s": 789.0,
+      "video_end_s": 810.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The text object is renamed to 'l_switch_GEO'.",
+      "how_to": [
+        {
+          "text": "In the Outliner, double-click the Type text object name.",
+          "support": "shown",
+          "evidence": "Double-clicks node name in Outliner."
+        },
+        {
+          "text": "Rename the node to 'l_switch_GEO'.",
+          "support": "shown",
+          "evidence": "Types l_switch_GEO."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm node name in Outliner reads 'l_switch_GEO'.",
+          "support": "shown",
+          "evidence": "Outliner displays l_switch_GEO."
+        }
+      ],
+      "visual_evidence": "Switch object is renamed in Outliner to l_switch_GEO.",
+      "evidence": [
+        "l_switch_GEO"
+      ],
+      "flags": [
+        "UI name 'Outliner > Object Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Add custom FK_IK_Switch attribute to the switch control object",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > l_switch_GEO",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Edit > Add Attribute",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Add Attribute > Long Name",
+          "keys": [],
+          "value": "FK_IK_Switch"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Add Attribute > Add",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Channel Box",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-04",
+      "verifiable": false,
+      "video_start_s": 811.0,
+      "video_end_s": 839.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Switching modes mid-animation makes the limb jump back to where the other chain's pose was, unless the FK controls are first matched to the IK pose (or the reverse). (community: tech-artists.org: Automatic FK/IK switching in a Maya rig)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A custom float attribute named FK_IK_Switch (range 0 to 1) is added to l_switch_GEO.",
+      "how_to": [
+        {
+          "text": "Select 'l_switch_GEO'.",
+          "support": "shown",
+          "evidence": "Selects l_switch_GEO."
+        },
+        {
+          "text": "Open Channel Box menu Edit > Add Attribute.",
+          "support": "shown",
+          "evidence": "Opens Add Attribute window from Channel Box menu."
+        },
+        {
+          "text": "Set Long Name to 'FK_IK_Switch'.",
+          "support": "shown",
+          "evidence": "Types FK_IK_Switch into Attribute Name."
+        },
+        {
+          "text": "Ensure Data Type is Float, set Minimum to 0, Maximum to 1, Default to 0, and click Add.",
+          "support": "shown",
+          "evidence": "Sets Min 0, Max 1, Default 0 and clicks Add."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check Channel Box of l_switch_GEO to see 'FK_IK_Switch' attribute added at the bottom.",
+          "support": "shown",
+          "evidence": "FK_IK_Switch attribute is visible in Channel Box."
+        }
+      ],
+      "visual_evidence": "Add Attribute window is used to add FK_IK_Switch float attribute with min 0 and max 1.",
+      "evidence": [
+        "Edit > Add Attribute, FK_IK_Switch"
+      ],
+      "flags": [
+        "sources disagree: The menu location differs between sources (Modify > Add Attribute in the 2013 help, Edit > Add Attribute in the tutorials). Tell the learner to look in both.",
+        "UI name 'Outliner > l_switch_GEO' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Add Attribute > Add' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Parent constraint switch GEO object to left hip skin joint",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > left_hip_skin_jnt",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Outliner > l_switch_GEO",
+          "keys": [
+            "Shift"
+          ],
+          "value": null
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Constrain > Parent",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CNST-01",
+      "verifiable": false,
+      "video_start_s": 840.0,
+      "video_end_s": 886.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Forgetting Maintain Offset makes the constrained object jump to the target when the constraint is created. (author: Maya: Constrain > Parent (options))"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The switch GEO object is constrained to follow the leg hip joint motion.",
+      "how_to": [
+        {
+          "text": "Select 'left_hip_skin_jnt', then Shift-select 'l_switch_GEO'.",
+          "support": "shown",
+          "evidence": "Selects left_hip_skin_jnt then l_switch_GEO."
+        },
+        {
+          "text": "Click Constrain > Parent.",
+          "support": "shown",
+          "evidence": "Executes Constrain > Parent."
+        }
+      ],
+      "check": [
+        {
+          "text": "Rotate left_hip_skin_jnt and confirm l_switch_GEO moves along with it.",
+          "support": "shown",
+          "evidence": "Switch GEO follows leg movement in viewport."
+        }
+      ],
+      "visual_evidence": "Parent constraint is created with left_hip_skin_jnt as driver and l_switch_GEO as driven.",
+      "evidence": [
+        "Constrain > Parent"
+      ],
+      "flags": [
+        "UI name 'Outliner > left_hip_skin_jnt' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Outliner > l_switch_GEO' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "goal": "Connect FK_IK_Switch attribute to IK constraint weights in Node Editor",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Windows > Node Editor",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Node Editor",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "panel_open",
+          "target": "Node Editor",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-06",
+      "verifiable": true,
+      "video_start_s": 911.0,
+      "video_end_s": 994.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Switching modes mid-animation makes the limb jump back to where the other chain's pose was, unless the FK controls are first matched to the IK pose (or the reverse). (community: tech-artists.org: Automatic FK/IK switching in a Maya rig)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The FK_IK_Switch attribute directly drives all leg parent constraint IK weight inputs.",
+      "how_to": [
+        {
+          "text": "Open Windows > Node Editor.",
+          "support": "shown",
+          "evidence": "Opens Node Editor panel."
+        },
+        {
+          "text": "Add 'l_switch_GEO' and all leg joint parentConstraint nodes to Node Editor workspace.",
+          "support": "shown",
+          "evidence": "Graph nodes loaded in Node Editor."
+        },
+        {
+          "text": "Connect 'l_switch_GEO.FK_IK_Switch' to 'left_hip_skin_jnt_parentConstraint1.left_hip_IK_jntW1'.",
+          "support": "shown",
+          "evidence": "Connects FK_IK_Switch to hip parent constraint IK weight."
+        },
+        {
+          "text": "Connect 'l_switch_GEO.FK_IK_Switch' to IK weight inputs for knee, ankle, ball, and toe parent constraints.",
+          "support": "shown",
+          "evidence": "Connects FK_IK_Switch to remaining parent constraint IK weights."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify connection lines go from FK_IK_Switch output port to all IK target weight input ports in Node Editor.",
+          "support": "shown",
+          "evidence": "Connection lines shown in Node Editor diagram."
+        }
+      ],
+      "visual_evidence": "Node Editor shows FK_IK_Switch output connected to IK target weight inputs of all leg parent constraint nodes.",
+      "evidence": [
+        "Windows > Node Editor, FK_IK_Switch connection to IK weights"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "goal": "Create reverse node and connect to FK constraint weights",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": "Node Editor",
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Node Editor > Quick Creation",
+          "keys": [],
+          "value": "reverse"
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Node Editor",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Node Editor",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "IKFK-06",
+      "verifiable": false,
+      "video_start_s": 995.0,
+      "video_end_s": 1075.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Switching modes mid-animation makes the limb jump back to where the other chain's pose was, unless the FK controls are first matched to the IK pose (or the reverse). (community: tech-artists.org: Automatic FK/IK switching in a Maya rig)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A reverse node inverts FK_IK_Switch to drive all leg parent constraint FK weight inputs.",
+      "how_to": [
+        {
+          "text": "In Node Editor, press Tab, type 'reverse', and press Enter to create a reverse utility node.",
+          "support": "shown",
+          "evidence": "Creates reverse node using Tab menu in Node Editor."
+        },
+        {
+          "text": "Connect 'l_switch_GEO.FK_IK_Switch' to 'reverse.inputX'.",
+          "support": "shown",
+          "evidence": "Connects FK_IK_Switch to reverse.inputX."
+        },
+        {
+          "text": "Connect 'reverse.outputX' to 'left_hip_skin_jnt_parentConstraint1.left_hip_FK_jntW0'.",
+          "support": "shown",
+          "evidence": "Connects reverse outputX to hip FK weight."
+        },
+        {
+          "text": "Connect 'reverse.outputX' to FK weight inputs of knee, ankle, ball, and toe parent constraints.",
+          "support": "shown",
+          "evidence": "Connects reverse outputX to remaining FK constraint weight inputs."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm in Node Editor that reverse.outputX feeds into all FK weight attributes on the parent constraints.",
+          "support": "shown",
+          "evidence": "Output connection lines from reverse node to all FK weights visible."
+        }
+      ],
+      "visual_evidence": "Reverse node is created; FK_IK_Switch connects to reverse inputX, and reverse outputX connects to FK target weight attributes.",
+      "evidence": [
+        "reverse node, reverse.inputX, reverse.outputX"
+      ],
+      "flags": [
+        "UI name 'Node Editor > Quick Creation' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "goal": "Test FK and IK switching behavior on the skin leg joints",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > l_switch_GEO",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > FK_IK_Switch",
+          "keys": [],
+          "value": "0"
+        },
+        {
+          "verb": "drag",
+          "ui_element": "3D Viewport",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "TEST-02",
+      "verifiable": false,
+      "video_start_s": 1076.0,
+      "video_end_s": 1151.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.497,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Toggling FK_IK_Switch seamlessly switches the skin leg chain driver between FK (value 0) and IK (value 1).",
+      "how_to": [
+        {
+          "text": "Select 'l_switch_GEO' and set FK_IK_Switch attribute to 0 in Channel Box.",
+          "support": "shown",
+          "evidence": "Sets FK_IK_Switch to 0."
+        },
+        {
+          "text": "Rotate FK hip joint to confirm skin leg follows FK joints.",
+          "support": "shown",
+          "evidence": "Rotates FK hip joint; skin joints follow."
+        },
+        {
+          "text": "Set FK_IK_Switch attribute to 1 in Channel Box and rotate IK joint to confirm skin leg follows IK joints.",
+          "support": "shown",
+          "evidence": "Sets FK_IK_Switch to 1; skin joints follow IK chain movement."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify skin joints follow FK when switch is 0 and follow IK when switch is 1.",
+          "support": "shown",
+          "evidence": "Instructor demonstrates skin joints following FK and IK successively."
+        }
+      ],
+      "visual_evidence": "FK_IK_Switch value is toggled between 0 and 1 in Channel Box while rotating FK and IK joints to verify skin joint switching.",
+      "evidence": [
+        "FK_IK_Switch 0 and 1 testing"
+      ],
+      "flags": [
+        "UI name 'Outliner > l_switch_GEO' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Channel Box > FK_IK_Switch' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name '3D Viewport' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "TEST-02 (Control behaviour tests) needs an add-on or a script in maya: the tutorial is using something outside the application"
+      ],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v6",
+  "video_duration_s": 1151.0,
+  "warnings": [],
+  "extracted_at": "2026-10-16T16:12:26.922800Z"
+}

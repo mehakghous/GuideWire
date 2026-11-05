@@ -17,6 +17,7 @@ from typing import Literal
 
 from shared.step_record import StatePredicate, Step, StepList
 
+from .features import CRAFT_FEATURES, VERSION_NOTES, load_catalog
 from .profiles import AppProfile, norm
 
 TS_TOLERANCE_S = 1.0          # allowed rounding past the stated video duration
@@ -37,6 +38,8 @@ PENALTY = {
     "duplicate_goal": 0.7,
     "missing_time": 0.9,
     "overlap": 0.9,
+    "feature_needs_extra": 0.9,
+    "ungrounded_how_to": 0.85,
 }
 
 
@@ -83,6 +86,8 @@ def find_errors(sl: StepList, video_duration_s: float | None = None) -> list[Iss
                         "TS_BEYOND_END", "error",
                         f"{name} {t:g}s is beyond the video duration {video_duration_s:g}s", s.id,
                     ))
+        if s.feature_id and s.feature_id not in load_catalog():
+            out.append(Issue("UNKNOWN_FEATURE", "error", f"feature_id {s.feature_id!r} is not in the rigging feature catalog", s.id))
         if s.video_start_s is not None:
             if last_start is not None and s.video_start_s + TS_TOLERANCE_S < last_start:
                 out.append(Issue(
@@ -112,7 +117,7 @@ def _canonical_target(p: StatePredicate, profile: AppProfile) -> str | None:
     if p.kind == "selection_type":
         t = p.target.strip().upper()
         return t if t in profile.selection_types else None
-    pools = {"active_tool": profile.tools, "workspace": profile.workspaces, "panel_open": profile.panels}
+    pools = {"active_tool": profile.tools, "workspace": profile.workspaces, "panel_open": profile.panels, "node_exists": profile.nodes}
     if p.kind in pools:
         t = p.target.strip().lower()
         for cand in pools[p.kind]:
@@ -161,6 +166,12 @@ def _covered_seconds(steps: list[Step]) -> float:
     return total
 
 
+def _same_source_span(a: Step, b: Step) -> bool:
+    """Two steps cut from the same spoken passage share its time span on purpose (GW-005); that is not an overlap between separate moments."""
+    spans = lambda s: {r for r in s.source_refs if r.startswith("transcript:")}
+    return bool(spans(a) & spans(b))
+
+
 def sanitize_and_annotate(
     sl: StepList, profile: AppProfile, video_duration_s: float | None = None
 ) -> StepList:
@@ -178,6 +189,9 @@ def sanitize_and_annotate(
     seen_sigs: dict[tuple, Step] = {}
     prev: Step | None = None
     for step in sl.steps:
+        if step.feature_id in CRAFT_FEATURES and step.kind != "craft":
+            step.kind = "craft"                               # decided by the catalog, not the model; recorded so the learner can see why
+            step.flags.append(f"{step.feature_id} is craft ({CRAFT_FEATURES[step.feature_id]}): compare with the tutorial's playback, it is not graded")
         for which in ("expected_state", "start_state"):
             kept = []
             for p in getattr(step, which):
@@ -203,6 +217,20 @@ def sanitize_and_annotate(
                      f"UI name '{a.ui_element}' is not in the {profile.name} vocabulary (it may be real "
                      "but missing from the list): please check")
 
+        if step.feature_id and step.feature_id in load_catalog():
+            f = load_catalog().get(step.feature_id)
+            note = VERSION_NOTES.get(f.id, {}).get(sl.app)
+            if note and note not in step.version_dependent:
+                step.version_dependent.append(note)
+            code = f.support_code(sl.app)
+            if code in ("U", "C"):
+                what = "has no tool" if code == "U" else "needs an add-on or a script"
+                flag(step, "feature_needs_extra", f"{f.id} ({f.name}) {what} in {sl.app}: the tutorial is using something outside the application")
+
+        loose = [h for h in (*step.how_to, *step.check) if h.support in ("shown", "said") and not (h.evidence or "").strip()]
+        if loose:
+            flag(step, "ungrounded_how_to", f"{len(loose)} instruction line(s) claim to be {loose[0].support} in the source but give no evidence for it")
+
         if step.support in ("demonstrated", "narrated", "both") and not step.evidence:
             flag(step, "no_evidence", f"claims support='{step.support}' but gives no evidence")
         if step.support in ("demonstrated", "both") and not (step.visual_evidence or "").strip():
@@ -218,6 +246,7 @@ def sanitize_and_annotate(
             if (
                 step.video_start_s is not None and prev.video_end_s is not None
                 and step.video_start_s < prev.video_end_s - 2 * TS_TOLERANCE_S
+                and not _same_source_span(prev, step)
             ):
                 flag(step, "overlap",
                      f"starts at {step.video_start_s:g}s, before step {prev.order} ends ({prev.video_end_s:g}s)")

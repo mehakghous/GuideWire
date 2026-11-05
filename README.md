@@ -50,6 +50,15 @@ python -m pytest -q          # offline tests; live API tests are deselected
 ruff check .                 # lint
 python -m ingestion.cli --help
 python -m ingestion.cli purge   # delete YouTube-derived run logs and caches older than 30 days
+python -m ingestion.cli ask --app maya "Create joints down the arm\nCreate an IK handle on the leg"   # written rigging steps -> validated step list
+python -m ingestion.cli features steps.json   # which features a step list teaches, and what it assumes
+python -m ingestion.cli find --app maya "make the legs move properly" [--live] [--recency off|low|normal|high]   # plain-language goal -> ranked tutorials
+python -m ingestion.cli score steps.json --rubric tests/fixtures/rubrics/maya_fkik_leg.json   # actionability rubric (structure only)
+python -m ingestion.cli instructions steps.json   # add how-to / check lines from a step list own evidence
+python -m ingestion.cli chain steps.json [-o out.json]   # fill missing expected states from the knowledge base; check each step starts from what earlier steps made
+python -m ingestion.cli ask --app maya "my knee flips when I move the ik handle"   # a described problem -> sourced cause and fix (route rigging_knowledge)
+python -m ingestion.cli captions VIDEO_ID --app maya --duration SECONDS   # DEV ONLY (unofficial endpoint): a real tutorial transcript -> steps
+python -m ingestion.cli review show steps.json   # then: review edit ... / review promote steps.json --by YOU --request "<text>"
 ```
 
 AI Gateway (needs `GATEWAY_TOKENS` and the provider keys in `.env`; one worker only, see `gateway/app.py`):

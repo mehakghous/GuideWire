@@ -47,6 +47,7 @@ class Entry:
     mistakes: tuple[Statement, ...]
     troubleshooting: tuple[dict, ...]
     conflicts: tuple[dict, ...]
+    effects: dict[str, dict]   # feature id -> {"makes": [node types the step creates], "needs": [node types it requires first]}; used by scene_chain
 
 
 class Knowledge:
@@ -95,10 +96,13 @@ class Knowledge:
             for s in c["sources"]:
                 if s not in self.sources:
                     raise KnowledgeError(f"{eid}: conflict cites unknown source {s!r}")
+        for f, eff in e.get("effects", {}).items():
+            if f not in e["features"] or not eff.get("makes"):
+                raise KnowledgeError(f"{eid}: effects for {f!r} must name one of the entry's features and say what it makes")
         g = lambda key: tuple(self._stmt(f"{eid} {key}", x) for x in e.get(key, ()))
         return Entry(id=eid, apps=tuple(e["apps"]), features=tuple(e["features"]), phrases=tuple(e.get("phrases", ())), ui=tuple(e.get("ui", ())),
                      prerequisites=tuple(e.get("prerequisites", ())), outline=g("outline"), facts=g("facts"), verify=g("verify"), mistakes=g("mistakes"),
-                     troubleshooting=tuple(ts), conflicts=tuple(e.get("conflicts", ())))
+                     troubleshooting=tuple(ts), conflicts=tuple(e.get("conflicts", ())), effects=dict(e.get("effects", {})))
 
     # ------------------------------------------------------------------ queries
     def for_feature(self, feature_id: str, app: str) -> list[Entry]:

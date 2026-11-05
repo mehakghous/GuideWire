@@ -93,6 +93,15 @@ def _offline(args) -> int:
         from .workflows import load_steplist
         print(feature_report(load_steplist(args.file)).render())          # a step list, or an answer bundle holding one
         return 0
+    if args.cmd == "chain":
+        from .scene_chain import chain_report, derive_state
+        from .workflows import load_steplist
+        sl = load_steplist(args.file)
+        before = chain_report(sl)
+        print(f"derived state on {derive_state(sl)} step(s); before: {before.verifiable}/{before.total} verifiable\n" + chain_report(sl).render())
+        if args.out:
+            Path(args.out).write_text(sl.model_dump_json(indent=2), encoding="utf-8")
+        return 0
     if args.cmd == "review":
         return _review(args)
     if args.cmd in ("score", "instructions"):
@@ -233,7 +242,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "chain", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -322,6 +331,9 @@ def main(argv: list[str] | None = None) -> int:
     ins.add_argument("-o", "--out")
     ft = sub.add_parser("features", help="OFFLINE: which rigging/animation features a step list (JSON) teaches, and which prerequisites it assumes")
     ft.add_argument("file")
+    ch = sub.add_parser("chain", help="OFFLINE: fill missing expected states from the knowledge base, then check each step's start state follows from earlier steps")
+    ch.add_argument("file")
+    ch.add_argument("-o", "--out", help="write the step list with the derived states (default: report only)")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
     m = sub.add_parser("validate", help="OFFLINE: validate and annotate a manually entered step list (JSON)")
     m.add_argument("file")

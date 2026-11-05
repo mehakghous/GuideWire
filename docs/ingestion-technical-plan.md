@@ -2174,3 +2174,17 @@ Also learned: the original test video's only caption track is Korean auto-captio
 
 ### 26.7 Limits
 One labeller, small sets, auto-captions with recognition errors ("Fries the transformations"); the reader still tags about a third of moments wrongly or not at all; menu paths marked `tutorial` or `author` are not vendor documentation; Autodesk pages are 2009 to 2026 versions as stated per source; nothing was tried inside Maya or Blender; Houdini, Reddit and Stack Exchange are not covered; the captions adapter uses an unofficial endpoint (against YouTube's terms, development only; its cache is deleted after 30 days).
+
+
+## 27. Scene-chain check (2026-10-16)
+
+Problem: steps carried how-to lines but little a program could verify (5 of 15 mechanics steps in the real v6 run) and nothing checked that a step's start state follows from earlier steps.
+Built: `ingestion/scene_chain.py`. `derive_state` fills a missing `node_exists` from the knowledge base (`effects` per feature: what the step makes and needs; 5 Maya features) and flags it as derived; `chain_report` replays the steps on a simulated scene of node types and reports order errors (a node needed before the only step that makes it), assumed starting nodes and steps with nothing to verify. Hooked into extraction after `compose_instructions`; CLI `python -m ingestion.cli chain steps.json [-o out.json]`. Tests: `tests/test_scene_chain.py` (real v6 fixture `R6_maya_part9_v6.json`, shuffled-order case).
+Measured on the real v6 run: verifiable end states 5/15 (33%) -> 6/15 (40%); no false order errors; a joint-creation step moved to the end is caught. The planned 70% was NOT reached: node TYPES cannot express renames, orientation, attributes, a second joint chain or a reverse node (9 of 15 steps), and the shared `PredicateKind` has no kind for them. Reaching it needs a contract change (for example attribute_exists, name_exists, node count), which belongs to the app and vision owners.
+A tried effect was removed: CTRL-01 -> nurbsCurve was wrong for a 3D Type control and for a step that only repositioned a control; feature tags from the model can be wrong, so derived states are labelled and only claim what the feature always creates.
+
+
+## 28. Houdini knowledge (2026-10-16)
+Added to `knowledge/rigging_knowledge.json`: 5 sources (H1 to H3 SideFX Houdini 22 docs, official; H4, H5 SideFX forum threads, community) and 2 entries: `houdini.apex_autorig` (Pack Character, AutoRig Component sources, Configure Controls; node and option names, Multi IK segment-tag rule, outline) and `houdini.capture_weights` (Joint Capture Biharmonic/Proximity, Joint Deform, Rig Pose, Capture Geometry shelf tool; verify lines, three documented mistakes, two community troubleshooting entries: finger/eye weight bleed, mismatched rest pose).
+Read in full: the three docs pages and the two forum threads. NOT covered: Rig Doctor, retargeting, Motion Clips, animation workflows, mocap, Vellum/ragdoll; forum threads other than these two (only search summaries were seen); nothing checked inside Houdini. The docs are for 22.0; tutorials for Houdini 18.5 to 19 predate this workflow and a forum reply says they do not always carry over (search summary only, not read in full); Houdini steps carry the version caution already in `VERSION_NOTES`.
+Tests: `tests/test_rigging_knowledge.py` (two real forum symptoms, wrong-app silence, tiers, vocabulary, tagging).

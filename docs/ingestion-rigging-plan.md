@@ -13,3 +13,107 @@ Source: GuideWire_Rigging_Animation_Feature_Matrix.xlsx v0.1 (145 features, 22 c
 | 7 | Version-drift notes (Blender 4 to 5 bone collections, Houdini 20 to 22 APEX) on steps | Step `version_dependent` filled from the catalog. **Done** (`VERSION_NOTES` in `ingestion/features.py`, 11 notes the matrix states). |
 
 Order follows the matrix phases: Phase 1 (scene, skeleton, posing) first, then the rest.
+
+
+## Milestone 2: prerequisite report (Implemented, verified by tests; no application integration)
+
+`python -m ingestion.cli features steps.json` reads a step list (or an answer bundle holding one) and prints which catalog features it teaches
+(`feature_id`, else a labelled guess from `terms.suggest_feature`), which are craft or unsupported in the app, and which prerequisites no step covers.
+Code: `ingestion/feature_report.py`. Tests: `tests/test_feature_report.py`.
+
+| Criterion | Status |
+|---|---|
+| A tagged step reports its feature and uncovered prerequisites in teaching order | Verified (test) |
+| Covered prerequisites are not reported missing | Verified (test) |
+| Guesses stay separate from tags and never change a step | Verified (test) |
+| Unknown, craft and unsupported features are called out | Verified (test) |
+| Works for Blender, Maya and Houdini step lists | Verified on step lists only; no application is installed here |
+| Missing file gives a one-line error | Verified (test) |
+
+Known limits: the guess is deliberately cautious, so many steps stay "unmatched" until the model sets `feature_id` (prompt v4) or a person does.
+Fixed on the way: `--prompt-version v4` was missing from the extraction CLI choices.
+
+
+## Milestone 3: written rigging procedures for Maya, Houdini and Blender (Implemented, verified by tests; no application integration)
+
+`python -m ingestion.cli ask --app maya "Create joints down the arm\nCreate an IK handle on the leg\nBind skin to the skeleton"` returns a validated
+step list (route `rigging_text`) with feature ids, `node_exists` expectations for created nodes, craft marking, and the prerequisites it assumes.
+In chat: `/app maya`, `/load steps FILE`, `/observe nodes=joint`; the session file keeps the app. Code: `ingestion/rigging_text.py`, `router.route(app=)`,
+`Session.app`, `Service /app`. Tests: `tests/test_rigging_text.py` (9).
+
+| Criterion | Status |
+|---|---|
+| Clauses become steps keeping the user's wording, labelled drafted automatically | Verified (unit) |
+| Features are tagged only on a clear match; the rest stay flagged and are counted | Verified (unit) |
+| "Create <known node>" expects that node; other steps claim nothing verifiable | Verified (unit) |
+| Craft steps are not graded; prerequisites the text skips are listed | Verified (unit) |
+| Router sends Maya/Houdini procedures here, questions get a clarification, Blender modelling text is unchanged | Verified (router test plus the 493 existing tests) |
+| CLI `ask --app` works | Verified (CLI test, manual run) |
+| Chat: `/app`, load, observe nodes, verify met/unmet, restart keeps app and position; old sessions open | Verified (service test) |
+| Works inside real Maya / Houdini | Blocked: neither is installed here; nothing reads a live scene |
+
+
+## Milestone 4: review and promote (GW-012) (Implemented, verified by tests; the store is empty)
+
+`python -m ingestion.cli review show|edit|promote|list`, see technical plan section 18. Tests: `tests/test_review.py` (11).
+
+| Criterion | Status |
+|---|---|
+| A reviewer can see steps and flags, change goals, remove and reorder steps | Verified (unit, CLI) |
+| Bad edits (unknown step, empty goal, no steps left, move before a dependency) are refused with a reason; input untouched | Verified (unit) |
+| Promotion needs a named person, marks steps reviewed only then, and a refused promotion stores nothing | Verified (unit, CLI) |
+| A promoted workflow is served by `ask`/`chat` only for a known version inside its range | Verified (router, service) |
+| Works for Blender catalog text and for Maya/Houdini rigging text | Verified for rigging text; the catalog path is covered by the existing reviewed-workflow tests |
+| Real reviewed workflows exist | Not done: needs a human reviewer |
+
+
+## Milestone 5: transcript prerequisite chain, GW-003 (Implemented, verified by tests)
+
+Criteria: xfail becomes a pass (Verified); a transcript that enters Edit Mode first is not flagged (Verified); one that went back to Object Mode is flagged
+(Verified); no step is added or removed (by construction; the existing recall and corpus tests still pass). Details: technical plan section 19.
+
+
+## Milestone 6: version cues in transcripts, GW-004 (Implemented, verified by tests)
+
+Criteria: xfail becomes a pass (Verified); the user's own version and plain narration are not flagged (Verified); "used to / older versions" wording is flagged (Verified).
+
+
+## Milestone 7: overlap noise, GW-005 (Implemented, verified by tests)
+
+Criteria: xfail becomes a pass (Verified); real overlap between separate passages is still flagged (Verified). Known follow-up: wrong-shortcut flags on multi-step sentences (technical plan section 21).
+
+
+## Milestone 8: passage ranking, GW-023 (Implemented, verified by tests)
+
+Criteria: right paragraph for 20 synthetic questions, 20/20 against 0/20 for the lead (Verified, synthetic); lead kept when it already answers (Verified); excerpt verbatim, length-limited, source is the page (Verified);
+sensible on the real 294-page index (spot-checked by hand, 3 questions). Independent gold questions: Not done (GW-041).
+
+
+## Milestone 9: rigging goal to ranked tutorials (Implemented, verified with injected search; not yet run live)
+
+`python -m ingestion.cli find --app maya "rig a biped character in Maya 2024" [--live]`. Tests: `tests/test_rigging_discovery.py` (12).
+
+| Criterion | Status |
+|---|---|
+| Goal gives app, version, stages, a dependency-ordered plan, assumed prerequisites | Verified (unit) |
+| No application named: ask, spend nothing | Verified (unit) |
+| At most 2 searches; quota counted; duplicate videos looked up once | Verified (unit) |
+| Other-application, unembeddable and unrelated videos are excluded with a reason; best match first; older versions penalised not removed | Verified (unit, fake search) |
+| `--live` uses the Data API and reports the cost; API errors are one line | Verified with the API stubbed |
+| Real YouTube results are sensible for a real goal | Run twice live on 2026-10-15 (402 units) and read by hand; four ranking faults fixed (technical plan 23.1). Judged from titles only; whether they teach it is unknown |
+| Length judged against the goal, not fixed | Verified (unit tests; real results re-ranked by replay) |
+| Chat integration (`/find`, `/load video`) | Not done |
+
+
+Tests added after the live runs (18 in total in `tests/test_rigging_discovery.py`): query without filler, auto-rig penalty and the exception, series note, stage credit, area wording, save and replay without quota.
+
+
+## Milestone 10: first video extraction (live) and multi-application transcripts
+
+| Criterion | Status |
+|---|---|
+| One real rigging video to steps through Gemini with prompt v4 | Done once (technical plan 24.1): 10 steps, valid feature ids, no times, no expected state |
+| Prompt fixes for times and `node_exists` | Written; not yet re-tested live (needs a second paid call) |
+| Prerequisites reported once, not once per feature | Verified (unit) |
+| Transcript to steps for Maya, Houdini, Blender rigging; CLI and chat; old Blender behaviour unchanged | Verified (`tests/test_rigging_transcript.py`, 9 tests, full suite 552 passed) |
+| Transcript route run on a real rigging transcript | Not done: needs a transcript (yours, or the opt-in captions adapter) |

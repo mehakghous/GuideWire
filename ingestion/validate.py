@@ -165,6 +165,12 @@ def _covered_seconds(steps: list[Step]) -> float:
     return total
 
 
+def _same_source_span(a: Step, b: Step) -> bool:
+    """Two steps cut from the same spoken passage share its time span on purpose (GW-005); that is not an overlap between separate moments."""
+    spans = lambda s: {r for r in s.source_refs if r.startswith("transcript:")}
+    return bool(spans(a) & spans(b))
+
+
 def sanitize_and_annotate(
     sl: StepList, profile: AppProfile, video_duration_s: float | None = None
 ) -> StepList:
@@ -235,6 +241,7 @@ def sanitize_and_annotate(
             if (
                 step.video_start_s is not None and prev.video_end_s is not None
                 and step.video_start_s < prev.video_end_s - 2 * TS_TOLERANCE_S
+                and not _same_source_span(prev, step)
             ):
                 flag(step, "overlap",
                      f"starts at {step.video_start_s:g}s, before step {prev.order} ends ({prev.video_end_s:g}s)")

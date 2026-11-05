@@ -175,6 +175,9 @@ def _rigging_rules(profile: AppProfile) -> str:
 This is a character rigging and animation tutorial for {profile.name}.
 - feature_id: when a step teaches one of the features below, set feature_id to its id exactly; otherwise null. Never invent an id.
 {feats}
+- video_start_s and video_end_s: give them for EVERY step ("MM:SS" or "H:MM:SS"), because the learner is taken to that moment in the video; use null only when you truly cannot locate it.
+- expected_state: when a step creates a node or object of one of the node types listed in the node_exists line above (for example joint, ikHandle, skinCluster), add
+  {{"kind": "node_exists", "name": "<that type exactly>"}}. Leave it empty for steps whose result cannot be read from the application.
 - kind: "craft" when the result is judged by eye (timing, arcs, weight, feel; for example {", ".join(sorted(CRAFT_FEATURES))}); otherwise "mechanics".
   A craft step has no expected_state.
 - Name the rig's parts as the tutorial does ("bone" in Blender, "joint" in Maya and Houdini). Do not translate between applications.

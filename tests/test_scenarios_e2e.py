@@ -142,22 +142,44 @@ def test_repeated_explicit_keys_are_separate_steps_not_merged():
     assert len(goals(ingest([(2, "hit tab, then 1 for vertex select"), (5, "hit tab, then g to grab")]))) == 4
 
 
-@pytest.mark.xfail(strict=True, reason="GAP: the transcript route has no mode-prerequisite chain; 'press p to separate' with no Edit Mode before it is not flagged")
-def test_gap_transcript_flags_a_missing_prerequisite():
+def test_transcript_flags_a_missing_prerequisite():          # GW-003 (was a strict xfail)
     st = ingest([(2, "now press p to separate the selection")]).steps.steps[0]
-    assert any("Edit Mode" in f for f in st.flags)
+    assert any("Edit Mode" in f and "no earlier step" in f for f in st.flags)
 
 
-@pytest.mark.xfail(strict=True, reason="GAP: narration about another Blender version ('in blender 2.7 you would ...') is not marked version-specific")
-def test_gap_version_specific_narration_is_flagged():
+def test_transcript_prerequisite_chain_follows_the_narrated_modes():
+    ok = ingest([(2, "press tab to go into edit mode"), (6, "now press p to separate the selection")]).steps.steps
+    assert not any("prerequisite" in f for s in ok for f in s.flags)                      # Edit Mode was entered first: nothing to flag
+    back = ingest([(2, "press tab to go into edit mode"), (6, "go back to object mode"), (10, "now press p to separate the selection")]).steps.steps
+    assert any("prerequisite not met" in f and "Object Mode" in f for f in back[-1].flags)    # the narration left you in Object Mode
+
+
+def test_version_specific_narration_is_flagged():          # GW-004 (was a strict xfail)
     b = ingest([(2, "in blender 2.7 you would right click to select the object but now just click it")])
-    assert b.steps is None or any("2.7" in f for f in b.steps.steps[0].flags)
+    assert any("version cue" in f and "2.7" in f for f in b.steps.steps[0].flags)
 
 
-@pytest.mark.xfail(strict=True, reason="GAP: several steps from ONE spoken sentence all get 'starts before step N ends' overlap warnings (noise)")
-def test_gap_no_overlap_noise_for_one_sentence():
+def test_version_cues_ignore_the_users_own_version_and_plain_narration():
+    same = ingest([(2, "in blender 2.80 you click to select the object")], version="2.80").steps.steps
+    assert not any("version cue" in f for s in same for f in s.flags)
+    plain = ingest([(2, "now click to select the object")]).steps.steps
+    assert not any("version cue" in f or "prerequisite" in f for s in plain for f in s.flags)           # a bare selection is not a missing prerequisite either
+    vague = ingest([(2, "this used to be a different button but you can click to select the object")]).steps.steps
+    assert any("another version" in f for f in vague[0].flags)
+
+
+def test_no_overlap_noise_for_one_sentence():          # GW-005 (was a strict xfail)
     b = ingest([(2, "press tab to go into edit mode, select a vertex and press g to move it")])
     assert not any("starts at" in f for s in b.steps.steps for f in s.flags)
+
+
+def test_real_overlap_between_separate_moments_is_still_flagged():
+    from ingestion.validate import sanitize_and_annotate
+    from ingestion.profiles import BLENDER
+    from shared.step_record import Step, StepList
+    mk = lambda i, a, b, ref: Step(id=f"s{i}", order=i, goal=f"do thing number {i} now", video_start_s=a, video_end_s=b, source_refs=[ref])
+    sl = StepList(source_type="transcript", app="blender", steps=[mk(1, 0, 30, "transcript:0-30s"), mk(2, 10, 40, "transcript:10-40s")])
+    assert any("starts at" in f for f in sanitize_and_annotate(sl, BLENDER, 60).steps[1].flags)
 
 
 # ================================================================== 2. written instructions

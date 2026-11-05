@@ -128,6 +128,29 @@ class KnowledgeBase:
         r = self.con.execute("SELECT * FROM pages WHERE path=? AND branch=?", (path, branch)).fetchone()
         return self._hit(r, 0.0, 0, 0, "") if r else None
 
+    def passage(self, hit: Hit, query_terms: list[str], max_chars: int = 420) -> str | None:
+        """The paragraph of `hit`'s page that best matches the query, when it matches clearly more of the query's terms than the page lead does
+        (GW-023); None means the lead is already the best excerpt. Verbatim manual text, trimmed at a sentence boundary."""
+        title = {stem(w) for w in re.findall(r"[a-z0-9]+", hit.title.lower())}
+        want = {stem(t) for t in query_terms} - title            # words of the page title match every paragraph of the page: they cannot tell paragraphs apart
+        if not want:
+            return None
+        covered = lambda text: len(want & {stem(w) for w in re.findall(r"[a-z0-9]+", text.lower())})
+        best, best_n = None, covered(hit.lead)
+        for r in self.con.execute("SELECT heading, body FROM chunks WHERE path=? AND branch=?", (hit.path, hit.branch)):
+            for para in re.split(r"\n\s*\n", r["body"] or ""):
+                para = " ".join(para.split())
+                n = covered(para) + 0.5 * covered(r["heading"] or "")           # a matching section heading counts, but less than the text itself
+                if len(para) >= 40 and not para.startswith("..") and n > best_n:
+                    best, best_n = para, n
+        if best is None:
+            return None
+        if len(best) > max_chars:
+            cut = best[:max_chars]
+            end = max(cut.rfind(". "), cut.rfind("? "), cut.rfind("! "))
+            best = (cut[: end + 1] if end > 120 else cut.rsplit(" ", 1)[0] + "...").strip()
+        return best
+
     def _hit(self, r, score, tt, nt, heading) -> Hit:
         return Hit(path=r["path"], branch=r["branch"], title=r["title"], score=score, title_terms=tt, n_terms=nt,
                    url=page_url(r["path"], r["branch"]), lead=r["lead"], reference=json.loads(r["reference"]) if r["reference"] else None,

@@ -359,8 +359,8 @@ def match_troubleshooting(text: str) -> list[Operation]:
 
 
 def parse_version(v: str | None) -> tuple[int, int] | None:
-    m = re.match(r"^\s*(\d+)\.(\d+)", v or "")
-    return (int(m.group(1)), int(m.group(2))) if m else None
+    m = re.match(r"^\s*(\d+)(?:\.(\d+))?", v or "")          # "4.2", "20.5.410" and Maya's bare year "2025" (minor 0)
+    return (int(m.group(1)), int(m.group(2) or 0)) if m else None
 
 
 def version_status(op: Operation, version: str | None) -> tuple[str, str]:

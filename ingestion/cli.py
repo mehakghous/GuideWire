@@ -20,6 +20,60 @@ from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
 
+DISCOVERY_CACHE = Path(__file__).resolve().parents[1] / "runs" / "cache"      # raw live search results; tests point this elsewhere
+
+
+def _reviewed_store(args):
+    """The reviewed-workflow store, when one has been promoted into (knowledge/reviewed) and the documentation index is not switched off."""
+    from .workflows import DEFAULT_STORE, ReviewedWorkflowStore
+    return ReviewedWorkflowStore(DEFAULT_STORE) if DEFAULT_STORE.exists() and not getattr(args, "no_kb", False) else None
+
+
+def _pairs(items: list[str] | None, sep: str, what: str) -> list[tuple[str, str]]:
+    out = []
+    for it in items or []:
+        a, s, b = it.partition(sep)
+        if not s:
+            raise ValueError(f"{what}: expected N{sep}VALUE, got {it!r}")
+        out.append((a.strip(), b))
+    return out
+
+
+def _review(args) -> int:
+    """Human review of a generated step list: show it, edit it, promote it into the reviewed-workflow store (GW-012)."""
+    from .workflows import (DEFAULT_STORE, ReviewedWorkflowStore, edit_steps, entries, load_steplist, op_key, promote, text_key)
+    store = ReviewedWorkflowStore(args.store or DEFAULT_STORE)
+    if args.rcmd == "list":
+        rows = entries(store)
+        for r in rows:
+            print(f"{r['key']}  {r['app']}  {r['steps']} steps  by {r['reviewed_by']} on {r['reviewed_at'][:10]}  versions {r['min_version']}..{r['max_version'] or 'any'}")
+        print(f"{len(rows)} reviewed workflow(s) in {store.dir}")
+        return 0
+    sl = load_steplist(args.file)
+    if args.rcmd == "show":
+        print(f"{sl.title or args.file}  app={sl.app}  steps={len(sl.steps)}")
+        for s in sl.steps:
+            print(f"{s.order:>3}. [{s.review_status}] {s.goal}   (confidence {s.confidence}" + (f", {s.feature_id}" if s.feature_id else "") + (", craft" if s.kind == "craft" else "") + ")")
+            for f in s.flags:
+                print(f"       ! {f}")
+        return 0
+    if args.rcmd == "edit":
+        goals = {int(k): v for k, v in _pairs(args.set_goal, "=", "--set-goal")}
+        moves = [(int(a), int(b)) for a, b in _pairs(args.move, ":", "--move")]
+        new = edit_steps(sl, goals=goals, remove={int(x) for x in args.remove or []}, moves=moves)
+        Path(args.out or args.file).write_text(new.model_dump_json(indent=2), encoding="utf-8")
+        print(f"{len(new.steps)} steps written to {args.out or args.file}")
+        return 0
+    if args.rcmd == "promote":
+        if bool(args.request) == bool(args.ops):
+            raise ValueError("give exactly one of --request (the question or text users will send) or --ops (catalog operation ids)")
+        key = text_key(args.request) if args.request else op_key([o.strip() for o in args.ops.split(",") if o.strip()])
+        path = promote(store, key, sl, reviewed_by=args.by, min_version=args.min_version, max_version=args.max_version)
+        print(f"promoted {len(sl.steps)} steps as {key}: {path}")
+        return 0
+    return 2
+
+
 def _offline(args) -> int:
     """Commands that never touch the network or a model."""
     from .router import route
@@ -30,6 +84,13 @@ def _offline(args) -> int:
         removed = purge_derived(ROOT)
         print(f"removed {len(removed)} file(s) older than 30 days", *removed, sep="\n  ")
         return 0
+    if args.cmd == "features":
+        from .feature_report import feature_report
+        from .workflows import load_steplist
+        print(feature_report(load_steplist(args.file)).render())          # a step list, or an answer bundle holding one
+        return 0
+    if args.cmd == "review":
+        return _review(args)
     if args.cmd == "captions":
         from .youtube.captions import CaptionsUnavailable, fetch_captions, purge_expired
         from .youtube.metadata import parse_video_id
@@ -42,7 +103,7 @@ def _offline(args) -> int:
             print(f"error: {e}", file=sys.stderr)
             return 1
         print(f"captions: {res.source} ({res.language}), from_cache={res.from_cache}, tracks={res.tracks}", file=sys.stderr)
-        b = route(res.text, version=args.version, input_type="transcript", duration_s=args.duration)
+        b = route(res.text, version=args.version, input_type="transcript", duration_s=args.duration, app=args.app)
         print(b.model_dump_json(indent=2))
         return 0
     if args.cmd == "chat":
@@ -60,6 +121,34 @@ def _offline(args) -> int:
         except (EOFError, KeyboardInterrupt):
             return 0
     if args.cmd == "find":
+        from .rigging_discovery import discover_rigging, parse_goal
+        if args.app in ("maya", "houdini") or parse_goal(args.text, args.app).stages:       # rigging and animation goals: any application
+            search = metadata = rec = None
+            if args.replay:                                         # a saved live run: ranking can be tuned with no quota
+                from .rigging_discovery import replay
+                search, metadata = replay(args.replay)
+            elif args.live:
+                from .rigging_discovery import Recording
+                from .youtube import api
+                rec = Recording(lambda q, n: api.search_videos(q, max_results=n), api.videos_metadata)
+                search, metadata = rec.search, rec.metadata
+            try:
+                rd = discover_rigging(args.text, app=args.app, version=args.version, limit=args.limit, search=search, metadata=metadata)
+            except Exception as e:
+                if args.live and type(e).__name__ == "YouTubeApiError":
+                    print(f"error: {e}", file=sys.stderr)
+                    return 1
+                raise
+            g = rd.goal
+            if rec is not None and rec.meta:
+                import hashlib, time
+                saved = DISCOVERY_CACHE / f"discovery_{hashlib.sha256(args.text.encode()).hexdigest()[:8]}_{int(time.time())}.json"
+                rec.save(saved, args.text)
+                print(f"raw search results saved to {saved} (replay with --replay, no quota)", file=sys.stderr)
+            print(json.dumps({"goal": {"app": g.app, "version": g.version, "stages": g.stages, "areas": g.areas, "plan": g.plan, "prerequisites": g.prerequisites},
+                              "queries": rd.queries, "quota_units_used": rd.quota_units, "results": [r.model_dump() for r in rd.recommendations],
+                              "notes": rd.notes, "excluded": rd.excluded}, indent=1))
+            return 0
         from .tutorials import discover, load_index, verify_captions
         entries = load_index(args.index) if args.index else load_index()
         if args.candidates:
@@ -106,9 +195,9 @@ def _offline(args) -> int:
             db = Path(args.kb) if args.kb else DEFAULT_DB
             if db.exists():
                 kb, tut = KnowledgeBase(db), load_index()
-        b = route(args.text, version=args.version, observed=obs, kb=kb, tutorials=tut)
+        b = route(args.text.replace("\\n", "\n"), version=args.version, observed=obs, kb=kb, tutorials=tut, app=args.app, store=_reviewed_store(args))
     elif args.cmd == "transcript":
-        b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="transcript", duration_s=args.duration)
+        b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="transcript", duration_s=args.duration, app=args.app)
     else:
         b = route(Path(args.file).read_text(encoding="utf-8"), version=args.version, input_type="manual_steps")
     out = b.model_dump_json(indent=2)
@@ -120,7 +209,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("review", "features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -146,6 +235,7 @@ def main(argv: list[str] | None = None) -> int:
     a = sub.add_parser("ask", help="OFFLINE: answer a request from the catalog / parsers; never calls a model")
     a.add_argument("text")
     a.add_argument("--version", help="your Blender version, e.g. 2.80")
+    a.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"], help="the application the steps are for (Maya and Houdini: paste a multi-step rigging/animation procedure, one step per line or '\n')")
     a.add_argument("--mode", help="observed mode, e.g. OBJECT or EDIT_MESH")
     a.add_argument("--selected", help="observed selected object types, comma separated, e.g. MESH,MESH")
     a.add_argument("--kb", help="path to the knowledge index (default: knowledge/kb.sqlite if it exists)")
@@ -159,6 +249,9 @@ def main(argv: list[str] | None = None) -> int:
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")
+    fd.add_argument("--app", choices=["blender", "maya", "houdini"], help="the application (rigging/animation goals; otherwise read from the request)")
+    fd.add_argument("--live", action="store_true", help="rigging goals: also search YouTube (Data API: 100 quota units per search, at most 2 searches, plus 1 for metadata)")
+    fd.add_argument("--replay", metavar="FILE", help="rigging goals: rank a saved live run (runs/cache/discovery_*.json) again; no quota used")
     fd.add_argument("--limit", type=int, default=3)
     fd.add_argument("--index", help="a tutorial index JSON (default: knowledge/tutorial_index.json)")
     fd.add_argument("--candidates", action="store_true", help="also search the UNREVIEWED candidates file")
@@ -168,13 +261,35 @@ def main(argv: list[str] | None = None) -> int:
     t = sub.add_parser("transcript", help="OFFLINE: parse a user-supplied SRT/VTT or timestamped transcript into narrated steps")
     t.add_argument("file")
     t.add_argument("--duration", type=float)
+    t.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"], help="the application the tutorial is for")
     t.add_argument("--version")
     t.add_argument("-o", "--out")
     c = sub.add_parser("captions", help="OPT-IN: fetch captions for ONE public video (third-party library, undocumented endpoint), then run the offline transcript route")
     c.add_argument("video", help="YouTube URL or id")
     c.add_argument("--duration", type=float)
+    c.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"], help="the application the tutorial is for")
     c.add_argument("--version")
     c.add_argument("--purge", action="store_true", help="only delete cached captions older than 30 days, then exit")
+    rv = sub.add_parser("review", help="OFFLINE: review a generated step list: show it, edit it, promote it to a reviewed workflow users are then served")
+    rv.add_argument("--store", help="folder of reviewed workflows (default: knowledge/reviewed)")
+    rs = rv.add_subparsers(dest="rcmd", required=True)
+    rs.add_parser("list", help="reviewed workflows already stored")
+    for name, h in (("show", "print a step list (a JSON file, e.g. from `ask ... > steps.json`) with flags"), ("edit", "change goals, remove or move steps"), ("promote", "mark every step reviewed and store it")):
+        p = rs.add_parser(name, help=h)
+        p.add_argument("file")
+        if name == "edit":
+            p.add_argument("--set-goal", action="append", metavar="N=TEXT", help="new goal for step N (repeatable)")
+            p.add_argument("--remove", action="append", metavar="N", help="remove step N (repeatable)")
+            p.add_argument("--move", action="append", metavar="N:M", help="move step N to position M, applied in order (repeatable)")
+            p.add_argument("-o", "--out", help="write here instead of editing the file in place")
+        if name == "promote":
+            p.add_argument("--by", required=True, help="the person who reviewed the steps")
+            p.add_argument("--request", help="the text users will send; the workflow is served when it matches")
+            p.add_argument("--ops", help="catalog operation ids, comma separated (Blender catalog route)")
+            p.add_argument("--min-version", default="2.80")
+            p.add_argument("--max-version")
+    ft = sub.add_parser("features", help="OFFLINE: which rigging/animation features a step list (JSON) teaches, and which prerequisites it assumes")
+    ft.add_argument("file")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
     m = sub.add_parser("validate", help="OFFLINE: validate and annotate a manually entered step list (JSON)")
     m.add_argument("file")
@@ -183,7 +298,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--app", default="blender")
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
-        p.add_argument("--prompt-version", default="v2", choices=["v2", "v3"],
+        p.add_argument("--prompt-version", default="v2", choices=["v2", "v3", "v4"],
                        help="v2 = baseline used in all recorded live runs; v3 = unevaluated candidate")
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)

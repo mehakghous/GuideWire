@@ -25,7 +25,7 @@ from .step_record import StepList
 Kind = Literal["procedure", "concept", "troubleshooting", "mixed", "clarification", "unsupported", "needs_model",
                "tutorial_recommendation", "needs_state", "decline"]
 Route = Literal["session", "reviewed_workflow", "catalog", "text_parser", "transcript_parser", "manual_steps", "clarify", "fallback_required",
-                "docs_index", "outside_index", "tutorial_index", "tutorial_import", "decline"]
+                "docs_index", "outside_index", "tutorial_index", "tutorial_import", "decline", "rigging_text"]
 Trust = Literal["reviewed", "catalog", "doc_extracted", "doc_passage", "index_pointer", "tutorial_metadata", "none"]
 
 

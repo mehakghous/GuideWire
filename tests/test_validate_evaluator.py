@@ -88,3 +88,36 @@ def test_evaluator_property_and_none_selection():
     s2 = step(expected_state=[P(kind="selection_type", target="NONE")])
     assert evaluate_step(s2, {"selection_types": []}).status == "met"
     assert evaluate_step(s2, OBS).status == "unmet"
+
+
+def test_feature_id_must_be_in_the_catalog_and_gaps_in_the_app_are_flagged():
+    from ingestion.profiles import BLENDER
+    from ingestion.validate import find_errors, sanitize_and_annotate
+    ok = StepList(source_type="written", app="blender", steps=[Step(id="s1", order=1, goal="Create a joint chain", feature_id="SKEL-01")])
+    assert find_errors(ok) == []
+    bad = StepList(source_type="written", app="blender", steps=[Step(id="s1", order=1, goal="x", feature_id="ZZZZ-99")])
+    assert [i.code for i in find_errors(bad)] == ["UNKNOWN_FEATURE"]
+    lost = StepList(source_type="written", app="blender", steps=[Step(id="s1", order=1, goal="Retarget the walk", feature_id="LAYR-06")])
+    step = sanitize_and_annotate(lost, BLENDER).steps[0]
+    assert any("LAYR-06" in f and "no tool" in f for f in step.flags) and step.confidence < 0.5
+    with pytest.raises(ValueError):
+        Step(id="s1", order=1, goal="x", feature_id="skel-1")        # wrong shape is refused by the schema itself
+
+
+def test_a_step_teaching_a_craft_feature_is_craft_and_never_verifiable():
+    from ingestion.profiles import BLENDER
+    from ingestion.validate import sanitize_and_annotate
+    sl = StepList(source_type="written", app="blender", steps=[
+        Step(id="s1", order=1, goal="Review the arcs", feature_id="CLNP-04", expected_state=[P(kind="mode", target="POSE")])])
+    step = sanitize_and_annotate(sl, BLENDER).steps[0]
+    assert step.kind == "craft" and not step.verifiable and any("not graded" in f for f in step.flags)
+    assert evaluate_step(step, {"mode": "POSE"}).status == "unverifiable"
+
+
+def test_version_notes_from_the_catalog_are_added_once_for_the_right_app():
+    from ingestion.profiles import BLENDER, HOUDINI
+    from ingestion.validate import sanitize_and_annotate
+    mk = lambda app: StepList(source_type="written", app=app, steps=[Step(id="s1", order=1, goal="Make a bone collection", feature_id="CTRL-06")])
+    b = sanitize_and_annotate(mk("blender"), BLENDER).steps[0]
+    assert b.version_dependent == ["Blender 4.0 replaced bone layers with bone collections"]
+    assert sanitize_and_annotate(mk("houdini"), HOUDINI).steps[0].version_dependent == []

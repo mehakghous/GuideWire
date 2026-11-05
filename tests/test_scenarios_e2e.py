@@ -403,7 +403,7 @@ def test_follow_up_heldout_set_is_frozen_and_currently_passes():
 
 # ================================================================== 6. schema 0.6
 def test_schema_version_and_backward_compatibility():
-    assert SCHEMA_VERSION == "0.7"
+    assert SCHEMA_VERSION == "0.9"
     for p in sorted((ROOT / "shared" / "examples").glob("*.json")):
         sl = StepList.model_validate(json.loads(p.read_text(encoding="utf-8")))
         assert all(s.depends_on == [] and s.verification is None for s in sl.steps)       # old files still validate, new fields default empty

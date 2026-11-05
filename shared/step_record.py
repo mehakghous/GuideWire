@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.7"  # 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
+SCHEMA_VERSION = "0.9"  # 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
 
 PredicateKind = Literal[
     "mode",            # target: interaction mode, e.g. OBJECT, EDIT_MESH, SCULPT
@@ -24,6 +24,7 @@ PredicateKind = Literal[
     "selection_type",  # target: kind of thing selected, e.g. MESH, LIGHT, CAMERA, NONE
     "panel_open",      # target: panel/editor name, e.g. Properties:Modifiers
     "property_equals", # target: property path; value: expected value
+    "node_exists",     # target: node/object type that must exist, e.g. Maya "ikHandle", Houdini "Rig Doctor"
 ]
 
 ActionVerb = Literal[
@@ -90,6 +91,7 @@ class Step(BaseModel):
     start_state: list[StatePredicate] = Field(default_factory=list)
     expected_state: list[StatePredicate] = Field(default_factory=list)
     kind: StepKind = "mechanics"
+    feature_id: str | None = Field(default=None, pattern=r"^[A-Z]{4}-\d{2}$")  # which catalog feature this step teaches, e.g. "SKEL-01" (ingestion/features.py)
     verifiable: bool = False  # derived: True iff expected_state is non-empty and the step is not craft
     video_start_s: float | None = Field(default=None, ge=0)
     video_end_s: float | None = Field(default=None, ge=0)

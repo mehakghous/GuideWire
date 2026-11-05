@@ -1,0 +1,212 @@
+{
+ "_about": "Hand labels for the steps the transcript reader produced on three real English auto-caption transcripts (fetched 2026-10-16 with the opt-in captions adapter). ONLY video id, the second a unit starts at and the label are stored: no caption text (derived YouTube data, 30-day rule). 'correct' lists the catalog features that would be an acceptable tag for what the speaker is doing at that moment; [] means 'not a rigging step' (intro, outro, chatter, testing, advice), so any tag there is a false step. One labeller (the assistant that wrote the reader), so this measures progress, not accuracy; a second labeller is still needed. The scoring test skips when the local caption cache is absent.",
+ "labelled_on": "2026-10-16 (third pass: 13 more moments, labelled AFTER seeing the reader output, so biased toward agreement)",
+ "videos": {
+  "wugi1I6Zelo": {
+   "title": "Autodesk Maya | How to create an IK/FK Rig (Juzz 3D World), 12 min",
+   "app": "maya",
+   "duration_s": 726,
+   "labels": {
+    "4": [],
+    "9": [
+     "SKEL-01",
+     "SKEL-02"
+    ],
+    "134": [
+     "CTRL-01"
+    ],
+    "149": [
+     "CTRL-01",
+     "SKEL-03"
+    ],
+    "185": [
+     "CTRL-02",
+     "CTRL-03"
+    ],
+    "201": [],
+    "245": [
+     "IKFK-02",
+     "IKFK-03"
+    ],
+    "317": [
+     "IKFK-04",
+     "CNST-01"
+    ],
+    "393": [
+     "CTRL-04"
+    ],
+    "413": [
+     "CTRL-03",
+     "PREP-06"
+    ],
+    "447": [
+     "CNST-02"
+    ],
+    "464": [
+     "IKFK-06"
+    ],
+    "475": [
+     "IKFK-06",
+     "BSHP-04"
+    ],
+    "532": [
+     "CNST-02"
+    ],
+    "576": [
+     "IKFK-06",
+     "CTRL-05"
+    ],
+    "596": [
+     "SKIN-01"
+    ],
+    "627": [
+     "SKIN-03"
+    ],
+    "274": [
+     "IKFK-04"
+    ],
+    "349": [
+     "IKFK-06"
+    ],
+    "551": [
+     "CNST-02"
+    ],
+    "53": [
+     "SKEL-03"
+    ],
+    "262": [
+     "IKFK-04",
+     "CTRL-01"
+    ],
+    "286": [
+     "CTRL-03"
+    ],
+    "480": [
+     "IKFK-06",
+     "BSHP-04"
+    ],
+    "642": [
+     "SKIN-03"
+    ]
+   }
+  },
+  "8LwHLR4S1jI": {
+   "title": "Character rigging for beginners in Maya 2024 (MH Tutorials), 11 min",
+   "app": "maya",
+   "duration_s": 703,
+   "labels": {
+    "261": [
+     "SKEL-07"
+    ],
+    "365": [],
+    "409": [
+     "SKIN-01"
+    ],
+    "426": [
+     "SKIN-01"
+    ],
+    "570": [],
+    "580": [],
+    "640": [
+     "SKIN-01"
+    ],
+    "493": [
+     "SKIN-03"
+    ],
+    "649": [
+     "SKIN-03"
+    ]
+   }
+  },
+  "r0aFUjBb-Yo": {
+   "title": "Rigging for Beginners: IK Legs in Maya (Academic Phoenix Plus), 17 min",
+   "app": "maya",
+   "duration_s": 1040,
+   "labels": {
+    "12": [],
+    "76": [
+     "SKEL-01"
+    ],
+    "80": [
+     "SKEL-03"
+    ],
+    "129": [
+     "SKEL-02"
+    ],
+    "132": [
+     "SKEL-02"
+    ],
+    "159": [
+     "SKEL-02"
+    ],
+    "307": [],
+    "331": [
+     "IKFK-02"
+    ],
+    "350": [
+     "IKFK-02"
+    ],
+    "380": [
+     "IKFK-04"
+    ],
+    "391": [
+     "IKFK-04",
+     "IKFK-02"
+    ],
+    "476": [],
+    "532": [
+     "PREP-04"
+    ],
+    "551": [],
+    "586": [],
+    "652": [
+     "PREP-04"
+    ],
+    "696": [
+     "CNST-01"
+    ],
+    "899": [
+     "SKIN-01"
+    ],
+    "960": [],
+    "1004": [],
+    "17": [],
+    "32": [],
+    "814": [
+     "IKFK-04",
+     "CTRL-01"
+    ],
+    "862": [
+     "IKFK-04"
+    ],
+    "52": [
+     "SKEL-01"
+    ],
+    "452": [
+     "CTRL-01"
+    ],
+    "565": [
+     "CTRL-01"
+    ],
+    "618": [
+     "CTRL-01"
+    ],
+    "673": [
+     "CTRL-02",
+     "CTRL-03"
+    ],
+    "708": [
+     "CNST-01",
+     "CNST-02"
+    ],
+    "713": [
+     "CNST-01"
+    ],
+    "728": [
+     "CNST-01",
+     "IKFK-04"
+    ]
+   }
+  }
+ }
+}

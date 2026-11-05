@@ -25,11 +25,12 @@ CONCEPTS: dict[str, dict[str, str]] = {
 }
 _SYNONYMS = {"bone": "joint", "bones": "joint", "joints": "joint", "armature": "skeleton", "skeletons": "skeleton", "keys": "keyframe",
              "keyframes": "keyframe", "keying": "keyframe", "shape key": "blend shape", "shape keys": "blend shape", "blendshape": "blend shape",
-             "vertex groups": "weights", "weight": "weights", "constraints": "constraint", "controls": "control", "controllers": "control"}
-_STOP = frozenset("a an the of to and or in on for with from by at as is it this that then set up add make create use using new your".split())
+             "vertex groups": "weights", "weight": "weights", "constraints": "constraint", "controls": "control", "controllers": "control", "rename": "name", "renaming": "name", "renamed": "name"}
+_STOP = frozenset("a an the of to and or in on for with from by at as is it this that then up your".split())          # create, add, make, set stay: "Create Joints" is two words, not one
+USE_KNOWLEDGE = True            # False = catalog wording only (the baseline in measurements)
 MIN_SCORE = 0.6
 MIN_MARGIN = 0.12
-SINGLE_WORD = 0.85              # a one-word reference ("joint") matches too many features to count as fully as a two-word one
+SINGLE_WORD = 0.55              # a one-word reference ("joint", "parent") matches any sentence that mentions it, so it can never be enough on its own (MIN_SCORE is 0.6)
 
 
 def term(concept: str, app: str) -> str:
@@ -41,9 +42,13 @@ def _stem(w: str) -> str:
     return w[:-1] if len(w) > 3 and w.endswith("s") and not w.endswith("ss") else w       # arcs -> arc, joints -> joint
 
 
+_KEYBOARD = re.compile(r"\b(?:control|ctrl|shift|alt|command)(?: and (?:control|ctrl|shift|alt))? keys?\b")
+
+
 @lru_cache(maxsize=4096)
 def _tokens(text: str) -> frozenset[str]:
-    t = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+    t = re.sub(r"\bconstraints?\s+(orient|point|scale|aim|parent)\b", r"\1 constraint", text.lower())
+    t = re.sub(r"[^a-z0-9]+", " ", _KEYBOARD.sub(" ", t)).strip()           # "press the control and shift key" is the keyboard, not rig controls
     for src, dst in sorted(_SYNONYMS.items(), key=lambda kv: -len(kv[0])):
         t = re.sub(rf"\b{re.escape(src)}\b", dst, t)
     return frozenset(_stem(w) for w in t.split() if w not in _STOP and not w.isdigit())
@@ -61,6 +66,12 @@ def suggest_feature(text: str, app: str) -> str | None:
     """The catalog feature id whose name or tool phrase best matches `text`, or None when no feature is clearly the best match."""
     if app not in APPS:
         raise ValueError(f"unknown app {app!r}")
+    from .rigging_knowledge import load as knowledge
+    kb_entry = knowledge().match_phrase(text, app, min_cover=0.75) if USE_KNOWLEDGE else None               # what people actually say, researched (knowledge/rigging_knowledge.json)
+    if kb_entry is not None:
+        feats = [f for f in kb_entry.features if load_catalog().get(f).support_code(app) != "U"]
+        if feats:
+            return feats[0]                                                       # the entry lists its primary feature first
     goal = _tokens(text)
     ranked = sorted(((_score(goal, f, app), f.id) for f in load_catalog().features if f.support_code(app) != "U"), reverse=True)
     best, runner = ranked[0], ranked[1]

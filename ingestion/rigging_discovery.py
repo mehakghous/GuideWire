@@ -18,7 +18,10 @@ from typing import Callable
 
 from shared.answer import TutorialRecommendation
 
+from datetime import date
+
 from .features import APPS, load_catalog
+from .intent_rigging import interpret
 from .terms import suggest_feature
 from .tutorials import _MAXDUR
 
@@ -71,6 +74,27 @@ _AREA_WORDS = {
 
 
 @dataclass
+class RankingConfig:
+    """How much recency counts. A smooth decay, never a cut-off: a relevant tutorial from years ago still beats a recent unrelated one."""
+    recency: float = 1.0                  # weight; 0 switches recency off. The bonus is at most 1 point x weight; touching two more of the six rigging areas is worth more than the whole difference between a new and an old upload.
+    half_life_years: float = 3.0          # the bonus halves every this many years of age
+    max_age_years: float = 8.0            # older than this AND outscored by at least `limit` better candidates: left out as outdated
+    today: date | None = None             # for tests
+
+
+RECENCY_LEVELS = {"off": 0.0, "low": 0.5, "normal": 1.0, "high": 2.0}
+
+
+def age_years(published: str | None, today: date) -> float | None:
+    """Years since the UPLOAD date (YYYY-MM-DD or YYYY-MM). Unknown or unreadable dates give None: they are never guessed."""
+    try:
+        y, m, *d = (int(x) for x in (published or "")[:10].split("-"))
+        return max(0.0, (today - date(y, m, d[0] if d else 1)).days / 365.25)
+    except (ValueError, TypeError):
+        return None
+
+
+@dataclass
 class RiggingGoal:
     app: str | None                       # None = the request does not say which application
     version: str | None
@@ -81,6 +105,11 @@ class RiggingGoal:
     prerequisites: list[str] = field(default_factory=list)    # features the plan assumes first (scene set-up, rest pose ...), reported, not searched for
     needs_app: bool = False
     notes: list[str] = field(default_factory=list)
+    label: str = ""                       # how the request was read, in plain words (shown to the person)
+    part: str | None = None               # leg | arm | hand | spine | neck | head | tail
+    narrow: bool = False                  # one part / one outcome: searches keep the part; a whole-character goal does not
+    search_words: tuple[str, ...] = ()    # plain words tutorial titles use, from the outcome the person described
+    clarification: str | None = None      # one question to ask INSTEAD of searching, when the answer changes which tutorial is right
     max_duration_s: int | None = None     # a limit the user stated ("under 20 minutes"); the only length that excludes a video
     full_scope: bool = False              # the user asked for the whole thing ("complete", "start to finish"): long videos are expected
 
@@ -107,12 +136,19 @@ def parse_goal(query: str, app: str | None = None, version: str | None = None) -
         m = _VERSION[app].search(q)
         version = m.group(1) if m else None
     cat = load_catalog()
+    it = interpret(q, app)                                                   # outcomes in plain words: "make the legs move properly"
     stages, codes = [], []
     for pat, cs, name in _STAGES:
         if pat.search(q):
+            if name == "animation" and "ready for animation" in it.label:        # "ready for animation" is the step BEFORE animating
+                continue
             stages.append(name)
-            codes += [c for c in cs if c not in codes]
+            if not (it.narrow and name == "rigging"):                   # "rig it so I can move its feet" must not become the whole rig
+                codes += [c for c in cs if c not in codes]
+    codes += [c for c in it.areas if c not in codes]
+    notes += it.notes
     plan_ids = {f.id for f in cat.features if f.code in codes and (app is None or f.support_code(app) in ("N", "P")) and f.priority in ("P0", "P1", "P2")}
+    plan_ids |= {f for f in it.features if app is None or cat.get(f).support_code(app) in ("N", "P")}
     for clause in re.split(r"[,;]| and |\.", q):                       # a feature named outright ("create an IK handle") joins the plan
         fid = suggest_feature(clause, app or "maya") if clause.strip() else None
         if fid:
@@ -125,8 +161,10 @@ def parse_goal(query: str, app: str | None = None, version: str | None = None) -
     topic = [w for w in re.findall(r"[a-z0-9]+", q.lower()) if w not in _REQUEST_WORDS and not any(p.fullmatch(w) for p in _APP_WORDS.values()) and not w.isdigit()]
     md = _MAXDUR.search(q)
     maxd = int(float(md.group(1)) * (3600 if md.group(2).lower().startswith("h") else 60)) if md else None
+    if it.label and not stages:
+        stages = ["rigging"] if any(a in ("SKEL", "ORNT", "IKFK", "CTRL", "SKIN") for a in it.areas) else stages
     return RiggingGoal(app=app, version=version, topic=topic, stages=stages, plan=plan, areas=areas, prerequisites=prereqs, needs_app=app is None, notes=notes,
-                       max_duration_s=maxd, full_scope=bool(_FULL_WORDS.search(q)))
+                       label=it.label, part=it.part, narrow=it.narrow, search_words=it.words, clarification=it.clarify, max_duration_s=maxd, full_scope=bool(_FULL_WORDS.search(q)))
 
 
 def expected_length(goal: RiggingGoal) -> tuple[int, int | None, str]:
@@ -150,10 +188,11 @@ def search_queries(goal: RiggingGoal, max_queries: int = MAX_QUERIES) -> list[st
     """At most `max_queries` search strings: the goal in the user's words plus the application and 'tutorial', then a stage-based one."""
     if goal.app is None:
         return []
-    base = " ".join(goal.topic[:6]) or "character rigging"
+    words = list(dict.fromkeys(([goal.part] if goal.narrow and goal.part else []) + list(goal.search_words)))      # plain words, not the user's phrasing; no repeats
+    base = " ".join(words) if goal.narrow and words else " ".join(goal.topic[:6]) or " ".join(words) or "character rigging"
     out = [f"{goal.app} {base} tutorial"]
-    if goal.stages:
-        out.append(f"{goal.app} {goal.stages[0].split(' / ')[0]} character tutorial")
+    if goal.stages:                                                                                # a second, broader wording that still keeps the body part
+        out.append(f"{goal.app} {goal.part if goal.narrow and goal.part else 'character'} {goal.stages[0].split(' / ')[0]} tutorial")
     return list(dict.fromkeys(out))[:max_queries]
 
 
@@ -179,17 +218,23 @@ def touched_areas(entry: dict, goal: RiggingGoal) -> list[str]:
 def entry_from_metadata(m: dict, app: str) -> dict:
     ch = (m.get("channel") or "").lower()
     official = any(w in ch for w in _OFFICIAL_CHANNELS[app])
-    return {**m, "source_tier": "official" if official else "community", "app_hint": title_hint(m.get("title"), app)}
+    in_title, in_desc = title_hint(m.get("title"), app), title_hint(m.get("description_head"), app)
+    return {**m, "source_tier": "official" if official else "community", "app_hint": in_title or in_desc, "hint_source": "title" if in_title else ("description" if in_desc else None)}
 
 
 def discover_rigging(query: str, *, app: str | None = None, version: str | None = None, limit: int = 3,
                      search: Callable[[str, int], list[dict]] | None = None, metadata: Callable[[list[str]], list[dict]] | None = None,
-                     local: list[dict] | None = None) -> RiggingDiscovery:
+                     local: list[dict] | None = None, config: RankingConfig | None = None) -> RiggingDiscovery:
     """`search(query, max_results) -> [{video_id, title, channel}]` and `metadata(ids) -> [video dicts]` are the live calls (None = no live search)."""
+    cfg = config or RankingConfig()
+    today = cfg.today or date.today()
     goal = parse_goal(query, app, version)
     out = RiggingDiscovery(goal, [], notes=list(goal.notes))
     if goal.needs_app:
         out.notes.append("Which application do you use: Blender, Maya or Houdini? Tutorials differ completely between them.")
+        return out
+    if goal.clarification:                                              # nothing is searched or spent until the answer is known
+        out.notes.append(goal.clarification)
         return out
     if not goal.plan:
         out.notes.append("The request does not say which part of rigging or animation to learn (for example rigging, skinning, IK, a walk cycle).")
@@ -230,21 +275,30 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
             score -= 1.0
             notes.append(f"the title does not say it is for {goal.app}")
         hint = e.get("app_hint") or title_hint(title, goal.app)
+        where = e.get("hint_source") or "title"
         if goal.version and hint:
             same = hint.split(".")[0] == goal.version.split(".")[0]
             score += 1.0 if same else -1.5
             if not same:
-                notes.append(f"recorded for {goal.app} {hint}, you use {goal.version}: menus and names may differ")
+                notes.append(f"its {where} says {goal.app} {hint}, you use {goal.version}: menus and names may differ")
         elif goal.version:
             notes.append(f"its {goal.app} version is not stated, so compatibility is unknown")
+        age = age_years(e.get("published"), today)
+        if age is None:
+            notes.append("upload date unknown, so recency was not scored")
+        else:
+            score += cfg.recency * 1.0 * 0.5 ** (age / cfg.half_life_years)
+            notes.append(f"uploaded {e['published'][:7]}, {age:.0f} year(s) ago (the upload date is not the date it was recorded, and the version it shows is only known if the title or description says)")
+        if e.get("captions_flag"):
+            score += 0.3                                            # a TRUE flag means creator captions exist (a FALSE flag says nothing, so it is not used)
         dur = e.get("duration_s")
         lo, hi, why = expected_length(goal)
         if dur is not None and goal.max_duration_s and dur > goal.max_duration_s:
             out.excluded.append(f"{title} ({dur // 60} min, longer than the {goal.max_duration_s // 60} you asked for)")
             continue
-        if dur is not None and dur < TOO_SHORT_S and not goal.max_duration_s:
+        if dur is not None and dur <= max(TOO_SHORT_S, lo / 6) and not goal.max_duration_s:        # a teaser: far too short to teach this goal step by step
             score -= 1.5
-            notes.append("under 3 minutes: too short to teach rigging step by step")
+            notes.append(f"only {dur // 60} min for this goal ({why}): too short to teach it step by step")
         elif dur is not None and dur < lo / 3:
             score -= 1.0
             notes.append(f"{dur // 60} min is short for this goal ({why}): it probably covers only part of it")
@@ -266,11 +320,21 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
             miss = [names[a] for a in goal.areas if a not in hit_areas]
             notes.append(f"title/chapters touch {len(hit_areas)} of {len(goal.areas)} areas you need ({', '.join(names[a] for a in hit_areas) or 'none'})" + (f"; not mentioned: {', '.join(miss)}" if miss else ""))
         notes.append("Judged from metadata only: what it actually shows is unknown until its steps are extracted.")
-        scored.append((-round(score, 2), title, TutorialRecommendation(
+        scored.append((-round(score, 2), title, age, TutorialRecommendation(
             title=title, url=e["url"], channel=e.get("channel"), source_tier=e.get("source_tier", "unknown"), duration_s=dur, blender_version_hint=hint,
             licence=e.get("licence"), captions_available=e.get("captions_flag"), chapters=e.get("chapters") or None, published=e.get("published"),
             matched_terms=cov, score=round(score, 2), note=" ".join(n[0].upper() + n[1:] + ("" if n.endswith(".") else ".") for n in notes))))
-    out.recommendations = [r for _, _, r in sorted(scored, key=lambda t: t[:2])][:limit]
+    scored.sort(key=lambda t: t[:2])
+    if len(scored) > limit:                                                 # old AND clearly outscored by `limit` better candidates: outdated for this task
+        cutoff = -scored[limit - 1][0]
+        keep = []
+        for neg, title, age, rec in scored:
+            if age is not None and age > cfg.max_age_years and -neg < cutoff:
+                out.excluded.append(f"{title} (uploaded {rec.published}, {age:.0f} years ago, and {limit} better and newer-or-equal candidates exist)")
+            else:
+                keep.append((neg, title, age, rec))
+        scored = keep
+    out.recommendations = [r for _, _, _, r in scored][:limit]
     if entries and not out.recommendations:
         out.notes.append("Every candidate was ruled out; see the excluded list.")
     return out

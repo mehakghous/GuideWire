@@ -15,7 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import ExtractionError, extract_from_text, extract_from_video
+from .extract import PROMPT_VERSIONS, ExtractionError, extract_from_text, extract_from_video
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -54,6 +54,10 @@ def _review(args) -> int:
         print(f"{sl.title or args.file}  app={sl.app}  steps={len(sl.steps)}")
         for s in sl.steps:
             print(f"{s.order:>3}. [{s.review_status}] {s.goal}   (confidence {s.confidence}" + (f", {s.feature_id}" if s.feature_id else "") + (", craft" if s.kind == "craft" else "") + ")")
+            for h in s.how_to:
+                print(f"       - [{h.support}] {h.text}")
+            for h in s.check:
+                print(f"       ? [{h.support}] {h.text}")
             for f in s.flags:
                 print(f"       ! {f}")
         return 0
@@ -91,6 +95,24 @@ def _offline(args) -> int:
         return 0
     if args.cmd == "review":
         return _review(args)
+    if args.cmd in ("score", "instructions"):
+        from .eval.actionability import load_rubric, score
+        from .instructions import compose_instructions
+        from .workflows import load_steplist
+        if args.cmd == "score" and args.more:                          # several files: one block each, for before/after
+            rub = load_rubric(args.rubric) if args.rubric else None
+            for f in [args.file, *args.more]:
+                print(f"== {f}")
+                print(score(load_steplist(f), rub).render())
+            return 0
+        sl = load_steplist(args.file)
+        if args.cmd == "instructions":                                  # add how-to / check lines to a saved step list (no model, no network)
+            n = compose_instructions(sl)
+            Path(args.out or args.file).write_text(sl.model_dump_json(indent=2), encoding="utf-8")
+            print(f"{n} of {len(sl.steps)} steps gained instructions; written to {args.out or args.file}")
+            return 0
+        print(score(sl, load_rubric(args.rubric) if args.rubric else None).render())
+        return 0
     if args.cmd == "captions":
         from .youtube.captions import CaptionsUnavailable, fetch_captions, purge_expired
         from .youtube.metadata import parse_video_id
@@ -133,7 +155,9 @@ def _offline(args) -> int:
                 rec = Recording(lambda q, n: api.search_videos(q, max_results=n), api.videos_metadata)
                 search, metadata = rec.search, rec.metadata
             try:
-                rd = discover_rigging(args.text, app=args.app, version=args.version, limit=args.limit, search=search, metadata=metadata)
+                from .rigging_discovery import RECENCY_LEVELS, RankingConfig
+                rd = discover_rigging(args.text, app=args.app, version=args.version, limit=args.limit, search=search, metadata=metadata,
+                                      config=RankingConfig(recency=RECENCY_LEVELS[args.recency]))
             except Exception as e:
                 if args.live and type(e).__name__ == "YouTubeApiError":
                     print(f"error: {e}", file=sys.stderr)
@@ -209,7 +233,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("review", "features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -251,6 +275,7 @@ def main(argv: list[str] | None = None) -> int:
     fd.add_argument("--version")
     fd.add_argument("--app", choices=["blender", "maya", "houdini"], help="the application (rigging/animation goals; otherwise read from the request)")
     fd.add_argument("--live", action="store_true", help="rigging goals: also search YouTube (Data API: 100 quota units per search, at most 2 searches, plus 1 for metadata)")
+    fd.add_argument("--recency", choices=["off", "low", "normal", "high"], default="normal", help="rigging goals: how much a newer upload counts (never excludes by itself)")
     fd.add_argument("--replay", metavar="FILE", help="rigging goals: rank a saved live run (runs/cache/discovery_*.json) again; no quota used")
     fd.add_argument("--limit", type=int, default=3)
     fd.add_argument("--index", help="a tutorial index JSON (default: knowledge/tutorial_index.json)")
@@ -288,6 +313,13 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--ops", help="catalog operation ids, comma separated (Blender catalog route)")
             p.add_argument("--min-version", default="2.80")
             p.add_argument("--max-version")
+    sc = sub.add_parser("score", help="OFFLINE: score a step list against the actionability rubric (structure only: it cannot tell whether the content is true)")
+    sc.add_argument("file")
+    sc.add_argument("more", nargs="*", help="more step lists to score the same way, to compare")
+    sc.add_argument("--rubric", help="a reference checklist JSON (see tests/fixtures/rubrics) for the completeness score")
+    ins = sub.add_parser("instructions", help="OFFLINE: add how-to and check lines (from the steps' own evidence) to a saved step list")
+    ins.add_argument("file")
+    ins.add_argument("-o", "--out")
     ft = sub.add_parser("features", help="OFFLINE: which rigging/animation features a step list (JSON) teaches, and which prerequisites it assumes")
     ft.add_argument("file")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
@@ -298,7 +330,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--app", default="blender")
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
-        p.add_argument("--prompt-version", default="v2", choices=["v2", "v3", "v4"],
+        p.add_argument("--prompt-version", default="v2", choices=list(PROMPT_VERSIONS),
                        help="v2 = baseline used in all recorded live runs; v3 = unevaluated candidate")
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)
@@ -334,6 +366,10 @@ def main(argv: list[str] | None = None) -> int:
             sl = extract_from_video(provider, vid, app=args.app, duration_s=duration, title_hint=title,
                                     prompt_version=args.prompt_version, on_attempt=hook)
     except (ExtractionError, ValueError, RuntimeError, LookupError) as e:
+        from .providers.base import OverloadError
+        if isinstance(getattr(e, "__cause__", None), OverloadError):
+            print("error: the model service is at capacity (HTTP 503/5xx) and did not answer after the bounded retries. Nothing was charged. Try again in a few minutes.", file=sys.stderr)
+            return 1
         print(f"error: {e}", file=sys.stderr)
         return 1
 

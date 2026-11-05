@@ -1,0 +1,1792 @@
+{
+  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini (unresearched), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16.",
+  "retrieved": "2026-10-16",
+  "tiers": {
+    "official": "vendor documentation",
+    "community": "forum / Q&A / course-note advice",
+    "tutorial": "narrated or shown in a tutorial",
+    "author": "assistant's synthesis, unverified"
+  },
+  "sources": {
+    "M1": {
+      "title": "Maya: Orient Joint Options",
+      "url": "https://help.autodesk.com/cloudhelp/2017/ENU/Maya/files/GUID-29DF5D0F-1BDE-4464-850C-45769B3CF1CA.htm",
+      "tier": "official",
+      "version": "Maya 2017 help"
+    },
+    "M2": {
+      "title": "Maya: Constrain > Parent (options)",
+      "url": "https://download.autodesk.com/global/docs/maya2012/en_us/files/Constrain__Parent.htm",
+      "tier": "official",
+      "version": "Maya 2012 help"
+    },
+    "M3": {
+      "title": "Maya: IK Handle Tool",
+      "url": "https://download.autodesk.com/us/maya/2011help/files/CST_IK_Handle_Tool.htm",
+      "tier": "official",
+      "version": "Maya 2009-2011 help"
+    },
+    "M4": {
+      "title": "Maya: Skin > Bind Skin > Smooth Bind",
+      "url": "https://download.autodesk.com/global/docs/maya2013/en_us/files/Skin__Bind_Skin__Smooth_Bind.htm",
+      "tier": "official",
+      "version": "Maya 2009-2014 help"
+    },
+    "M5": {
+      "title": "Maya: Reset and Freeze Transformations Options",
+      "url": "https://help.autodesk.com/cloudhelp/2017/ENU/Maya/files/GUID-DA296489-D6E1-4C8E-8D2C-8FC8FEF2887D.htm",
+      "tier": "official",
+      "version": "Maya 2016-2018 help"
+    },
+    "M6": {
+      "title": "Maya: Set Driven Key window",
+      "url": "https://help.autodesk.com/cloudhelp/2017/ENU/Maya/files/GUID-D2B1C7EF-F177-4B0E-9E41-B479CFF2AFD4.htm",
+      "tier": "official",
+      "version": "Maya 2016-2017 help"
+    },
+    "M7": {
+      "title": "Maya: Add Attribute Options",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Basics/files/GUID-3C81CEBF-A92A-493D-9630-7F9AE4C5B74C.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M8": {
+      "title": "Maya: Paint Skin Weights Tool",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-99189E9D-237F-471E-A02C-BE6593B4828B.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M9": {
+      "title": "Maya: Modify > Add Attribute",
+      "url": "https://download.autodesk.com/global/docs/maya2013/en_US/files/Modify__Add_Attribute.htm",
+      "tier": "official",
+      "version": "Maya 2013 help"
+    },
+    "C1": {
+      "title": "Autodesk Community: Arm bending wrong way",
+      "url": "https://forums.autodesk.com/t5/maya-animation-and-rigging-forum/arm-bending-wrong-way/m-p/6251343",
+      "tier": "community"
+    },
+    "C2": {
+      "title": "Polycount: IK joints need a slight bend / straight chain problem",
+      "url": "https://polycount.com/discussion/comment/1126470/",
+      "tier": "community"
+    },
+    "C3": {
+      "title": "UCLA course notes: Maya IK and pole vector",
+      "url": "https://users.dma.ucla.edu/~cariesta/MayaCourseNotes/html/ik.html",
+      "tier": "community"
+    },
+    "C4": {
+      "title": "Autodesk Community: Mesh is no longer moving with skeleton",
+      "url": "https://forums.autodesk.com/t5/maya-animation-and-rigging-forum/mesh-is-no-longer-moving-with-skeleton/m-p/12482253",
+      "tier": "community"
+    },
+    "C5": {
+      "title": "Unity forum: Smooth bind problem when importing from Maya",
+      "url": "https://discussions.unity.com/t/smooth-bind-problem-when-importing-from-maya/376141",
+      "tier": "community"
+    },
+    "C6": {
+      "title": "tech-artists.org: Automatic FK/IK switching in a Maya rig",
+      "url": "https://www.tech-artists.org/t/automatic-fk-ik-switching-in-a-maya-rig/1412",
+      "tier": "community"
+    },
+    "C7": {
+      "title": "Lester Banks: creating a reverse foot lock and IK/FK switch (set driven keys)",
+      "url": "https://lesterbanks.com/tag/maya-fk-ik-tutorial/",
+      "tier": "community"
+    },
+    "C8": {
+      "title": "University of Washington CSE 460: Orienting joints",
+      "url": "https://courses.cs.washington.edu/courses/cse460/05sp/links/Rigging/orient_joints.html",
+      "tier": "community"
+    },
+    "T1": {
+      "title": "Tutorial narration (auto captions fetched 2026-10-16): Juzz 3D World 'How to create an IK/FK Rig', wugi1I6Zelo",
+      "url": "https://www.youtube.com/watch?v=wugi1I6Zelo",
+      "tier": "tutorial"
+    },
+    "T2": {
+      "title": "Tutorial narration: Academic Phoenix Plus 'Rigging for Beginners: IK Legs in Maya', r0aFUjBb-Yo",
+      "url": "https://www.youtube.com/watch?v=r0aFUjBb-Yo",
+      "tier": "tutorial"
+    },
+    "T3": {
+      "title": "Tutorial narration: MH Tutorials 'Character rigging for beginners in Maya 2024', 8LwHLR4S1jI",
+      "url": "https://www.youtube.com/watch?v=8LwHLR4S1jI",
+      "tier": "tutorial"
+    },
+    "T4": {
+      "title": "Model-read evidence from the Sang Sang Part 9 video (dc3iRo0hb3g), live runs 2026-10-16: what the video shows, not checked by a person",
+      "url": "https://www.youtube.com/watch?v=dc3iRo0hb3g",
+      "tier": "tutorial"
+    },
+    "B1": {
+      "title": "Blender manual: Armature Deform Parent",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/skinning/parenting.html",
+      "tier": "official",
+      "version": "manual latest, 2026-10-16"
+    },
+    "B2": {
+      "title": "Blender manual: Inverse Kinematics Constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/tracking/ik_solver.html",
+      "tier": "official",
+      "version": "manual latest, 2026-10-16"
+    },
+    "B3": {
+      "title": "Blender manual: Bone Roll",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/editing/bone_roll.html",
+      "tier": "official",
+      "version": "manual latest, 2026-10-16"
+    },
+    "B4": {
+      "title": "Blender manual: Symmetrize (armature)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/editing/symmetrize.html",
+      "tier": "official",
+      "version": "manual latest, 2026-10-16"
+    },
+    "B5": {
+      "title": "Blender manual: Bone naming and conventions",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/editing/naming.html",
+      "tier": "official",
+      "version": "manual latest, 2026-10-16"
+    },
+    "B6": {
+      "title": "Blender bug tracker: Bone Heat Weighting: failed to find solution for one or more bones (#51250)",
+      "url": "https://projects.blender.org/blender/blender/issues/51250",
+      "tier": "community"
+    },
+    "B7": {
+      "title": "BlenderArtists: Character doesn't follow knee pole correctly",
+      "url": "https://blenderartists.org/t/character-doesn-t-follow-knee-pole-correctly/1492390",
+      "tier": "community"
+    },
+    "B8": {
+      "title": "BlenderArtists: Knee bending problems with human character",
+      "url": "https://blenderartists.org/t/knee-bending-problems-with-human-character/671199",
+      "tier": "community"
+    },
+    "B9": {
+      "title": "BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle",
+      "url": "https://blenderartists.org/t/inverse-kinematics-always-at-90-degrees-wrong-angle/1260630",
+      "tier": "community"
+    },
+    "B10": {
+      "title": "Guide: blender weight painting problems (secondary source, lower trust)",
+      "url": "https://app.cinevva.com/guides/blender-weight-painting-problems",
+      "tier": "community"
+    }
+  },
+  "entries": [
+    {
+      "id": "maya.orient_joint",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ORNT-02",
+        "ORNT-03"
+      ],
+      "phrases": [
+        "make the joints face the right way",
+        "my joints twist the wrong way",
+        "joint axes point in different directions",
+        "orient the joints",
+        "fix the joint rotation axes",
+        "bones rotate on the wrong axis"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton > Orient Joint (options box)",
+          "tier": "tutorial",
+          "source": "T1",
+          "options": [
+            "Orient Joint to World",
+            "Primary Axis",
+            "Secondary Axis",
+            "Secondary Axis World Orientation",
+            "Orient children of selected joints",
+            "Reorient the local scale axes",
+            "Toggle Local Axes Visibility"
+          ],
+          "options_tier": "official",
+          "options_source": "M1",
+          "note": "The Autodesk page lists the options but gives no menu path; the path 'Skeleton > Orient Joint' is as spoken in tutorials."
+        }
+      ],
+      "prerequisites": [
+        "The joint chain exists and is parented root to tip.",
+        "Select the root joint of the chain first, and turn on 'Orient children of selected joints' if the whole chain should change."
+      ],
+      "facts": [
+        {
+          "text": "The Primary Axis is the local axis that points down the bone toward its child.",
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        },
+        {
+          "text": "A joint cannot rotate around its Primary Axis: with Primary Axis X, the local X axis will not rotate.",
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        },
+        {
+          "text": "Primary and Secondary Axis cannot be the same axis; if you choose one already in use, Maya switches the other.",
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        },
+        {
+          "text": "Setting Secondary Axis to None lets Maya choose it automatically.",
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        },
+        {
+          "text": "'Orient children of selected joints' makes the settings apply to every joint below the selected one; with it off only the selected joint changes.",
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Turn on 'Toggle Local Axes Visibility' (or display local rotation axes) and look down the chain: every joint's primary axis should point at its child and the secondary axes should line up.",
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Letting Maya orient automatically on a curved chain can flip axes, because it does not know which way is 'up' for the joints; choose a Secondary Axis World Orientation to fix the up direction.",
+          "tier": "community",
+          "sources": [
+            "C8",
+            "M1"
+          ]
+        },
+        {
+          "text": "Orienting the joints after skinning moves the rest pose of the skeleton; orient before binding.",
+          "tier": "author",
+          "sources": []
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "joint won't rotate on one axis",
+            "can't rotate joint around x",
+            "joint locked on one rotation axis"
+          ],
+          "cause": "That axis was chosen as the Primary Axis, and a joint does not rotate around its primary axis.",
+          "fix": [
+            "Check which axis is the Primary Axis in Orient Joint Options.",
+            "Rotate around one of the other two axes, or re-orient with a different Primary Axis."
+          ],
+          "tier": "official",
+          "sources": [
+            "M1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.ik_handle",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-02",
+        "IKFK-03",
+        "IKFK-05"
+      ],
+      "phrases": [
+        "make the leg follow the foot",
+        "move the foot and the leg bends",
+        "make an ik handle",
+        "create ik for the leg",
+        "set up inverse kinematics",
+        "pin the foot to the ground while the hip moves"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton > Create IK Handle",
+          "tier": "tutorial",
+          "source": "T2",
+          "options": [
+            "Current Solver",
+            "Solver Enable",
+            "Autopriority",
+            "Priority",
+            "Sticky",
+            "Weight"
+          ],
+          "options_tier": "official",
+          "options_source": "M3",
+          "note": "Options named on the Autodesk IK Handle Tool page (2009-2011). The two usual solvers are ikRPsolver (rotate plane) and ikSCsolver (single chain)."
+        }
+      ],
+      "prerequisites": [
+        "A joint chain with a slight bend at the knee or elbow, oriented consistently.",
+        "Know the start joint (hip) and the end joint (ankle) of the limb."
+      ],
+      "outline": [
+        {
+          "text": "Choose the IK Handle tool (Skeleton > Create IK Handle).",
+          "tier": "tutorial",
+          "sources": [
+            "T2"
+          ]
+        },
+        {
+          "text": "Click the start joint (for a leg, the hip), then the end joint (the ankle); the handle appears at the end joint.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "text": "Move the handle to check that the limb bends to follow it.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "'Solver Enable' is on by default, so the handle works immediately.",
+          "tier": "official",
+          "sources": [
+            "M3"
+          ]
+        },
+        {
+          "text": "'Autopriority' (off by default) sets the handle's priority from its start joint's depth in the hierarchy.",
+          "tier": "official",
+          "sources": [
+            "M3"
+          ]
+        },
+        {
+          "text": "'Sticky' (off by default) holds the handle in place while other joints or handles are posed.",
+          "tier": "official",
+          "sources": [
+            "M3"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the IK handle: the whole limb should bend to follow it and the end joint should stay on the handle.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Building the limb as a perfectly straight chain makes the IK solver pick the bend direction unpredictably, so the knee or elbow can flip.",
+          "tier": "community",
+          "sources": [
+            "C1",
+            "C2"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "knee flips",
+            "elbow bends the wrong way",
+            "arm bending wrong way",
+            "leg bends backwards when I move the ik handle",
+            "knee goes wonky",
+            "knee popping",
+            "knee pops the wrong way",
+            "knee snaps backwards"
+          ],
+          "cause": "The joint chain had no bend (or the wrong bend) when the IK handle was created, so Maya has no preferred bend direction; a missing or badly placed pole vector can also flip it.",
+          "fix": [
+            "Disable the IK handle, rotate the knee or elbow slightly in the direction it should bend, set the preferred angle, then enable the handle again.",
+            "If it still flips, add a pole vector control in front of the knee (see the pole vector entry).",
+            "As a last resort rebuild the chain drawn from the front view with a slight bend."
+          ],
+          "tier": "community",
+          "sources": [
+            "C1",
+            "C2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.preferred_angle",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-09",
+        "IKFK-04"
+      ],
+      "phrases": [
+        "make the knee bend the right direction",
+        "tell the ik which way to bend",
+        "set the preferred angle",
+        "ik not bending properly",
+        "stop the knee from popping the wrong way",
+        "knee popping",
+        "knee pops out",
+        "stop the knee flipping",
+        "keep the knee from snapping backwards"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton > Set Preferred Angle",
+          "tier": "tutorial",
+          "source": "T2"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Select the top joint of the chain (the hip), then use Skeleton > Set Preferred Angle so Maya knows which way the knee should bend, before creating the IK handle.",
+          "tier": "tutorial",
+          "sources": [
+            "T2"
+          ]
+        },
+        {
+          "text": "If the handle already exists: disable it, pre-bend the joint, assume/set the preferred angle, then enable it again.",
+          "tier": "community",
+          "sources": [
+            "C1"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "A chain with no initial bend gives the solver no hint, which is the usual cause of a flipped knee.",
+          "tier": "community",
+          "sources": [
+            "C1",
+            "C2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.pole_vector",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-04"
+      ],
+      "phrases": [
+        "control which way the knee points",
+        "add a knee control",
+        "pole vector",
+        "make the knee follow a control",
+        "pole vector control",
+        "make sure the pole vector",
+        "create a pole vector",
+        "add a pole vector constraint",
+        "constrain the pull vector",
+        "right knee control"
+      ],
+      "ui": [
+        {
+          "path": "Constrain > Pole Vector",
+          "tier": "community",
+          "source": "C3"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Create a control (a locator or curve) and place it in front of the knee, not too close to it.",
+          "tier": "community",
+          "sources": [
+            "C2"
+          ]
+        },
+        {
+          "text": "Select the control and the IK handle, then Constrain > Pole Vector.",
+          "tier": "community",
+          "sources": [
+            "C2",
+            "C3"
+          ]
+        }
+      ],
+      "conflicts": [
+        {
+          "text": "Sources disagree on the selection order: the UCLA notes say select the control (locator) first and the IK handle second; a Polycount reply says the IK handle first, then the control. Check which order works in your Maya version and tell the learner to test it.",
+          "sources": [
+            "C2",
+            "C3"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the pole vector control around the knee: the knee should turn toward it without the leg flipping.",
+          "tier": "community",
+          "sources": [
+            "B7",
+            "C2"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Putting the pole vector control behind the knee, or on the limb's own axis, can make the leg flip.",
+          "tier": "community",
+          "sources": [
+            "B7",
+            "C2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.parent_constraint",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CNST-01",
+        "CNST-04"
+      ],
+      "phrases": [
+        "make one object follow another",
+        "attach the controller to the joint",
+        "parent constraint",
+        "make the joint follow the control",
+        "blend between two controls"
+      ],
+      "ui": [
+        {
+          "path": "Constrain > Parent (options box)",
+          "tier": "official",
+          "source": "M2",
+          "options": [
+            "Maintain Offset",
+            "Animation Layer",
+            "Set Layer To Override",
+            "Constraint Axes",
+            "Weight"
+          ],
+          "options_tier": "official",
+          "options_source": "M2"
+        }
+      ],
+      "facts": [
+        {
+          "text": "'Maintain Offset' keeps the object's existing position and rotation relative to its target when the constraint is made.",
+          "tier": "official",
+          "sources": [
+            "M2"
+          ]
+        },
+        {
+          "text": "'Weight' only matters when there is more than one target.",
+          "tier": "official",
+          "sources": [
+            "M2"
+          ]
+        },
+        {
+          "text": "'Constraint Axes' can limit the constraint to X, Y or Z instead of All.",
+          "tier": "official",
+          "sources": [
+            "M2"
+          ]
+        },
+        {
+          "text": "The Autodesk page does not state the selection order. In tutorials the target(s) are selected first and the object to be constrained last (select the IK joint, then the FK joint, then the skin joint).",
+          "tier": "tutorial",
+          "sources": [
+            "M2",
+            "T4"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move or rotate the driver (the target): the constrained object should follow. With two targets, change the Weight values and check it moves between them.",
+          "tier": "tutorial",
+          "sources": [
+            "T4"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Forgetting Maintain Offset makes the constrained object jump to the target when the constraint is created.",
+          "tier": "author",
+          "sources": [
+            "M2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.ikfk_switch",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-06",
+        "IKFK-07",
+        "CTRL-04",
+        "CNST-04",
+        "BSHP-04"
+      ],
+      "phrases": [
+        "switch between two ways of controlling a leg",
+        "switch between ik and fk",
+        "toggle between ik and fk",
+        "ik fk blend",
+        "let the animator choose ik or fk",
+        "one control to change between two rigs",
+        "ik fk match switch",
+        "create an ik fk switch",
+        "add the ik fk switch"
+      ],
+      "outline": [
+        {
+          "text": "Build three joint chains: the skin (bind) chain, an IK chain and an FK chain (duplicate the skin chain twice and rename the copies, for example with Modify > Search and Replace Names).",
+          "tier": "tutorial",
+          "sources": [
+            "T4",
+            "T1"
+          ]
+        },
+        {
+          "text": "Parent-constrain each skin joint to its IK joint and its FK joint (target joints first, skin joint last), with Maintain Offset on.",
+          "tier": "tutorial",
+          "sources": [
+            "T4"
+          ]
+        },
+        {
+          "text": "Create a switch control and add a float attribute (for example FK_IK_Switch) with a minimum of 0 and a maximum of 1.",
+          "tier": "tutorial",
+          "sources": [
+            "T4",
+            "T1"
+          ]
+        },
+        {
+          "text": "Connect the attribute to the two constraint weights so one rises as the other falls; the video routes one weight through a reverse node for the opposite value. A Set Driven Key on the weights is the other common method.",
+          "tier": "tutorial",
+          "sources": [
+            "T4",
+            "T1",
+            "C7"
+          ]
+        },
+        {
+          "text": "Test by changing the switch from 0 to 1 and checking the skin joints follow the FK chain, then the IK chain.",
+          "tier": "tutorial",
+          "sources": [
+            "T4"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Set the switch to 0 and to 1 and move the IK and FK controls separately: the skin joints should follow only the chain the switch selects, and nothing should jump when you change it.",
+          "tier": "tutorial",
+          "sources": [
+            "T4"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Switching modes mid-animation makes the limb jump back to where the other chain's pose was, unless the FK controls are first matched to the IK pose (or the reverse).",
+          "tier": "community",
+          "sources": [
+            "C6"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.freeze_transformations",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "PREP-04",
+        "CTRL-03"
+      ],
+      "phrases": [
+        "reset the position values to zero",
+        "freeze transformations",
+        "clean up the transforms before rigging",
+        "zero out the channels",
+        "delete history and freeze",
+        "delete the history and freeze the transformations",
+        "freeze the transformations"
+      ],
+      "ui": [
+        {
+          "path": "Modify > Freeze Transformations (options box)",
+          "tier": "tutorial",
+          "source": "T2",
+          "options": [
+            "Translate",
+            "Rotate",
+            "Scale",
+            "Joint orient",
+            "Lock normals",
+            "Preserve normals"
+          ],
+          "options_tier": "official",
+          "options_source": "M5"
+        }
+      ],
+      "facts": [
+        {
+          "text": "Freezing does not change joint translation, because joint translation defines the bone length.",
+          "tier": "official",
+          "sources": [
+            "M5"
+          ]
+        },
+        {
+          "text": "Older Autodesk help advises freezing (and deleting history) before operations such as stitch, align, attach, sculpt, wire and wrinkle.",
+          "tier": "official",
+          "sources": [
+            "M5"
+          ]
+        }
+      ],
+      "prerequisites": [
+        "Do it on the mesh and on controls before binding or constraining."
+      ],
+      "mistakes": [
+        {
+          "text": "Skipping 'delete history' and 'freeze transformations' on the mesh before binding is one of the most common causes of a bind that misbehaves.",
+          "tier": "community",
+          "sources": [
+            "C4",
+            "C5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.bind_skin",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKIN-01",
+        "SKIN-02"
+      ],
+      "phrases": [
+        "make the mesh follow the skeleton",
+        "attach the mesh to the joints",
+        "bind the character to the rig",
+        "skin the character",
+        "my mesh doesn't move with the joints",
+        "smooth bind"
+      ],
+      "ui": [
+        {
+          "path": "Skin > Bind Skin > Smooth Bind (options box)",
+          "tier": "official",
+          "source": "M4",
+          "options": [
+            "Bind to",
+            "Bind method",
+            "Max influences",
+            "Dropoff rate"
+          ],
+          "options_tier": "official",
+          "options_source": "M4"
+        }
+      ],
+      "prerequisites": [
+        "Delete history and freeze transformations on the mesh first.",
+        "The skeleton is oriented and in a clean rest pose (T-pose or A-pose).",
+        "Select the skeleton's root joint and the mesh."
+      ],
+      "facts": [
+        {
+          "text": "The hierarchy-based bind method is the default and is meant for characters: it stops a joint on one side from influencing the other side's skin.",
+          "tier": "official",
+          "sources": [
+            "M4"
+          ]
+        },
+        {
+          "text": "The Heat Map method treats each joint as a heat source inside the mesh; it only works on polygon meshes.",
+          "tier": "official",
+          "sources": [
+            "M4"
+          ]
+        },
+        {
+          "text": "Max influences is how many joints may affect each skin point (default 5 in the help).",
+          "tier": "official",
+          "sources": [
+            "M4"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Rotate a joint: the mesh around it should follow. Undo afterwards.",
+          "tier": "tutorial",
+          "sources": [
+            "T3"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Do not use Delete by Type > History on a bound mesh: it can remove the skin cluster, leaving the skeleton moving but the mesh stuck. Use Delete by Type > Non-Deformer History on a bound mesh instead.",
+          "tier": "community",
+          "sources": [
+            "C4"
+          ]
+        },
+        {
+          "text": "Binding a mesh that was not frozen and cleaned first causes odd results such as the mesh merging toward the first joint.",
+          "tier": "community",
+          "sources": [
+            "C5"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "mesh doesn't move with the skeleton",
+            "mesh stays still when the joints move",
+            "mesh is no longer moving with skeleton",
+            "skeleton moves but the mesh doesn't",
+            "joints move but mesh stays"
+          ],
+          "cause": "The skin binding is missing or was removed: often history was deleted after binding, or the bind was never made on this mesh.",
+          "fix": [
+            "Select the mesh and look in the Channel Box or Node Editor for a skinCluster; if there is none, the bind is gone.",
+            "Rebind with Skin > Bind Skin > Smooth Bind (after freezing and deleting history on the mesh), or restore from a saved scene.",
+            "In future use Delete by Type > Non-Deformer History after binding."
+          ],
+          "tier": "community",
+          "sources": [
+            "C4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.paint_skin_weights",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKIN-03",
+        "SKIN-04",
+        "SKIN-13"
+      ],
+      "phrases": [
+        "fix the way the mesh bends",
+        "paint the weights",
+        "the elbow collapses when it bends",
+        "smooth the skin weights",
+        "paint skin weights",
+        "paint skin weights tool",
+        "open the paint skin weights options",
+        "paint white where you want more influence"
+      ],
+      "ui": [
+        {
+          "path": "Skin > Paint Skin Weights Tool",
+          "tier": "tutorial",
+          "source": "T1",
+          "options": [
+            "Influence",
+            "Paint Operation",
+            "Normalize Weights",
+            "Weight Hammer",
+            "Move Weights"
+          ],
+          "options_tier": "official",
+          "options_source": "M8"
+        }
+      ],
+      "facts": [
+        {
+          "text": "'Normalize Weights' is a separate setting from the paint operation: in Interactive mode (the default) the weights on all influences are kept adding up to 1.0.",
+          "tier": "official",
+          "sources": [
+            "M8"
+          ]
+        },
+        {
+          "text": "Turning normalization off allows weights above or below one in total and can produce odd deformation.",
+          "tier": "official",
+          "sources": [
+            "M8"
+          ]
+        },
+        {
+          "text": "Weight Hammer repairs selected vertices whose weights cause bad deformation; Move Weights takes weight from a source influence and gives it to target influences.",
+          "tier": "official",
+          "sources": [
+            "M8"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Pose the joint through its range and look at the area you painted; it should bend smoothly with no pinching or sticking to the wrong bone.",
+          "tier": "author",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "id": "maya.add_attribute",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CTRL-04"
+      ],
+      "phrases": [
+        "add a slider to a controller",
+        "add a custom attribute",
+        "make a switch attribute",
+        "add a channel to the control",
+        "add an extra setting to the rig control"
+      ],
+      "ui": [
+        {
+          "path": "Edit > Add Attribute (Channel Box) / Modify > Add Attribute (older help)",
+          "tier": "tutorial",
+          "source": "T1",
+          "options": [
+            "Long name",
+            "Override nice name",
+            "Nice name",
+            "Make attribute Keyable",
+            "Displayable",
+            "Hidden",
+            "Data type",
+            "Minimum",
+            "Maximum"
+          ],
+          "options_tier": "official",
+          "options_source": "M7",
+          "note": "Autodesk's 2013 help puts the command in the Modify menu; tutorials show it under the Channel Box Edit menu. Look for it in both."
+        }
+      ],
+      "conflicts": [
+        {
+          "text": "The menu location differs between sources (Modify > Add Attribute in the 2013 help, Edit > Add Attribute in the tutorials). Tell the learner to look in both.",
+          "sources": [
+            "M9",
+            "T1",
+            "T4"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "'Minimum' and 'Maximum' limit the values that can be entered for a numeric attribute.",
+          "tier": "official",
+          "sources": [
+            "M7"
+          ]
+        },
+        {
+          "text": "'Keyable' makes the attribute keyable; 'Displayable' shows it in the Channel Box without being keyable; 'Hidden' hides it.",
+          "tier": "official",
+          "sources": [
+            "M7"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Select the control: the new attribute should appear in the Channel Box with the range you set.",
+          "tier": "official",
+          "sources": [
+            "M7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.set_driven_key",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-06",
+        "BSHP-04"
+      ],
+      "phrases": [
+        "make one control drive another",
+        "set driven key",
+        "drive a setting from a slider",
+        "connect a slider to the rig",
+        "set driven tab",
+        "driver tab",
+        "driven tab",
+        "driver and driven"
+      ],
+      "ui": [
+        {
+          "path": "Animate > Set Driven Key > Set (the Set Driven Key window)",
+          "tier": "author",
+          "source": "M6",
+          "options": [
+            "Load Driver",
+            "Load Driven",
+            "Key",
+            "Load > Selected as Driver",
+            "Load > Selected as Driven",
+            "Options > Clear On Load"
+          ],
+          "options_tier": "official",
+          "options_source": "M6",
+          "note": "The window and its buttons are on the Autodesk page; the menu that opens it is not stated there."
+        }
+      ],
+      "outline": [
+        {
+          "text": "Select the driver (for example the switch control) and click Load Driver; select the driven object and click Load Driven.",
+          "tier": "official",
+          "sources": [
+            "M6"
+          ]
+        },
+        {
+          "text": "Set the driver attribute and the driven attribute to the first state and press Key; change both to the second state and press Key again.",
+          "tier": "author",
+          "sources": [
+            "M6"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.armature_deform_parent",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKIN-01"
+      ],
+      "phrases": [
+        "make the mesh follow the bones",
+        "attach my character to the armature",
+        "parent the mesh to the rig",
+        "automatic weights",
+        "bind the mesh to the skeleton",
+        "skin my character"
+      ],
+      "ui": [
+        {
+          "path": "Object > Parent > Armature Deform (Ctrl-P, 'Set Parent To')",
+          "tier": "official",
+          "source": "B1",
+          "options": [
+            "With Empty Groups",
+            "With Automatic Weights",
+            "With Envelope Weights"
+          ],
+          "options_tier": "official",
+          "options_source": "B1"
+        }
+      ],
+      "prerequisites": [
+        "The armature's bones that should move the mesh are set to Deform (Properties > Bone > Deform).",
+        "Mesh in a clean rest pose; apply scale on both the mesh and the armature (see mistakes)."
+      ],
+      "outline": [
+        {
+          "text": "Select the mesh (the child) first, then select the armature last so it is the active object.",
+          "tier": "official",
+          "sources": [
+            "B1"
+          ]
+        },
+        {
+          "text": "Press Ctrl-P and choose 'With Automatic Weights' in the 'Set Parent To' menu.",
+          "tier": "official",
+          "sources": [
+            "B1"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "'With Empty Groups' creates empty vertex groups named after each deforming bone; 'With Automatic Weights' also fills them using a 'bone heat' distance method.",
+          "tier": "official",
+          "sources": [
+            "B1"
+          ]
+        },
+        {
+          "text": "Automatic weights can leave parts of the mesh not deforming as expected on complex armatures; the manual says you then adjust the weights by hand.",
+          "tier": "official",
+          "sources": [
+            "B1"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Go into Pose Mode, rotate a bone, and check the mesh around it follows; undo the pose afterwards.",
+          "tier": "official",
+          "sources": [
+            "B1"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Selecting the armature before the mesh (wrong order) parents the wrong way round.",
+          "tier": "official",
+          "sources": [
+            "B1"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "bone heat weighting failed",
+            "automatic weights failed",
+            "failed to find solution for one or more bones",
+            "bone heat weighting: failed to find solution",
+            "automatic weights not working"
+          ],
+          "cause": "The automatic weighting could not compute weights for some bones; reports point to the mesh itself (loose or non-manifold geometry, duplicate vertices, bad scale) and not the rig.",
+          "fix": [
+            "Clean the mesh: Mesh > Clean Up > Merge by Distance, Delete Loose, and look for non-manifold geometry (Select > Select All by Trait > Non Manifold).",
+            "Apply scale on the mesh and the armature (Object > Apply > Scale).",
+            "Check that no deforming bone is too small or sits outside the mesh.",
+            "If it still fails, use With Empty Groups and paint the weights by hand."
+          ],
+          "tier": "community",
+          "sources": [
+            "B6",
+            "B10"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.ik_constraint",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "IKFK-02",
+        "IKFK-03",
+        "IKFK-04",
+        "IKFK-05",
+        "IKFK-09"
+      ],
+      "phrases": [
+        "make the leg follow the foot",
+        "move the foot and the leg bends",
+        "set up ik in blender",
+        "ik chain",
+        "make the knee point forward",
+        "add a knee control",
+        "pole target"
+      ],
+      "ui": [
+        {
+          "path": "Pose Mode > Bone Constraint properties > Add Bone Constraint > Inverse Kinematics (or Shift-I)",
+          "tier": "official",
+          "source": "B2",
+          "options": [
+            "Target",
+            "Pole Target",
+            "Iterations",
+            "Chain Length",
+            "Use Tail",
+            "Stretch",
+            "Weight Position",
+            "Rotation",
+            "Influence"
+          ],
+          "options_tier": "official",
+          "options_source": "B2"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Make a target bone (the foot control) and, for the bend direction, a pole target bone (the knee control) in front of the knee.",
+          "tier": "community",
+          "sources": [
+            "B7",
+            "B8"
+          ]
+        },
+        {
+          "text": "In Pose Mode, select the last bone of the limb (the shin) and add an Inverse Kinematics constraint; set Target (and Pole Target) and set Chain Length to the number of bones that should move (2 for thigh and shin).",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Chain Length is the number of bones affected, counting from the constrained bone up through its parents; 1 affects only that bone, 2 the bone and its parent, 0 means all ancestors up to the root.",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        },
+        {
+          "text": "The Pole Target decides the roll of the chain, which for a limb means the direction the knee or elbow points.",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        },
+        {
+          "text": "The IK constraint can work without a Target: the chain tip can then be moved freely and only its ancestors are constrained.",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        },
+        {
+          "text": "'Use Tail' makes the end of the chain the bone's tail; unticking it uses the bone's head.",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward.",
+          "tier": "community",
+          "sources": [
+            "B8",
+            "B9"
+          ]
+        },
+        {
+          "text": "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out.",
+          "tier": "community",
+          "sources": [
+            "B7"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "knee bends the wrong way in blender",
+            "knee flips when I move the foot",
+            "knee pointing sideways",
+            "character doesn't follow knee pole correctly",
+            "knee going wonky",
+            "ik always at 90 degrees"
+          ],
+          "cause": "No initial bend on the chain, a pole target in the wrong place, or the Pole Angle not matching the bone's roll.",
+          "fix": [
+            "In Edit Mode move the knee joint slightly forward so the chain is bent the right way.",
+            "Put the pole target bone in front of the knee, a little away from the mesh.",
+            "Adjust the constraint's Pole Angle in Pose Mode until the knee points at the pole target.",
+            "If it bends on several axes, lock the IK rotation on the shin so it bends on one axis only (the lock must be on the shin, the bone in the chain)."
+          ],
+          "tier": "community",
+          "sources": [
+            "B7",
+            "B8",
+            "B9"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.bone_roll",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ORNT-02"
+      ],
+      "phrases": [
+        "fix the bone rotation",
+        "bones twist the wrong way",
+        "bone roll",
+        "align the bone axes",
+        "bones rotate on the wrong axis"
+      ],
+      "ui": [
+        {
+          "path": "Edit Mode > Armature > Bone Roll > Recalculate Roll (Shift-N)",
+          "tier": "official",
+          "source": "B3",
+          "options": [
+            "Axis Orientation",
+            "Flip Axis",
+            "Shortest Rotation"
+          ],
+          "options_tier": "official",
+          "options_source": "B3"
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bone roll is the bone's default rotation around its own length, part of its rest pose, and is edited in Edit Mode.",
+          "tier": "official",
+          "sources": [
+            "B3"
+          ]
+        },
+        {
+          "text": "Recalculate Roll aligns the roll of the selected bones to a reference: a local tangent, a global axis, the active bone, the view axis or the 3D cursor.",
+          "tier": "official",
+          "sources": [
+            "B3"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Show the bones' axes (Properties > Armature > Viewport Display > Axes) and check each bone's Z axis points the way you chose.",
+          "tier": "author",
+          "sources": [
+            "B3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.symmetrize",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKEL-04",
+        "SKEL-03"
+      ],
+      "phrases": [
+        "copy the left side bones to the right",
+        "mirror the armature",
+        "make the other arm",
+        "symmetrize the rig",
+        "mirror the bones"
+      ],
+      "ui": [
+        {
+          "path": "Edit Mode > Armature > Symmetrize",
+          "tier": "official",
+          "source": "B4"
+        }
+      ],
+      "prerequisites": [
+        "Name the bones with a left/right convention (for example .L and .R, or Left/Right) so Blender can pair them."
+      ],
+      "facts": [
+        {
+          "text": "Symmetrize mirrors the selected bones along the X axis using the bone naming convention.",
+          "tier": "official",
+          "sources": [
+            "B4"
+          ]
+        },
+        {
+          "text": "Bones whose names do not show a side are ignored; existing opposite-side bones are overwritten.",
+          "tier": "official",
+          "sources": [
+            "B4"
+          ]
+        },
+        {
+          "text": "Bones can be renamed in the Bone properties Name field or by double-clicking them in the Outliner.",
+          "tier": "official",
+          "sources": [
+            "B5"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Check the other side now has bones with the side swapped in their names, positioned as a mirror image.",
+          "tier": "official",
+          "sources": [
+            "B4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.create_joints",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKEL-01",
+        "SKEL-02"
+      ],
+      "phrases": [
+        "create a joint chain",
+        "draw the skeleton",
+        "make the bones for the leg",
+        "create joints",
+        "place the joints on the character",
+        "put the joints where the knee bends",
+        "create a bone setup",
+        "adjust the position of the joints",
+        "create the root joint"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton > Create Joints",
+          "tier": "tutorial",
+          "source": "T3"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Go to the front or side view and use the joint tool to click the joints in order from the top of the limb down (for a leg: hip, knee, ankle, ball, toe).",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2",
+            "T4"
+          ]
+        },
+        {
+          "text": "Adjust each joint so it sits where the real body bends (hip, knee, ankle), checking in more than one view.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "text": "Give the knee or elbow a slight bend in the direction it should fold, so IK later knows which way to bend.",
+          "tier": "community",
+          "sources": [
+            "C1",
+            "C2"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "In the Outliner or hierarchy the joints form one chain, each parented to the one before it, and from the front and side views each joint sits at a bend point inside the mesh.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "A perfectly straight limb chain makes later IK unpredictable (the knee can flip).",
+          "tier": "community",
+          "sources": [
+            "C1",
+            "C2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.name_joints",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKEL-03"
+      ],
+      "phrases": [
+        "rename the joints",
+        "name the joints",
+        "give the joints names",
+        "add a side to the joint names",
+        "name each joint left hip",
+        "rename each joint"
+      ],
+      "ui": [
+        {
+          "path": "Outliner (double-click a name to rename)",
+          "tier": "author",
+          "source": "T4"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Rename every joint so the name says its side, its body part and what kind of joint it is (the video used names such as left_hip_skin_JNT, left_knee_skin_JNT); unique names are needed for later tools such as search-and-replace renaming and mirroring.",
+          "tier": "tutorial",
+          "sources": [
+            "T4",
+            "T1",
+            "T2"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "In the Outliner every joint has a unique name that starts or ends with its side.",
+          "tier": "tutorial",
+          "sources": [
+            "T4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.create_controllers",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CTRL-01",
+        "CTRL-02"
+      ],
+      "phrases": [
+        "create controllers",
+        "make a control for the foot",
+        "add a circle controller",
+        "make controls for the ik and fk",
+        "make animator controls",
+        "create control curves",
+        "make a controller for each joint",
+        "create controllers for the ik and fk chains"
+      ],
+      "ui": [
+        {
+          "path": "Create > NURBS Primitives > Circle (a common control shape)",
+          "tier": "author",
+          "source": "T1",
+          "note": "Tutorials use curve shapes such as circles, or a controller-creation tool or script; the exact tool varies."
+        }
+      ],
+      "outline": [
+        {
+          "text": "Make a curve shape (often a circle) for each joint you want the animator to grab, size and turn it to suit the joint, and name it after the joint it will drive.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "text": "Place each control at its joint, delete its history and freeze its transformations so its channels read zero, then parent or constrain it so it drives the joint.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Each control is visible, selectable, named after its joint, and moving or rotating it moves or rotates the joint it drives.",
+          "tier": "tutorial",
+          "sources": [
+            "T1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.point_orient_constraints",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CNST-02"
+      ],
+      "phrases": [
+        "orient constraint",
+        "point constraint",
+        "scale constraint",
+        "constrain the rotation only",
+        "make the joint copy the rotation of the control",
+        "create an orient constraint"
+      ],
+      "ui": [
+        {
+          "path": "Constrain > Orient / Point / Scale (shown in tutorials as separate menu items)",
+          "tier": "tutorial",
+          "source": "T1"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Select the target (for example the FK control) first and the object it should drive (the FK joint) last, then choose the constraint type; use an orient constraint to pass on rotation only.",
+          "tier": "tutorial",
+          "sources": [
+            "T1"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Parent Constraint page documents Maintain Offset, Constraint Axes and Weight; the same ideas are used in tutorials for orient and point constraints, but this page does not describe those other constraint types.",
+          "tier": "official",
+          "sources": [
+            "M2"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Rotate the target: only the constrained property (rotation, for an orient constraint) should follow on the driven object.",
+          "tier": "tutorial",
+          "sources": [
+            "T1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.group_controls",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CTRL-03",
+        "PREP-06"
+      ],
+      "phrases": [
+        "group the controller",
+        "make an offset group",
+        "put the control in a group",
+        "zero out the control",
+        "create separate groups for ik and fk controllers",
+        "place the ik handle under the controller",
+        "group the controls"
+      ],
+      "ui": [
+        {
+          "path": "Edit > Group (Ctrl-G)",
+          "tier": "author",
+          "source": "T1"
+        }
+      ],
+      "outline": [
+        {
+          "text": "Put each control in its own group (an offset group) so the control itself reads zero while the group holds its position.",
+          "tier": "tutorial",
+          "sources": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "text": "Keep the IK controls and the FK controls in separate groups so each set can be shown, hidden or moved as one.",
+          "tier": "tutorial",
+          "sources": [
+            "T1"
+          ]
+        },
+        {
+          "text": "Place the IK handle under its IK controller so moving the controller moves the handle.",
+          "tier": "tutorial",
+          "sources": [
+            "T1"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Freeze Transformations resets translate/rotate/scale values to zero without moving the object, which is how a control is made to read zero in its place.",
+          "tier": "official",
+          "sources": [
+            "M5"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Select the control: its translate and rotate channels read 0 and scale 1 while it still sits at the joint.",
+          "tier": "official",
+          "sources": [
+            "M5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.quick_rig",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKEL-07",
+        "CTRL-08"
+      ],
+      "phrases": [
+        "make a rig automatically",
+        "auto rig",
+        "quick rig",
+        "generate a rig",
+        "let maya build the rig",
+        "place the joints and maya creates the rig",
+        "automatic rig for the character"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton > Quick Rig (as described in the tutorial; the exact path varies by Maya version)",
+          "tier": "author",
+          "source": "T3"
+        }
+      ],
+      "outline": [
+        {
+          "text": "In the beginner tutorial you mark where the wrist, elbow and other joints belong on the character and Maya then creates the rig for you, after which you bind the mesh and test by moving joints.",
+          "tier": "tutorial",
+          "sources": [
+            "T3"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand.",
+          "tier": "author",
+          "sources": []
+        }
+      ]
+    }
+  ]
+}

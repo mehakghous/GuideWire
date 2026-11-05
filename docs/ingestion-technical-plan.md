@@ -2077,3 +2077,100 @@ Neighbouring pieces about one feature merge. Times and verbatim evidence come fr
 `cli transcript --app`, `cli captions --app` and chat `/app` + `/load transcript` use it. A Blender transcript with no modelling-catalog steps falls back to it. A free-speech false positive found while testing ("edit mode ... move whole objects"
 matched a bone-placement feature) is closed by requiring rigging vocabulary in the piece. `suggest_feature` now weights the tool name above the whole menu path ("go to skeleton and orient joint" is Orient Joints, not Create Joints).
 Limits: rule-based and cautious, so it will miss real instructions phrased unusually; Houdini and Maya vocabularies are unchecked against an install; no real transcript of a rigging tutorial has been run through it yet (tests use written examples).
+
+
+## 25. Better discovery and actionable steps (2026-10-16)
+
+### 25.1 Diagnosis: why the Maya Part 9 run was valid but unhelpful
+Traced from the saved raw response (`tests/fixtures/real_runs/R5_maya_part9_v4_raw.json`) through the code:
+1. The model DID see the detail. Its `visual_evidence` and `evidence` fields hold "Constrain > Parent", "Maintain offset", "Attribute Name: FK_IK_Switch", "Minimum: 0", "Maximum: 1", "Orient Joint Options ... Primary Axis X, Secondary Axis Y", "Search For: skin / Replace With: ik" and "reverse node".
+2. It put them in the only free-text fields, because `actions` is optional and was left empty on all 10 steps, and the schema had no field for "how to do it" or "how to check it".
+3. Nothing downstream turned those fragments into learner-facing text: `_to_steplist` copies fields as they are, and every consumer shows `goal`. The detail was lost in the last step, not by the model.
+4. Times and expected states were also left out (optional fields). One step packs three operations into one `visual_evidence` sentence ("Selecting IK joint, FK joint, then Skin joint, applying Parent Constraint ...").
+5. The validator checked structure and vocabulary but nothing about actionability, so the output looked fine.
+
+### 25.2 What changed
+- Schema 0.10 (additive): `Step.how_to`, `Step.check` (lines of `HowTo{text, support: shown|said|catalog, evidence}`) and `Step.result`. Old files still load. The model may only claim `shown` or `said`; `catalog` is ours.
+- `ingestion/instructions.py` `compose_instructions`: from a step's OWN evidence it builds actions and lines (menu paths, "Setting: value", "setting X to Y", "with X enabled") and keeps the `visual_evidence` sentences verbatim as "In the video:" lines. It adds `check` lines from the expected state and from `features.LEARNER_CHECKS` (plain-language checks written for the catalog, labelled `catalog`, never `shown`). It invents nothing and is idempotent. It runs inside extraction before validation. `speech_details` does the same for what a speaker SAYS ("go to skeleton and orient joint", "set the primary axis to x", "name it left_leg_ik"), only for names the app profile knows, labelled `said`; the transcript route uses it.
+- Prompt v5 (`ACTIONABLE STEPS` block, on top of v4): one operation per step; ordered `how_to` lines covering what to select, the exact menu path, every value and name, each with support and evidence; never write a location, shortcut, value or name the video does not show or say; omit unreadable detail and note it in `assumptions`; `check` only if the video shows it; every step needs both times. v2 (the frozen baseline), v3 and v4 text is unchanged. `MODEL_SCHEMA_TAG` is 0.7.
+- Validator: a `shown`/`said` line without evidence is flagged (`ungrounded_how_to`).
+- The Maya UI vocabulary grew by the names that real run used (Parent, Maintain Offset, Add Attribute, Attribute Name, Minimum, Maximum, Search and Replace Names, Primary/Secondary Axis ...). Still unverified against an install.
+- Discovery (`rigging_discovery.py`): `RankingConfig` (recency weight, half-life 3 years, max age 8 years). Recency is a smooth bonus of at most 1 point x weight, so it cannot beat relevance on its own. Unknown upload dates are neutral and said. A video older than 8 years is left out only when at least `limit` better candidates exist. The upload date is always labelled as not the recording date. A version hint is read from the title or the description and attributed to where it came from. Creator captions listed add 0.3. Teaser-length videos are judged against the goal. `find --recency off|low|normal|high`. `videos_metadata` now also returns `description_head`.
+- Plain-language requests (`intent_rigging.py`): outcome phrases map to catalog areas, a body part and plain search words ("make the legs move properly" / "move its feet" -> leg IK/FK + controls; "arms bend naturally" -> skinning; "switch between two ways of controlling a leg" -> IK/FK switch). A named part keeps the request narrow instead of widening it into a whole rig. The reading is shown to the person ("I read this as ...", and that "move" was taken as setting up, not animating). "Ready for animation" asks ONE question (a full rig with controls, or skeleton and skinning only) and spends nothing until answered.
+- Reliability: Gemini retries are bounded (3), exponential with jitter. 408/5xx/network failures end as `OverloadError` ("the model service is at capacity ... nothing was charged"), 429 as `QuotaError`, other 4xx as a plain `ProviderError` that is not retried. The run log now records HTTP attempts with their latency.
+- Cost: `price_of(model, date)`. The pricing page (checked 2026-10-16) lists gemini-3.6-flash at 0.75 input / 3.75 output per 1M tokens, thinking billed as output, through 2026-12-31, then 1.50 / 7.50.
+
+### 25.3 Staged pipeline versus one improved call (a decision, not yet measured live)
+A staged pipeline (segment, extract actions, write learner text, validate) would multiply video-model calls, and the video is the expensive part (about 94 prompt tokens per second of video). The chosen design keeps ONE video call and moves the other stages to deterministic code: segmentation and evidence (in the call and in the transcript route), conversion to learner-facing lines (`compose_instructions`) and validation (`sanitize_and_annotate`). A second model pass is worth testing only for steps the validator marks as lacking detail, and only on a short clip. That is an experiment for after the v5 run, not default behaviour.
+
+### 25.4 Visual evidence
+No frame analysis was added. The video model already reads the screen in the single call; lines it grounds in what it saw are labelled `shown` (model-read, not human-verified), narration-only lines `said`. Where the call returns no detail for a step, the step says so (`assumptions`) instead of being filled in. Targeted frame inspection of flagged steps is the next option and needs your approval for cost.
+
+### 25.5 Measured on the real response (offline, deterministic rubric `ingestion/eval/actionability.py`, reference `tests/fixtures/rubrics/maya_fkik_leg.json`)
+
+| Criterion (percent of maximum) | Before (R5 as returned) | After (composer) |
+|---|---|---|
+| actionability | 0 | 50 |
+| UI specificity | 0 | 50 |
+| verification | 0 | 50 |
+| grounding | 100 | 100 |
+| timestamps | 0 | 0 (only a new model run can supply them) |
+| feature tag valid | 100 | 100 |
+| completeness (15 reference items) | 100 | 100 |
+| ordering | 50 | 50 |
+| overall | 43.8 | 62.5 |
+
+The rubric measures structure, not truth. Completeness was already complete: the topics were there; the HOW was missing. "Ordering 50" is one possible order issue (constraining the skin joints before the switch control exists) that the catalog's generic prerequisite chain flags; this tutorial does not need it. The three finer details in the project's quality example (select the root joint, open the Rigging menu set, check the axes afterwards) are NOT in the source evidence and were not made up.
+
+Concrete example, step 4. Before: "Orient the leg joint chain axes". After: "Open Skeleton > Orient Joint." / "Set Primary Axis to X." / "Set Secondary Axis to Y." / "In the video: Orient Joint Options window open, setting Primary Axis to X, Secondary Axis to Y." / check (catalog guidance): "with local rotation axes shown, every joint's primary axis points down the bone toward its child".
+
+### 25.6 Cost, latency, reliability
+Recorded: 108,268 prompt + 1,188 output + 1,642 thinking tokens = 0.092 USD at today's price (0.184 USD at the 2027 price). A 60-minute video is roughly 3 times that. Latency was not recorded for that run (the log had no timing); it is recorded from now on. The first call of that session failed with 503 three times (no charge); the second succeeded first time. Prompt v5 has NOT been run live: v5 numbers are unmeasured.
+
+### 25.7 Limits
+Everything in 25.5 is offline. No instruction has been tried in Maya. The composer repeats what the model said it saw; if the model misread the screen the line is wrong with evidence attached. Feature tags were not judged for meaning. Request understanding is a phrase table, so unusual wording falls back to the keyword stages. Maya and Houdini vocabularies are unverified against an install.
+
+### Prompt v5 live attempts (2026-10-16)
+Two attempts of three HTTP calls each (about 4 minutes apart) on `dc3iRo0hb3g` with `--prompt-version v5` all ended in HTTP 503 "high demand". Nothing was charged; no v5 output exists, so the v5 columns of the rubric table remain unmeasured.
+To retry when capacity returns: `python -m ingestion.cli video https://www.youtube.com/watch?v=dc3iRo0hb3g --app maya --prompt-version v5 --run-log runs/live_maya_v5.jsonl -o v5.json`, then `python -m ingestion.cli score before.json v5.json --rubric tests/fixtures/rubrics/maya_fkik_leg.json`.
+
+
+## 26. Rigging knowledge base, real-speech transcripts and the v5 live result (2026-10-16)
+
+### 26.1 Audit: the gaps this closes
+Before today the system knew the feature catalog (what exists, and in which app it is native) but nothing about HOW people say things, WHERE the tools are, WHAT goes wrong, or HOW to check a step. Concretely: the matcher knew tool names only from the matrix text; the composer's checks were one generic sentence per feature; nothing answered "my knee flips"; the Maya vocabulary was a short hand-written list; and the transcript reader had never been run on real speech.
+
+### 26.2 What was researched, and what could not be
+Sources: Autodesk Maya help (Orient Joint Options, Parent Constraint, IK Handle Tool, Smooth Bind, Freeze Transformations, Set Driven Key window, Add Attribute Options, Paint Skin Weights); the Blender manual rigging pages (fetched with the project's own low-rate fetcher, 116 new pages, the index is now 410 pages); community threads (Autodesk Community, Polycount, Blender Artists, a Blender bug report, UCLA and University of Washington course notes); and the narration of three real tutorials.
+Could not be obtained: **Reddit threads** and **Blender Stack Exchange** pages (the search tool never returned them), and anything checked inside a running Maya or Blender. Houdini was not researched. The knowledge file says so, and returns nothing for Houdini instead of guessing.
+
+### 26.3 The knowledge base (`knowledge/rigging_knowledge.json`, `ingestion/rigging_knowledge.py`)
+21 entries (Maya 17, Blender 4), 31 sources, each statement tagged with a trust tier (`official` vendor documentation, `community` forum advice, `tutorial` said or shown in a tutorial, `author` unverified) and source ids. Per entry: everyday phrases, UI path and option names, prerequisites, ordered outline, facts, plain-language checks, common mistakes, symptom-to-fix troubleshooting, and recorded source disagreements. `load()` refuses a file that cites an unknown source, calls something `official` without an official source, names an unknown feature or app, or repeats an id (tests mutate the file to prove it). Conflicts are recorded, not resolved: the pole-vector selection order and the Add Attribute menu location are two real disagreements between sources. To add knowledge: add the source, add the entry with tiers, run `pytest tests/test_rigging_knowledge.py`.
+
+### 26.4 Where it is used
+- Feature tagging (`terms.suggest_feature`): everyday phrases are tried first.
+- Request understanding (`intent_rigging.interpret`): when the phrase table has nothing, the knowledge base says what the person is asking about; the reading is shown to them.
+- Troubleshooting answers (`router`, route `rigging_knowledge`): cause, ordered fixes, the trust tier, and each source (labelled `manual`, `forum` or `tutorial_video`); if the match is for the other application, that is said.
+- Composed steps (`instructions.py`): app-specific checks with their sources, common mistakes with their tier and source, "Before this" prerequisites and a note where sources disagree.
+- Validator: the documented menu and option names are part of the app vocabulary (fewer false "unknown UI name" flags).
+- Prompt v6: the documented menu paths and options for the application (about 500 extra tokens, about 0.0004 USD per call). Community advice is never put in a prompt.
+- Transcript reader: intros, outros and recaps are explanations (at the ends of the video, or when they name no feature); "now check that it works" talk becomes a `check` line on the step before; "control and shift key" is the keyboard.
+
+### 26.5 Measurements (offline; every number reproducible with the commands in the README)
+Real spoken tutorials: three English auto-caption transcripts (Maya, 12 + 12 + 17 minutes), 52 labelled moments, one labeller, the last 13 labels made after seeing the reader's output (biased toward agreement). Fixture: `tests/fixtures/rubrics/real_speech_labels.json` (ids, times, labels; no caption text).
+
+| Reader | Tag precision | Recall | False steps |
+|---|---|---|---|
+| Original (last commit) | 42.3% (11/26) | 21.2% (11/52) | 6 |
+| Today, knowledge switched off | 51.6% (16/31) | 30.8% (16/52) | 5 |
+| Today, knowledge on | **63.6% (28/44)** | **53.8% (28/52)** | 6 |
+
+Everyday requests (16, written by the assistant after the knowledge base, so a development set and an upper bound): 9/16 understood without the knowledge base, 16/16 with it (two phrases were added while tuning on this set). Real symptom wording (9 forum-thread titles and error messages from the research): 9/9 find the right entry; unrelated text, the wrong application and Houdini find nothing.
+Mistakes the real speech exposed and the fixes: "create"/"add"/"make" were treated as filler so "Create Joints" became the single word "joint" and matched any sentence mentioning a joint (16 of 21 steps in one video were tagged "create a joint chain"); "orient constraint" was read as joint orientation; the keyboard "control key" as rig controls; intros and "assume you know how to ..." as steps.
+
+### 26.6 The live prompt v5 result (one paid call, 0.096 USD, 28 s)
+The model returned 11 steps and **ignored every new field** (no `how_to`, `check`, `result`, times or expected state) even though the prompt asked for them: it fills optional JSON-schema fields only when it has to. Rubric: v5 live 58.6%, below v4 plus the composer (62.5%), with two more steps (freeze transforms, constrain the switch control to the hip) and fewer evidence fragments. Fix: those fields are now REQUIRED in the schema the model sees (`extract.MODEL_REQUIRED`, `MODEL_SCHEMA_TAG` 0.8). This has NOT been re-run live. Feature tags also differed between runs (step 5 was CNST-04, then CNST-01): one run is not a stable measurement.
+Also learned: the original test video's only caption track is Korean auto-captions, so its narration is not English.
+
+### 26.7 Limits
+One labeller, small sets, auto-captions with recognition errors ("Fries the transformations"); the reader still tags about a third of moments wrongly or not at all; menu paths marked `tutorial` or `author` are not vendor documentation; Autodesk pages are 2009 to 2026 versions as stated per source; nothing was tried inside Maya or Blender; Houdini, Reddit and Stack Exchange are not covered; the captions adapter uses an unofficial endpoint (against YouTube's terms, development only; its cache is deleted after 30 days).

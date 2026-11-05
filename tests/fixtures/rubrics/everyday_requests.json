@@ -1,0 +1,123 @@
+{
+ "_about": "Plain-language requests written by the assistant AFTER it wrote the knowledge base, so this is a development set and not an independent test. 'ok' lists the catalog features that count as understood; [] = not about rigging, so nothing should be inferred.",
+ "requests": [
+  {
+   "text": "how do I name my joints properly",
+   "app": "maya",
+   "ok": [
+    "SKEL-03"
+   ]
+  },
+  {
+   "text": "where do I put the bones on my character so it bends right",
+   "app": "maya",
+   "ok": [
+    "SKEL-01",
+    "SKEL-02"
+   ]
+  },
+  {
+   "text": "how do I make controls for my character's feet",
+   "app": "maya",
+   "ok": [
+    "CTRL-01",
+    "CTRL-02"
+   ]
+  },
+  {
+   "text": "how do I attach a controller to a joint so the joint follows it",
+   "app": "maya",
+   "ok": [
+    "CNST-01",
+    "CNST-02",
+    "CTRL-02"
+   ]
+  },
+  {
+   "text": "how do I add a slider to my control",
+   "app": "maya",
+   "ok": [
+    "CTRL-04"
+   ]
+  },
+  {
+   "text": "I want maya to build the rig for me automatically",
+   "app": "maya",
+   "ok": [
+    "SKEL-07",
+    "CTRL-08"
+   ]
+  },
+  {
+   "text": "how do I reset all the numbers on my controller to zero",
+   "app": "maya",
+   "ok": [
+    "PREP-04",
+    "CTRL-03"
+   ]
+  },
+  {
+   "text": "how do I make the knee point forward with a control",
+   "app": "maya",
+   "ok": [
+    "IKFK-04"
+   ]
+  },
+  {
+   "text": "how do I stop the knee from popping the wrong way",
+   "app": "maya",
+   "ok": [
+    "IKFK-09",
+    "IKFK-04"
+   ]
+  },
+  {
+   "text": "how do I paint weights so the elbow stops collapsing",
+   "app": "maya",
+   "ok": [
+    "SKIN-03"
+   ]
+  },
+  {
+   "text": "how do I make my mesh follow the skeleton",
+   "app": "maya",
+   "ok": [
+    "SKIN-01"
+   ]
+  },
+  {
+   "text": "how do I fix bones twisting the wrong way in blender",
+   "app": "blender",
+   "ok": [
+    "ORNT-02"
+   ]
+  },
+  {
+   "text": "copy the left arm bones to the right side in blender",
+   "app": "blender",
+   "ok": [
+    "SKEL-04"
+   ]
+  },
+  {
+   "text": "how do I bind my mesh in blender with automatic weights",
+   "app": "blender",
+   "ok": [
+    "SKIN-01"
+   ]
+  },
+  {
+   "text": "how do I set up ik for a leg in blender",
+   "app": "blender",
+   "ok": [
+    "IKFK-02",
+    "IKFK-03"
+   ]
+  },
+  {
+   "text": "what is the best pizza recipe",
+   "app": "maya",
+   "ok": []
+  }
+ ]
+}

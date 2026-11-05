@@ -1,0 +1,133 @@
+{
+ "video_id": "dc3iRo0hb3g",
+ "app": "maya",
+ "prompt_version": "v4",
+ "model_id": "gemini-3.6-flash",
+ "usage": {
+  "prompt": 108268,
+  "output": 1188,
+  "thoughts": 1642,
+  "total": 111098
+ },
+ "raw_response": {
+  "title": "Maya Character Rigging - Part 9. create FK, IK and Skin leg joint",
+  "steps": [
+   {
+    "goal": "Create a leg joint chain in side view",
+    "confidence": 0.95,
+    "feature_id": "SKEL-01",
+    "support": "both",
+    "visual_evidence": "Joint tool is activated and joints are created sequentially down the leg.",
+    "evidence": [
+     "Skeleton menu",
+     "Create Joints"
+    ]
+   },
+   {
+    "goal": "Position leg joints to align with character mesh landmarks",
+    "confidence": 0.9,
+    "feature_id": "SKEL-02",
+    "support": "both",
+    "visual_evidence": "Joints are moved in front and side orthographic views using Move Tool.",
+    "evidence": [
+     "hip position",
+     "knee line"
+    ]
+   },
+   {
+    "goal": "Rename skin leg joints with proper side and hierarchy tags",
+    "confidence": 0.95,
+    "feature_id": "SKEL-03",
+    "support": "both",
+    "visual_evidence": "Joints in Outliner renamed to left_hip_skin_jnt, left_knee_skin_jnt, etc.",
+    "evidence": [
+     "left_hip_skin_jnt",
+     "left_knee_skin_jnt",
+     "left_ankle_skin_jnt",
+     "left_ball_skin_jnt",
+     "left_toe_skin_jnt"
+    ]
+   },
+   {
+    "goal": "Orient the leg joint chain axes",
+    "confidence": 0.95,
+    "feature_id": "ORNT-02",
+    "support": "both",
+    "visual_evidence": "Orient Joint Options window open, setting Primary Axis to X, Secondary Axis to Y.",
+    "evidence": [
+     "Skeleton > Orient Joint",
+     "Primary Axis X"
+    ]
+   },
+   {
+    "goal": "Duplicate skin leg chain to create IK and FK joint chains and rename them",
+    "confidence": 0.95,
+    "feature_id": "SKEL-05",
+    "support": "both",
+    "visual_evidence": "Search and Replace Names dialog used to replace 'skin' with 'ik' and 'fk'.",
+    "evidence": [
+     "Modify > Search and Replace Names...",
+     "Search For: skin",
+     "Replace With: ik"
+    ]
+   },
+   {
+    "goal": "Parent constrain skin leg joints between IK and FK joint counterparts",
+    "confidence": 0.95,
+    "feature_id": "CNST-04",
+    "support": "both",
+    "visual_evidence": "Selecting IK joint, FK joint, then Skin joint, applying Parent Constraint with Maintain Offset enabled.",
+    "evidence": [
+     "Constrain > Parent",
+     "Maintain offset"
+    ]
+   },
+   {
+    "goal": "Create 3D text geometry control for FK/IK switch",
+    "confidence": 0.9,
+    "feature_id": "CTRL-01",
+    "support": "both",
+    "visual_evidence": "3D Type object added with text 'FK - IK' and formatted near the hip region.",
+    "evidence": [
+     "Create > Type",
+     "FK - IK"
+    ]
+   },
+   {
+    "goal": "Add FK_IK_Switch attribute to the switch control object",
+    "confidence": 0.95,
+    "feature_id": "CTRL-04",
+    "support": "both",
+    "visual_evidence": "Add Attribute window opened, creating FK_IK_Switch floating attribute from 0 to 1.",
+    "evidence": [
+     "Edit > Add Attribute...",
+     "Attribute Name: FK_IK_Switch",
+     "Minimum: 0",
+     "Maximum: 1"
+    ]
+   },
+   {
+    "goal": "Connect FK_IK_Switch attribute to constraint weights using Node Editor and Reverse node",
+    "confidence": 0.95,
+    "feature_id": "IKFK-06",
+    "support": "both",
+    "visual_evidence": "Node Editor shown connecting switch attribute directly to IK constraint weights and through a reverse node to FK constraint weights.",
+    "evidence": [
+     "Node Editor",
+     "reverse node"
+    ]
+   },
+   {
+    "goal": "Test FK/IK blending functionality on the leg rig",
+    "confidence": 0.9,
+    "feature_id": "IKFK-06",
+    "support": "demonstrated",
+    "visual_evidence": "Posing FK and IK legs separately, then scrubbing FK_IK_Switch value between 0 and 1 to show skin joint matching.",
+    "evidence": [
+     "Switch from 0 to 1",
+     "skin joint follow"
+    ]
+   }
+  ]
+ }
+}

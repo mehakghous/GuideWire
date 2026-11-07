@@ -85,3 +85,18 @@ def test_old_session_files_without_an_app_still_open(tmp_path):
     d.pop("app")
     (tmp_path / "s.json").write_text(json.dumps(d), encoding="utf-8")
     assert Service.open(tmp_path / "s.json", use_kb=False).session.app == "blender"
+
+
+def test_blender_node_types_are_recognised_from_spoken_names_and_targets_are_not_made():
+    from ingestion.rigging_text import _created_nodes
+    assert _created_nodes("Add an armature then add an IK constraint to the lower bone", "blender") == ["ARMATURE", "CONSTRAINT_IK"]    # the bone is the target
+    assert _created_nodes("Add an armature modifier to the mesh", "blender") == ["MODIFIER_ARMATURE"]                                   # a modifier, not an armature object
+    assert _created_nodes("Add a bone", "blender") == ["BONE"]
+    assert _created_nodes("Add a Rig Doctor after the skeleton", "houdini") == ["Rig Doctor"]                                           # the skeleton already exists
+    assert _created_nodes("Create an IK handle on the leg joint", "maya") == ["ikHandle"]
+
+
+def test_blender_written_rigging_steps_carry_node_states_like_maya_and_houdini():
+    sl, _ = rigging_to_steplist("Add an armature\nAdd an IK constraint to the lower bone", "blender")
+    assert [p.target for p in sl.steps[0].expected_state] == ["ARMATURE"]
+    assert [p.target for p in sl.steps[1].expected_state] == ["CONSTRAINT_IK"]

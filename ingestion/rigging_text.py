@@ -44,14 +44,38 @@ def looks_like_rigging(text: str, app: str) -> bool:
 
 
 def _node_words(node: str) -> str:
+    """How a person says a node type. Maya camelCase (ikHandle -> "ik handle"), Houdini labels (Rig Doctor), and Blender identifiers: ARMATURE -> "armature",
+    CONSTRAINT_IK -> "ik constraint", MODIFIER_ARMATURE -> "armature modifier" (the prefixes only keep Blender's same-named things apart)."""
+    if node.isupper() or "_" in node:
+        for prefix, suffix in (("CONSTRAINT_", "constraint"), ("MODIFIER_", "modifier")):
+            if node.startswith(prefix):
+                return norm(f"{node[len(prefix):].replace('_', ' ')} {suffix}")
+        return norm(node.replace("_", " "))
     return norm(re.sub(r"(?<!^)(?=[A-Z])", " ", node))          # ikHandle -> "ik handle", Rig Doctor -> "rig doctor"
+
+
+_TARGET_PREPS = frozenset("to on onto of for from in into at under over after before between using".split())
+
+
+def _made(tokens: list[str], phrase: str) -> bool:
+    """The clause names this node type somewhere other than as the target of a preposition ("add an IK constraint to the bone" makes a constraint, not a bone)."""
+    want = phrase.split()
+    n = len(want)
+    for i in range(len(tokens) - n + 1):
+        if tokens[i:i + n] == want or (tokens[i:i + n - 1] == want[:-1] and tokens[i + n - 1] == want[-1] + "s"):
+            if not _TARGET_PREPS & set(tokens[max(0, i - 3):i]):          # "to the lower bone": a preposition within three words before it
+                return True
+    return False
 
 
 def _created_nodes(clause: str, app: str) -> list[str]:
     if not _CREATE.search(clause):
         return []
     words = f" {norm(clause)} "
-    return sorted(n for n in get_profile(app).nodes if re.search(rf" {re.escape(_node_words(n))}s? ", words))
+    tokens = words.split()
+    hits = {n: _node_words(n) for n in get_profile(app).nodes if _made(tokens, _node_words(n))}
+    # "add an armature modifier" says a modifier, not an armature object: drop a match whose words sit inside a longer match
+    return sorted(n for n, w in hits.items() if not any(m != n and f" {w} " in f" {mw} " for m, mw in hits.items()))
 
 
 def prerequisite_notes(sl: StepList) -> tuple[list[str], list[str]]:

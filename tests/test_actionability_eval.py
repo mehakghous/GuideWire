@@ -59,7 +59,7 @@ def test_cli_score_and_instructions_work_on_a_saved_step_list(tmp_path, capsys):
     assert cli.main(["score", str(f)]) == 0
     assert cli.main(["review", "show", str(f)]) == 0
     shown = capsys.readouterr().out
-    assert "[shown] Open Skeleton > Orient Joint." in shown and "[catalog] Check that" in shown
+    assert "[shown] Open Skeleton > Orient Joint." in shown and "[catalog] " in shown           # catalog guidance is labelled as such (the knowledge base now supplies most check lines)
 
 
 def test_cli_score_can_compare_several_files(tmp_path, capsys):

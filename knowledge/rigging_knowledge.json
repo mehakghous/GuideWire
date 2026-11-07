@@ -1,5 +1,5 @@
 {
-  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini beyond two entries (APEX AutoRig, capture weights; no Houdini animation, retargeting or Rig Doctor), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16.",
+  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini animation, retargeting, Motion Clips and mocap (Houdini has eight entries: skeleton, orient, mirror, IK Chains, Rig Doctor, capture weights, AutoRig, KineFX workflow), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16.",
   "retrieved": "2026-10-16",
   "tiers": {
     "official": "vendor documentation",
@@ -204,6 +204,144 @@
       "title": "SideFX forum: FBX character looks wrong in FBX Character Import (piece captured in a different rest pose)",
       "url": "https://www.sidefx.com/forum/post/347964/",
       "tier": "community"
+    },
+    "H6": {
+      "title": "SideFX Houdini docs: Skeleton (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--skeleton.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "H7": {
+      "title": "SideFX Houdini docs: Orient Joints 2.0 (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--orientjoints.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "H8": {
+      "title": "SideFX Houdini docs: Skeleton Mirror (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--skeletonmirror.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "H9": {
+      "title": "SideFX Houdini docs: IK Chains (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--ikchains.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "H10": {
+      "title": "SideFX Houdini docs: Rig Doctor (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--rigdoctor.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "H11": {
+      "title": "SideFX Houdini docs: KineFX introduction",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/overview.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "B11": {
+      "title": "Blender manual: Adding Bones",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/add_bones.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "B12": {
+      "title": "Blender manual: Copy Rotation Constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/transform/copy_rotation.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "B13": {
+      "title": "Blender manual: Child Of Constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/relationship/child_of.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "B14": {
+      "title": "Blender manual: Bone Collections (Armature properties panel)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/properties/bone_collections.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "M10": {
+      "title": "Autodesk Maya help: Mirror joint chains",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-CEA7B7ED-10B9-43C7-AD15-8B7E4DC44360.htm",
+      "tier": "official",
+      "version": "Maya help page, version not stated on the page, fetched 2026-10-22"
+    },
+    "M11": {
+      "title": "Autodesk Maya help: Insert joints",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-CharacterAnimation/files/GUID-EA39CCE9-2B02-4399-9374-3141E7A089BF.htm",
+      "tier": "official",
+      "version": "Maya help page, version not stated on the page, fetched 2026-10-22"
+    },
+    "M12": {
+      "title": "Autodesk Maya help: Aim constraint options",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-CharacterAnimation/files/GUID-D4769D95-EC0E-4C94-AF60-8EB3FC4305E4.htm",
+      "tier": "official",
+      "version": "Maya help page (links carry v=2025), fetched 2026-10-22"
+    },
+    "M13": {
+      "title": "Autodesk Maya help: Mirror Skin Weights Options",
+      "url": "https://help.autodesk.com/cloudhelp/2023/ENU/Maya-CharacterAnimation/files/GUID-27FE7EDB-4078-473A-B001-C9AFAB3A77A3.htm",
+      "tier": "official",
+      "version": "Maya help page, version not stated on the page, fetched 2026-10-22"
+    },
+    "B15": {
+      "title": "Blender manual: Apply (object transforms)",
+      "url": "https://docs.blender.org/manual/en/latest/scene_layout/object/editing/apply.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "B16": {
+      "title": "Blender manual: Apply (pose, Pose Mode)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/posing/editing/apply.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "B17": {
+      "title": "Blender manual: Clear Transform (pose)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/posing/editing/clear.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "B18": {
+      "title": "Blender manual: Posing introduction",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/posing/introduction.html",
+      "tier": "official",
+      "version": "manual main (Blender 5.2 LTS), read from the local manual index 2026-10-22"
+    },
+    "H12": {
+      "title": "SideFX Houdini docs: Rig Pose (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--rigpose.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "H13": {
+      "title": "SideFX Houdini docs: Rig Stash Pose (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--rigstashpose.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-10-22"
+    },
+    "M14": {
+      "title": "Autodesk Maya help: Go to the bind pose",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-CharacterAnimation/files/GUID-F0342988-9ED1-4C86-BE65-0D624C9C3C03.htm",
+      "tier": "official",
+      "version": "Maya help page, fetched 2026-10-22"
+    },
+    "M15": {
+      "title": "Autodesk Maya help: Troubleshoot reaching the bind pose",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-D47C31C7-428F-4A54-B104-49C51F3856E5.htm",
+      "tier": "official",
+      "version": "Maya help page, fetched 2026-10-22"
+    },
+    "M16": {
+      "title": "Autodesk Maya help: Set transformation values to zero (Reset Transformations)",
+      "url": "https://help.autodesk.com/cloudhelp/2017/ENU/MayaLT/files/GUID-23250CAD-50E7-482F-9BC0-157833597B8F.htm",
+      "tier": "official",
+      "version": "Maya help page, version not stated, fetched 2026-10-22"
     }
   },
   "entries": [
@@ -1270,7 +1408,18 @@
             "B10"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "SKIN-01": {
+          "makes": [
+            "MODIFIER_ARMATURE"
+          ],
+          "needs": [
+            "ARMATURE",
+            "MESH"
+          ]
+        }
+      }
     },
     {
       "id": "blender.ik_constraint",
@@ -1305,7 +1454,7 @@
             "Chain Length",
             "Use Tail",
             "Stretch",
-            "Weight Position",
+            "Weight",
             "Rotation",
             "Influence"
           ],
@@ -1410,7 +1559,18 @@
             "B9"
           ]
         }
-      ]
+      ],
+      "effects": {
+        "IKFK-02": {
+          "makes": [
+            "CONSTRAINT_IK"
+          ],
+          "needs": [
+            "ARMATURE",
+            "BONE"
+          ]
+        }
+      }
     },
     {
       "id": "blender.bone_roll",
@@ -1433,7 +1593,7 @@
           "tier": "official",
           "source": "B3",
           "options": [
-            "Axis Orientation",
+            "Type",
             "Flip Axis",
             "Shortest Rotation"
           ],
@@ -1924,7 +2084,8 @@
             "Segments"
           ],
           "options_tier": "official",
-          "options_source": "H1"
+          "options_source": "H1",
+          "options_in": "component menu filled from the installed rig components, not a fixed parameter list"
         },
         {
           "path": "APEX Configure Controls (SOP)",
@@ -2069,7 +2230,8 @@
             "Show Handle"
           ],
           "options_tier": "official",
-          "options_source": "H2"
+          "options_source": "H2",
+          "options_in": "viewer state handle toggle, not a node parameter"
         },
         {
           "path": "Characters tab > Capture Geometry (shelf tool)",
@@ -2087,7 +2249,8 @@
             "High Precision"
           ],
           "options_tier": "official",
-          "options_source": "H3"
+          "options_source": "H3",
+          "options_in": "shelf tool dialog, not a node"
         }
       ],
       "prerequisites": [
@@ -2218,7 +2381,2106 @@
           ]
         }
       ],
-      "conflicts": []
+      "conflicts": [],
+      "effects": {
+        "SKIN-01": {
+          "makes": [
+            "Joint Capture Biharmonic",
+            "Joint Deform"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.skeleton_sop",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKEL-01",
+        "SKEL-02",
+        "SKEL-05",
+        "SKEL-03"
+      ],
+      "phrases": [
+        "draw a skeleton in houdini",
+        "create joints in houdini",
+        "build the skeleton with the skeleton node",
+        "add joints to the character in houdini",
+        "make a joint chain in houdini",
+        "place joints in the viewport"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton (SOP)",
+          "tier": "official",
+          "source": "H6",
+          "options": [
+            "Stash Input",
+            "Stash Merge Input",
+            "Update Stash From Output",
+            "Transfer Input Animation",
+            "Joint Color"
+          ],
+          "options_tier": "official",
+          "options_source": "H6"
+        },
+        {
+          "path": "Skeleton viewer state toolbar",
+          "tier": "official",
+          "source": "H6",
+          "options": [
+            "Name",
+            "Mode",
+            "Joint Placement",
+            "Scale Inheritance",
+            "Tweak Mode",
+            "Child Compensate"
+          ],
+          "options_tier": "official",
+          "options_source": "H6",
+          "options_in": "viewer state toolbar, not node parameters"
+        }
+      ],
+      "prerequisites": [
+        "You are working at SOP level, in a geometry network, because the Skeleton node is a SOP."
+      ],
+      "outline": [
+        {
+          "text": "Add a Skeleton node and work in its viewport state. In Create mode click in empty space to make a joint; click a joint to create a new joint parented to it; Shift-click in empty space for a floating, unparented joint.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "Press F to switch between Create and Modify mode. In Modify mode click a joint to select it, double-click to select its whole chain, hold S and drag to box select.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "Press G for Tweak Mode and drag a joint to move it and its descendants; Shift-drag moves only that joint.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "Give each joint a name in the Name field of the toolbar.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Joint Placement offers View Based, Normal Based, Freehand and Surface. Freehand snaps to the construction plane if it is shown, otherwise the joint sits on a plane perpendicular to the view.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "Delete removes the selected joint and reparents its descendants to its former parent; Shift+Delete removes it without reparenting them. Shift+Ctrl-click a link inserts a new joint into it.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "Joints are white when unselected and yellow when selected; red joints mean the hierarchy contains a cycle.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "The Skeleton node is a non-procedural, interactive way to author a skeleton; a skeleton is points connected by polygon lines.",
+          "tier": "official",
+          "sources": [
+            "H6",
+            "H11"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "No joint is red: a red joint means a cyclical, invalid hierarchy that must be fixed.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        },
+        {
+          "text": "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken.",
+          "tier": "official",
+          "sources": [
+            "H6"
+          ]
+        }
+      ],
+      "effects": {
+        "SKEL-01": {
+          "makes": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.orient_joints",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "ORNT-02",
+        "ORNT-03"
+      ],
+      "phrases": [
+        "orient the joints in houdini",
+        "fix joint orientation in houdini",
+        "set the aim and up axis of the joints",
+        "orient the skeleton"
+      ],
+      "ui": [
+        {
+          "path": "Orient Joints (SOP)",
+          "tier": "official",
+          "source": "H7",
+          "options": [
+            "Group",
+            "Configuration",
+            "Forward Vector",
+            "Up Vector",
+            "Chain Operation",
+            "Multi Child Option",
+            "Leaf Operation",
+            "Preferred Plane",
+            "Compute Local Transforms",
+            "Mirror Group"
+          ],
+          "options_tier": "official",
+          "options_source": "H7"
+        }
+      ],
+      "prerequisites": [
+        "A SOP skeleton is connected to the node's input."
+      ],
+      "outline": [
+        {
+          "text": "Connect the skeleton to Orient Joints, choose the Forward Vector (the axis that points to the children) and the Up Vector.",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        },
+        {
+          "text": "Add chain operations in order: set up the Root settings before Spine, and orient an arm before its hand so the hand can inherit the arm's up vector.",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Each joint's forward axis is oriented toward its children and its up axis toward a user-selected target; the node always outputs rigid transforms (scale 1 on all axes).",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        },
+        {
+          "text": "Chain operations are Do Nothing, Root Only, Spine, Plane, Multi Plane, World Up Vector and Rotation Offset; Preferred Plane keeps up vectors consistent with Plane and Multi Plane.",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        },
+        {
+          "text": "For a biped, the Biped Setup SOP generates biped_* groups that make it easier to select chains.",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Use the viewer state together with the parameter editor to see what each chain operation does to the joints' axes.",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Using Plane on a perfectly straight chain: no plane can be computed, so the node shows a warning and falls back to Spine.",
+          "tier": "official",
+          "sources": [
+            "H7"
+          ]
+        }
+      ],
+      "effects": {
+        "ORNT-02": {
+          "makes": [
+            "Orient Joints"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.skeleton_mirror",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKEL-04"
+      ],
+      "phrases": [
+        "mirror the skeleton in houdini",
+        "mirror the joints to the other side",
+        "build one arm and mirror it",
+        "mirror half a skeleton"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton Mirror (SOP)",
+          "tier": "official",
+          "source": "H8",
+          "options": [
+            "Group",
+            "Reflect Using",
+            "Mirror Plane",
+            "Mirror Point",
+            "Direction",
+            "Origin",
+            "Mirroring Style",
+            "Find Tokens",
+            "Replace Tokens",
+            "Token Position",
+            "Update Existing Joints",
+            "Rename Group",
+            "New Group Name",
+            "Attributes To Mirror"
+          ],
+          "options_tier": "official",
+          "options_source": "H8"
+        }
+      ],
+      "prerequisites": [
+        "Half of the skeleton exists as a SOP skeleton on the node's input."
+      ],
+      "outline": [
+        {
+          "text": "Build one half of the skeleton with the Skeleton node, connect it to Skeleton Mirror, and choose Reflect Using Mirror Plane (Direction and Origin).",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        },
+        {
+          "text": "Use Find Tokens and Replace Tokens (for example a left prefix replaced by a right one) so the duplicated joints get new names.",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Mirroring Style By Rotation mirrors posing only in rotation and flips animated translations, and avoids negative scales; By Scale mirrors rotation and translation but leaves inversely scaled transforms.",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        },
+        {
+          "text": "With Update Existing Joints on, transforms on joints already on the mirrored side are updated; with it off, duplicate joints are created with the same name.",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Joint names are unique after mirroring: the page expects names to be unique, topology-independent identifiers.",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Turning Update Existing Joints off: clashing joint names can quickly be introduced and the page warns this can cause instability.",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        },
+        {
+          "text": "Using By Scale for a rig that goes to a game engine or another package: the inverse-scaled transforms can be problematic there.",
+          "tier": "official",
+          "sources": [
+            "H8"
+          ]
+        }
+      ],
+      "effects": {
+        "SKEL-04": {
+          "makes": [
+            "Skeleton Mirror"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.ik_chains",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "IKFK-02",
+        "IKFK-03",
+        "IKFK-04",
+        "IKFK-05"
+      ],
+      "phrases": [
+        "set up ik in houdini",
+        "make an ik leg in houdini",
+        "two bone ik in houdini",
+        "add an ik goal and a twist control"
+      ],
+      "ui": [
+        {
+          "path": "IK Chains (SOP)",
+          "tier": "official",
+          "source": "H9",
+          "options": [
+            "Root Name",
+            "Mid Name",
+            "Tip Name",
+            "Match by Name",
+            "Twist Name",
+            "Goal Name",
+            "Blend",
+            "Orient Tip",
+            "Stretch",
+            "Enable Multithreading"
+          ],
+          "options_tier": "official",
+          "options_source": "H9"
+        }
+      ],
+      "prerequisites": [
+        "A SOP skeleton on the first input and a second skeleton (or points) with the goal and optional twist points on the second input."
+      ],
+      "outline": [
+        {
+          "text": "Connect the skeleton to the first input and the IK driver points to the second input.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        },
+        {
+          "text": "Type the joint names for Root Name, Mid Name and Tip Name (for example shoulder, elbow, wrist), then the Goal Name and optionally the Twist Name.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "IK Chains creates and evaluates two-bone IK solvers on a SOP skeleton. The chain joints are called Root, Mid and Tip; the page does not use the words Start Joint, End Joint or Pole Vector.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        },
+        {
+          "text": "If Twist Name is left blank, the solver uses the position of the Mid joint as the pole vector.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        },
+        {
+          "text": "Blend mixes between the input pose and the IK result; Orient Tip orients the tip joint to the goal; Stretch lets the chain stretch to reach the goal.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        },
+        {
+          "text": "The KineFX introduction lists IK Chains and Full Body IK among the pre-APEX rig behaviour nodes; rigs in Houdini 20 and later are built as APEX graphs.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the goal point: the Tip joint follows it, and the Mid joint bends toward the twist point, or toward its own position when none is given.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Enabling Enable Multithreading for one or two chains: it comes with an overhead and should only be used for many chains.",
+          "tier": "official",
+          "sources": [
+            "H9"
+          ]
+        }
+      ],
+      "effects": {
+        "IKFK-02": {
+          "makes": [
+            "IK Chains"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.rig_doctor",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "ORNT-05",
+        "ORNT-01",
+        "SKEL-03"
+      ],
+      "phrases": [
+        "check the skeleton in houdini",
+        "fix joint names in houdini",
+        "what is rig doctor",
+        "clean up the skeleton hierarchy"
+      ],
+      "ui": [
+        {
+          "path": "Rig Doctor (SOP)",
+          "tier": "official",
+          "source": "H10",
+          "options": [
+            "Sanitize Names",
+            "Initialize Missing Names",
+            "Sort Hierarchy",
+            "On Failure",
+            "Re-Orient To Child",
+            "Initialize Transforms",
+            "Freeze Time Dependent Attributes",
+            "Attributes To Freeze"
+          ],
+          "options_tier": "official",
+          "options_source": "H10"
+        }
+      ],
+      "prerequisites": [
+        "A SOP skeleton on the input."
+      ],
+      "outline": [
+        {
+          "text": "Place Rig Doctor after you change a skeleton's topology (adding, removing or reparenting joints), so later nodes can rely on a fixed topology and a name attribute.",
+          "tier": "official",
+          "sources": [
+            "H10"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Rig Doctor checks for empty point names, duplicate names and names containing spaces, a failed traversal of the hierarchy, unsorted skeletons and missing transform attributes.",
+          "tier": "official",
+          "sources": [
+            "H10"
+          ]
+        },
+        {
+          "text": "On Failure can be Warning (geometry passes through) or Error (interrupts cooking of the downstream network).",
+          "tier": "official",
+          "sources": [
+            "H10"
+          ]
+        },
+        {
+          "text": "Re-Orient To Child uses the average position when a joint has several children; leaf joints use their parent's position as the reference.",
+          "tier": "official",
+          "sources": [
+            "H10"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The node reports no warnings or errors for names or hierarchy.",
+          "tier": "official",
+          "sources": [
+            "H10"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Leaving On Failure at Error while experimenting: a failure stops everything downstream from cooking.",
+          "tier": "official",
+          "sources": [
+            "H10"
+          ]
+        }
+      ],
+      "effects": {
+        "ORNT-05": {
+          "makes": [
+            "Rig Doctor"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.kinefx_workflow",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKEL-01",
+        "SKIN-01",
+        "CTRL-08",
+        "ORNT-01"
+      ],
+      "phrases": [
+        "how does rigging work in houdini",
+        "what is kinefx",
+        "kinefx rigging order",
+        "where do i start rigging in houdini"
+      ],
+      "ui": [],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Build the skeleton and prepare a guide skeleton (extra joints, tags and properties).",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        },
+        {
+          "text": "Create skin capture weights on the geometry.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        },
+        {
+          "text": "Build the rig with APEX graphs, prebuilt rig components or the Autorig Builder.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        },
+        {
+          "text": "Assemble the elements into a packed character folder structure, then animate in the animate state or with SOPs.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "KineFX is the SOP-level character toolset for rigging, animation and retargeting; APEX is the rigging engine underneath it.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        },
+        {
+          "text": "Only data in a packed character folder structure can be displayed in the animate state; characters do not need to be packed for SOP-based animation.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        },
+        {
+          "text": "Before Houdini 20, rig logic and evaluation were tied together (Rig Pose and Bone Deform); tutorials from that time show a different workflow from APEX.",
+          "tier": "official",
+          "sources": [
+            "H11"
+          ]
+        }
+      ],
+      "verify": [],
+      "mistakes": []
+    },
+    {
+      "id": "blender.add_bones",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKEL-01",
+        "SKEL-02"
+      ],
+      "phrases": [
+        "add a bone in blender",
+        "create bones in blender",
+        "add a bone to the armature",
+        "make a bone chain in blender"
+      ],
+      "ui": [
+        {
+          "path": "Add Bone (Shift-A in Edit Mode)",
+          "tier": "official",
+          "source": "B11",
+          "options": [
+            "Name",
+            "Space",
+            "Align",
+            "Length",
+            "Deform"
+          ],
+          "options_tier": "official",
+          "options_source": "B11"
+        }
+      ],
+      "prerequisites": [
+        "An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "outline": [
+        {
+          "text": "In the 3D Viewport, in Edit Mode on the armature, press Shift-A to add a bone, then adjust Name, Space, Align, Length and Deform in the redo panel.",
+          "tier": "official",
+          "sources": [
+            "B11"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "A new bone is one unit long, oriented toward the global Z axis, with its root at the 3D cursor, with no parent, and with Deform enabled.",
+          "tier": "official",
+          "sources": [
+            "B11"
+          ]
+        },
+        {
+          "text": "Disable Deform for control bones that should not affect mesh deformation.",
+          "tier": "official",
+          "sources": [
+            "B11"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "tier": "author",
+          "sources": [
+            "B11"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Leaving Deform on for control bones: they will then move the mesh.",
+          "tier": "official",
+          "sources": [
+            "B11"
+          ]
+        }
+      ],
+      "effects": {
+        "SKEL-01": {
+          "makes": [
+            "BONE"
+          ],
+          "needs": [
+            "ARMATURE"
+          ]
+        }
+      }
+    },
+    {
+      "id": "blender.copy_rotation",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CNST-02"
+      ],
+      "phrases": [
+        "copy the rotation of a bone",
+        "make one bone follow another bones rotation",
+        "add a copy rotation constraint",
+        "copy rotation constraint in blender"
+      ],
+      "ui": [
+        {
+          "path": "Copy Rotation (bone constraint)",
+          "tier": "official",
+          "source": "B12",
+          "options": [
+            "Target",
+            "Owner",
+            "Order",
+            "Axis",
+            "Invert",
+            "Mix",
+            "Influence"
+          ],
+          "options_tier": "official",
+          "options_source": "B12"
+        }
+      ],
+      "prerequisites": [
+        "The bone or object that should follow exists, and a target object or bone to copy from."
+      ],
+      "outline": [
+        {
+          "text": "Add a Copy Rotation constraint to the owner bone or object and set its Target (and Bone, if the target is an armature).",
+          "tier": "official",
+          "sources": [
+            "B12"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The constraint forces an object or bone to match the rotation of a target, and as a side effect removes shearing.",
+          "tier": "official",
+          "sources": [
+            "B12"
+          ]
+        },
+        {
+          "text": "Mix decides how the target's rotation is combined with the owner's original rotation: Replace, Add, Before Original, After Original, or the deprecated Offset (Legacy).",
+          "tier": "official",
+          "sources": [
+            "B12"
+          ]
+        },
+        {
+          "text": "Axis chooses which axes are copied and Invert flips the sign on chosen axes; Influence sets how strongly the constraint affects the owner.",
+          "tier": "official",
+          "sources": [
+            "B12"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Rotate the target: the owner follows on the axes you enabled.",
+          "tier": "author",
+          "sources": [
+            "B12"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Relying on the old Offset checkbox behaviour: it does not work correctly with multiple axes and is deprecated; use a Mix mode instead.",
+          "tier": "official",
+          "sources": [
+            "B12"
+          ]
+        }
+      ],
+      "effects": {
+        "CNST-02": {
+          "makes": [
+            "CONSTRAINT_COPY_ROTATION"
+          ],
+          "needs": [
+            "BONE"
+          ]
+        }
+      }
+    },
+    {
+      "id": "blender.child_of",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CNST-01"
+      ],
+      "phrases": [
+        "child of constraint in blender",
+        "switch the parent of a bone",
+        "parent switching with a constraint",
+        "make a bone act like a child of another"
+      ],
+      "ui": [
+        {
+          "path": "Child Of (bone constraint)",
+          "tier": "official",
+          "source": "B13",
+          "options": [
+            "Target",
+            "Location",
+            "Rotation",
+            "Scale",
+            "Set Inverse",
+            "Clear Inverse",
+            "Influence"
+          ],
+          "options_tier": "official",
+          "options_source": "B13"
+        }
+      ],
+      "prerequisites": [
+        "The child bone or object and the target parent exist."
+      ],
+      "outline": [
+        {
+          "text": "Add a Child Of constraint to the child and set its Target to the parent object or bone.",
+          "tier": "official",
+          "sources": [
+            "B13"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The constraint transforms an object or bone as though it were a child of the target; unlike plain parenting its Influence can be animated, which allows switching between parents over time.",
+          "tier": "official",
+          "sources": [
+            "B13"
+          ]
+        },
+        {
+          "text": "The same Influence can mix several Child Of constraints into a weighted average of parents; if those parents are bones the armature may be a better choice.",
+          "tier": "official",
+          "sources": [
+            "B13"
+          ]
+        },
+        {
+          "text": "Location, Rotation and Scale choose which axes of the child are affected.",
+          "tier": "official",
+          "sources": [
+            "B13"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the target: the child follows, and its transform is not displaced when the constraint is enabled.",
+          "tier": "author",
+          "sources": [
+            "B13"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Ignoring a jump when the constraint is enabled: if the child's transform is correct with the constraint disabled but wrong with it enabled, click Set Inverse.",
+          "tier": "official",
+          "sources": [
+            "B13"
+          ]
+        }
+      ],
+      "effects": {
+        "CNST-01": {
+          "makes": [
+            "CONSTRAINT_CHILD_OF"
+          ],
+          "needs": [
+            "BONE"
+          ]
+        }
+      }
+    },
+    {
+      "id": "blender.bone_collections",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "PREP-06",
+        "CTRL-06"
+      ],
+      "phrases": [
+        "organise bones in blender",
+        "hide the deform bones",
+        "bone collections in blender",
+        "group bones into layers"
+      ],
+      "ui": [
+        {
+          "path": "Armature properties > Bone Collections",
+          "tier": "official",
+          "source": "B14",
+          "options": [
+            "Visible",
+            "Solo",
+            "Assign",
+            "Remove",
+            "Select",
+            "Deselect",
+            "Show All",
+            "Un-Solo All",
+            "Remove Unused",
+            "Move to Bone Collection"
+          ],
+          "options_tier": "official",
+          "options_source": "B14",
+          "options_in": "button text on the panel (not an RNA name, so not checked against the install)"
+        }
+      ],
+      "prerequisites": [
+        "An armature with bones; Edit Mode or Pose Mode to move bones between collections."
+      ],
+      "outline": [
+        {
+          "text": "In the Bone Collections panel create a collection, select bones, and click Assign to put the selected bones in the active collection.",
+          "tier": "official",
+          "sources": [
+            "B14"
+          ]
+        },
+        {
+          "text": "Use the Visible (eye) toggle to hide a collection in the 3D Viewport, and Solo to show only that collection.",
+          "tier": "official",
+          "sources": [
+            "B14"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bones can belong to several collections at once. Move to Bone Collection (M in Edit or Pose Mode) unassigns the selected bones from all other collections first.",
+          "tier": "official",
+          "sources": [
+            "B14"
+          ]
+        },
+        {
+          "text": "Collections can be nested by dragging one name onto another, or with Add Child Collection from the right-click menu.",
+          "tier": "official",
+          "sources": [
+            "B14"
+          ]
+        },
+        {
+          "text": "Remove Unused deletes collections that have neither bones nor children.",
+          "tier": "official",
+          "sources": [
+            "B14"
+          ]
+        }
+      ],
+      "verify": [],
+      "mistakes": []
+    },
+    {
+      "id": "maya.mirror_joint",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKEL-04"
+      ],
+      "phrases": [
+        "mirror the joints in maya",
+        "mirror the skeleton to the other side",
+        "mirror joint across yz",
+        "build one leg and mirror it",
+        "mirror the arm joints"
+      ],
+      "ui": [
+        {
+          "path": "Rigging menu set (F3) > Skeleton > Mirror Joints > options",
+          "tier": "official",
+          "source": "M10",
+          "options": [
+            "Mirror Across",
+            "Mirror Function",
+            "Search For",
+            "Replace With",
+            "Mirror",
+            "Apply",
+            "Close"
+          ],
+          "options_tier": "official",
+          "options_source": "M10",
+          "options_in": "the Mirror Joint Options window, not node attributes"
+        }
+      ],
+      "prerequisites": [
+        "The parent joint of the chain you want to mirror exists and is selected."
+      ],
+      "outline": [
+        {
+          "text": "Select the parent joint of the chain, then choose Skeleton > Mirror Joints and open its options.",
+          "tier": "official",
+          "sources": [
+            "M10"
+          ]
+        },
+        {
+          "text": "Choose Mirror Across (the plane), optionally type the old name text in Search For and the new text in Replace With so the copies are renamed, then click Mirror.",
+          "tier": "official",
+          "sources": [
+            "M10"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Mirror Across options represent a plane whose origin is at the parent joint of the original chain.",
+          "tier": "official",
+          "sources": [
+            "M10"
+          ]
+        },
+        {
+          "text": "Mirror duplicates and flips the chain and closes the window; Apply does the same and leaves the window open; Close discards the settings.",
+          "tier": "official",
+          "sources": [
+            "M10"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "A copy of the chain exists on the other side of the plane, with the names you asked for in Replace With.",
+          "tier": "author",
+          "sources": [
+            "M10"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Making the other half with Edit > Duplicate at a Scale of -1: the page says to use Skeleton > Mirror Joint instead.",
+          "tier": "official",
+          "sources": [
+            "M10"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.insert_joint",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKEL-05"
+      ],
+      "phrases": [
+        "add a joint to the chain in maya",
+        "insert a joint into the skeleton",
+        "insert joint tool",
+        "add an extra joint in the middle of the arm"
+      ],
+      "ui": [
+        {
+          "path": "Rigging menu set (F3) > Skeleton > Insert Joints",
+          "tier": "official",
+          "source": "M11"
+        }
+      ],
+      "prerequisites": [
+        "A joint chain exists; the joint you click becomes the parent of the new joint."
+      ],
+      "outline": [
+        {
+          "text": "Choose Skeleton > Insert Joints, click the joint that should be the parent of the new joint, then drag to where the new joint should go.",
+          "tier": "official",
+          "sources": [
+            "M11"
+          ]
+        },
+        {
+          "text": "Repeat for more joints, then press Enter to exit the Insert Joint Tool.",
+          "tier": "official",
+          "sources": [
+            "M11"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bones for inserted joints are oriented automatically along the axes of the bones already in the chain; the tool has no tool settings.",
+          "tier": "official",
+          "sources": [
+            "M11"
+          ]
+        },
+        {
+          "text": "For a bound character the bind pose adjusts automatically when you insert joints and the skin history is retained.",
+          "tier": "official",
+          "sources": [
+            "M11"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The new joint appears in the chain in the Outliner under the joint you clicked.",
+          "tier": "author",
+          "sources": [
+            "M11"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Expecting an inserted joint to move the skin: it influences nothing until you add it with Skin > Edit Influence > Add Influence.",
+          "tier": "official",
+          "sources": [
+            "M11"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.aim_constraint",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CNST-03"
+      ],
+      "phrases": [
+        "aim constraint in maya",
+        "make the eye look at a target",
+        "look at constraint in maya",
+        "point an object at another object",
+        "aim constraint up vector"
+      ],
+      "ui": [
+        {
+          "path": "Animation or Rigging menu set > Constrain > Aim > options",
+          "tier": "official",
+          "source": "M12",
+          "options": [
+            "Maintain Offset",
+            "Offset",
+            "Animation Layer",
+            "Set Layer To Override",
+            "Constraint Axes",
+            "Weight",
+            "World Up Object"
+          ],
+          "options_tier": "official",
+          "options_source": "M12",
+          "options_in": "the Aim Constraint Options window, not node attributes"
+        },
+        {
+          "path": "aimConstraint node (Attribute Editor)",
+          "tier": "official",
+          "source": "M12",
+          "options": [
+            "Aim Vector",
+            "Up Vector",
+            "World Up Type",
+            "World Up Vector",
+            "Scene Up",
+            "Object Up",
+            "Object Rotation Up",
+            "Vector",
+            "None"
+          ],
+          "options_tier": "official",
+          "options_source": "M12",
+          "options_node": "aimConstraint"
+        }
+      ],
+      "prerequisites": [
+        "The object to turn and the target to aim at both exist."
+      ],
+      "outline": [
+        {
+          "text": "Select the target(s), then the object to constrain, and choose Constrain > Aim.",
+          "tier": "author",
+          "sources": [
+            "M12"
+          ]
+        },
+        {
+          "text": "Set Aim Vector (the local axis that points at the target, default local +X) and Up Vector (default local +Y), then choose a World Up Type.",
+          "tier": "official",
+          "sources": [
+            "M12"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "World Up Type choices are Scene Up, Object Up, Object Rotation Up, Vector (the default) and None; the World Up Vector defaults to (0, 1, 0), the positive Y axis.",
+          "tier": "official",
+          "sources": [
+            "M12"
+          ]
+        },
+        {
+          "text": "Object Up and Object Rotation Up use a world up object, which is given with the -wuo flag of the aimConstraint MEL command.",
+          "tier": "official",
+          "sources": [
+            "M12"
+          ]
+        },
+        {
+          "text": "Weight sets how strongly the targets influence the orientation, from 0 to 10, default 1.",
+          "tier": "official",
+          "sources": [
+            "M12"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the target: the constrained object keeps its aim axis pointing at it without spinning around that axis.",
+          "tier": "author",
+          "sources": [
+            "M12"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Pointing the Up Vector in the same direction as the Aim Vector, or setting World Up Type to None: the constrained object then depends on motion history and can flip.",
+          "tier": "official",
+          "sources": [
+            "M12"
+          ]
+        }
+      ],
+      "effects": {
+        "CNST-03": {
+          "makes": [
+            "aimConstraint"
+          ]
+        }
+      }
+    },
+    {
+      "id": "maya.mirror_skin_weights",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKIN-05"
+      ],
+      "phrases": [
+        "mirror skin weights in maya",
+        "copy the left weights to the right",
+        "mirror the weights",
+        "mirror skin weights options"
+      ],
+      "ui": [
+        {
+          "path": "Skin > Mirror Skin Weights > options",
+          "tier": "official",
+          "source": "M13",
+          "options": [
+            "Mirror Across",
+            "Direction",
+            "Surface Association",
+            "Influence Association",
+            "Normalize"
+          ],
+          "options_tier": "official",
+          "options_source": "M13",
+          "options_in": "the Mirror Skin Weights Options window, not node attributes"
+        }
+      ],
+      "prerequisites": [
+        "The mesh is bound to a skeleton whose two halves are joints that correspond to each other."
+      ],
+      "outline": [
+        {
+          "text": "Select the skinned mesh, choose Skin > Mirror Skin Weights, set Mirror Across and Direction, set Surface Association and Influence Association, then apply.",
+          "tier": "official",
+          "sources": [
+            "M13"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Surface Association is Closest point on surface (the default), Raycast or Closest component; Influence Association pairs joints by Closest joint (the default for the first pass), One to one, Label or None, in up to two passes.",
+          "tier": "official",
+          "sources": [
+            "M13"
+          ]
+        },
+        {
+          "text": "Normalize scales each vertex's influences so they total 1.0 (for example 1.2 and 0.8 become 0.6 and 0.4).",
+          "tier": "official",
+          "sources": [
+            "M13"
+          ]
+        },
+        {
+          "text": "Reflection is disabled in the Paint Skin Weights Tool, so Skin > Mirror Skin Weights is the way to mirror weights.",
+          "tier": "official",
+          "sources": [
+            "M13"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Paint Skin Weights on the target side shows weights that mirror the source side.",
+          "tier": "author",
+          "sources": [
+            "M13"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Using One to one when the two sides do not have identical skeleton hierarchies.",
+          "tier": "official",
+          "sources": [
+            "M13"
+          ]
+        },
+        {
+          "text": "Leaving a second Influence Association pass on when one pass is enough: set the second to None.",
+          "tier": "official",
+          "sources": [
+            "M13"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.apply_transforms",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "PREP-04"
+      ],
+      "phrases": [
+        "apply the transforms in blender",
+        "freeze transformations in blender",
+        "reset the scale of the object",
+        "apply scale before rigging",
+        "clear the object transform but keep the shape"
+      ],
+      "ui": [
+        {
+          "path": "Apply > Transforms",
+          "tier": "official",
+          "source": "B15",
+          "options": [
+            "Location",
+            "Rotation",
+            "Scale",
+            "Apply Properties",
+            "Corrective Flip Normals"
+          ],
+          "options_tier": "official",
+          "options_source": "B15"
+        }
+      ],
+      "prerequisites": [
+        "The object (the mesh you will skin) is selected in Object Mode."
+      ],
+      "outline": [
+        {
+          "text": "Select the object and use Apply > Transforms (Location, Rotation, Scale or Rotation & Scale) so the transform values become neutral while the object stays where it is.",
+          "tier": "official",
+          "sources": [
+            "B15"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Applying transforms resets Location, Rotation or Scale values while visually keeping the object in place: the origin moves to the global origin, rotation becomes zero and scale becomes 1.0, and the geometry is adjusted so it looks unchanged.",
+          "tier": "official",
+          "sources": [
+            "B15"
+          ]
+        },
+        {
+          "text": "Applying transforms can affect how modifiers, constraints and parenting behave, because they often depend on an object's transform values; objects with children apply the transform to the children too.",
+          "tier": "official",
+          "sources": [
+            "B15"
+          ]
+        },
+        {
+          "text": "Corrective Flip Normals flips normals when a negative scale is applied, which avoids inverted shading.",
+          "tier": "official",
+          "sources": [
+            "B15"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The object's Location is 0, Rotation is 0 and Scale is 1 in the Object properties, and the mesh has not moved or changed size in the viewport.",
+          "tier": "author",
+          "sources": [
+            "B15"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Applying transforms after constraints or a parent are set up, or on an object that is already skinned: constraints, modifiers and parenting depend on those values and can change.",
+          "tier": "official",
+          "sources": [
+            "B15"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.pose_as_rest_pose",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "PREP-05"
+      ],
+      "phrases": [
+        "set the rest pose in blender",
+        "make the current pose the rest pose",
+        "apply pose as rest pose",
+        "change the t pose of the armature",
+        "fix the bind pose"
+      ],
+      "ui": [
+        {
+          "path": "Apply > Pose as Rest Pose (Pose Mode)",
+          "tier": "official",
+          "source": "B16",
+          "options": [
+            "Pose as Rest Pose",
+            "Pose Selected as Rest Pose"
+          ],
+          "options_tier": "official",
+          "options_source": "B16",
+          "options_in": "menu labels in the Apply menu; the operator itself is named \"Apply Pose as Rest Pose\" in Blender 5.2.2"
+        }
+      ],
+      "prerequisites": [
+        "The armature is in Pose Mode and posed the way you want its new rest pose to be."
+      ],
+      "outline": [
+        {
+          "text": "In Pose Mode pose the bones, then choose Apply > Pose as Rest Pose (or Pose Selected as Rest Pose for only the selected bones).",
+          "tier": "official",
+          "sources": [
+            "B16"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Pose as Rest Pose applies the current bone transforms to the armature in Edit Mode, so the armature's undeformed state changes to the current pose; meshes deformed by the armature are reset to their undeformed state relative to the new rest pose.",
+          "tier": "official",
+          "sources": [
+            "B16"
+          ]
+        },
+        {
+          "text": "Pose Selected as Rest Pose does the same for the selected bones only; unselected bones keep their original rest pose transforms.",
+          "tier": "official",
+          "sources": [
+            "B16"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Clear the pose transforms (Clear Transform > All): the armature stays in the new pose.",
+          "tier": "author",
+          "sources": [
+            "B17"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Applying a rest pose casually: it permanently changes the armature structure and can require re-binding or adjusting skinning, constraints, drivers, animations and exported assets.",
+          "tier": "official",
+          "sources": [
+            "B16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.clear_pose_transform",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ORNT-04"
+      ],
+      "phrases": [
+        "reset the pose in blender",
+        "clear the bone transforms",
+        "put the armature back to rest",
+        "zero out the pose",
+        "reset bones to default"
+      ],
+      "ui": [
+        {
+          "path": "Pose > Clear Transform",
+          "tier": "official",
+          "source": "B17",
+          "options": [
+            "All",
+            "Location",
+            "Rotation",
+            "Scale",
+            "Only Selected"
+          ],
+          "options_tier": "official",
+          "options_source": "B17"
+        }
+      ],
+      "prerequisites": [
+        "The armature is in Pose Mode."
+      ],
+      "outline": [
+        {
+          "text": "In Pose Mode select the bones (or none, to affect all) and use Clear Transform > All, or Alt-G, Alt-R and Alt-S for location, rotation and scale separately.",
+          "tier": "official",
+          "sources": [
+            "B17"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "All resets location, rotation and scaling of the selected bones to their default values; Alt-G, Alt-R and Alt-S clear them individually.",
+          "tier": "official",
+          "sources": [
+            "B17"
+          ]
+        },
+        {
+          "text": "Reset Unkeyed clears the transforms to their keyframe state; Only Selected chooses between the selected bones and all bones.",
+          "tier": "official",
+          "sources": [
+            "B17"
+          ]
+        },
+        {
+          "text": "In Envelope visualization Alt-S does not clear scale but scales the Distance influence area of the selected bones.",
+          "tier": "official",
+          "sources": [
+            "B17"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Each bone returns to its rest position: location and rotation 0, scale 1 in the bone's Transform panel.",
+          "tier": "author",
+          "sources": [
+            "B18"
+          ]
+        }
+      ],
+      "mistakes": []
+    },
+    {
+      "id": "blender.fk_posing",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "IKFK-01"
+      ],
+      "phrases": [
+        "pose a bone in blender",
+        "rotate the bones to pose the character",
+        "fk pose in blender",
+        "pose mode in blender",
+        "move the arm by rotating bones"
+      ],
+      "ui": [
+        {
+          "path": "Mode selector > Pose Mode",
+          "tier": "official",
+          "source": "B18"
+        }
+      ],
+      "prerequisites": [
+        "The armature exists; for the mesh to follow, it is skinned to the armature."
+      ],
+      "outline": [
+        {
+          "text": "Switch the armature to Pose Mode, select a bone and rotate it; each child bone follows its parent.",
+          "tier": "author",
+          "sources": [
+            "B18"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Edit Mode edits the default rest position of an armature and Object Mode transforms whole objects, so bones are posed in Pose Mode.",
+          "tier": "official",
+          "sources": [
+            "B18"
+          ]
+        },
+        {
+          "text": "In rest position each bone has neutral values (0 for position and rotation, 1 for scale); editing a bone in Pose Mode creates an offset from its rest position.",
+          "tier": "official",
+          "sources": [
+            "B18"
+          ]
+        },
+        {
+          "text": "Bone colours: gray default, blue wireframe in Pose Mode, green with a constraint, yellow with an IK solver constraint.",
+          "tier": "official",
+          "sources": [
+            "B18"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The skinned mesh deforms as the bone rotates.",
+          "tier": "author",
+          "sources": [
+            "B18"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Trying to pose bones in Edit Mode: that changes the rest position instead of creating a pose.",
+          "tier": "official",
+          "sources": [
+            "B18"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.rig_pose",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "IKFK-01",
+        "ORNT-04"
+      ],
+      "phrases": [
+        "pose the skeleton in houdini",
+        "rotate the joints to pose the rig",
+        "rig pose node",
+        "reset the pose in houdini",
+        "fk pose in houdini"
+      ],
+      "ui": [
+        {
+          "path": "Rig Pose (SOP)",
+          "tier": "official",
+          "source": "H12",
+          "options": [
+            "Mode",
+            "Pre-Multiply",
+            "Post-Multiply",
+            "Override",
+            "From Rest Pose",
+            "Rest Pose Attribute",
+            "World Space",
+            "Set All Transformations to Default",
+            "Bake From Rest Pose",
+            "Bake From Input",
+            "Bake Current Input Pose to Animation Channels",
+            "Bake Input Sequence into Animation Channels"
+          ],
+          "options_tier": "official",
+          "options_source": "H12"
+        }
+      ],
+      "prerequisites": [
+        "A SOP skeleton or rig is connected to the node's input."
+      ],
+      "outline": [
+        {
+          "text": "Add a Rig Pose node after the skeleton and use its viewport state: select a joint and rotate it. Q selects the parent joint, A the first child, Z the next sibling.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        },
+        {
+          "text": "To turn poses into animation channels use the Bake buttons on the node (Bake Current Input Pose to Animation Channels, or Bake Input Sequence into Animation Channels for a range of frames). These are the labels on the node in Houdini 22.0.466; what each bake does exactly was not checked.",
+          "tier": "author",
+          "sources": [
+            "H12"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Mode decides how an edit is applied: Pre-Multiply (the default) layers transforms on the input, typically for FK rotations; Post-Multiply changes the offset from the parent; Override replaces input animation; From Rest Pose restores a point to the pose in the Rest Pose Attribute.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        },
+        {
+          "text": "Set All Transformations to Default returns Translate, Rotate and Scale to defaults even if animated; on an existing keyframe it replaces the animated values with defaults.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        },
+        {
+          "text": "With joint limits from the Configure Joints SOP, Enforce Transform Limits (toggle with F) stops rotation past the limits.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Moving a joint in the viewport changes the Transformations entries on the node and the joints below it follow.",
+          "tier": "author",
+          "sources": [
+            "H12"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Changing World Space after you already have edits on the pose: it will likely produce erratic results; use separate Rig Pose nodes for mixed local and world-space edits.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        },
+        {
+          "text": "Using Override and expecting input animation to survive: it replaces the input animation for that point.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        }
+      ],
+      "effects": {
+        "IKFK-01": {
+          "makes": [
+            "Rig Pose"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "houdini.rig_stash_pose",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "PREP-05"
+      ],
+      "phrases": [
+        "store a pose in houdini",
+        "stash the rest pose",
+        "save the current pose on the skeleton",
+        "restore the stored pose"
+      ],
+      "ui": [
+        {
+          "path": "Rig Stash Pose (SOP)",
+          "tier": "official",
+          "source": "H13",
+          "options": [
+            "Attribute Name",
+            "Mode",
+            "Store",
+            "Restore",
+            "Clear Existing Attribute",
+            "Method",
+            "Time Shift",
+            "Stash SOP",
+            "Frame Source",
+            "Frame"
+          ],
+          "options_tier": "official",
+          "options_source": "H13"
+        }
+      ],
+      "prerequisites": [
+        "A SOP skeleton in the pose you want to store."
+      ],
+      "outline": [
+        {
+          "text": "Connect the posed skeleton to Rig Stash Pose, name the point attribute in Attribute Name, set Mode to Store; later set Mode to Restore to apply it again.",
+          "tier": "official",
+          "sources": [
+            "H13"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The node stores a static pose on a skeleton as a matrix point attribute for use downstream; with a second input connected, that input's pose is written to the attribute.",
+          "tier": "official",
+          "sources": [
+            "H13"
+          ]
+        },
+        {
+          "text": "The documentation calls it a static pose; it does not call it a rest pose or bind pose, so whether you use it as a rest pose is your choice of workflow.",
+          "tier": "official",
+          "sources": [
+            "H13"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After Restore, the skeleton returns to the stored pose.",
+          "tier": "author",
+          "sources": [
+            "H13"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Choosing the Stash SOP method without knowing it is destructive: it replaces the current pose on the first input.",
+          "tier": "official",
+          "sources": [
+            "H13"
+          ]
+        },
+        {
+          "text": "Leaving Clear Existing Attribute on by accident: it clears the existing point attribute before storing.",
+          "tier": "official",
+          "sources": [
+            "H13"
+          ]
+        }
+      ],
+      "effects": {
+        "PREP-05": {
+          "makes": [
+            "Rig Stash Pose"
+          ],
+          "needs": [
+            "Skeleton"
+          ]
+        }
+      }
+    },
+    {
+      "id": "maya.go_to_bind_pose",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "PREP-05"
+      ],
+      "phrases": [
+        "go to bind pose in maya",
+        "return the skeleton to the bind pose",
+        "reset the character to the t pose",
+        "snap the rig back to bind pose",
+        "skeleton wont go to bind pose"
+      ],
+      "ui": [
+        {
+          "path": "Rigging menu set (F3) > Skin > Go To Bind Pose",
+          "tier": "official",
+          "source": "M14"
+        },
+        {
+          "path": "Modify > Evaluate Nodes",
+          "tier": "official",
+          "source": "M15",
+          "options": [
+            "Ignore All",
+            "Evaluate All"
+          ],
+          "options_tier": "official",
+          "options_source": "M15",
+          "options_in": "menu items; not node attributes"
+        }
+      ],
+      "prerequisites": [
+        "The character's skeleton is bound to a surface (a bind pose exists)."
+      ],
+      "outline": [
+        {
+          "text": "With one bind pose, select the character's skeleton and choose Skin > Go To Bind Pose; with several bound surfaces, select the surface you want returned to its bind pose first.",
+          "tier": "official",
+          "sources": [
+            "M14"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "When the skeleton will not reach its bind pose the cause is locked joint attributes (constraints, expressions, IK spline handles, IK handles with keys) or locked attributes or an expression on the root joint, whose pose is relative to world space.",
+          "tier": "official",
+          "sources": [
+            "M15"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The joints return to the pose they had when the mesh was bound.",
+          "tier": "author",
+          "sources": [
+            "M14"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Forgetting to turn the nodes back on after the fix: Modify > Evaluate Nodes > Ignore All must be followed by Evaluate All.",
+          "tier": "official",
+          "sources": [
+            "M15"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "skeleton does not go to the bind pose",
+            "error can only reach local bind pose",
+            "go to bind pose fails",
+            "root joint did not reach bind pose"
+          ],
+          "cause": "Joint attributes are locked by constraints, expressions, IK spline handles or IK handles with keys, or the root joint has locked attributes or an expression, so the skeleton cannot reach its bind pose.",
+          "tier": "official",
+          "sources": [
+            "M15"
+          ],
+          "fix": [
+            "Choose Modify > Evaluate Nodes > Ignore All to disable the nodes that lock the attributes.",
+            "Choose Skin > Go To Bind Pose.",
+            "Choose Modify > Evaluate Nodes > Evaluate All to turn the nodes back on.",
+            "If the local-only bind pose error remains, check the root joint for locked attributes or expressions and repeat the three steps."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.reset_transformations",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ORNT-04"
+      ],
+      "phrases": [
+        "reset transformations in maya",
+        "modify reset transformations",
+        "reset vs freeze transformations",
+        "undo freeze transformations",
+        "return the object to its original zero position"
+      ],
+      "ui": [
+        {
+          "path": "Modify > Reset Transformations > options",
+          "tier": "official",
+          "source": "M16",
+          "options": [
+            "Translate",
+            "Rotate",
+            "Scale"
+          ],
+          "options_tier": "official",
+          "options_source": "M16",
+          "options_in": "the Reset Transformations options window, not node attributes"
+        }
+      ],
+      "prerequisites": [
+        "The object or control is selected."
+      ],
+      "outline": [
+        {
+          "text": "Select the object and choose Modify > Reset Transformations; open its options to leave Translate, Rotate or Scale out of the reset.",
+          "tier": "official",
+          "sources": [
+            "M16"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Maya stores an object's transform as an offset from its original zero position. Reset Transformations returns the object to that zero (the first or last frozen position); Freeze Transformations makes the current transformations the new zero.",
+          "tier": "official",
+          "sources": [
+            "M16"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The Channel Box shows 0 for translate and rotate and 1 for scale on the object.",
+          "tier": "author",
+          "sources": [
+            "M16"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Expecting Reset Transformations to undo a freeze: it returns to the last or first frozen position, so the frozen reference matters.",
+          "tier": "official",
+          "sources": [
+            "M16"
+          ]
+        }
+      ]
     }
   ]
 }

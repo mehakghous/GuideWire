@@ -2,7 +2,7 @@
 
 Snapshot (JSON, written by snapshot_<app>.py):
   {"app": "blender", "version": "5.2.2", "mode": "OBJECT" | null, "selection_types": ["MESH"], "node_types": {"ARMATURE": 1, "IK": 2},
-   "node_names": ["Armature"], "properties": {"<path>": 1.0 | "text" | {"error": "..."}}}
+   "node_names": ["Armature"], "attributes": {"<object.attribute>": true}, "properties": {"<path>": 1.0 | "text" | {"error": "..."}}}
 `node_types` keys are whatever the application calls a node/object/constraint type; Houdini adds the type's label ("Rig Doctor") as well as its name.
 
 Limit (v1): every step is compared with the ONE scene given, so this checks the state at the END of a procedure. A step whose state a later step changes
@@ -47,6 +47,11 @@ def property_paths(sl: StepList) -> list[str]:
     return sorted({p.target for st in sl.steps for p in st.expected_state if p.kind == "property_equals"})
 
 
+def attribute_paths(sl: StepList) -> list[str]:
+    """The "object.attribute" paths a snapshot must test for existence (attribute_exists targets)."""
+    return sorted({p.target for st in sl.steps for p in st.expected_state if p.kind == "attribute_exists"})
+
+
 def _label(p: StatePredicate) -> str:
     return f"{p.kind}:{p.target}" + (f"={p.value}" if p.value is not None else "")
 
@@ -58,6 +63,24 @@ def check_predicate(p: StatePredicate, snap: dict) -> PredicateResult:
         have = {_norm(k): v for k, v in snap.get("node_types", {}).items()}
         n = have.get(want, 0)
         return PredicateResult(lab, "met" if n >= 1 else "unmet", f"{n} of this type in the scene" if n else "no node of this type in the scene")
+    if p.kind == "node_count":
+        want = _norm(p.target)
+        have = {_norm(k): v for k, v in snap.get("node_types", {}).items()}
+        n = have.get(want, 0)
+        return PredicateResult(lab, "met" if n >= float(p.value) else "unmet", f"{n} of this type in the scene (at least {int(float(p.value))} wanted)")
+    if p.kind == "name_exists":
+        names = snap.get("node_names")
+        if names is None:
+            return PredicateResult(lab, "cannot_check", "names were not recorded")
+        ok = p.target.strip() in set(names)                  # the learner's own name: exact, as the Outliner shows it
+        return PredicateResult(lab, "met" if ok else "unmet", "a node with this name exists" if ok else "no node with this exact name")
+    if p.kind == "attribute_exists":
+        got = (snap.get("attributes") or {}).get(p.target)
+        if got is None:
+            return PredicateResult(lab, "cannot_check", "attribute was not tested (not in the snapshot request)")
+        if isinstance(got, dict):
+            return PredicateResult(lab, "cannot_check", f"attribute could not be tested: {got.get('error', 'unknown error')}")
+        return PredicateResult(lab, "met" if got else "unmet", "the attribute exists" if got else "no such attribute on that object")
     if p.kind == "mode":
         if snap.get("mode") is None:
             return PredicateResult(lab, "cannot_check", f"{snap.get('app')} reports no interaction mode headlessly")

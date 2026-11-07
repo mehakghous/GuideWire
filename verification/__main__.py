@@ -5,7 +5,7 @@ import sys
 
 from shared.step_record import StepList
 
-from .checker import check_steplist, property_paths, render
+from .checker import attribute_paths, check_steplist, property_paths, render
 from .runner import detect_apps, take_snapshot
 
 
@@ -28,7 +28,7 @@ def main(argv=None) -> int:
         with open(a.snapshot, encoding="utf-8") as f:
             snap = json.load(f)
     else:
-        snap = take_snapshot(sl.app, a.scene, property_paths(sl))
+        snap = take_snapshot(sl.app, a.scene, property_paths(sl), attribute_paths=attribute_paths(sl))
     print(render(check_steplist(sl, snap), sl))
     return 0
 

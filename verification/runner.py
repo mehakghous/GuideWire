@@ -55,13 +55,25 @@ def run_script(app: str, script: Path, args: list[str], timeout: int = 300) -> s
     return subprocess.run(_argv(inst, script, args), capture_output=True, text=True, timeout=timeout)
 
 
-def take_snapshot(app: str, scene: str | None, property_paths: list[str] | None = None, timeout: int = 300) -> dict:
+def take_snapshot(app: str, scene: str | None, property_paths: list[str] | None = None, timeout: int = 300, attribute_paths: list[str] | None = None) -> dict:
     """Open `scene` (or the empty startup scene) in the application, read it, return the snapshot dict."""
     with tempfile.TemporaryDirectory() as d:
         req, out = Path(d, "request.json"), Path(d, "snapshot.json")
-        req.write_text(json.dumps({"scene": scene, "properties": property_paths or [], "out": str(out)}), encoding="utf-8")
+        req.write_text(json.dumps({"scene": scene, "properties": property_paths or [], "attributes": attribute_paths or [], "out": str(out)}), encoding="utf-8")
         p = run_script(app, HERE / f"snapshot_{app}.py", [str(req)], timeout)
         if not out.exists():
             tail = (p.stderr or p.stdout or "").strip().splitlines()[-5:]
             raise RuntimeError(f"{app} produced no snapshot (exit {p.returncode}): " + " | ".join(tail))
+        return json.loads(out.read_text(encoding="utf-8"))
+
+
+def run_recipes(app: str, recipes: dict[str, str], timeout: int = 600) -> dict:
+    """Run each recipe (feature id -> code) in an empty scene of the real application. Returns {"version", "results": {feature: {"before", "after"} | {"error"}}}."""
+    with tempfile.TemporaryDirectory() as d:
+        req, out = Path(d, "request.json"), Path(d, "probe.json")
+        req.write_text(json.dumps({"recipes": recipes, "out": str(out)}), encoding="utf-8")
+        p = run_script(app, HERE / f"probe_{app}.py", [str(req)], timeout)
+        if not out.exists():
+            tail = (p.stderr or p.stdout or "").strip().splitlines()[-5:]
+            raise RuntimeError(f"{app} produced no probe result (exit {p.returncode}): " + " | ".join(tail))
         return json.loads(out.read_text(encoding="utf-8"))

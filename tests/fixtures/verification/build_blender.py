@@ -21,5 +21,6 @@ bpy.ops.object.mode_set(mode="OBJECT")
 body = bpy.data.objects.new("Body", bpy.data.meshes.new("BodyMesh"))
 bpy.context.scene.collection.objects.link(body)
 body.location.x = 2.0
+rig["FK_IK_Switch"] = 0.0
 rig.select_set(True)
 bpy.ops.wm.save_as_mainfile(filepath=out)

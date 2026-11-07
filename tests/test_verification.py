@@ -79,7 +79,7 @@ def _build(app, script, out):
 def test_blender_real_scene(tmp_path):
     scene = tmp_path / "rig.blend"
     _build("blender", "build_blender.py", scene)
-    sl = steps("blender", [P("node_exists", "ARMATURE")], [P("node_exists", "IK")], [P("node_exists", "BONE")], [P("node_exists", "SUBSURF")],
+    sl = steps("blender", [P("node_exists", "ARMATURE")], [P("node_exists", "CONSTRAINT_IK")], [P("node_exists", "BONE")], [P("node_exists", "MODIFIER_SUBSURF")],
                [P("selection_type", "ARMATURE")], [P("mode", "OBJECT")], [P("property_equals", "objects['Body'].location.x", 2.0)],
                [P("property_equals", "objects['Body'].location.x", 9.0)], [P("workspace", "Layout")])
     snap = take_snapshot("blender", str(scene), property_paths(sl))

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 def norm(s: str) -> str:
@@ -99,6 +100,14 @@ BLENDER = AppProfile(
         "Properties:Output", "Properties:World", "Properties:Physics", "Properties:Data",
         "Outliner", "Timeline", "Shader Editor", "UV Editor", "Sidebar", "Toolbar",
     }),
+    # node_exists for Blender: the identifiers Blender itself uses for objects, bones, bone/object constraints and modifiers (a rigging subset of
+    # knowledge/app_vocab/blender.json, checked by tests/test_app_vocab.py; the harness in verification/ counts exactly these).
+    nodes=frozenset({"ARMATURE", "BONE", "MESH", "EMPTY", "CURVE", "LATTICE", "CAMERA", "LIGHT",
+                     "CONSTRAINT_IK", "CONSTRAINT_SPLINE_IK", "CONSTRAINT_COPY_LOCATION", "CONSTRAINT_COPY_ROTATION", "CONSTRAINT_COPY_SCALE",
+                     "CONSTRAINT_COPY_TRANSFORMS", "CONSTRAINT_CHILD_OF", "CONSTRAINT_DAMPED_TRACK", "CONSTRAINT_TRACK_TO", "CONSTRAINT_STRETCH_TO",
+                     "CONSTRAINT_LIMIT_LOCATION", "CONSTRAINT_LIMIT_ROTATION", "CONSTRAINT_LIMIT_SCALE", "CONSTRAINT_LIMIT_DISTANCE", "CONSTRAINT_TRANSFORM",
+                     "CONSTRAINT_ACTION", "CONSTRAINT_ARMATURE", "CONSTRAINT_LOCKED_TRACK",
+                     "MODIFIER_ARMATURE", "MODIFIER_MIRROR", "MODIFIER_SUBSURF", "MODIFIER_LATTICE", "MODIFIER_SHRINKWRAP", "MODIFIER_SOLIDIFY"}),
 )
 
 # MAYA and HOUDINI: written from the feature matrix (knowledge/rigging_features.json) and recalled knowledge, NOT checked against an install.
@@ -146,23 +155,42 @@ HOUDINI = AppProfile(
     name="houdini",
     modes=frozenset({"SELECT", "EDIT_SKELETON", "ANIMATE", "HANDLE"}),
     tools=frozenset({"Select", "Edit Skeleton", "Rig Pose", "Animate", "Handle", "Translate", "Rotate", "Scale"}),
-    workspaces=frozenset({"Build", "Animate", "Rigging", "Tech", "Solaris"}),
+    workspaces=frozenset({"Build", "Animate", "Technical", "TechnicalWide", "Solaris", "SolarisLookDev", "TOPs", "VEX_Builder"}),   # the .desk files of 22.0.466
     selection_types=frozenset({"NONE", "POINT", "PRIMITIVE", "JOINT", "NODE", "CONTROL"}),
     ui_names=frozenset(norm(n) for n in _HOUDINI_UI.replace("\n", "").split(";") if n.strip()),
     mode_aliases={"EDIT SKELETON": "EDIT_SKELETON", "ANIMATE_STATE": "ANIMATE"},
     panels=frozenset({"Network View", "Scene View", "Parameters", "Geometry Spreadsheet", "Animation Editor", "Take List", "Graph Debugger"}),
-    nodes=frozenset({"Skeleton", "Rig Doctor", "Orient Joints", "Skeleton Mirror", "Rig Pose", "Rig Stash Pose", "Rig Match Pose", "IK Chains",
-                     "Full Body IK", "Bone Deform", "Joint Deform", "Bone Capture Proximity", "Joint Capture Biharmonic", "Capture Layer Paint",
-                     "Capture Mirror", "Map Points", "Biped Retarget", "Animation from Skeleton", "FBX Character Import", "FBX Animation Import",
-                     "Mocap Import", "Mocap Stream", "FBX Character Output", "FBX Animation Output", "GLTF Character Output",
-                     "Character Blend Shapes", "Configure Controls", "Motion Mixer", "Motion Clips", "Delta Mush", "Look At", "Secondary Motion",
-                     "Ragdoll", "Pack Folder", "Character Pack", "Object Merge", "Null", "Transform"}),
+    # Labels exactly as Houdini 22.0.466 shows them (checked against knowledge/app_vocab/houdini.json by tests/test_app_vocab.py). The recalled list had
+    # "Animation from Skeleton", "Configure Controls", "FBX/GLTF ... Output", "Motion Clips" and "Ragdoll", which are not labels in the install.
+    nodes=frozenset({"Skeleton", "Skeleton Blend", "Skeleton Mirror", "Rig Doctor", "Orient Joints", "Rig Pose", "Rig Stash Pose", "Rig Match Pose", "Rig Mirror Pose",
+                     "IK Chains", "Spline IK", "Full Body IK", "Full Body IK Configure Targets", "Bone Deform", "Joint Deform", "Bone Capture Proximity",
+                     "Joint Capture Biharmonic", "Capture Layer Paint", "Capture Mirror", "Map Points", "Biped Retarget", "APEX Animation from Skeleton",
+                     "APEX Configure Controls", "APEX AutoRig Builder", "APEX Autorig Component", "Attach Control Geometry", "FBX Character Import",
+                     "FBX Animation Import", "FBX Skin Import", "GLTF Character Import", "GLTF Animation Import", "Mocap Import", "Mocap Stream",
+                     "ROP FBX Character Output", "ROP FBX Animation Output", "ROP GLTF Character Output", "Character Blend Shapes", "Blend Shapes",
+                     "Motion Mixer", "MotionClip", "Delta Mush", "Secondary Motion", "Ragdoll Solver", "Ragdoll Constraints", "Pack Folder", "Character Pack",
+                     "Object Merge", "Look At", "Null", "Transform"}),
 )
 
 PROFILES: dict[str, AppProfile] = {"blender": BLENDER, "maya": MAYA, "houdini": HOUDINI}
 
 
 _EXTENDED: dict[str, AppProfile] = {}
+VOCAB_DIR = Path(__file__).resolve().parent.parent / "knowledge" / "app_vocab"
+
+
+def _install_ui_names(app: str) -> frozenset[str]:
+    """Names the real application reports (scripts/dump_app_vocab.py): Blender menus, panels, operators and dropdown choices; Houdini node labels.
+    They only widen what the validator accepts (fewer false 'unknown UI name' flags); they never change a step."""
+    import json
+    path = VOCAB_DIR / f"{app}.json"
+    if not path.exists():
+        return frozenset()
+    d = json.loads(path.read_text(encoding="utf-8"))
+    names = list(d.get("ui_names", []))
+    for entries in d.get("node_types_by_category", {}).values():
+        names += [desc for _, desc in entries if desc]
+    return frozenset(norm(n) for n in names)
 
 
 def get_profile(app: str) -> AppProfile:
@@ -172,7 +200,7 @@ def get_profile(app: str) -> AppProfile:
         if app not in _EXTENDED:
             from dataclasses import replace
             from .rigging_knowledge import load as knowledge
-            _EXTENDED[app] = replace(base, ui_names=base.ui_names | frozenset(norm(n) for n in knowledge().ui_names(app)))
+            _EXTENDED[app] = replace(base, ui_names=base.ui_names | frozenset(norm(n) for n in knowledge().ui_names(app)) | _install_ui_names(app))
         return _EXTENDED[app]
     except KeyError:
         raise ValueError(

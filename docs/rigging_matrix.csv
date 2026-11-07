@@ -2,27 +2,27 @@ id,category,name,priority,phase,mvp,offline_test_mentions,blender_catalog,blende
 PREP-01,Character preparation and scene setup,"Set scene units, scale and up-axis",P0,1,yes,3,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
 PREP-02,Character preparation and scene setup,Import or create the character mesh,P0,1,yes,2,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
 PREP-03,Character preparation and scene setup,Check mesh readiness for deformation,P2,1,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,P,0,none,name,,not run,none
-PREP-04,Character preparation and scene setup,Apply or freeze transforms and clear history,P0,1,yes,0,N,0,none,name,,not run,none,N,1,basic,kb-phrase,,not run,none,N,0,none,name,,not run,none
-PREP-05,Character preparation and scene setup,Establish a rest (bind) pose,P0,1,yes,6,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
-PREP-06,Character preparation and scene setup,"Organise scene hierarchy, naming and layers",P1,1,yes,0,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
+PREP-04,Character preparation and scene setup,Apply or freeze transforms and clear history,P0,1,yes,0,N,1,verify,kb-phrase,,not run,none,N,1,basic,kb-phrase,,not run,none,N,0,none,name,,not run,none
+PREP-05,Character preparation and scene setup,Establish a rest (bind) pose,P0,1,yes,6,N,1,verify,kb-phrase,,not run,none,N,1,trouble,kb-phrase,,not run,none,N,1,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+PREP-06,Character preparation and scene setup,"Organise scene hierarchy, naming and layers",P1,1,yes,0,N,1,basic,kb-phrase,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
 PREP-07,Character preparation and scene setup,Create proxy or low-resolution mesh for animation,P3,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
-SKEL-01,"Skeleton, joint and bone creation",Create a joint or bone chain,P0,1,yes,25,N,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,not run,R6,N,0,none,name,,not run,none
-SKEL-02,"Skeleton, joint and bone creation",Place joints on anatomical landmarks,P0,1,yes,1,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
-SKEL-03,"Skeleton, joint and bone creation",Name joints following a convention,P0,1,yes,1,N,1,verify,name,,not run,none,N,1,verify,kb-phrase,,not run,R6,N,0,none,name,,not run,none
-SKEL-04,"Skeleton, joint and bone creation",Mirror a skeleton half,P1,1,yes,1,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
-SKEL-05,"Skeleton, joint and bone creation","Insert, delete and reparent joints",P1,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKEL-01,"Skeleton, joint and bone creation",Create a joint or bone chain,P0,1,yes,25,N,1,verify,kb-phrase,yes,"effect verified, blender 5.2.2 LTS",none,N,1,verify,kb-phrase,yes,"effect verified, maya 2027",R6,N,2,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+SKEL-02,"Skeleton, joint and bone creation",Place joints on anatomical landmarks,P0,1,yes,1,N,1,verify,name,,not run,none,N,1,verify,name,,not run,none,N,1,verify,name,,not run,none
+SKEL-03,"Skeleton, joint and bone creation",Name joints following a convention,P0,1,yes,1,N,1,verify,name,,not run,none,N,1,verify,kb-phrase,,not run,R6,N,2,verify,name,,not run,none
+SKEL-04,"Skeleton, joint and bone creation",Mirror a skeleton half,P1,1,yes,1,N,1,verify,kb-phrase,,not run,none,N,1,verify,kb-phrase,,not run,none,N,1,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+SKEL-05,"Skeleton, joint and bone creation","Insert, delete and reparent joints",P1,1,yes,0,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,none,N,1,verify,name,,not run,none
 SKEL-06,"Skeleton, joint and bone creation",Build a hand and finger skeleton,P2,4,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
 SKEL-07,"Skeleton, joint and bone creation",Auto-generate a skeleton or rig from a template,P2,4,,0,N,0,none,name,,not run,none,P,1,basic,kb-phrase,,not run,none,N,1,verify,name,,not run,none
-ORNT-01,Hierarchy and joint orientation,Maintain the parent-child hierarchy and root,P0,1,yes,1,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
-ORNT-02,Hierarchy and joint orientation,Orient joints consistently (aim/up axes),P0,1,yes,5,N,1,verify,kb-phrase,,not run,none,N,1,trouble,kb-phrase,,not run,R6,N,0,none,name,,not run,none
-ORNT-03,Hierarchy and joint orientation,Visualise and verify local axes,P1,1,yes,0,N,0,none,name,,not run,none,N,1,trouble,name,,not run,none,N,0,none,name,,not run,none
-ORNT-04,Hierarchy and joint orientation,Reset to rest transforms (zero pose),P1,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
-ORNT-05,Hierarchy and joint orientation,Validate skeleton structure,P2,2,,1,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
-IKFK-01,Forward and inverse kinematics,Pose an FK chain,P0,1,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
-IKFK-02,Forward and inverse kinematics,Create an IK chain,P1,2,yes,10,N,1,trouble,kb-phrase,,not run,none,N,1,trouble,kb-phrase,yes,not run,none,N,1,verify,name,,not run,none
-IKFK-03,Forward and inverse kinematics,Create and configure the IK target/handle,P1,2,yes,0,N,1,trouble,name,,not run,none,N,1,trouble,none,yes,not run,none,N,0,none,name,,not run,none
-IKFK-04,Forward and inverse kinematics,Set pole target / bend direction,P1,2,yes,0,N,1,trouble,none,,not run,none,N,2,verify,kb-phrase,yes,not run,none,N,0,none,name,,not run,none
-IKFK-05,Forward and inverse kinematics,"Configure chain length, stretch and solver options",P2,2,,0,N,1,trouble,name,,not run,none,N,1,trouble,name,,not run,none,N,0,none,name,,not run,none
+ORNT-01,Hierarchy and joint orientation,Maintain the parent-child hierarchy and root,P0,1,yes,1,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,2,verify,name,,not run,none
+ORNT-02,Hierarchy and joint orientation,Orient joints consistently (aim/up axes),P0,1,yes,5,N,1,verify,kb-phrase,,not run,none,N,1,trouble,kb-phrase,,not run,R6,N,1,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+ORNT-03,Hierarchy and joint orientation,Visualise and verify local axes,P1,1,yes,0,N,0,none,name,,not run,none,N,1,trouble,name,,not run,none,N,1,verify,name,,not run,none
+ORNT-04,Hierarchy and joint orientation,Reset to rest transforms (zero pose),P1,1,yes,0,N,1,verify,kb-phrase,,not run,none,N,1,verify,kb-phrase,,not run,none,N,1,verify,name,,not run,none
+ORNT-05,Hierarchy and joint orientation,Validate skeleton structure,P2,2,,1,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+IKFK-01,Forward and inverse kinematics,Pose an FK chain,P0,1,yes,0,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+IKFK-02,Forward and inverse kinematics,Create an IK chain,P1,2,yes,10,N,1,trouble,kb-phrase,yes,"effect verified, blender 5.2.2 LTS",none,N,1,trouble,kb-phrase,yes,"effect verified, maya 2027",none,N,2,verify,kb-phrase,yes,"effect verified, houdini 22.0.466",none
+IKFK-03,Forward and inverse kinematics,Create and configure the IK target/handle,P1,2,yes,0,N,1,trouble,name,,not run,none,N,1,trouble,none,yes,"effect verified, maya 2027",none,N,1,verify,name,,not run,none
+IKFK-04,Forward and inverse kinematics,Set pole target / bend direction,P1,2,yes,0,N,1,trouble,none,,not run,none,N,2,verify,kb-phrase,yes,"effect verified, maya 2027",none,N,1,verify,name,,not run,none
+IKFK-05,Forward and inverse kinematics,"Configure chain length, stretch and solver options",P2,2,,0,N,1,trouble,name,,not run,none,N,1,trouble,name,,not run,none,N,1,verify,name,,not run,none
 IKFK-10,Forward and inverse kinematics,Spline IK for spine/tail chains,P2,4,,0,N,0,none,none,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
 IKFK-06,Forward and inverse kinematics,Switch between IK and FK,P1,2,,2,P,0,none,name,,not run,none,P,2,verify,kb-phrase,,not run,R6,N,1,verify,name,,not run,none
 IKFK-07,Forward and inverse kinematics,Snap IK to FK and FK to IK (pose matching),P2,4,,0,P,0,none,name,,not run,none,C,1,verify,name,,not run,none,P,0,none,name,,not run,none
@@ -33,22 +33,22 @@ CTRL-02,Rig controls and controller creation,Bind controls to joints (FK control
 CTRL-03,Rig controls and controller creation,Zero-offset groups and control hierarchy,P1,2,yes,0,P,0,none,name,,not run,none,N,2,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none
 CTRL-04,Rig controls and controller creation,Add custom attributes and properties to controls,P1,2,yes,1,N,0,none,name,,not run,none,N,2,verify,kb-phrase,,not run,R6,N,0,none,name,,not run,none
 CTRL-05,Rig controls and controller creation,"Lock, hide and limit channels",P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
-CTRL-06,Rig controls and controller creation,"Selection sets, visibility groups and character picker",P2,2,,1,P,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CTRL-06,Rig controls and controller creation,"Selection sets, visibility groups and character picker",P2,2,,1,P,1,basic,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
 CTRL-07,Rig controls and controller creation,Rig UI/picker panels,P3,4,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
-CTRL-08,Rig controls and controller creation,Modular rig components / autorig,P2,4,,1,N,0,none,name,,not run,none,P,1,basic,name,,not run,none,N,1,verify,kb-phrase,,not run,none
+CTRL-08,Rig controls and controller creation,Modular rig components / autorig,P2,4,,1,N,0,none,name,,not run,none,P,1,basic,name,,not run,none,N,2,verify,kb-phrase,,not run,none
 CTRL-09,Rig controls and controller creation,Use bendy/segmented limbs (twist & stretch),P3,4,,0,N,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
-CNST-01,Constraints and relationships,Parent / child-of constraint,P1,2,yes,2,N,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,not run,R6,N,0,none,name,,not run,none
-CNST-02,Constraints and relationships,"Point, orient and scale (copy transform) constraints",P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none
-CNST-03,Constraints and relationships,Aim / look-at / track constraint,P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+CNST-01,Constraints and relationships,Parent / child-of constraint,P1,2,yes,2,N,1,verify,kb-phrase,yes,"effect verified, blender 5.2.2 LTS",none,N,1,verify,kb-phrase,yes,"effect verified, maya 2027",R6,N,0,none,name,,not run,none
+CNST-02,Constraints and relationships,"Point, orient and scale (copy transform) constraints",P1,2,yes,0,N,1,verify,kb-phrase,yes,"effect verified, blender 5.2.2 LTS",none,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none
+CNST-03,Constraints and relationships,Aim / look-at / track constraint,P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,kb-phrase,yes,"effect verified, maya 2027",none,N,0,none,name,,not run,none
 CNST-04,Constraints and relationships,Weighted multi-target blending,P2,2,,1,N,0,none,name,,not run,none,N,2,verify,name,,not run,none,N,0,none,name,,not run,none
 CNST-05,Constraints and relationships,Dynamic parenting / space switching,P2,4,,0,P,0,none,name,,not run,none,P,0,none,name,,not run,none,N,0,none,name,,not run,none
 CNST-06,Constraints and relationships,Transform limits and geometry constraints,P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
 CNST-07,Constraints and relationships,Troubleshoot constraint conflicts and dependency cycles,P3,5,,0,C,0,none,name,,not run,none,C,0,none,name,,not run,none,N,0,none,name,,not run,none
-SKIN-01,"Skin binding, weight painting and deformation",Bind mesh to skeleton (automatic weights),P0,2,yes,16,N,1,trouble,kb-phrase,,not run,none,N,1,trouble,kb-phrase,yes,not run,none,N,1,trouble,kb-phrase,,not run,none
+SKIN-01,"Skin binding, weight painting and deformation",Bind mesh to skeleton (automatic weights),P0,2,yes,16,N,1,trouble,kb-phrase,yes,"effect verified, blender 5.2.2 LTS",none,N,1,trouble,kb-phrase,yes,"effect verified, maya 2027",none,N,2,trouble,kb-phrase,yes,"effect verified, houdini 22.0.466",none
 SKIN-02,"Skin binding, weight painting and deformation",Choose bind method and max influences,P1,2,yes,0,P,0,none,name,,not run,none,N,1,trouble,name,,not run,none,N,1,trouble,name,,not run,none
 SKIN-03,"Skin binding, weight painting and deformation",Paint and edit skin weights,P1,2,yes,1,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,none,N,1,trouble,name,,not run,none
 SKIN-04,"Skin binding, weight painting and deformation",Normalise weights and clamp influences,P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,name,,not run,none,N,0,none,name,,not run,none
-SKIN-05,"Skin binding, weight painting and deformation",Mirror skin weights,P1,2,yes,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none
+SKIN-05,"Skin binding, weight painting and deformation",Mirror skin weights,P1,2,yes,0,N,0,none,name,,not run,none,N,1,verify,kb-phrase,,not run,none,N,0,none,name,,not run,none
 SKIN-06,"Skin binding, weight painting and deformation",Copy / transfer weights between meshes,P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
 SKIN-07,"Skin binding, weight painting and deformation",Add/remove influences and re-bind,P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,P,0,none,name,,not run,none
 SKIN-08,"Skin binding, weight painting and deformation",Select deformation method (linear vs dual quaternion),P2,2,,0,N,0,none,name,,not run,none,N,0,none,name,,not run,none,N,0,none,name,,not run,none

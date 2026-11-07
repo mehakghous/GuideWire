@@ -15,7 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import PROMPT_VERSIONS, ExtractionError, extract_from_text, extract_from_video
+from .extract import PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -255,6 +255,29 @@ def _one_line(e: BaseException) -> str:
     return first[:300]
 
 
+def _dry_run(args, model: str | None) -> int:
+    """Print what the first model call would cost and whether it is cached. Calls no model."""
+    from .budget import Ceilings, dry_run
+    from .extract import _schema, build_system_prompt, video_prompt, written_prompt
+    from .providers.gemini import DEFAULT_MODEL
+    from .profiles import get_profile
+    model = model or DEFAULT_MODEL
+    system = build_system_prompt(get_profile(args.app), args.prompt_version)
+    if args.cmd == "written":
+        text = Path(args.file).read_text(encoding="utf-8").strip()
+        prompt, url, dur = written_prompt(text), None, None
+    else:
+        vid = parse_video_id(args.url)
+        dur = args.duration
+        if dur is None and not args.no_metadata:
+            dur = fetch_metadata(vid).duration_s
+        from .youtube.metadata import canonical_url
+        prompt, url = video_prompt(args.prompt_version, dur, None), canonical_url(vid)
+    r = dry_run(model, video_s=dur, system=system, prompt=prompt, schema=_schema(), video_url=url, ceilings=Ceilings.from_env(max_usd_run=args.max_usd_run))
+    print(json.dumps({**r, "app": args.app, "prompt_version": args.prompt_version, "video_seconds": dur, "key_label": args.key}, indent=1))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
     ap = argparse.ArgumentParser(prog="ingestion")
@@ -342,10 +365,20 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--app", default="blender")
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
-        p.add_argument("--prompt-version", default="v2", choices=list(PROMPT_VERSIONS),
-                       help="v2 = baseline used in all recorded live runs; v3 = unevaluated candidate")
+        p.add_argument("--prompt-version", default=None, choices=list(PROMPT_VERSIONS),
+                       help="default: v7 for Maya and Houdini (and for --rigging), v2 for Blender. v2 = baseline of the earliest live runs; v6 = rigging prompt of the last live run")
+        p.add_argument("--tier", choices=["iterate", "report"], help="model tier: iterate = gemini-3.5-flash-lite (cheap, for trying things), report = gemini-3.8-flash (for results you will show)")
+        p.add_argument("--model", help="an explicit model id (it must have a price in ingestion/experiment.py)")
+        p.add_argument("--key", choices=["default", "dev", "test"], default="default", help="which API key variable to read: GEMINI_API_KEY, GEMINI_API_KEY_DEV or GEMINI_API_KEY_TEST")
+        p.add_argument("--fresh", action="store_true", help="ask the model again even if this exact request is cached (it is still cached afterwards)")
+        p.add_argument("--dry-run", action="store_true", help="print the worst-case cost and whether the answer is cached, then stop; calls nothing")
+        p.add_argument("--duration", type=float, help="video length in seconds (skips the metadata call; used for the cost estimate)")
+        p.add_argument("--max-usd-run", type=float, help="stop before a call that could pass this many dollars in this run (default GW_MAX_USD_RUN or 5)")
+        p.add_argument("--rigging", action="store_true", help="the tutorial is about character rigging or animation (selects the rigging prompt for Blender too)")
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)
+    if getattr(args, "prompt_version", 0) is None:
+        args.prompt_version = default_prompt_version(args.app, args.rigging)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     for noisy in ("httpx", "httpcore", "google_genai", "google.genai"):  # request logs can carry secrets
         logging.getLogger(noisy).setLevel(logging.WARNING)
@@ -362,21 +395,36 @@ def main(argv: list[str] | None = None) -> int:
 
     hook = RunLog(args.run_log, cmd=args.cmd) if args.run_log else None
     try:
-        provider = GeminiProvider(media_resolution=args.media_resolution)
+        from .budget import BudgetedProvider, BudgetExceeded, Ceilings, TIERS, api_key_for
+        model = args.model or (TIERS[args.tier] if args.tier else None)
+        if args.dry_run:
+            return _dry_run(args, model)
+        try:
+            inner = GeminiProvider(api_key=api_key_for(args.key), model=model, media_resolution=args.media_resolution)
+        except BudgetExceeded as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+        provider = BudgetedProvider(inner, ceilings=Ceilings.from_env(max_usd_run=args.max_usd_run), label=args.key, fresh=args.fresh)
         if args.cmd == "written":
             sl = extract_from_text(provider, Path(args.file).read_text(encoding="utf-8"), app=args.app,
                                    prompt_version=args.prompt_version, on_attempt=hook)
         else:
             vid = parse_video_id(args.url)
-            duration = title = None
+            duration = args.duration
+            title = None
             if not args.no_metadata:
                 md = fetch_metadata(vid)
                 if md.privacy_status != "public":
                     print(f"Video is '{md.privacy_status}'; the URL route needs a public video.", file=sys.stderr)
                     return 2
-                duration, title = md.duration_s, md.title
+                duration, title = (duration or md.duration_s), md.title
+            provider.video_seconds = duration
             sl = extract_from_video(provider, vid, app=args.app, duration_s=duration, title_hint=title,
                                     prompt_version=args.prompt_version, on_attempt=hook)
+        print(f"model {provider.model_id}: {provider.calls} paid call(s), {provider.hits} cache hit(s), about ${provider.run_usd:.4f} this run (log: runs/budget/cost_log.jsonl)", file=sys.stderr)
+    except BudgetExceeded as e:
+        print(f"stopped by the budget guard, nothing further was called: {e}", file=sys.stderr)
+        return 3
     except (ExtractionError, ValueError, RuntimeError, LookupError) as e:
         from .providers.base import OverloadError
         if isinstance(getattr(e, "__cause__", None), OverloadError):

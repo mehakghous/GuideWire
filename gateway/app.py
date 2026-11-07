@@ -18,7 +18,8 @@ from typing import Callable
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from ingestion.extract import ExtractionError, extract_from_text, extract_from_video
+from ingestion.budget import BudgetedProvider, BudgetExceeded
+from ingestion.extract import ExtractionError, default_prompt_version, extract_from_text, extract_from_video
 from ingestion.providers.base import ProviderError, QuotaError
 from ingestion.router import route
 from ingestion.youtube import api as yt_api
@@ -41,6 +42,7 @@ class ExtractIn(BaseModel):
 class AnswerIn(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     version: str | None = Field(default=None, max_length=20)
+    app: str = "blender"
 
 
 def tokens_from_env() -> dict[str, str]:
@@ -101,6 +103,8 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
     def provider_call(fn):
         try:
             return fn()
+        except BudgetExceeded as e:                           # the cost guard stopped the call before anything was sent
+            raise HTTPException(503, f"cost guard: {e}")
         except QuotaError as e:                              # never retried (SRS CI-9)
             raise HTTPException(429, f"AI quota exhausted: {e}")
         except ProviderError as e:
@@ -133,8 +137,11 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
             try:
                 charge(uid)
                 provider = provider_factory()
-                sl = provider_call(lambda: extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint)
-                                   if vid else extract_from_text(provider, body.text, app=body.app))
+                if hasattr(provider, "video_seconds"):
+                    provider.video_seconds = body.duration_s
+                sl = provider_call(lambda: extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint,
+                                                      prompt_version=default_prompt_version(body.app))
+                                   if vid else extract_from_text(provider, body.text, app=body.app, prompt_version=default_prompt_version(body.app)))
             finally:
                 slots.release()
             out = sl.model_dump(mode="json")
@@ -145,7 +152,7 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
     def answer(body: AnswerIn, uid: str = Depends(user)):
         # offline knowledge-base route, no paid call; documentation text is never stored (SEC-10)
         try:
-            return route(body.question, version=body.version).model_dump(mode="json")
+            return route(body.question, version=body.version, app=body.app).model_dump(mode="json")
         except ValueError as e:                              # JSON-looking text that is not a valid step list (JSONDecodeError and pydantic errors are ValueErrors)
             raise HTTPException(422, str(e).splitlines()[0][:200])
 
@@ -188,4 +195,5 @@ def _err(code: int, msg: str):
 def main() -> None:                                          # pragma: no cover
     import uvicorn
     from ingestion.providers.gemini import GeminiProvider
-    uvicorn.run(create_app(provider_factory=GeminiProvider), host="127.0.0.1", port=8080)
+    # every request goes through the cost guard: content-hash cache, per-run and per-day dollar ceilings, cost log (ingestion/budget.py)
+    uvicorn.run(create_app(provider_factory=lambda: BudgetedProvider(GeminiProvider(), label="default")), host="127.0.0.1", port=8080)

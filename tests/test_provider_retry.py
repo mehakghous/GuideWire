@@ -74,8 +74,9 @@ def test_the_api_key_never_appears_in_the_error():
 def test_cli_says_nothing_was_charged_when_the_model_is_at_capacity(monkeypatch, capsys):
     from ingestion import cli
     import ingestion.cli as c
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")         # the CLI now reads the key itself (so a key label can pick dev or test)
     class Boom:
-        model_id = "x"
+        model_id = "gemini-3.6-flash"                                   # the budget guard refuses a model that has no known price
         def __init__(self, **k): pass
         def generate_json(self, **k): raise OverloadError("503")
     monkeypatch.setattr(c, "GeminiProvider", Boom)

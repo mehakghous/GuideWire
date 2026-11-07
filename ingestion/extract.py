@@ -21,7 +21,7 @@ from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from shared.step_record import Action, PredicateKind, StatePredicate, Step, StepKind, StepList, Support
+from shared.step_record import Action, StatePredicate, Step, StepKind, StepList, Support
 
 from .instructions import compose_instructions
 from .profiles import AppProfile, get_profile
@@ -33,7 +33,7 @@ from .validate import Issue, ValidationFailure, check_structure, sanitize_and_an
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7")
 
 
 class ExtractionError(RuntimeError):
@@ -43,11 +43,16 @@ class ExtractionError(RuntimeError):
         self.issues = issues or []
 
 
+# The model is offered the seven kinds of schema 0.10. name_exists, attribute_exists and node_count (0.11) exist in the contract, the checker and the
+# harness, but no prompt teaches them yet (that needs a live run, and it would change MODEL_SCHEMA_TAG and every cache key).
+ModelPredicateKind = Literal["mode", "active_tool", "workspace", "selection_type", "panel_open", "property_equals", "node_exists"]
+
+
 class DraftPredicate(BaseModel):
     """Model-facing predicate. Field names differ from the shared StatePredicate on purpose:
     live testing showed the model confused `target`/`value` and put the kind in `target`."""
 
-    kind: PredicateKind
+    kind: ModelPredicateKind
     name: str = Field(description="the mode / tool id / workspace / selection type / panel name, or the property path")
     expected_value: str | float | None = Field(
         default=None, description="ONLY for kind=property_equals: the value the property must equal; otherwise null"
@@ -110,7 +115,8 @@ _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Ke
 
 
 def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSION) -> str:
-    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes else ""
+    # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version == "v7") else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
@@ -135,7 +141,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-    if version in ("v3", "v4", "v5", "v6"):
+    if version in ("v3", "v4", "v5", "v6", "v7"):
         base = f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
 A tutorial has TWO sources of instruction. Extract BOTH:
@@ -174,7 +180,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-        return base + (_rigging_rules(profile) if version in ("v4", "v5", "v6") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6") else "") + (_knowledge_notes(profile) if version == "v6" else "")
+        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7") else "") + (_knowledge_notes(profile) if version in ("v6", "v7") else "")
     raise ValueError(f"unknown prompt version {version!r}; choose from {PROMPT_VERSIONS}")
 
 
@@ -212,17 +218,32 @@ If the video shows a different menu or label from the one above, write the video
 """)
 
 
-def _rigging_rules(profile: AppProfile) -> str:
+NODE_EXAMPLES = {            # v7: what a node_exists name looks like in each application (checked against the real installs by tests/test_app_vocab.py)
+    "maya": "for example joint, ikHandle, skinCluster: Maya's node type names",
+    "houdini": "for example Skeleton, Rig Doctor, Joint Deform: the label the node type has in the network editor, without any internal prefix",
+    "blender": "for example ARMATURE or BONE (objects and bones), CONSTRAINT_IK or CONSTRAINT_COPY_ROTATION (a constraint on a bone or object), MODIFIER_ARMATURE (a modifier): Blender's upper-case type names, with CONSTRAINT_ or MODIFIER_ in front",
+}
+RIGGING_APPS = ("maya", "houdini")
+
+
+def default_prompt_version(app: str, rigging: bool = False) -> str:
+    """Rigging and animation is the main use for Maya and Houdini, so they get the newest prompt; Blender keeps the modelling baseline (v2) unless the caller says the video is about rigging."""
+    return "v7" if rigging or app in RIGGING_APPS else DEFAULT_PROMPT_VERSION
+
+
+def _rigging_rules(profile: AppProfile, version: str = "v6") -> str:
     """v4 addition for character rigging and animation tutorials: the feature list the model may tag steps with."""
     from .features import CRAFT_FEATURES, load_catalog
     cat = load_catalog()
     feats = "\n".join(f"  {f.id}: {f.name}" for f in cat.supported(profile.name, ("N", "P", "C")))
+    # v6 and earlier gave Maya examples to every application (a Houdini or Blender prompt told the model "joint, ikHandle, skinCluster"); v7 gives each its own.
+    node_example = NODE_EXAMPLES[profile.name] if version == "v7" else "for example joint, ikHandle, skinCluster"
     return f"""
 This is a character rigging and animation tutorial for {profile.name}.
 - feature_id: when a step teaches one of the features below, set feature_id to its id exactly; otherwise null. Never invent an id.
 {feats}
 - video_start_s and video_end_s: give them for EVERY step ("MM:SS" or "H:MM:SS"), because the learner is taken to that moment in the video; use null only when you truly cannot locate it.
-- expected_state: when a step creates a node or object of one of the node types listed in the node_exists line above (for example joint, ikHandle, skinCluster), add
+- expected_state: when a step creates a node or object of one of the node types listed in the node_exists line above ({node_example}), add
   {{"kind": "node_exists", "name": "<that type exactly>"}}. Leave it empty for steps whose result cannot be read from the application.
 - kind: "craft" when the result is judged by eye (timing, arcs, weight, feel; for example {", ".join(sorted(CRAFT_FEATURES))}); otherwise "mechanics".
   A craft step has no expected_state.
@@ -347,17 +368,22 @@ def _run(
     )
 
 
+def written_prompt(text: str) -> str:
+    """The per-request prompt for written instructions (exposed so the dry run and the cache key use exactly what is sent)."""
+    return (
+        "Convert these written instructions into step records. "
+        "Do not add steps that the text does not imply. "
+        "video_start_s/video_end_s must be null.\n\n--- INSTRUCTIONS ---\n" + text.strip()
+    )
+
+
 def extract_from_text(
     provider: LLMProvider, text: str, *, app: str = "blender",
     prompt_version: str = DEFAULT_PROMPT_VERSION, on_attempt=None,
 ) -> StepList:
     if not text or not text.strip():
         raise ExtractionError("empty instruction text")
-    prompt = (
-        "Convert these written instructions into step records. "
-        "Do not add steps that the text does not imply. "
-        "video_start_s/video_end_s must be null.\n\n--- INSTRUCTIONS ---\n" + text.strip()
-    )
+    prompt = written_prompt(text)
     sl = _run(
         provider, prompt=prompt, video_url=None, source_type="written", app=app, video_id=None,
         video_duration_s=None, prompt_version=prompt_version, on_attempt=on_attempt,
@@ -391,7 +417,7 @@ def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str 
     """The per-request (user) prompt for a video. Exposed so experiments can hash it for cache keys."""
     from .transcript import transcript_for_prompt
 
-    if prompt_version in ("v3", "v4", "v5", "v6"):
+    if prompt_version in ("v3", "v4", "v5", "v6", "v7"):
         time_fmt = "as MM:SS (or H:MM:SS)"
         dur_txt = (f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to "
                    f"{_mmss(duration_s)}." if duration_s else "")

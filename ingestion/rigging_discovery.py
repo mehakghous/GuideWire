@@ -31,6 +31,8 @@ _FULL_WORDS = re.compile(r"\b(?:full|complete|entire|whole|start to finish|end t
 
 _APP_WORDS = {"blender": re.compile(r"\bblender\b", re.I), "maya": re.compile(r"\bmaya\b", re.I),
               "houdini": re.compile(r"\b(?:houdini|kinefx|apex)\b", re.I)}
+# the word each community uses in tutorial TITLES for the rigging toolset (Houdini's is KineFX, Blender's rig is an armature); the second search adds it
+_APP_SEARCH_TERM = {"houdini": "kinefx", "blender": "armature"}
 _OFFICIAL_CHANNELS = {"blender": ("blender",), "maya": ("autodesk",), "houdini": ("sidefx",)}
 _VERSION = {"maya": re.compile(r"\bmaya\s*(?:version\s*)?(20\d\d)\b", re.I), "houdini": re.compile(r"\bhoudini\s*(?:version\s*)?(\d{2}(?:\.\d)?)\b", re.I),
             "blender": re.compile(r"\bblender\s*(?:version\s*)?(\d{1,2}(?:\.\d{1,2})?)\b", re.I)}
@@ -192,7 +194,7 @@ def search_queries(goal: RiggingGoal, max_queries: int = MAX_QUERIES) -> list[st
     base = " ".join(words) if goal.narrow and words else " ".join(goal.topic[:6]) or " ".join(words) or "character rigging"
     out = [f"{goal.app} {base} tutorial"]
     if goal.stages:                                                                                # a second, broader wording that still keeps the body part
-        out.append(f"{goal.app} {goal.part if goal.narrow and goal.part else 'character'} {goal.stages[0].split(' / ')[0]} tutorial")
+        out.append(f"{goal.app} {_APP_SEARCH_TERM.get(goal.app, '')} {goal.part if goal.narrow and goal.part else 'character'} {goal.stages[0].split(' / ')[0]} tutorial".replace("  ", " "))
     return list(dict.fromkeys(out))[:max_queries]
 
 

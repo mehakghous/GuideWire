@@ -123,7 +123,7 @@ def test_unknown_predicate_kind_is_not_auto_completed(env):
     db, uid, _ = env
     import json
     d = json.loads(SAMPLE.read_text(encoding="utf-8"))
-    d["steps"][0]["expected_state"].append({"kind": "node_count", "target": "joint", "value": 9})
+    d["steps"][0]["expected_state"].append({"kind": "future_kind", "target": "joint", "value": 9})
     tid = db.save_tutorial(uid, "Future", load_steps(d))
     e = SessionEngine.create(db, uid, tid)
     e.start()

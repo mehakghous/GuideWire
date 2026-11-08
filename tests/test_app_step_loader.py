@@ -19,7 +19,7 @@ def test_known_files_load_unchanged():
 
 def test_unknown_kind_does_not_fail_and_step_is_not_checkable():
     d = _data()
-    d["steps"][0]["expected_state"].append({"kind": "node_count", "target": "joint", "value": 9})
+    d["steps"][0]["expected_state"].append({"kind": "future_kind", "target": "joint", "value": 9})
     sl = load_steps(d)
     s = sl.steps[0]
     assert not s.verifiable
@@ -30,14 +30,14 @@ def test_unknown_kind_does_not_fail_and_step_is_not_checkable():
 def test_other_steps_are_untouched():
     d = _data()
     before = load_steps(_data())
-    d["steps"][0]["expected_state"].append({"kind": "name_exists", "target": "x"})
+    d["steps"][0]["expected_state"].append({"kind": "future_kind_b", "target": "x"})
     after = load_steps(d)
     assert [s.model_dump() for s in after.steps[1:]] == [s.model_dump() for s in before.steps[1:]]
 
 
 def test_input_is_not_mutated():
     d = _data()
-    d["steps"][0]["expected_state"].append({"kind": "attribute_exists", "target": "a.b"})
+    d["steps"][0]["expected_state"].append({"kind": "future_kind_c", "target": "a.b"})
     snap = json.dumps(d, sort_keys=True)
     load_steps(d)
     assert json.dumps(d, sort_keys=True) == snap

@@ -7,3 +7,4 @@ youtube-transcript-api
 pytest
 fastapi
 ruff
+bcrypt

@@ -191,3 +191,7 @@ local_data/
 # Knowledge base: fetched manual source text and the built index are local build artifacts (CC-BY-SA text is not committed)
 knowledge/cache/
 knowledge/*.sqlite
+
+# vision demo output
+frame.png
+frame_annotated.png

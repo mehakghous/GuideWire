@@ -10,3 +10,4 @@ pytest
 youtube-transcript-api
 fastapi
 uvicorn
+numpy

@@ -1,0 +1,82 @@
+"""Manual check on a real machine: find Blender, report its areas, draw a highlight on each.
+
+    python -m vision.demo            # window title containing "Blender"
+    python -m vision.demo --save frame.png --delay 5
+
+Needs Windows, PyQt6, mss, opencv-python and a running Blender at the default layout.
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+import time
+
+from shared.grounding import Rect
+from vision import winplatform
+from vision.capture import grab
+from vision.overlay import highlight_mark, make_overlay_window
+from vision.regions import default_layout, detect_layout
+
+
+def save_annotated(pixels, layout, frame_path: str) -> str:
+    """Write <frame>_annotated.png with each detected area outlined and named."""
+    import cv2
+    img = pixels.copy()
+    for r in layout.regions:
+        x, y, w, h = r.rect.x, r.rect.y, r.rect.w, r.rect.h
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 190, 255), 3)
+        cv2.putText(img, r.name, (x + 8, y + 26), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 190, 255), 2)
+    out = frame_path.rsplit(".", 1)[0] + "_annotated.png"
+    cv2.imwrite(out, img)
+    return out
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--title", default="Blender")
+    ap.add_argument("--save", help="write the captured frame to this PNG")
+    ap.add_argument("--delay", type=float, default=0, help="seconds to wait before capturing, to switch to Blender")
+    args = ap.parse_args()
+
+    if args.delay > 0:
+        print(f"capturing in {args.delay:g}s: switch to Blender now")
+        time.sleep(args.delay)
+    winplatform.enable_dpi_awareness()
+    win = winplatform.find_window(args.title)
+    if win is None:
+        print(f"no visible window with '{args.title}' in its title", file=sys.stderr)
+        return 1
+    frame = grab(win.rect)
+    print(f"window: {win.title!r} {win.rect}  frame: {frame.pixels.shape[1]}x{frame.pixels.shape[0]}")
+    if args.save:
+        import cv2
+        cv2.imwrite(args.save, frame.pixels)
+
+    layout = detect_layout(frame.pixels)
+    if layout.confidence < 0.5:
+        print(f"low confidence ({layout.confidence:.2f}); using default-layout fractions")
+        layout = default_layout(frame.pixels.shape[1], frame.pixels.shape[0])
+    for r in layout.regions:
+        print(f"  {r.name:<10} {r.rect}")
+    if args.save:
+        annotated = save_annotated(frame.pixels, layout, args.save)
+        print(f"saved {os.path.abspath(args.save)}")
+        print(f"saved {os.path.abspath(annotated)} (the same frame with the detected areas drawn on it)")
+        os.startfile(os.path.abspath(annotated))  # opens in the default image viewer
+
+    from PyQt6.QtWidgets import QApplication
+    app = QApplication(sys.argv[:1])
+    overlay = make_overlay_window()
+    overlay.cover(win.rect)
+    marks = [highlight_mark(Rect(win.rect.x + r.rect.x, win.rect.y + r.rect.y, r.rect.w, r.rect.h), r.name)
+             for r in layout.regions]
+    overlay.set_marks(marks)
+    overlay.show_click_through()
+    from PyQt6.QtCore import QTimer
+    QTimer.singleShot(6000, app.quit)
+    return app.exec()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

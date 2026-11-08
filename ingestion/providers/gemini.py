@@ -68,7 +68,13 @@ class GeminiProvider:
         t = self._types
         parts = []
         if video_url:
-            parts.append(t.Part(file_data=t.FileData(file_uri=video_url)))
+            # "https://www.youtube.com/watch?v=ID#t=60,180" asks the model to watch only seconds 60 to 180; the fragment is not part of the URI sent
+            uri, _, frag = video_url.partition("#t=")
+            meta = None
+            if frag:
+                a, b = (float(x) for x in frag.split(","))
+                meta = t.VideoMetadata(start_offset=f"{int(a)}s", end_offset=f"{int(b)}s")
+            parts.append(t.Part(file_data=t.FileData(file_uri=uri), video_metadata=meta))
         parts.append(t.Part(text=prompt))
         cfg_kwargs: dict[str, Any] = dict(
             system_instruction=system,

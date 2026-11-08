@@ -163,7 +163,7 @@ HOUDINI = AppProfile(
     # Labels exactly as Houdini 22.0.466 shows them (checked against knowledge/app_vocab/houdini.json by tests/test_app_vocab.py). The recalled list had
     # "Animation from Skeleton", "Configure Controls", "FBX/GLTF ... Output", "Motion Clips" and "Ragdoll", which are not labels in the install.
     nodes=frozenset({"Skeleton", "Skeleton Blend", "Skeleton Mirror", "Rig Doctor", "Orient Joints", "Rig Pose", "Rig Stash Pose", "Rig Match Pose", "Rig Mirror Pose",
-                     "IK Chains", "Spline IK", "Full Body IK", "Full Body IK Configure Targets", "Bone Deform", "Joint Deform", "Bone Capture Proximity",
+                     "IK Chains", "Spline IK", "Full Body IK", "Full Body IK Configure Targets", "Bone Deform", "Joint Deform", "Bone Capture Proximity", "Bone Capture Biharmonic",
                      "Joint Capture Biharmonic", "Capture Layer Paint", "Capture Mirror", "Map Points", "Biped Retarget", "APEX Animation from Skeleton",
                      "APEX Configure Controls", "APEX AutoRig Builder", "APEX Autorig Component", "Attach Control Geometry", "FBX Character Import",
                      "FBX Animation Import", "FBX Skin Import", "GLTF Character Import", "GLTF Animation Import", "Mocap Import", "Mocap Stream",

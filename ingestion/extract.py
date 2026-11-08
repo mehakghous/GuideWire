@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
@@ -28,12 +29,12 @@ from .profiles import AppProfile, get_profile
 from .providers.base import LLMProvider, ProviderError, QuotaError
 from .scene_chain import derive_state, flag_order_errors
 from .timecode import parse_timestamp
-from .validate import Issue, ValidationFailure, check_structure, sanitize_and_annotate
+from .validate import Issue, ValidationFailure, check_structure, refresh_coverage_warnings, sanitize_and_annotate
 
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline")
 
 
 class ExtractionError(RuntimeError):
@@ -115,8 +116,13 @@ _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Ke
 
 
 def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSION) -> str:
+    # "v10-nokb" and "v10-outline" are v10 with the knowledge block removed or replaced by typical sequences: a measured experiment (docs/evaluation_report_2026-11-09.md), not a default.
+    full_version = version
+    version, _, kb_mode = version.partition("-")
+    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline")):
+        raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
-    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version == "v7") else ""
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10")) else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
@@ -141,7 +147,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-    if version in ("v3", "v4", "v5", "v6", "v7"):
+    if version in ("v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"):
         base = f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
 A tutorial has TWO sources of instruction. Extract BOTH:
@@ -180,8 +186,8 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7") else "") + (_knowledge_notes(profile) if version in ("v6", "v7") else "")
-    raise ValueError(f"unknown prompt version {version!r}; choose from {PROMPT_VERSIONS}")
+        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "")
+    raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
 
 
 _ACTIONABLE_RULES = """
@@ -195,6 +201,42 @@ ACTIONABLE STEPS. A beginner must be able to perform each step in the applicatio
 - check: how the learner can tell the step worked, only if the video shows or says it. Do not add generic checks.
 - result: one sentence saying what the learner has after the step.
 - No steps for introductions, recaps or talk with nothing to do.
+"""
+
+
+# v8 (2026-11-09). The first human-labelled comparison (docs/evaluation_report_2026-11-09.md) found that v7 steps cover several of a person's small actions each: 4 to 13 steps
+# for 25 to 62 labelled actions, with whole stretches of some videos empty. v7 itself asks to group repeats and to skip incidental changes, so v8 states the opposite for
+# operations a learner must perform, and puts it last so it wins over the earlier rules.
+_ATOMIC_RULES = """
+ATOMIC STEPS. These rules replace any earlier rule about grouping, summarising or leaving out small operations.
+- Write ONE step per independent operation the learner performs, however small: a mode or state change (a key such as Tab, a mode menu, pressing Enter in the viewport to start or stop a tool),
+  selecting a named object, joint, bone or node, choosing a tool, ticking or clearing a checkbox, choosing an item in a dropdown or menu, typing or changing a value, naming or renaming,
+  opening or switching a panel, tab, editor, window or workspace, pressing a shortcut, connecting nodes, parenting, constraining.
+- Never merge two independent operations into one step. "Create a skeleton and name it Base" is two steps: create it, then name it.
+- Do not skip an operation because the instructor does not mention it. If the screen shows it (a mode label changes, a box is ticked, a panel opens, a value changes), it is a step with support
+  "demonstrated". If it is only said, support "narrated".
+- Keep the order in which the operations happen, and give EVERY step its own video_start_s and video_end_s, even when it lasts a second or two.
+- Still leave out: intros, outros, recaps, talk with nothing to do, and view movement (orbit, pan, zoom) that does not change the result. Identical repetitions may be ONE step only when each
+  repetition is exactly the same; say how many times.
+- Keep how_to to one or two short lines per step (the menu path, the value, the name): atomic steps are small, so a long tutorial can have many dozens of them.
+"""
+
+
+# v9 = v8 plus a coverage rule. The first live v8 run (docs/evaluation_report_2026-11-09.md) split the tutorial into small steps but left long stretches with none (for example 65 s
+# of a 190 s video), so one-to-one recall rose while the share of the video covered fell.
+_COVERAGE_RULES = """
+COVERAGE. Work through the video from the first operation to the last, in time order, without stopping early. Do not leave a stretch of more than about 15 seconds without a step
+if anything is performed in it: when you reach a gap, look at that stretch again. The steps must reach the last operation of the tutorial; the final step's video_end_s should be close to
+the end of the video unless the video ends with talk only.
+"""
+
+
+# v10 = v9 plus a rule against padding. In the first windowed v9 run about a quarter of the steps matched nothing the human labeller listed, and many were not operations at all
+# ("Inspect ...", "Explain ...", "Prepare to ...", "Select the node" repeated). Only operations that choose or change something are steps.
+_NO_PADDING_RULES = """
+ONLY OPERATIONS. A step is something the learner does that chooses or changes something in the application. Never write a step for looking at, inspecting, checking, explaining,
+discussing, preparing for, planning or "being ready to" do something; put what to look for in the preceding step's check line instead. Never repeat an operation already written for the
+same moment. If nothing is performed in a stretch (only talk, or only the cursor moving), write no step for it.
 """
 
 
@@ -218,6 +260,25 @@ If the video shows a different menu or label from the one above, write the video
 """)
 
 
+def _knowledge_outlines(profile: AppProfile) -> str:
+    """v10-outline (experiment): the typical order of operations the researched knowledge base gives for each topic of this application, one line per topic. The aim is to remind the
+    model of small operations that usually occur (a state key, an options box, a rename) so it LOOKS for them; the rule below says it must write only what the video shows, because
+    a model given an outline can copy it instead of watching. Only official and tutorial statements are used."""
+    from .rigging_knowledge import load as knowledge
+    lines = []
+    for e in knowledge().entries:
+        if profile.name not in e.apps:
+            continue
+        steps = [x.text.rstrip(".") for x in e.outline if x.tier in ("official", "tutorial")][:6]
+        if len(steps) >= 2:
+            lines.append(f"  - {e.id.split('.', 1)[-1].replace('_', ' ')}: " + " -> ".join(steps))
+    if not lines:
+        return ""
+    return ("\nTypical order of operations for common topics in " + profile.name + " (from its documentation and tutorials). Use them ONLY to remember small operations that usually happen "
+            "(a key that starts a tool, an options box, a rename) and to look for them in the video. A tutorial may skip, reorder or do things differently: write ONLY what the video shows "
+            "or says, never a step because it is on this list.\n" + "\n".join(lines) + "\n")
+
+
 NODE_EXAMPLES = {            # v7: what a node_exists name looks like in each application (checked against the real installs by tests/test_app_vocab.py)
     "maya": "for example joint, ikHandle, skinCluster: Maya's node type names",
     "houdini": "for example Skeleton, Rig Doctor, Joint Deform: the label the node type has in the network editor, without any internal prefix",
@@ -237,7 +298,7 @@ def _rigging_rules(profile: AppProfile, version: str = "v6") -> str:
     cat = load_catalog()
     feats = "\n".join(f"  {f.id}: {f.name}" for f in cat.supported(profile.name, ("N", "P", "C")))
     # v6 and earlier gave Maya examples to every application (a Houdini or Blender prompt told the model "joint, ikHandle, skinCluster"); v7 gives each its own.
-    node_example = NODE_EXAMPLES[profile.name] if version == "v7" else "for example joint, ikHandle, skinCluster"
+    node_example = NODE_EXAMPLES[profile.name] if version in ("v7", "v8", "v9", "v10") else "for example joint, ikHandle, skinCluster"
     return f"""
 This is a character rigging and animation tutorial for {profile.name}.
 - feature_id: when a step teaches one of the features below, set feature_id to its id exactly; otherwise null. Never invent an id.
@@ -288,6 +349,24 @@ def _to_steplist(
         video_id=video_id, title=draft.title, steps=steps, model_id=model_id,
         prompt_version=prompt_version,
     )
+
+
+def sort_by_time(sl: StepList) -> bool:
+    """Put the steps in the order of their start times when every step has one and the model listed them out of order (a stable sort; ids and order renumbered; the steps that
+    moved are flagged). Times are what the video shows, so they decide; a list with a missing time is left alone. Returns True when anything moved."""
+    steps = sl.steps
+    if len(steps) < 2 or any(st.video_start_s is None for st in steps):
+        return False
+    ordered = sorted(steps, key=lambda st: st.video_start_s)
+    if [id(x) for x in ordered] == [id(x) for x in steps]:
+        return False
+    moved = [x for x, y in zip(ordered, steps) if x is not y]
+    for st in moved:
+        st.flags.append("the model listed this step out of time order; steps were sorted by their start times")
+    for i, st in enumerate(ordered, start=1):
+        st.id, st.order = f"s{i:02d}", i
+    sl.steps = ordered
+    return True
 
 
 def _retry_note(err: str, issues: list[Issue]) -> str:
@@ -362,6 +441,15 @@ def _run(
             if on_attempt:
                 on_attempt(rec)
             raise ExtractionError(f"provider failure: {e}") from e
+    # Last resort, only when the ONLY problem is steps listed out of time order: the times are what the video shows, so sort by them (flagged on the steps that moved) and check again.
+    # Any other violation, or a second kind next to this one, is still reported and nothing is repaired.
+    if last_partial is not None and last_issues and all(i.code == "TS_NOT_MONOTONIC" for i in last_issues) and sort_by_time(last_partial):
+        try:
+            check_structure(last_partial, video_duration_s)
+            flag_order_errors(last_partial)
+            return last_partial
+        except ValidationFailure as e:
+            last_issues = list(e.issues)
     raise ExtractionError(
         f"model output still invalid after {max_attempts} attempts: {last_err[:600]}",
         partial=last_partial, issues=last_issues,
@@ -412,12 +500,106 @@ def extract_from_video(
     return check_evidence(sl, transcript_cues) if transcript_cues else sl
 
 
+def video_windows(duration_s: float, window_s: float = 60.0, overlap_s: float = 8.0) -> list[tuple[int, int]]:
+    """Overlapping (start, end) seconds that together cover the whole video. The last window is never shorter than 15 s (it is folded into the one before)."""
+    if duration_s <= window_s:
+        return [(0, int(duration_s))]
+    step = max(1.0, window_s - overlap_s)
+    out, start = [], 0.0
+    while start < duration_s:
+        end = min(duration_s, start + window_s)
+        out.append((int(start), int(end)))
+        if end >= duration_s:
+            break
+        start += step
+    if len(out) > 1 and out[-1][1] - out[-1][0] < 15:
+        out[-2] = (out[-2][0], out[-1][1])
+        out.pop()
+    return out
+
+
+def _words(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9]+", text.lower()) if len(w) > 2}
+
+
+def merge_window_steps(parts: list[list[Step]], duration_s: float) -> list[Step]:
+    """Join the steps of consecutive windows in time order. A step from a later window that repeats one already kept (it starts inside the kept step's span plus 3 s and
+    shares at least 60 % of the shorter goal's words) is the same action seen twice in an overlap and is dropped. Ids and order are renumbered."""
+    kept: list[Step] = []
+    for steps in parts:
+        for st in sorted(steps, key=lambda s: (s.video_start_s if s.video_start_s is not None else 1e9)):
+            dup = False
+            for k in kept[-6:]:
+                if st.video_start_s is None or k.video_start_s is None:
+                    continue
+                if k.video_start_s - 3 <= st.video_start_s <= (k.video_end_s if k.video_end_s is not None else k.video_start_s) + 3:
+                    a, b = _words(st.goal), _words(k.goal)
+                    if a and b and len(a & b) / min(len(a), len(b)) >= 0.6:
+                        dup = True
+                        break
+            if not dup:
+                kept.append(st)
+    kept.sort(key=lambda s: (s.video_start_s if s.video_start_s is not None else 1e9))
+    for i, st in enumerate(kept, start=1):
+        st.id, st.order = f"s{i:02d}", i
+        st.depends_on = []
+    return kept
+
+
+def extract_from_video_windows(
+    provider: LLMProvider, video_id: str, *, app: str = "blender", duration_s: float, window_s: float = 60.0, overlap_s: float = 8.0,
+    title_hint: str | None = None, prompt_version: str = DEFAULT_PROMPT_VERSION, on_attempt=None,
+) -> StepList:
+    """Extract a long video in short overlapping windows and join the results. Each call shows the model only that clip (`...#t=start,end`), so it cannot summarise or skip a long
+    stretch; the model gives times from the start of its clip and they are shifted back to the video's timeline here. A window the model could not answer validly is reported in
+    `warnings` and left empty rather than failing the whole video (a provider outage or quota error still raises)."""
+    from .youtube.metadata import canonical_url
+
+    wins = video_windows(duration_s, window_s, overlap_s)
+    parts: list[list[Step]] = []
+    warns: list[str] = []
+    first: StepList | None = None
+    for a, b in wins:
+        if hasattr(provider, "video_seconds"):
+            provider.video_seconds = b - a
+        prompt = video_prompt(prompt_version, float(b - a), title_hint) + (
+            f"\nThis video is a clip, seconds {a} to {b} of a longer tutorial. Give every timestamp as MM:SS counted from the START OF THIS CLIP. "
+            "Steps of earlier or later parts are not your concern; do not repeat an operation only because it is half visible at the very start or end of the clip.")
+        try:
+            sl = _run(provider, prompt=prompt, video_url=f"{canonical_url(video_id)}#t={a},{b}", source_type="youtube", app=app, video_id=video_id,
+                      video_duration_s=float(b - a), prompt_version=prompt_version, on_attempt=on_attempt)
+        except ExtractionError as e:
+            if isinstance(e.__cause__, ProviderError):
+                raise
+            if e.partial is None:
+                warns.append(f"window {a}s to {b}s: no valid answer from the model ({str(e)[:120]})")
+                parts.append([])
+                continue
+            sl = e.partial
+            warns.append(f"window {a}s to {b}s: the model's answer had problems and was kept as drafted")
+        first = first or sl
+        for st in sl.steps:
+            for attr in ("video_start_s", "video_end_s"):
+                v = getattr(st, attr)
+                if v is not None:
+                    setattr(st, attr, min(float(duration_s), v + a))
+        parts.append(sl.steps)
+    merged = merge_window_steps(parts, duration_s)
+    out = StepList(source_type="youtube", app=app, app_version_tutorial=first.app_version_tutorial if first else None, video_id=video_id, title=first.title if first else None,
+                   steps=merged, model_id=provider.model_id, prompt_version=prompt_version, video_duration_s=duration_s)
+    flag_order_errors(out)
+    refresh_coverage_warnings(out)
+    out.warnings = [f"extracted in {len(wins)} windows of about {window_s:g} s with {overlap_s:g} s overlap"] + warns + out.warnings
+    return out
+
+
 def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str | None = None,
                  transcript_cues=None) -> str:
     """The per-request (user) prompt for a video. Exposed so experiments can hash it for cache keys."""
     from .transcript import transcript_for_prompt
+    prompt_version = prompt_version.partition("-")[0]                  # "v10-nokb" and "v10-outline" differ only in the system prompt
 
-    if prompt_version in ("v3", "v4", "v5", "v6", "v7"):
+    if prompt_version in ("v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"):
         time_fmt = "as MM:SS (or H:MM:SS)"
         dur_txt = (f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to "
                    f"{_mmss(duration_s)}." if duration_s else "")

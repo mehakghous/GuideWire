@@ -2188,3 +2188,40 @@ A tried effect was removed: CTRL-01 -> nurbsCurve was wrong for a 3D Type contro
 Added to `knowledge/rigging_knowledge.json`: 5 sources (H1 to H3 SideFX Houdini 22 docs, official; H4, H5 SideFX forum threads, community) and 2 entries: `houdini.apex_autorig` (Pack Character, AutoRig Component sources, Configure Controls; node and option names, Multi IK segment-tag rule, outline) and `houdini.capture_weights` (Joint Capture Biharmonic/Proximity, Joint Deform, Rig Pose, Capture Geometry shelf tool; verify lines, three documented mistakes, two community troubleshooting entries: finger/eye weight bleed, mismatched rest pose).
 Read in full: the three docs pages and the two forum threads. NOT covered: Rig Doctor, retargeting, Motion Clips, animation workflows, mocap, Vellum/ragdoll; forum threads other than these two (only search summaries were seen); nothing checked inside Houdini. The docs are for 22.0; tutorials for Houdini 18.5 to 19 predate this workflow and a forum reply says they do not always carry over (search summary only, not read in full); Houdini steps carry the version caution already in `VERSION_NOTES`.
 Tests: `tests/test_rigging_knowledge.py` (two real forum symptoms, wrong-app silence, tiers, vocabulary, tagging).
+
+
+## 29. Scene-chain check on every route (2026-10-20)
+
+Gap: `derive_state` ran only in video extraction, and nothing put an order error on a step. The written-rigging route and the rigging transcript route got neither derived states nor an order check.
+Built: `scene_chain.flag_order_errors` writes each order error onto the step that has it (flag starting `order:`, once, idempotent). Video extraction, `rigging_to_steplist` (also a caveat) and `ingest_rigging_transcript` (also a limitation line) call it after validation; the two deterministic routes call `derive_state` first. Tests: `tests/test_scene_chain.py`.
+
+
+## 30. Real-application verification, real vocabularies, verified derived states (2026-10-22)
+
+All three applications are installed on the development machine: Blender 5.2.2 LTS (Python 3.13), Maya 2027 (mayapy) and Houdini 22.0.466 (hython, Apprentice licence). Everything below was RUN in them.
+
+**Harness (`verification/`).** Scripts that run inside the application write a JSON snapshot of a scene (node types, mode, selection, requested properties); `checker.py` compares each step's `expected_state` with it and says met / unmet / cannot_check (never guesses). `python -m verification detect|check`. It checks the END state of a whole procedure; per-step replay is not built. Tests: `tests/test_verification.py` (real scenes in all three).
+
+**Real vocabularies.** `python scripts/dump_app_vocab.py` writes `knowledge/app_vocab/<app>.json` (node types, modes, workspaces or desktops, UI names, Houdini parameter labels, Maya attribute labels). `ingestion/profiles.py` is checked against it (`tests/test_app_vocab.py`). Found and fixed: seven Houdini node labels that do not exist in the install ("Animation from Skeleton", "Configure Controls", "FBX/GLTF ... Output", "Motion Clips", "Ragdoll"), two wrong Houdini desktop names ("Rigging", "Tech"), and Blender had no node vocabulary at all (now objects, `BONE`, `CONSTRAINT_<type>`, `MODIFIER_<type>`; the prefixes keep Blender's same-named things apart). The real names also widen the validator's UI vocabulary (fewer false "unknown UI name" flags).
+
+**Prompt v7.** v2 to v6 stay frozen (a test pins v2). v7 = v6 with a `node_exists` explanation and examples per application (v6 told Blender and Houdini to use "joint, ikHandle, skinCluster"). Defaults: Maya and Houdini use v7, Blender keeps v2 unless `--rigging`; the gateway follows the same rule. `/v1/answer` now takes `app`.
+
+**Derived states checked in the applications.** `knowledge` entries carry `effects` (what a feature's step makes and needs). `verification/recipes.py` performs each step in an empty scene of the real application; `tests/test_effects_verified.py` fails if a claim does not hold. Verified: 7 Maya, 5 Blender, 8 Houdini features (including the five Maya claims from section 27, first checked in a real Maya here).
+
+**Documented option names checked.** Every `options` list in a Houdini or Blender entry must be a parameter label of that node (Houdini) or a UI name (Blender); Maya `options_node` lists must be attribute labels of that node. Entries say when an option lives somewhere else (`options_in`: viewer state, dialog, button text). This caught wrong names ("Weight Position", "Axis Orientation", "World Up Object", "Bake Current Pose", "Rotation & Scale") that came from paraphrased documentation.
+Limit: option NAMES are verified against the install; the sentences around them (what a mode does, a caution) are paraphrased from the official pages, which were read through a summarising fetch tool for Houdini and Maya, and from the local manual index for Blender. They carry `official` tier and a source but were not re-checked line by line.
+
+
+## 31. Knowledge base growth and the cost guard (2026-10-22)
+
+Entries: 23 -> 45 (Maya 23, Blender 12, Houdini 10; see `docs/rigging_matrix.md` for features covered per application: Blender 19, Maya 35, Houdini 25). New Houdini: Skeleton, Orient Joints, Skeleton Mirror, IK Chains, Rig Doctor, Rig Pose, Rig Stash Pose, KineFX workflow. New Blender: Add Bones, Copy Rotation, Child Of, Bone Collections, Apply Transforms, Pose as Rest Pose, Clear Pose Transform, FK Posing. New Maya: Mirror Joint, Insert Joint, Aim Constraint, Mirror Skin Weights, Go To Bind Pose (with its troubleshooting), Reset Transformations. Lesson recorded: a new phrase in one entry can make another entry's request ambiguous (the ambiguity guard returns nothing); `reset_transformations` first broke an everyday-request test and its phrases were made distinct.
+
+Cost guard (`ingestion/budget.py`): wraps any provider, so `cli video`, `cli written` and the gateway share it. Content-hash cache over everything the model sees (so the application, prompt version, hint and model are part of the key), per-run and per-day dollar ceilings and a token ceiling checked before each call against a worst case, a model without a known price is refused, a cost log without keys or text, `--dry-run`, `--tier iterate|report`, `--model`, `--key default|dev|test` (reads `GEMINI_API_KEY[_DEV|_TEST]`), `--fresh`, `--duration`, `--max-usd-run`. Tests: `tests/test_budget.py`. NOT used by `ingestion/experiment.py` (the Blender A/B runner has its own ledger; its `cell_key` still hashes the Blender system prompt only).
+Not done: no live Gemini call was made in this work; prompt v7 has never run on a video.
+
+
+## 32. First live v7 runs and the three new predicate kinds (2026-11-07)
+
+**Phase 1.** Prompt v7 ran on 7 real videos (Maya 5, Houdini 1, Blender 1) with `gemini-3.5-flash-lite` for about 0.27 USD; results and the failures found are in `docs/phase1_v7_results_2026-11-07.md`. `ingestion/eval/phase1.py` reports structure numbers per run and per application and the accuracy numbers when a human gold file exists (`tests/test_phase1_eval.py`). No gold exists, so no recall or precision is claimed. The 3.8 Flash model was at capacity (503/504) and was not run.
+
+**Phase 3, contract 0.11.** After the owners' approval (told to Ayesha 2026-11-07; `docs/proposal-predicate-kinds.md`): `name_exists` (target: name, matched exactly), `attribute_exists` (target: `object.attribute`; Houdini `/obj/node/parm`), `node_count` (target: node type, value: AT LEAST that many, a whole number >= 1). `StatePredicate` enforces the value rules. `verification/checker.py` checks all three; the Blender, Maya and Houdini snapshot scripts read names (Blender now includes bones) and test attributes; proven against real Blender, Maya and Houdini scenes (`tests/test_predicate_kinds.py`, fixtures gained one custom attribute). **The model is still offered only the seven older kinds** (`ModelPredicateKind` in `extract.py`) so frozen prompts and pinned cache keys do not change; teaching the new kinds is a prompt and `MODEL_SCHEMA_TAG` change that needs a measured live run.

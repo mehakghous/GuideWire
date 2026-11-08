@@ -1,5 +1,7 @@
 # Rigging audit, 2026-10-22: schema history, discovery, knowledge base, application checks
 
+**Update, same day:** sections 3 and 4 below describe the repository in the morning. Since then Maya 2027 was installed and checked, the knowledge base grew from 23 to 45 entries and every application's derived states were verified in the real application; see `docs/ingestion-technical-plan.md` sections 30 and 31 and `docs/rigging_matrix.md` for current numbers.
+
 Labels: **[V]** verified (ran it, or read the code/history in this audit). **[U]** unverified or a guess, said so.
 Branch `ayesha/chain-all-routes-v2`. Nothing outside new files was modified.
 

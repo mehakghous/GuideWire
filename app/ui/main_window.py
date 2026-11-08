@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
 from ..accounts import Accounts, User
 from ..db import Database
+from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
 from .screens import HomeScreen, LoginScreen, SessionScreen, StepReviewScreen
 
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
         self.home.open_review.connect(self.open_review)
         self.home.import_sample.connect(self.import_sample)
         self.review.saved.connect(lambda _tid: self.show_home())
-        self.home.open_session.connect(lambda tid: self.go(self.session, tid))
+        self.home.open_session.connect(self.open_session)
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
         self.stack.setCurrentWidget(self.login)
@@ -76,12 +77,17 @@ class MainWindow(QMainWindow):
         self.review.load(StepEditor.from_json_file(path), self.db, self.user.id)
         self.stack.setCurrentWidget(self.review)
 
-    def go(self, screen, tutorial_id: int) -> None:
+    def open_session(self, tutorial_id: int) -> None:
         if self.user is None:
             self.stack.setCurrentWidget(self.login)
             return
-        screen.load(tutorial_id)
-        self.stack.setCurrentWidget(screen)
+        try:
+            engine = SessionEngine.create(self.db, self.user.id, tutorial_id)
+        except EngineError:
+            self.show_home()
+            return
+        self.session.load(engine)
+        self.stack.setCurrentWidget(self.session)
 
 
 def main() -> int:

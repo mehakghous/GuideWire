@@ -95,7 +95,9 @@ def test_buttons_do_nothing_without_a_selection(win):
 
 
 def test_screens_never_open_without_a_login(win):
-    win.go(win.review, 1)
+    win.open_review(1)
+    assert win.current_screen() is win.login
+    win.open_session(1)
     assert win.current_screen() is win.login
     win.show_home()
     assert win.current_screen() is win.login
@@ -159,3 +161,52 @@ def test_unsaved_edits_are_not_stored(win):
 def test_import_needs_a_login(win):
     win.import_sample()
     assert win.current_screen() is win.login
+
+
+# ---------------------------------------------------------------- session screen
+def _session(w):
+    r = _open_sample(w)
+    r.save_button.click()
+    w.home.tutorials.setCurrentRow(0)
+    w.home.session_button.click()
+    return w.session
+
+
+def test_session_starts_not_started_with_only_start_enabled(win):
+    s = _session(win)
+    assert win.current_screen() is win.session
+    assert s.start_button.isEnabled() and not s.done_button.isEnabled() and not s.skip_button.isEnabled()
+    assert "0 of 4" in s.progress.text()
+
+
+def test_session_walks_through_to_finished(win):
+    s = _session(win)
+    s.start_button.click()
+    assert "Step 1" in s.step_text.text() and not s.prev_button.isEnabled()
+    s.done_button.click()
+    assert "Step 2" in s.step_text.text() and s.prev_button.isEnabled()
+    s.prev_button.click()
+    assert "Step 1" in s.step_text.text()
+    s.skip_button.click()
+    s.done_button.click()
+    s.done_button.click()
+    s.done_button.click()
+    assert "finished" in s.step_text.text() and "4 of 4" in s.progress.text()
+    assert not s.done_button.isEnabled() and not s.start_button.isEnabled()
+
+
+def test_craft_step_tells_the_user_it_is_manual(win):
+    s = _session(win)
+    s.start_button.click()
+    for _ in range(3):
+        s.done_button.click()
+    assert "cannot check this step automatically" in s.detail.text()
+
+
+def test_each_open_creates_its_own_session_and_back_goes_home(win):
+    s = _session(win)
+    first = s.engine.session_id
+    s.back_button.click()
+    win.home.tutorials.setCurrentRow(0)
+    win.home.session_button.click()
+    assert win.session.engine.session_id != first and win.current_screen() is win.session

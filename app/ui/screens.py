@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLin
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
+from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_editor import EditError, StepEditor
 
 
@@ -245,10 +246,80 @@ class StepReviewScreen(QWidget):
             self.saved.emit(tid[0])
 
 
-class SessionScreen(_Placeholder):
-    def __init__(self):
-        super().__init__("Session", "The guided session (step by step, with the overlay) is built in a later step.")
-        self.tutorial_id: int | None = None
+class SessionScreen(QWidget):
+    """Shows the active step with Done / Skip / Back. All state and rules live in SessionEngine."""
+    back = pyqtSignal()
 
-    def load(self, tutorial_id: int) -> None:
-        self.tutorial_id = tutorial_id
+    def __init__(self):
+        super().__init__()
+        self.engine: SessionEngine | None = None
+        self.title = QLabel("<h2>Session</h2>")
+        self.progress = QLabel("")
+        self.step_text = QLabel("")
+        self.step_text.setWordWrap(True)
+        self.detail = QLabel("")
+        self.detail.setWordWrap(True)
+        self.status = QLabel("")
+        self.start_button = QPushButton("Start")
+        self.done_button = QPushButton("Done")
+        self.skip_button = QPushButton("Skip")
+        self.prev_button = QPushButton("Previous step")
+        self.back_button = QPushButton("Back")
+        self.start_button.clicked.connect(lambda: self._do(self.engine.start))
+        self.done_button.clicked.connect(lambda: self._do(self.engine.complete))
+        self.skip_button.clicked.connect(lambda: self._do(self.engine.skip))
+        self.prev_button.clicked.connect(lambda: self._do(self.engine.back))
+        self.back_button.clicked.connect(self.back.emit)
+        row = QHBoxLayout()
+        for b in (self.start_button, self.prev_button, self.skip_button, self.done_button):
+            row.addWidget(b)
+        root = QVBoxLayout(self)
+        root.addWidget(self.title)
+        root.addWidget(self.progress)
+        root.addWidget(self.step_text)
+        root.addWidget(self.detail)
+        root.addLayout(row)
+        root.addWidget(self.status)
+        root.addStretch()
+        root.addWidget(self.back_button)
+
+    @property
+    def tutorial_id(self) -> int | None:
+        return None if self.engine is None else self.engine.db.get_session(self.engine.session_id)["tutorial_id"]
+
+    def load(self, engine: SessionEngine) -> None:
+        self.engine = engine
+        self.status.setText("")
+        self.refresh()
+
+    def _do(self, action) -> None:
+        try:
+            action()
+        except EngineError as e:
+            self.status.setText(str(e))
+        else:
+            self.status.setText("")
+        self.refresh()
+
+    def refresh(self) -> None:
+        e = self.engine
+        assert e is not None
+        done, total = e.progress()
+        self.progress.setText(f"{done} of {total} steps done")
+        step = e.current_step()
+        if e.state == NOT_STARTED:
+            self.step_text.setText("Press Start to begin.")
+            self.detail.setText("")
+        elif e.state == FINISHED:
+            self.step_text.setText("Session finished. Well done!")
+            self.detail.setText("")
+        else:
+            self.step_text.setText(f"<b>Step {e.position}:</b> {step.goal}")
+            lines = [h.text for h in step.how_to]
+            if not step.verifiable:
+                lines.append("(GuideWire cannot check this step automatically: tell it when you are done.)")
+            self.detail.setText("\n".join(lines))
+        self.start_button.setEnabled(e.state == NOT_STARTED)
+        self.done_button.setEnabled(e.state == ACTIVE)
+        self.skip_button.setEnabled(e.state == ACTIVE)
+        self.prev_button.setEnabled(e.state == ACTIVE and (e.position or 1) > 1)

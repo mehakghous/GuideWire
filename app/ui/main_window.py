@@ -10,7 +10,7 @@ from ..accounts import Accounts, User
 from ..db import Database
 from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
-from .screens import HistoryScreen, HomeScreen, LoginScreen, ProfileScreen, SessionScreen, StepReviewScreen
+from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 
 
 SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
@@ -29,9 +29,10 @@ class MainWindow(QMainWindow):
         self.review = StepReviewScreen()
         self.session = SessionScreen()
         self.history = HistoryScreen()
+        self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
         self.stack = QStackedWidget()
-        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile):
+        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial):
             self.stack.addWidget(screen)
         self.setCentralWidget(self.stack)
         self.login.logged_in.connect(self.on_logged_in)
@@ -43,6 +44,9 @@ class MainWindow(QMainWindow):
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
         self.history.back.connect(self.show_home)
+        self.new_tutorial.back.connect(self.show_home)
+        self.new_tutorial.created.connect(self.open_editor)
+        self.home.new_tutorial.connect(self.open_new_tutorial)
         self.profile.back.connect(self.show_home)
         self.profile.profile_changed.connect(self.on_profile_changed)
         self.home.open_history.connect(self.open_history)
@@ -70,6 +74,21 @@ class MainWindow(QMainWindow):
 
     def on_profile_changed(self, user: User) -> None:
         self.user = user
+
+    def open_new_tutorial(self) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.new_tutorial.reset()
+        self.stack.setCurrentWidget(self.new_tutorial)
+
+    def open_editor(self, editor: StepEditor) -> None:
+        """Review freshly generated steps; they are saved only when the user saves."""
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.review.load(editor, self.db, self.user.id)
+        self.stack.setCurrentWidget(self.review)
 
     def open_history(self) -> None:
         if self.user is None:

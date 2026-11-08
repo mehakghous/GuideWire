@@ -5,10 +5,11 @@ Login and Home work. Step Review and Session are placeholders for now (the edito
 from __future__ import annotations
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
+from ..pipeline import APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_editor import EditError, StepEditor
 
@@ -68,6 +69,7 @@ class HomeScreen(QWidget):
     open_review = pyqtSignal(int)      # tutorial id
     open_session = pyqtSignal(int)     # tutorial id
     import_sample = pyqtSignal()
+    new_tutorial = pyqtSignal()
     open_history = pyqtSignal()
     open_profile = pyqtSignal()
     logout = pyqtSignal()
@@ -79,6 +81,8 @@ class HomeScreen(QWidget):
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
         self.sample_button = QPushButton("Import sample steps")
+        self.new_button = QPushButton("New from text")
+        self.new_button.clicked.connect(self.new_tutorial.emit)
         self.history_button = QPushButton("History")
         self.profile_button = QPushButton("Profile")
         self.logout_button = QPushButton("Log out")
@@ -91,6 +95,7 @@ class HomeScreen(QWidget):
         row = QHBoxLayout()
         row.addWidget(self.review_button)
         row.addWidget(self.session_button)
+        row.addWidget(self.new_button)
         row.addWidget(self.sample_button)
         row.addWidget(self.history_button)
         row.addWidget(self.profile_button)
@@ -452,3 +457,54 @@ class ProfileScreen(QWidget):
         self.old_password.clear()
         self.new_password.clear()
         self.message.setText("Password changed")
+
+class NewTutorialScreen(QWidget):
+    """Paste written steps (or a timed transcript); the pipeline turns them into steps to review. Nothing is saved until the user saves in the editor."""
+    back = pyqtSignal()
+    created = pyqtSignal(object)       # StepEditor
+
+    def __init__(self):
+        super().__init__()
+        self.title = QLineEdit()
+        self.title.setPlaceholderText("Tutorial title")
+        self.app = QComboBox()
+        self.app.addItems(APPS)
+        self.text = QPlainTextEdit()
+        self.text.setPlaceholderText("One instruction per line, e.g.\nPress Tab to enter Edit Mode\nSelect the cube\n\nor paste a timed transcript")
+        self.message = QLabel("")
+        self.message.setWordWrap(True)
+        self.notes = QLabel("")
+        self.notes.setWordWrap(True)
+        self.create_button = QPushButton("Create steps")
+        self.back_button = QPushButton("Back")
+        self.create_button.clicked.connect(self.create)
+        self.back_button.clicked.connect(self.back.emit)
+        form = QFormLayout()
+        form.addRow("Title", self.title)
+        form.addRow("Application", self.app)
+        root = QVBoxLayout(self)
+        root.addWidget(QLabel("<h2>New tutorial</h2>"))
+        root.addLayout(form)
+        root.addWidget(self.text)
+        root.addWidget(self.message)
+        root.addWidget(self.notes)
+        buttons = QHBoxLayout()
+        buttons.addWidget(self.create_button)
+        buttons.addStretch()
+        buttons.addWidget(self.back_button)
+        root.addLayout(buttons)
+
+    def reset(self) -> None:
+        self.title.clear()
+        self.text.clear()
+        self.message.setText("")
+        self.notes.setText("")
+
+    def create(self) -> None:
+        result = request_steps(self.text.toPlainText(), self.app.currentText())
+        self.message.setText(result.message)
+        self.notes.setText("\n".join(f"Note: {n}" for n in result.notes))
+        if result.steps is None:
+            return
+        title = self.title.text().strip() or "Untitled tutorial"
+        self.created.emit(StepEditor(result.steps, title=title))

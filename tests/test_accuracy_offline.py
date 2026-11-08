@@ -136,7 +136,7 @@ def test_prompt_versions():
     assert "TWO sources" not in v2 and "TWO sources" in v3 and "MM:SS" in v3 and "visual_evidence" in v3
     assert "NEVER replace a concrete operation" in v3 and "Never invent a step" in v3
     with pytest.raises(ValueError):
-        build_system_prompt(BLENDER, "v9")
+        build_system_prompt(BLENDER, "v99")
 
 
 def test_structural_errors_collected():

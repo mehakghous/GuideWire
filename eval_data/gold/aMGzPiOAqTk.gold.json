@@ -1,0 +1,91 @@
+{
+ "video_id": "aMGzPiOAqTk",
+ "title": "How to Combine Objects in Blender like a Pro 2025",
+ "duration_s": 271.0,
+ "app": "blender",
+ "app_version": "3.x",
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "left click cube",
+   "t_start": 25.0,
+   "t_end": 26.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "left click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "scroll wheel to zoom in and out",
+   "t_start": 27.0,
+   "t_end": 28.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "scroll wheel",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "press scroll wheel and rotate to see different perspectives of the cube",
+   "t_start": 29.0,
+   "t_end": 33.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  }
+ ]
+}

@@ -1,0 +1,1084 @@
+{
+ "video_id": "8RqfDcoP0jI",
+ "title": "How to Rig a Character in Maya | Step-by-Step Quick Rig Tutorial for Beginners",
+ "duration_s": 190.0,
+ "app": "maya",
+ "app_version": null,
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "Switch to the Rigging workspace.",
+   "t_start": 16.0,
+   "t_end": 20.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Workspace > Rigging",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "Select Rigging from the Shelf.",
+   "t_start": 22.0,
+   "t_end": 25.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Rigging Shelf",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "Open the Quick Rig tool.",
+   "t_start": 25.0,
+   "t_end": 28.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Quick Rig icon",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 4,
+   "id": "H04",
+   "goal": "Click the plus button in the Quick Rig tool.",
+   "t_start": 28.0,
+   "t_end": 31.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Quick Rig > +",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 5,
+   "id": "H05",
+   "goal": "Enter a name for the character.",
+   "t_start": 31.0,
+   "t_end": 33.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Character Name",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 6,
+   "id": "H06",
+   "goal": "Select the Step-by-Step option.",
+   "t_start": 33.0,
+   "t_end": 40.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Quick Rig > Step-by-Step",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The alternative is One-Click."
+  },
+  {
+   "order": 7,
+   "id": "H07",
+   "goal": "Select the character geometry.",
+   "t_start": 40.0,
+   "t_end": 42.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport selection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 8,
+   "id": "H08",
+   "goal": "Click the plus button under Geometry.",
+   "t_start": 40.0,
+   "t_end": 42.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Geometry > +",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Adds the selected geometry."
+  },
+  {
+   "order": 9,
+   "id": "H09",
+   "goal": "Create or update the guides.",
+   "t_start": 42.0,
+   "t_end": 46.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Guides > Create/Update",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Generates the rigging guides."
+  },
+  {
+   "order": 10,
+   "id": "H10",
+   "goal": "Switch to the front view.",
+   "t_start": 46.0,
+   "t_end": 48.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Spacebar",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Allows the guides to be positioned from the front."
+  },
+  {
+   "order": 11,
+   "id": "H11",
+   "goal": "Adjust the positions of the generated guides.",
+   "t_start": 48.0,
+   "t_end": 51.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport selection and Move tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 12,
+   "id": "H12",
+   "goal": "Expand the guides in the Outliner to identify individual guides.",
+   "t_start": 51.0,
+   "t_end": 55.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Allows individual guides to be selected."
+  },
+  {
+   "order": 13,
+   "id": "H13",
+   "goal": "Select the neck guide and move it to the desired neck position.",
+   "t_start": 55.0,
+   "t_end": 60.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner > Neck Guide > Move",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Adjusts the neck joint location."
+  },
+  {
+   "order": 14,
+   "id": "H14",
+   "goal": "Select the head guide and move it toward the top of the character's head.",
+   "t_start": 60.0,
+   "t_end": 65.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner > Head Guide > Move",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 15,
+   "id": "H15",
+   "goal": "Select the arm guide and move it into the correct position.",
+   "t_start": 65.0,
+   "t_end": 72.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner / Viewport > Move",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor adjusts an arm that is positioned too far inward."
+  },
+  {
+   "order": 16,
+   "id": "H16",
+   "goal": "Move the shoulder guide to the correct position.",
+   "t_start": 72.0,
+   "t_end": 75.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner / Viewport > Move",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 17,
+   "id": "H17",
+   "goal": "Select the left shoulder and left arm guides.",
+   "t_start": 75.0,
+   "t_end": 80.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner / Viewport selection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Only one side needs adjustment for a symmetrical character."
+  },
+  {
+   "order": 18,
+   "id": "H18",
+   "goal": "Use the guide adjustment button to mirror the selected guides to the opposite side.",
+   "t_start": 80.0,
+   "t_end": 88.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "User Adjustments > Mirror Left/Right",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The button transfers guide positions between the left and right sides."
+  },
+  {
+   "order": 19,
+   "id": "H19",
+   "goal": "Continue adjusting the remaining guides to match the character's anatomy.",
+   "t_start": 90.0,
+   "t_end": 95.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport selection and Move tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 20,
+   "id": "H20",
+   "goal": "Select the left upper-leg guide and move it into the correct position.",
+   "t_start": 95.0,
+   "t_end": 100.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner / Viewport > Move",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 21,
+   "id": "H21",
+   "goal": "Mirror the upper-leg guide adjustment to the opposite side.",
+   "t_start": 100.0,
+   "t_end": 103.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "User Adjustments > Mirror Left/Right",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 22,
+   "id": "H22",
+   "goal": "Check and adjust the remaining guides to ensure they are correctly positioned.",
+   "t_start": 103.0,
+   "t_end": 108.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport / Outliner",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Final guide-positioning check."
+  },
+  {
+   "order": 23,
+   "id": "H23",
+   "goal": "Click Create/Update Rig under Skeleton and Rig Generation.",
+   "t_start": 111.0,
+   "t_end": 116.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skeleton and Rig Generation > Create/Update Rig",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Generates the character skeleton and rig."
+  },
+  {
+   "order": 24,
+   "id": "H24",
+   "goal": "Inspect the generated rig and its joint structure.",
+   "t_start": 116.0,
+   "t_end": 123.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Check whether the joints are positioned correctly."
+  },
+  {
+   "order": 25,
+   "id": "H25",
+   "goal": "Generate or update the rig after confirming the joint structure.",
+   "t_start": 123.0,
+   "t_end": 127.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Create/Update Rig",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor repeats the rig-generation step."
+  },
+  {
+   "order": 26,
+   "id": "H26",
+   "goal": "Select the default binding settings.",
+   "t_start": 127.0,
+   "t_end": 130.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skinning > Default Settings",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Alternative: Current Settings."
+  },
+  {
+   "order": 27,
+   "id": "H27",
+   "goal": "Select Current Settings to customize the binding configuration.",
+   "t_start": 130.0,
+   "t_end": 135.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skinning > Current Settings",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Alternative to using default settings."
+  },
+  {
+   "order": 28,
+   "id": "H28",
+   "goal": "Adjust the skinning and binding settings.",
+   "t_start": 135.0,
+   "t_end": 139.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skinning Settings",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 29,
+   "id": "H29",
+   "goal": "Select Skin Cluster as the binding method.",
+   "t_start": 139.0,
+   "t_end": 142.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skinning > Skin Cluster",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Choose this if you intend to use weight painting later. Proximity Wrap is the alternative."
+  },
+  {
+   "order": 30,
+   "id": "H30",
+   "goal": "Apply the selected skinning settings.",
+   "t_start": 142.0,
+   "t_end": 148.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Apply",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Binds the character to the generated rig."
+  },
+  {
+   "order": 31,
+   "id": "H31",
+   "goal": "Move the character to test the rig's deformation.",
+   "t_start": 148.0,
+   "t_end": 151.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport / Rig Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 32,
+   "id": "H32",
+   "goal": "Open Weight Painting to correct unsatisfactory skin deformation.",
+   "t_start": 151.0,
+   "t_end": 156.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Weight Painting",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Alternative correction method."
+  },
+  {
+   "order": 33,
+   "id": "H33",
+   "goal": "Return to the default binding settings and initiate another rig update.",
+   "t_start": 156.0,
+   "t_end": 159.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skinning > Default Settings > Create/Update",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Alternative if the current binding does not produce satisfactory results."
+  },
+  {
+   "order": 34,
+   "id": "H34",
+   "goal": "Confirm deletion of the existing skin when prompted.",
+   "t_start": 159.0,
+   "t_end": 163.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Confirmation Dialog > OK",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Required when replacing the existing skin."
+  },
+  {
+   "order": 35,
+   "id": "H35",
+   "goal": "Inspect the updated character deformation.",
+   "t_start": 163.0,
+   "t_end": 167.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 36,
+   "id": "H36",
+   "goal": "Evaluate the skinning and weight distribution.",
+   "t_start": 167.0,
+   "t_end": 174.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Checks how well the automatic weights work."
+  },
+  {
+   "order": 37,
+   "id": "H37",
+   "goal": "Reopen weight painting and adjust the weights if necessary.",
+   "t_start": 174.0,
+   "t_end": 177.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Weight Painting",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  }
+ ]
+}

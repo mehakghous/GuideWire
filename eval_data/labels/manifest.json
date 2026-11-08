@@ -135,6 +135,118 @@
    "annotators": [
     "ayesha"
    ]
+  },
+  {
+   "video_id": "PctSMB-RGsM",
+   "title": "How to Rig a Leg with Inverse Kinematics in Blender | Quick IK Tutorial for Animation",
+   "channel": "What Make Art",
+   "url": "https://www.youtube.com/watch?v=PctSMB-RGsM",
+   "duration_s": 386,
+   "topic": "blender rigging leg inverse kinematics armature",
+   "app": "blender",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "wugi1I6Zelo",
+   "title": "Autodesk Maya, How to create an IK/FK Rig",
+   "channel": "Juzz 3D World",
+   "url": "https://www.youtube.com/watch?v=wugi1I6Zelo",
+   "duration_s": 726,
+   "topic": "maya rigging ik fk switch rig",
+   "app": "maya",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "r0aFUjBb-Yo",
+   "title": "Rigging for Beginners: IK Legs in Maya",
+   "channel": "Academic Phoenix Plus",
+   "url": "https://www.youtube.com/watch?v=r0aFUjBb-Yo",
+   "duration_s": 1040,
+   "topic": "maya rigging ik legs pole vector controls",
+   "app": "maya",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "HHXHbDH7c6A",
+   "title": "How to start rigging a character in Houdini with KineFX",
+   "channel": "Pixel Dynamics",
+   "url": "https://www.youtube.com/watch?v=HHXHbDH7c6A",
+   "duration_s": 815,
+   "topic": "houdini kinefx rigging skeleton skinning",
+   "app": "houdini",
+   "app_version": null,
+   "captions": "auto",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "8RqfDcoP0jI",
+   "title": "How to Rig a Character in Maya | Step-by-Step Quick Rig Tutorial for Beginners",
+   "channel": "What Make Art",
+   "url": "https://www.youtube.com/watch?v=8RqfDcoP0jI",
+   "duration_s": 190,
+   "topic": "maya quick rig character beginner",
+   "app": "maya",
+   "app_version": null,
+   "captions": "none",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "TmhC35PqZvQ",
+   "title": "Leg Setup & IK Handles",
+   "channel": "Learning Fever",
+   "url": "https://www.youtube.com/watch?v=TmhC35PqZvQ",
+   "duration_s": 392,
+   "topic": "maya rigging leg ik handles",
+   "app": "maya",
+   "app_version": null,
+   "captions": "none",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "xWnI7is6e7Q",
+   "title": "Rigging in Houdini with APEX: 01 | Simple FK",
+   "channel": "max rose",
+   "url": "https://www.youtube.com/watch?v=xWnI7is6e7Q",
+   "duration_s": 397,
+   "topic": "houdini apex rigging simple fk",
+   "app": "houdini",
+   "app_version": null,
+   "captions": "none",
+   "annotators": [
+    "ayesha"
+   ]
+  },
+  {
+   "video_id": "LJeap3wpyJA",
+   "title": "Rigging in Houdini with APEX: 02 | Simple IK",
+   "channel": "max rose",
+   "url": "https://www.youtube.com/watch?v=LJeap3wpyJA",
+   "duration_s": 377,
+   "topic": "houdini apex rigging simple ik",
+   "app": "houdini",
+   "app_version": null,
+   "captions": "none",
+   "annotators": [
+    "ayesha"
+   ]
   }
  ]
 }

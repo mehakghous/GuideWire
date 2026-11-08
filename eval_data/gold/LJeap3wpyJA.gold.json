@@ -1,0 +1,729 @@
+{
+ "video_id": "LJeap3wpyJA",
+ "title": "Rigging in Houdini with APEX: 02 | Simple IK",
+ "duration_s": 377.0,
+ "app": "houdini",
+ "app_version": null,
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "Switch from Modify mode to Create mode.",
+   "t_start": 25.0,
+   "t_end": 31.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Create Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "Create a skeleton and leave the default joint names unchanged.",
+   "t_start": 31.0,
+   "t_end": 42.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Skeleton",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The default names are used later in the IK Driven field."
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "Create a Pack Folder, connect the skeleton to it, and name the packed skeleton Base.",
+   "t_start": 42.0,
+   "t_end": 50.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Pack Folder",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The transcript refers to this as Base Scale; your notes identify the name as Base."
+  },
+  {
+   "order": 4,
+   "id": "H04",
+   "goal": "Set the Pack Folder type to Skeleton.",
+   "t_start": 50.0,
+   "t_end": 52.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pack Folder > Type",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 5,
+   "id": "H05",
+   "goal": "Create an Auto Rig Component and rename it IK.",
+   "t_start": 52.0,
+   "t_end": 60.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Auto Rig Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Connect the Pack Folder output to this component."
+  },
+  {
+   "order": 6,
+   "id": "H06",
+   "goal": "Select Smooth IK from the Component dropdown.",
+   "t_start": 60.0,
+   "t_end": 65.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Auto Rig Component > Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 7,
+   "id": "H07",
+   "goal": "Open the Driven field and identify the joint names that the IK component must control.",
+   "t_start": 65.0,
+   "t_end": 81.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Auto Rig Component > Driven",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The example uses the default joint names 0, 0.1, and 0.2."
+  },
+  {
+   "order": 8,
+   "id": "H08",
+   "goal": "Add a marker to display joint names while working.",
+   "t_start": 81.0,
+   "t_end": 107.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Right-click marker icon > + > Marker",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Set Marker Text to use the name attribute and set the attribute to point."
+  },
+  {
+   "order": 9,
+   "id": "H09",
+   "goal": "Select the skeleton and enable the marker display to inspect the joint names.",
+   "t_start": 107.0,
+   "t_end": 116.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Select skeleton > W",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "This makes the point names visible on the skeleton."
+  },
+  {
+   "order": 10,
+   "id": "H10",
+   "goal": "Enter the joint names into the IK Driven field and press Enter.",
+   "t_start": 116.0,
+   "t_end": 131.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK > Driven",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Use the actual names displayed by the marker, such as 0, 0.1, and 0.2."
+  },
+  {
+   "order": 11,
+   "id": "H11",
+   "goal": "Check the IK result and identify that it is not working correctly yet.",
+   "t_start": 131.0,
+   "t_end": 146.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The IK component needs the FK transforms initialized first."
+  },
+  {
+   "order": 12,
+   "id": "H12",
+   "goal": "Create another Auto Rig Component before the IK component and rename it FK.",
+   "t_start": 146.0,
+   "t_end": 161.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Auto Rig Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Connect the FK component before IK in the rigging chain."
+  },
+  {
+   "order": 13,
+   "id": "H13",
+   "goal": "Select FK and set the transform, rotation, and scale promotion groups to *.",
+   "t_start": 161.0,
+   "t_end": 180.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "FK > Component; T/R/S Promote Groups",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The wildcard promotes all points' transform channels."
+  },
+  {
+   "order": 14,
+   "id": "H14",
+   "goal": "Test the FK controls, then return to the IK component and verify that IK now works.",
+   "t_start": 180.0,
+   "t_end": 193.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "FK / IK components",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "FK initializes the transforms required by IK."
+  },
+  {
+   "order": 15,
+   "id": "H15",
+   "goal": "Inspect the IK component's Controls section and identify the generated pole-vector and IK-handle control names.",
+   "t_start": 197.0,
+   "t_end": 221.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK > Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The example names are arm_pole_L and arm_ik_handle_L (the exact displayed spelling should be followed)."
+  },
+  {
+   "order": 16,
+   "id": "H16",
+   "goal": "Remove the _L suffix from the pole-vector and IK-handle control names.",
+   "t_start": 221.0,
+   "t_end": 230.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK > Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Use center controls instead of left/right-specific controls."
+  },
+  {
+   "order": 17,
+   "id": "H17",
+   "goal": "Create a Configure Controls node and add two control configurations.",
+   "t_start": 230.0,
+   "t_end": 245.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Configure Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Configure one entry for each generated IK control."
+  },
+  {
+   "order": 18,
+   "id": "H18",
+   "goal": "Set the first control group to the pole-vector control and the second to the IK-handle control.",
+   "t_start": 245.0,
+   "t_end": 265.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Configure Controls > Control Groups",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Use the updated names after removing _L."
+  },
+  {
+   "order": 19,
+   "id": "H19",
+   "goal": "Configure the appearance of both controls by adjusting their size, shape, and color.",
+   "t_start": 265.0,
+   "t_end": 292.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Configure Controls > Shape Override / Color",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The example enlarges the controls, uses a blob shape, and assigns red to the IK control."
+  },
+  {
+   "order": 20,
+   "id": "H20",
+   "goal": "Create a Scene Add Character node and connect it after Configure Controls.",
+   "t_start": 292.0,
+   "t_end": 300.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Scene Add Character",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Adds the character to the Apex evaluation scene."
+  },
+  {
+   "order": 21,
+   "id": "H21",
+   "goal": "Create a Scene Animate node and test the IK rig.",
+   "t_start": 300.0,
+   "t_end": 312.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Scene Animate",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The resulting arm IK rig should now be visible and usable."
+  },
+  {
+   "order": 22,
+   "id": "H22",
+   "goal": "Inspect the pole-vector control's initial position and identify that it is placed at the elbow.",
+   "t_start": 312.0,
+   "t_end": 333.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pole-vector control",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The IK component is using the middle joint, 0.1, as the initial pole-vector position."
+  },
+  {
+   "order": 23,
+   "id": "H23",
+   "goal": "Move the pole-vector control outward from the elbow to establish a better initial position.",
+   "t_start": 333.0,
+   "t_end": 343.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pole-vector control",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Position it away from the arm so the elbow points in the intended direction."
+  },
+  {
+   "order": 24,
+   "id": "H24",
+   "goal": "Test the IK handle by moving it and observe how the arm flips if the pole vector remains at the elbow.",
+   "t_start": 343.0,
+   "t_end": 358.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK handle",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The elbow tries to point toward the pole vector, causing the arm to flip."
+  },
+  {
+   "order": 25,
+   "id": "H25",
+   "goal": "Introduce guides as the next method for defining initial rest positions for controls.",
+   "t_start": 358.0,
+   "t_end": 369.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "This is an explanation of the next tutorial, not an operation performed here."
+  }
+ ]
+}

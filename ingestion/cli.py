@@ -15,7 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video
+from .extract import PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -140,6 +140,15 @@ def _offline(args) -> int:
     if args.cmd == "chat":
         from .service import Service, chat
         svc = Service.open(args.session, version=args.version, use_kb=not args.no_kb)
+        if args.model_tier:                                  # answer with a model, grounded on the knowledge base; state changes stay rule-based; every call is cost-guarded
+            from .answer_model import ModelAnswerer
+            from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
+            from .providers.gemini import GeminiProvider
+            try:
+                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb)
+            except BudgetExceeded as e:
+                print(f"error: {e}", file=sys.stderr)
+                return 2
         if args.script:
             lines = Path(args.script).read_text(encoding="utf-8").splitlines()
         elif sys.stdin.isatty():
@@ -296,12 +305,14 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--selected", help="observed selected object types, comma separated, e.g. MESH,MESH")
     a.add_argument("--kb", help="path to the knowledge index (default: knowledge/kb.sqlite if it exists)")
     a.add_argument("--no-kb", action="store_true", help="catalog and parsers only; ignore the documentation index and tutorial index")
-    ch = sub.add_parser("chat", help="OFFLINE: talk to GuideWire in the terminal; load a tutorial and ask follow-up questions (session saved with --session)")
+    ch = sub.add_parser("chat", help="talk to GuideWire in the terminal; load a tutorial and ask follow-up questions (session saved with --session); offline unless --model-tier is given")
     ch.add_argument("--session", help="JSON file that keeps the conversation between runs")
     ch.add_argument("--script", help="read the messages from a file, one per line, instead of the keyboard")
     ch.add_argument("--version", help="your Blender version, e.g. 2.80")
     ch.add_argument("--json", action="store_true", help="print each reply as JSON (what a UI would receive)")
     ch.add_argument("--no-kb", action="store_true")
+    ch.add_argument("--model-tier", choices=["iterate", "report"], help="answer questions with a model (grounded on the knowledge base; one paid call per question, through the cost guard); omit for the offline rules only")
+    ch.add_argument("--key", choices=["default", "dev", "test"], default="default", help="with --model-tier: which API key variable to read")
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")
@@ -372,6 +383,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--key", choices=["default", "dev", "test"], default="default", help="which API key variable to read: GEMINI_API_KEY, GEMINI_API_KEY_DEV or GEMINI_API_KEY_TEST")
         p.add_argument("--fresh", action="store_true", help="ask the model again even if this exact request is cached (it is still cached afterwards)")
         p.add_argument("--dry-run", action="store_true", help="print the worst-case cost and whether the answer is cached, then stop; calls nothing")
+        p.add_argument("--window-s", type=float, help="extract in overlapping clips of this many seconds (for example 60) instead of one pass; needs the video length; one paid call per clip")
         p.add_argument("--duration", type=float, help="video length in seconds (skips the metadata call; used for the cost estimate)")
         p.add_argument("--max-usd-run", type=float, help="stop before a call that could pass this many dollars in this run (default GW_MAX_USD_RUN or 5)")
         p.add_argument("--rigging", action="store_true", help="the tutorial is about character rigging or animation (selects the rigging prompt for Blender too)")
@@ -419,8 +431,15 @@ def main(argv: list[str] | None = None) -> int:
                     return 2
                 duration, title = (duration or md.duration_s), md.title
             provider.video_seconds = duration
-            sl = extract_from_video(provider, vid, app=args.app, duration_s=duration, title_hint=title,
-                                    prompt_version=args.prompt_version, on_attempt=hook)
+            if args.window_s:
+                if not duration:
+                    print("--window-s needs the video length (the metadata call, or --duration).", file=sys.stderr)
+                    return 2
+                sl = extract_from_video_windows(provider, vid, app=args.app, duration_s=duration, window_s=args.window_s, title_hint=title,
+                                                prompt_version=args.prompt_version, on_attempt=hook)
+            else:
+                sl = extract_from_video(provider, vid, app=args.app, duration_s=duration, title_hint=title,
+                                        prompt_version=args.prompt_version, on_attempt=hook)
         print(f"model {provider.model_id}: {provider.calls} paid call(s), {provider.hits} cache hit(s), about ${provider.run_usd:.4f} this run (log: runs/budget/cost_log.jsonl)", file=sys.stderr)
     except BudgetExceeded as e:
         print(f"stopped by the budget guard, nothing further was called: {e}", file=sys.stderr)

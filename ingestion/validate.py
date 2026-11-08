@@ -12,6 +12,7 @@ Policy (deliberate):
 from __future__ import annotations
 
 import difflib
+import re
 from dataclasses import dataclass
 from typing import Literal
 
@@ -108,6 +109,10 @@ def check_structure(sl: StepList, video_duration_s: float | None = None) -> None
 # ----------------------------------------------------------------- vocabulary
 
 
+def _compact(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", s.lower())
+
+
 def _canonical_target(p: StatePredicate, profile: AppProfile) -> str | None:
     """Return the canonical vocabulary entry for p, or None if outside the vocabulary."""
     if p.kind == "mode":
@@ -123,7 +128,10 @@ def _canonical_target(p: StatePredicate, profile: AppProfile) -> str | None:
         for cand in pools[p.kind]:
             if cand.lower() == t:
                 return cand
-        return None
+        # The model often writes a node label without its spaces ("RigPose" for "Rig Pose", "BoneDeform") or with other spacing or case ("IK Handle" for
+        # ikHandle). Accept that when exactly one vocabulary entry has the same letters and digits; two candidates, or none, stays a drop.
+        hits = [cand for cand in pools[p.kind] if _compact(cand) == _compact(p.target)]
+        return hits[0] if _compact(p.target) and len(hits) == 1 else None
     return p.target.strip()  # property_equals: open-ended property path, kept as-is
 
 
@@ -172,6 +180,27 @@ def _same_source_span(a: Step, b: Step) -> bool:
     return bool(spans(a) & spans(b))
 
 
+def refresh_coverage_warnings(sl: StepList) -> None:
+    """List-level coverage findings (information for the reviewer, not a rejection): long uncovered stretches and a low share of the video covered."""
+    dur = sl.video_duration_s
+    sl.warnings = []
+    timed = [s for s in sl.steps if s.video_start_s is not None and s.video_end_s is not None]
+    if dur and timed:
+        min_gap = max(MIN_GAP_S, GAP_FRACTION * dur)
+        edges = [(0.0, "start")] + [(s.video_end_s, s.order) for s in timed]
+        starts = [s.video_start_s for s in timed] + [dur]
+        for (end, after), nxt in zip(edges, starts):
+            if nxt - end > min_gap:
+                where = "video start" if after == "start" else f"step {after}"
+                sl.warnings.append(
+                    f"uncovered {nxt - end:.0f}s after {where} ({end:g}s to {nxt:g}s): steps may be missing "
+                    "(or this is intro/outro/talk)"
+                )
+        cov = _covered_seconds(timed) / dur
+        if cov < LOW_COVERAGE:
+            sl.warnings.append(f"steps cover only {cov:.0%} of the {dur:g}s video: extraction may be incomplete")
+
+
 def sanitize_and_annotate(
     sl: StepList, profile: AppProfile, video_duration_s: float | None = None
 ) -> StepList:
@@ -179,7 +208,6 @@ def sanitize_and_annotate(
     `verifiable` and the heuristic `confidence`. Mutates and returns sl. Idempotent only
     on fresh extractor output (flags are appended)."""
     sl.video_duration_s = video_duration_s if video_duration_s is not None else sl.video_duration_s
-    dur = sl.video_duration_s
     pen: dict[str, list[float]] = {s.id: [] for s in sl.steps}
 
     def flag(step: Step, code: str, msg: str) -> None:
@@ -258,23 +286,7 @@ def sanitize_and_annotate(
         seen_sigs.setdefault(sig, step)
         prev = step
 
-    # list-level coverage findings (information for the reviewer, not a rejection)
-    sl.warnings = []
-    timed = [s for s in sl.steps if s.video_start_s is not None and s.video_end_s is not None]
-    if dur and timed:
-        min_gap = max(MIN_GAP_S, GAP_FRACTION * dur)
-        edges = [(0.0, "start")] + [(s.video_end_s, s.order) for s in timed]
-        starts = [s.video_start_s for s in timed] + [dur]
-        for (end, after), nxt in zip(edges, starts):
-            if nxt - end > min_gap:
-                where = "video start" if after == "start" else f"step {after}"
-                sl.warnings.append(
-                    f"uncovered {nxt - end:.0f}s after {where} ({end:g}s to {nxt:g}s): steps may be missing "
-                    "(or this is intro/outro/talk)"
-                )
-        cov = _covered_seconds(timed) / dur
-        if cov < LOW_COVERAGE:
-            sl.warnings.append(f"steps cover only {cov:.0%} of the {dur:g}s video: extraction may be incomplete")
+    refresh_coverage_warnings(sl)
 
     for step in sl.steps:
         base = step.model_confidence if step.model_confidence is not None else step.confidence

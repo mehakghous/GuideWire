@@ -194,3 +194,10 @@ def test_a_live_run_can_be_saved_and_replayed_with_no_quota(monkeypatch, capsys,
     assert cli.main(["find", "--replay", str(saved), GOAL]) == 0
     again = json.loads(capsys.readouterr().out)
     assert [r["url"] for r in again["results"]] == [r["url"] for r in live["results"]] and calls["search"] == []
+
+
+def test_second_search_uses_the_word_each_community_puts_in_titles():
+    from ingestion.rigging_discovery import parse_goal, search_queries
+    assert "kinefx" in search_queries(parse_goal("rig a character in Houdini", "houdini"))[1]
+    assert "armature" in search_queries(parse_goal("weight paint my armature", "blender"))[1]
+    assert search_queries(parse_goal("rig a biped in Maya 2024", "maya"))[1] == "maya character rigging tutorial"

@@ -281,3 +281,50 @@ def test_history_and_profile_need_a_login(win):
     assert win.current_screen() is win.login
     win.open_profile()
     assert win.current_screen() is win.login
+
+
+# ---------------------------------------------------------------- new tutorial from text
+def _new(w):
+    _login(w)
+    w.home.new_button.click()
+    return w.new_tutorial
+
+
+def test_new_from_text_opens_the_editor_and_saves_nothing_until_saved(win):
+    n = _new(win)
+    assert win.current_screen() is n
+    n.title.setText("My cube")
+    n.text.setPlainText("Press Tab to enter Edit Mode\nSelect the cube\nMove it with G")
+    n.create_button.click()
+    assert win.current_screen() is win.review and win.review.list.count() >= 2 and "My cube" in win.review.title.text()
+    win.review.back_button.click()
+    assert win.home.tutorials.count() == 0
+    win.home.new_button.click()
+    n.text.setPlainText("Press Tab to enter Edit Mode")
+    n.create_button.click()
+    win.review.save_button.click()
+    assert win.home.tutorials.count() == 1 and win.home.tutorials.item(0).text() == "Untitled tutorial"
+
+
+def test_new_from_text_shows_a_message_when_no_steps(win):
+    n = _new(win)
+    n.text.setPlainText("what is a vertex group?")
+    n.create_button.click()
+    assert win.current_screen() is n and n.message.text()
+
+
+def test_youtube_link_shows_the_gateway_message(win):
+    n = _new(win)
+    n.text.setPlainText("https://youtu.be/abc123")
+    n.create_button.click()
+    assert win.current_screen() is n and "AI gateway" in n.message.text()
+
+
+def test_new_tutorial_needs_a_login_and_reset_clears_the_form(win):
+    win.open_new_tutorial()
+    assert win.current_screen() is win.login
+    n = _new(win)
+    n.text.setPlainText("junk")
+    n.back_button.click()
+    win.home.new_button.click()
+    assert n.text.toPlainText() == "" and n.message.text() == ""

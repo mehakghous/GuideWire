@@ -10,7 +10,7 @@ from ..accounts import Accounts, User
 from ..db import Database
 from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
-from .screens import HomeScreen, LoginScreen, SessionScreen, StepReviewScreen
+from .screens import HistoryScreen, HomeScreen, LoginScreen, ProfileScreen, SessionScreen, StepReviewScreen
 
 
 SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
@@ -28,8 +28,10 @@ class MainWindow(QMainWindow):
         self.home = HomeScreen()
         self.review = StepReviewScreen()
         self.session = SessionScreen()
+        self.history = HistoryScreen()
+        self.profile = ProfileScreen(self.accounts)
         self.stack = QStackedWidget()
-        for screen in (self.login, self.home, self.review, self.session):
+        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile):
             self.stack.addWidget(screen)
         self.setCentralWidget(self.stack)
         self.login.logged_in.connect(self.on_logged_in)
@@ -40,6 +42,11 @@ class MainWindow(QMainWindow):
         self.home.open_session.connect(self.open_session)
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
+        self.history.back.connect(self.show_home)
+        self.profile.back.connect(self.show_home)
+        self.profile.profile_changed.connect(self.on_profile_changed)
+        self.home.open_history.connect(self.open_history)
+        self.home.open_profile.connect(self.open_profile)
         self.stack.setCurrentWidget(self.login)
 
     def current_screen(self):
@@ -60,6 +67,23 @@ class MainWindow(QMainWindow):
         rows = [(r["id"], r["title"]) for r in self.db.list_tutorials(self.user.id)]
         self.home.show_user(self.user, rows)
         self.stack.setCurrentWidget(self.home)
+
+    def on_profile_changed(self, user: User) -> None:
+        self.user = user
+
+    def open_history(self) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.history.load(self.db.session_history(self.user.id))
+        self.stack.setCurrentWidget(self.history)
+
+    def open_profile(self) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.profile.load(self.user)
+        self.stack.setCurrentWidget(self.profile)
 
     def open_review(self, tutorial_id: int) -> None:
         if self.user is None:

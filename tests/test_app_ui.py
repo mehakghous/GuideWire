@@ -210,3 +210,74 @@ def test_each_open_creates_its_own_session_and_back_goes_home(win):
     win.home.tutorials.setCurrentRow(0)
     win.home.session_button.click()
     assert win.session.engine.session_id != first and win.current_screen() is win.session
+
+
+# ---------------------------------------------------------------- history and profile
+def test_history_is_empty_then_lists_sessions(win):
+    _login(win)
+    win.home.history_button.click()
+    assert win.current_screen() is win.history and win.history.list.count() == 0
+    assert "No sessions yet" in win.history.empty.text()
+    win.history.back_button.click()
+    s = _session(win)
+    s.start_button.click()
+    s.done_button.click()
+    s.back_button.click()
+    win.home.history_button.click()
+    assert win.history.list.count() == 1
+    text = win.history.list.item(0).text()
+    assert "in progress" in text and "1/4 steps" in text
+
+
+def test_history_shows_only_own_sessions(win):
+    s = _session(win)
+    s.back_button.click()
+    win.on_logout()
+    win.login.email.setText("b@x.com")
+    win.login.password.setText("another pass1")
+    win.login.do_register()
+    win.home.history_button.click()
+    assert win.history.list.count() == 0
+
+
+def test_profile_saves_name_and_preferences(win):
+    _login(win)
+    win.home.profile_button.click()
+    p = win.profile
+    assert win.current_screen() is p and p.email.text() == "a@x.com" and p.theme.currentText() == "light" and p.overlay.isChecked()
+    p.name.setText("Mehak")
+    p.theme.setCurrentText("dark")
+    p.overlay.setChecked(False)
+    p.save_button.click()
+    assert p.message.text() == "Saved" and win.user.display_name == "Mehak"
+    win.on_logout()
+    win.login.email.setText("a@x.com")
+    win.login.password.setText("correct horse")
+    win.login.do_login()
+    win.home.profile_button.click()
+    assert p.name.text() == "Mehak" and p.theme.currentText() == "dark" and not p.overlay.isChecked()
+
+
+def test_profile_change_password(win):
+    _login(win)
+    win.home.profile_button.click()
+    p = win.profile
+    p.old_password.setText("wrong one")
+    p.new_password.setText("new password1")
+    p.password_button.click()
+    assert "Current password is incorrect" in p.message.text()
+    p.old_password.setText("correct horse")
+    p.password_button.click()
+    assert p.message.text() == "Password changed" and p.old_password.text() == ""
+    win.on_logout()
+    win.login.email.setText("a@x.com")
+    win.login.password.setText("new password1")
+    win.login.do_login()
+    assert win.current_screen() is win.home
+
+
+def test_history_and_profile_need_a_login(win):
+    win.open_history()
+    assert win.current_screen() is win.login
+    win.open_profile()
+    assert win.current_screen() is win.login

@@ -186,3 +186,13 @@ class Database:
 
     def list_sessions(self, user_id: int) -> list[sqlite3.Row]:
         return self.conn.execute("SELECT * FROM session WHERE user_id = ? ORDER BY id DESC", (user_id,)).fetchall()
+
+    def session_history(self, user_id: int) -> list[dict[str, Any]]:
+        """One row per session of this user, newest first, with the tutorial title and how many steps are dealt with (done or skipped)."""
+        rows = self.conn.execute(
+            """SELECT s.id, s.state, s.started_at, s.finished_at, t.title,
+                      (SELECT COUNT(*) FROM session_step ss WHERE ss.session_id = s.id) AS total,
+                      (SELECT COUNT(*) FROM session_step ss WHERE ss.session_id = s.id AND ss.status != 'pending') AS dealt
+               FROM session s JOIN tutorial t ON t.id = s.tutorial_id
+               WHERE s.user_id = ? ORDER BY s.id DESC""", (user_id,)).fetchall()
+        return [dict(r) for r in rows]

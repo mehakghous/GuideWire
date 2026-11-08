@@ -5,7 +5,7 @@ Login and Home work. Step Review and Session are placeholders for now (the edito
 from __future__ import annotations
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
@@ -68,6 +68,8 @@ class HomeScreen(QWidget):
     open_review = pyqtSignal(int)      # tutorial id
     open_session = pyqtSignal(int)     # tutorial id
     import_sample = pyqtSignal()
+    open_history = pyqtSignal()
+    open_profile = pyqtSignal()
     logout = pyqtSignal()
 
     def __init__(self):
@@ -77,7 +79,11 @@ class HomeScreen(QWidget):
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
         self.sample_button = QPushButton("Import sample steps")
+        self.history_button = QPushButton("History")
+        self.profile_button = QPushButton("Profile")
         self.logout_button = QPushButton("Log out")
+        self.history_button.clicked.connect(self.open_history.emit)
+        self.profile_button.clicked.connect(self.open_profile.emit)
         self.sample_button.clicked.connect(self.import_sample.emit)
         self.review_button.clicked.connect(lambda: self._emit(self.open_review))
         self.session_button.clicked.connect(lambda: self._emit(self.open_session))
@@ -86,6 +92,8 @@ class HomeScreen(QWidget):
         row.addWidget(self.review_button)
         row.addWidget(self.session_button)
         row.addWidget(self.sample_button)
+        row.addWidget(self.history_button)
+        row.addWidget(self.profile_button)
         row.addStretch()
         row.addWidget(self.logout_button)
         root = QVBoxLayout(self)
@@ -323,3 +331,108 @@ class SessionScreen(QWidget):
         self.done_button.setEnabled(e.state == ACTIVE)
         self.skip_button.setEnabled(e.state == ACTIVE)
         self.prev_button.setEnabled(e.state == ACTIVE and (e.position or 1) > 1)
+
+class HistoryScreen(QWidget):
+    """The user's past and current sessions, newest first."""
+    back = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.list = QListWidget()
+        self.empty = QLabel("")
+        self.back_button = QPushButton("Back")
+        self.back_button.clicked.connect(self.back.emit)
+        root = QVBoxLayout(self)
+        root.addWidget(QLabel("<h2>History</h2>"))
+        root.addWidget(self.empty)
+        root.addWidget(self.list)
+        root.addWidget(self.back_button)
+
+    @staticmethod
+    def describe(row: dict) -> str:
+        state = {"not_started": "not started", "active": "in progress", "finished": "finished"}.get(row["state"], row["state"])
+        when = (row["finished_at"] or row["started_at"] or "")[:16].replace("T", " ")
+        return f"{row['title']} - {state} - {row['dealt']}/{row['total']} steps" + (f" - {when}" if when else "")
+
+    def load(self, rows: list[dict]) -> None:
+        self.list.clear()
+        self.empty.setText("" if rows else "No sessions yet. Start one from Home.")
+        for r in rows:
+            self.list.addItem(self.describe(r))
+
+
+class ProfileScreen(QWidget):
+    """Display name, password change and preferences. Rules live in Accounts."""
+    back = pyqtSignal()
+    profile_changed = pyqtSignal(object)    # User
+
+    THEMES = ("light", "dark")
+
+    def __init__(self, accounts: Accounts):
+        super().__init__()
+        self.accounts = accounts
+        self.user: User | None = None
+        self.email = QLabel("")
+        self.name = QLineEdit()
+        self.theme = QComboBox()
+        self.theme.addItems(self.THEMES)
+        self.overlay = QCheckBox("Highlight the target on screen during a session")
+        self.save_button = QPushButton("Save profile")
+        self.old_password = QLineEdit()
+        self.new_password = QLineEdit()
+        for e in (self.old_password, self.new_password):
+            e.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_button = QPushButton("Change password")
+        self.message = QLabel("")
+        self.message.setWordWrap(True)
+        self.back_button = QPushButton("Back")
+        self.save_button.clicked.connect(self.save_profile)
+        self.password_button.clicked.connect(self.change_password)
+        self.back_button.clicked.connect(self.back.emit)
+        form = QFormLayout()
+        form.addRow("Email", self.email)
+        form.addRow("Display name", self.name)
+        form.addRow("Theme", self.theme)
+        form.addRow("", self.overlay)
+        pw = QFormLayout()
+        pw.addRow("Current password", self.old_password)
+        pw.addRow("New password", self.new_password)
+        root = QVBoxLayout(self)
+        root.addWidget(QLabel("<h2>Profile</h2>"))
+        root.addLayout(form)
+        root.addWidget(self.save_button)
+        root.addWidget(QLabel("<b>Change password</b>"))
+        root.addLayout(pw)
+        root.addWidget(self.password_button)
+        root.addWidget(self.message)
+        root.addStretch()
+        root.addWidget(self.back_button)
+
+    def load(self, user: User) -> None:
+        self.user = user
+        prefs = self.accounts.preferences(user.id)
+        self.email.setText(user.email)
+        self.name.setText(user.display_name)
+        self.theme.setCurrentText(prefs["theme"] if prefs.get("theme") in self.THEMES else "light")
+        self.overlay.setChecked(bool(prefs.get("overlay", True)))
+        self.old_password.clear()
+        self.new_password.clear()
+        self.message.setText("")
+
+    def save_profile(self) -> None:
+        assert self.user is not None
+        self.user = self.accounts.update_profile(self.user.id, self.name.text())
+        self.accounts.set_preferences(self.user.id, theme=self.theme.currentText(), overlay=self.overlay.isChecked())
+        self.message.setText("Saved")
+        self.profile_changed.emit(self.user)
+
+    def change_password(self) -> None:
+        assert self.user is not None
+        try:
+            self.accounts.change_password(self.user.id, self.old_password.text(), self.new_password.text())
+        except AccountError as e:
+            self.message.setText(str(e))
+            return
+        self.old_password.clear()
+        self.new_password.clear()
+        self.message.setText("Password changed")

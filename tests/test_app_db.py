@@ -105,3 +105,17 @@ def test_database_persists_to_a_file(tmp_path):
     uid = d.add_user("a@x.com", b"h")
     d.close()
     assert Database(p).get_user(uid)["email"] == "a@x.com"
+
+
+def test_session_history_newest_first_with_progress(db):
+    uid = db.add_user("a@x.com", b"h")
+    other = db.add_user("b@x.com", b"h")
+    tid = db.save_tutorial(uid, "Cube", _steps())
+    s1 = db.start_session(uid, tid)
+    s2 = db.start_session(uid, tid)
+    db.set_step_status(s1, db.session_steps(s1)[0]["step_id"], "done")
+    db.set_step_status(s1, db.session_steps(s1)[1]["step_id"], "skipped")
+    rows = db.session_history(uid)
+    assert [r["id"] for r in rows] == [s2, s1]
+    assert rows[1]["dealt"] == 2 and rows[1]["total"] == 4 and rows[1]["title"] == "Cube" and rows[0]["dealt"] == 0
+    assert db.session_history(other) == []

@@ -5,9 +5,11 @@ Login and Home work. Step Review and Session are placeholders for now (the edito
 from __future__ import annotations
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
+from ..db import Database
+from ..step_editor import EditError, StepEditor
 
 
 class LoginScreen(QWidget):
@@ -64,6 +66,7 @@ class LoginScreen(QWidget):
 class HomeScreen(QWidget):
     open_review = pyqtSignal(int)      # tutorial id
     open_session = pyqtSignal(int)     # tutorial id
+    import_sample = pyqtSignal()
     logout = pyqtSignal()
 
     def __init__(self):
@@ -72,13 +75,16 @@ class HomeScreen(QWidget):
         self.tutorials = QListWidget()
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
+        self.sample_button = QPushButton("Import sample steps")
         self.logout_button = QPushButton("Log out")
+        self.sample_button.clicked.connect(self.import_sample.emit)
         self.review_button.clicked.connect(lambda: self._emit(self.open_review))
         self.session_button.clicked.connect(lambda: self._emit(self.open_session))
         self.logout_button.clicked.connect(self.logout.emit)
         row = QHBoxLayout()
         row.addWidget(self.review_button)
         row.addWidget(self.session_button)
+        row.addWidget(self.sample_button)
         row.addStretch()
         row.addWidget(self.logout_button)
         root = QVBoxLayout(self)
@@ -121,13 +127,122 @@ class _Placeholder(QWidget):
         root.addWidget(self.back_button)
 
 
-class StepReviewScreen(_Placeholder):
-    def __init__(self):
-        super().__init__("Step review", "The step editor (edit, reorder, delete, add, save) is built in a later step.")
-        self.tutorial_id: int | None = None
+class StepReviewScreen(QWidget):
+    """List of steps the user can edit, reorder, delete and add, then save. All rules live in StepEditor."""
+    back = pyqtSignal()
+    saved = pyqtSignal(int)            # tutorial id
 
-    def load(self, tutorial_id: int) -> None:
-        self.tutorial_id = tutorial_id
+    def __init__(self):
+        super().__init__()
+        self.editor: StepEditor | None = None
+        self.db: Database | None = None
+        self.user_id: int | None = None
+        self.title = QLabel("")
+        self.list = QListWidget()
+        self.status = QLabel("")
+        self.edit_button = QPushButton("Edit text")
+        self.up_button = QPushButton("Move up")
+        self.down_button = QPushButton("Move down")
+        self.delete_button = QPushButton("Delete")
+        self.add_button = QPushButton("Add step")
+        self.save_button = QPushButton("Save")
+        self.back_button = QPushButton("Back")
+        self.edit_button.clicked.connect(self.edit_selected)
+        self.up_button.clicked.connect(lambda: self.move_selected(-1))
+        self.down_button.clicked.connect(lambda: self.move_selected(1))
+        self.delete_button.clicked.connect(self.delete_selected)
+        self.add_button.clicked.connect(self.add_step)
+        self.save_button.clicked.connect(self.save)
+        self.back_button.clicked.connect(self.back.emit)
+        self.list.itemDoubleClicked.connect(lambda _: self.edit_selected())
+        row = QHBoxLayout()
+        for b in (self.edit_button, self.up_button, self.down_button, self.delete_button, self.add_button):
+            row.addWidget(b)
+        bottom = QHBoxLayout()
+        bottom.addWidget(self.status)
+        bottom.addStretch()
+        bottom.addWidget(self.save_button)
+        bottom.addWidget(self.back_button)
+        root = QVBoxLayout(self)
+        root.addWidget(self.title)
+        root.addWidget(self.list)
+        root.addLayout(row)
+        root.addLayout(bottom)
+
+    # ---- opening
+    def load(self, editor: StepEditor, db: Database, user_id: int) -> None:
+        self.editor, self.db, self.user_id = editor, db, user_id
+        self.status.setText("")
+        self.refresh()
+
+    @property
+    def tutorial_id(self) -> int | None:
+        return None if self.editor is None else self.editor.tutorial_id
+
+    def refresh(self, select: str | None = None) -> None:
+        assert self.editor is not None
+        self.title.setText(f"<h2>{self.editor.title}</h2>")
+        self.list.clear()
+        for s in self.editor.steps.steps:
+            self.list.addItem(f"{s.order}. {s.goal}")
+            self.list.item(self.list.count() - 1).setData(0x0100, s.id)     # Qt.ItemDataRole.UserRole
+        if self.editor.steps.steps:
+            ids = [s.id for s in self.editor.steps.steps]
+            self.list.setCurrentRow(ids.index(select) if select in ids else 0)
+
+    def selected_id(self) -> str | None:
+        item = self.list.currentItem()
+        return None if item is None else str(item.data(0x0100))
+
+    def _try(self, action) -> bool:
+        try:
+            action()
+        except EditError as e:
+            self.status.setText(str(e))
+            return False
+        self.status.setText("Unsaved changes" if self.editor and self.editor.dirty else "")
+        return True
+
+    # ---- actions (each one is a method so tests can call it without a dialog)
+    def apply_edit(self, step_id: str, text: str) -> None:
+        if self._try(lambda: self.editor.edit_goal(step_id, text)):
+            self.refresh(step_id)
+
+    def edit_selected(self) -> None:
+        sid = self.selected_id()
+        if sid is None:
+            return
+        current = self.editor.steps.steps[self.editor._index(sid)].goal
+        text, ok = QInputDialog.getText(self, "Edit step", "Step text", text=current)
+        if ok:
+            self.apply_edit(sid, text)
+
+    def move_selected(self, delta: int) -> None:
+        sid = self.selected_id()
+        if sid is not None and self._try(lambda: self.editor.move(sid, delta)):
+            self.refresh(sid)
+
+    def delete_selected(self) -> None:
+        sid = self.selected_id()
+        if sid is not None and self._try(lambda: self.editor.delete(sid)):
+            self.refresh()
+
+    def apply_add(self, text: str) -> None:
+        sid = self.selected_id()
+        new: list[str] = []
+        if self._try(lambda: new.append(self.editor.add(text, after=sid))):
+            self.refresh(new[0])
+
+    def add_step(self) -> None:
+        text, ok = QInputDialog.getText(self, "Add step", "Step text")
+        if ok:
+            self.apply_add(text)
+
+    def save(self) -> None:
+        tid: list[int] = []
+        if self._try(lambda: tid.append(self.editor.save(self.db, self.user_id))):
+            self.status.setText("Saved")
+            self.saved.emit(tid[0])
 
 
 class SessionScreen(_Placeholder):

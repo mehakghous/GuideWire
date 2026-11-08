@@ -2,12 +2,17 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
 from ..accounts import Accounts, User
 from ..db import Database
+from ..step_editor import StepEditor
 from .screens import HomeScreen, LoginScreen, SessionScreen, StepReviewScreen
+
+
+SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
@@ -28,7 +33,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stack)
         self.login.logged_in.connect(self.on_logged_in)
         self.home.logout.connect(self.on_logout)
-        self.home.open_review.connect(lambda tid: self.go(self.review, tid))
+        self.home.open_review.connect(self.open_review)
+        self.home.import_sample.connect(self.import_sample)
+        self.review.saved.connect(lambda _tid: self.show_home())
         self.home.open_session.connect(lambda tid: self.go(self.session, tid))
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
@@ -52,6 +59,22 @@ class MainWindow(QMainWindow):
         rows = [(r["id"], r["title"]) for r in self.db.list_tutorials(self.user.id)]
         self.home.show_user(self.user, rows)
         self.stack.setCurrentWidget(self.home)
+
+    def open_review(self, tutorial_id: int) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.review.load(StepEditor.from_db(self.db, self.user.id, tutorial_id), self.db, self.user.id)
+        self.stack.setCurrentWidget(self.review)
+
+    def import_sample(self, path: str | Path | None = None) -> None:
+        """Open a hand-written sample step file in the editor (stands in for the real pipeline output). It is saved only when the user saves."""
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        path = Path(path) if path else sorted(SAMPLE_DIR.glob("*.json"))[0]
+        self.review.load(StepEditor.from_json_file(path), self.db, self.user.id)
+        self.stack.setCurrentWidget(self.review)
 
     def go(self, screen, tutorial_id: int) -> None:
         if self.user is None:

@@ -99,3 +99,63 @@ def test_screens_never_open_without_a_login(win):
     assert win.current_screen() is win.login
     win.show_home()
     assert win.current_screen() is win.login
+
+
+# ---------------------------------------------------------------- step review editor
+def _open_sample(w):
+    _login(w)
+    w.import_sample()
+    return w.review
+
+
+def test_import_sample_opens_the_editor_with_the_steps(win):
+    r = _open_sample(win)
+    assert win.current_screen() is win.review and r.list.count() == 4
+
+
+def test_edit_move_delete_add_through_the_screen(win):
+    r = _open_sample(win)
+    r.list.setCurrentRow(1)
+    r.apply_edit("s02", "Press Tab")
+    assert r.list.item(1).text() == "2. Press Tab" and "Unsaved" in r.status.text()
+    r.list.setCurrentRow(1)
+    r.up_button.click()
+    assert r.list.item(0).text() == "1. Press Tab" and r.list.currentRow() == 0
+    r.delete_button.click()
+    assert r.list.count() == 3
+    r.list.setCurrentRow(0)
+    r.apply_add("Save the file")
+    assert r.list.count() == 4 and r.list.item(1).text() == "2. Save the file"
+
+
+def test_empty_text_shows_a_message_and_changes_nothing(win):
+    r = _open_sample(win)
+    r.apply_edit("s01", "  ")
+    assert "needs some text" in r.status.text() and r.list.item(0).text().endswith("Add a cube to the scene")
+
+
+def test_save_returns_home_and_the_tutorial_is_listed(win):
+    r = _open_sample(win)
+    r.save_button.click()
+    assert win.current_screen() is win.home and win.home.tutorials.count() == 1
+
+
+def test_reopen_a_saved_tutorial_and_see_the_edit(win):
+    r = _open_sample(win)
+    r.apply_edit("s01", "Add a cube")
+    r.save_button.click()
+    win.home.tutorials.setCurrentRow(0)
+    win.home.review_button.click()
+    assert win.review.list.item(0).text() == "1. Add a cube"
+
+
+def test_unsaved_edits_are_not_stored(win):
+    r = _open_sample(win)
+    r.apply_edit("s01", "Never saved")
+    r.back_button.click()
+    assert win.home.tutorials.count() == 0
+
+
+def test_import_needs_a_login(win):
+    win.import_sample()
+    assert win.current_screen() is win.login

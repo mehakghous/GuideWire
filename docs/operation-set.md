@@ -23,17 +23,17 @@ Everything the team builds is tested against this list. The operations below are
 
 The hand-written sample step files in `shared/examples/` (add a cube and extrude, Subdivision Surface modifier, sculpt draw) also use `add object`, `Extrude Region` and `modifier` steps. If the team wants those in the tested set, they need catalog entries first.
 
-## Fixed Blender version and layout: TO BE DECIDED BY THE TEAM
+## Fixed application versions and layout
 
-Nothing in the repo fixes this, so it is not set here. The README still says "write the exact version here".
+Versions the team works against (installed by Ayesha; Mehak and Umaima must install the same ones):
 
-What the repo does say:
-- the knowledge base is built from the Blender manual (`main`, currently the 5.2 LTS manual, with branches for 5.0-5.3, 4.0-4.5, 3.3/3.5/3.6 and 2.93);
-- the catalog marks each operation with the versions it was verified against (`verified_versions`, default `main`).
+| Application | Version |
+|---|---|
+| Blender | 5.2 |
+| Maya | 2027 |
+| Houdini | 22.0.466 |
 
-To close this item, the team agrees on **one** installed version (suggest one that the manual branch covers, so facts and screenshots match), then:
-1. writes it in `README.md` under "Required versions";
-2. uses the default layout at 1920x1080 (or the same display scaling) on every machine, so screenshots are comparable;
-3. Umaima takes her reference screenshots on that version.
-
-Decision owner: all three (Mehak, Ayesha, Umaima). Record it here once agreed: **Blender version: ________**
+- Blender 5.2 matches the manual the knowledge base is built from (`main`, the 5.2 LTS manual), so facts, shortcuts and screenshots line up.
+- The operation set above is Blender only. Maya and Houdini operations are covered by the rigging catalog (`ingestion/features.py`).
+- Use the default layout at 1920x1080 (or the same display scaling) on every machine, so screenshots are comparable.
+- Umaima takes her reference screenshots on these versions.

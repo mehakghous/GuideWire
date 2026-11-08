@@ -154,6 +154,8 @@ class StepReviewScreen(QWidget):
         self.title = QLabel("")
         self.list = QListWidget()
         self.status = QLabel("")
+        self.detail = QLabel("")
+        self.detail.setWordWrap(True)
         self.edit_button = QPushButton("Edit text")
         self.up_button = QPushButton("Move up")
         self.down_button = QPushButton("Move down")
@@ -169,6 +171,7 @@ class StepReviewScreen(QWidget):
         self.save_button.clicked.connect(self.save)
         self.back_button.clicked.connect(self.back.emit)
         self.list.itemDoubleClicked.connect(lambda _: self.edit_selected())
+        self.list.currentRowChanged.connect(lambda _: self.show_detail())
         row = QHBoxLayout()
         for b in (self.edit_button, self.up_button, self.down_button, self.delete_button, self.add_button):
             row.addWidget(b)
@@ -180,6 +183,7 @@ class StepReviewScreen(QWidget):
         root = QVBoxLayout(self)
         root.addWidget(self.title)
         root.addWidget(self.list)
+        root.addWidget(self.detail)
         root.addLayout(row)
         root.addLayout(bottom)
 
@@ -198,15 +202,27 @@ class StepReviewScreen(QWidget):
         self.title.setText(f"<h2>{self.editor.title}</h2>")
         self.list.clear()
         for s in self.editor.steps.steps:
-            self.list.addItem(f"{s.order}. {s.goal}")
+            self.list.addItem(f"{s.order}. {s.goal}" + ("  [manual]" if not s.verifiable else ""))
             self.list.item(self.list.count() - 1).setData(0x0100, s.id)     # Qt.ItemDataRole.UserRole
         if self.editor.steps.steps:
             ids = [s.id for s in self.editor.steps.steps]
             self.list.setCurrentRow(ids.index(select) if select in ids else 0)
+        self.show_detail()
 
     def selected_id(self) -> str | None:
         item = self.list.currentItem()
         return None if item is None else str(item.data(0x0100))
+
+    def show_detail(self) -> None:
+        """Say why the selected step is manual, or what GuideWire will check, and show its warnings."""
+        sid = self.selected_id()
+        if self.editor is None or sid is None:
+            self.detail.setText("")
+            return
+        step = self.editor.steps.steps[self.editor._index(sid)]
+        lines = ["GuideWire can check this step automatically." if step.verifiable else "Manual step: GuideWire cannot check it, you confirm it yourself."]
+        lines.extend(f"Note: {f}" for f in step.flags)
+        self.detail.setText("\n".join(lines))
 
     def _try(self, action) -> bool:
         try:

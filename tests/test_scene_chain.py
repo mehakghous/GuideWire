@@ -48,8 +48,12 @@ def test_unknown_features_craft_steps_and_other_apps_are_left_alone():
     sl.steps[11].feature_id = None                             # s12 would too
     assert derive_state(sl) == 0
     sl2 = load_steplist(R6)
-    sl2.app = "blender"                                        # the file has no Blender effects: nothing is invented
-    assert derive_state(sl2) == 0
+    sl2.app = "blender"                                        # relabelled: Blender has its own effects now, and no Maya node name may leak into them
+    before = {(st.id, p.kind, p.target) for st in sl2.steps for p in st.expected_state + st.start_state}
+    derive_state(sl2)
+    added = {t for st in sl2.steps for p in st.expected_state + st.start_state for t in [p.target] if (st.id, p.kind, t) not in before}
+    assert added and not added & {"joint", "ikHandle", "skinCluster", "parentConstraint"}          # only Blender names were added
+    assert added & {"BONE", "CONSTRAINT_CHILD_OF"}
 
 
 def test_cli_chain_reports_and_writes(tmp_path, capsys):

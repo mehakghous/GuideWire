@@ -30,8 +30,8 @@ FAST University, Karachi Campus. Department of SE. FYP 2026-27.
 
 - Python 3.11
 - Blender 5.2 (everyone uses the same one)
-- Houdini 22.0.466 (Apprentice)
 - Maya 2027
+- Houdini 22.0.466 (Apprentice)
 - Blender layout: default layout, screen at 1920x1080 (or the same display scaling), so screenshots are comparable across team members
 
 ## Setup

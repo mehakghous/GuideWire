@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.10"  # 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
+SCHEMA_VERSION = "0.11"  # 0.11 (additive): PredicateKind name_exists, attribute_exists, node_count (node_count: value = at least that many). 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
 
 PredicateKind = Literal[
     "mode",            # target: interaction mode, e.g. OBJECT, EDIT_MESH, SCULPT
@@ -25,6 +25,9 @@ PredicateKind = Literal[
     "panel_open",      # target: panel/editor name, e.g. Properties:Modifiers
     "property_equals", # target: property path; value: expected value
     "node_exists",     # target: node/object type that must exist, e.g. Maya "ikHandle", Houdini "Rig Doctor"
+    "name_exists",     # target: the name of a node/object the learner gave, e.g. "left_hip_IK_jnt" (Outliner)
+    "attribute_exists",  # target: "object.attribute", e.g. "l_switch_GEO.FK_IK_Switch" (Channel Box / Attribute Editor)
+    "node_count",      # target: node/object type; value: AT LEAST this many exist, e.g. joint = 9
 ]
 
 ActionVerb = Literal[
@@ -58,11 +61,18 @@ class StatePredicate(BaseModel):
     value: str | float | None = None
 
     @model_validator(mode="after")
-    def _value_only_for_property(self) -> "StatePredicate":
-        if self.kind == "property_equals" and self.value is None:
-            raise ValueError("property_equals requires a value")
-        if self.kind != "property_equals" and self.value is not None:
-            raise ValueError(f"value is only allowed for property_equals, not {self.kind}")
+    def _value_rules(self) -> "StatePredicate":
+        if self.kind in ("property_equals", "node_count") and self.value is None:
+            raise ValueError(f"{self.kind} requires a value")
+        if self.kind not in ("property_equals", "node_count") and self.value is not None:
+            raise ValueError(f"value is only allowed for property_equals and node_count, not {self.kind}")
+        if self.kind == "node_count":
+            try:
+                n = float(self.value)
+            except (TypeError, ValueError):
+                raise ValueError("node_count value must be a number") from None
+            if n < 1 or n != int(n):
+                raise ValueError("node_count value must be a whole number of at least 1")
         return self
 
 

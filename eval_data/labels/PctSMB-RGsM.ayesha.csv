@@ -1,0 +1,62 @@
+start,end,action,evidence,importance,keys_or_menu,notes
+0:14,0:17,Add a single-bone Armature to the scene.,said,core,Shift + A > Armature,Creates the initial bone.
+0:17,0:21,Enter Edit Mode on the Armature.,said,core,Tab,
+0:23,0:30,Enable In Front in the Armature's viewport display settings.,said,core,Object Properties > Viewport Display > In Front,Makes the bones visible through the mesh.
+0:33,0:36,Select the entire bone.,said,core,,
+0:36,0:39,Move the selected bone upward.,said,core,G,
+0:39,0:44,Rotate the bone 90 degrees to the right.,said,core,R > 90,
+0:45,0:48,Scale the bone down.,said,core,S,
+0:48,0:53,Move the bone into position around the hip.,said,core,G,Position it where the hip joint should be.
+0:53,0:55,Select the appropriate section of the bone for extrusion.,said,core,,
+0:55,0:58,Extrude a bone downward to the knee.,said,core,E,
+0:58,1:01,Extrude another bone downward to the ankle.,said,core,E,
+1:01,1:05,Extrude two additional bone segments.,said,core,E (twice),The instructor does not clearly specify their destinations in the transcript.
+1:10,1:16,Select the ankle bone and extrude a controller bone outward along the Y-axis.,said,core,E > Y,Creates the ankle/foot controller.
+1:16,1:19,Select the knee bone and extrude another controller bone along the Y-axis.,said,core,E > Y,Creates the pole controller.
+1:21,1:26,Select the ankle controller and clear its parent.,said,core,Alt + P > Clear Parent,Separates the controller from its original bone parent.
+1:26,1:30,Move the ankle controller forward.,said,core,G > Y,
+1:33,1:39,Select the knee controller and clear its parent.,said,core,Alt + P > Clear Parent,
+1:39,1:42,Move the knee controller outward.,said,core,G > Y,
+1:42,1:46,Switch to Pose Mode to inspect the bone positions.,said,core,Ctrl + Tab / Mode Selector > Pose Mode,
+1:48,1:58,Check whether the bones are positioned correctly relative to the mesh's left-right alignment.,said,optional,,Move the bones horizontally if the mesh is not centered.
+1:58,2:00,Enter Pose Mode.,said,core,Pose Mode,Repeated mention of the mode transition.
+2:03,2:06,Select the first bone and Shift-select the second bone.,said,core,Shift + Click,The two bones are selected for IK setup.
+2:06,2:12,Create an inverse kinematic constraint using the active bone.,said,core,Shift + I > To Active Bone,Creates the IK relationship.
+2:12,2:15,Move the IK controller to test the rig.,said,optional,G,Demonstrates that the IK chain moves.
+2:22,2:26,Move the controller to observe the knee twisting and bending.,said,optional,G,Demonstrates the pole-target problem.
+2:30,2:33,Select all bones and clear their transforms.,said,core,A > Pose > Clear Transform > All,Resets the rig before further configuration.
+2:36,2:42,Select the IK-controlled bone to configure its pole target.,said,core,,
+2:42,2:48,Open Bone Constraints and use the eyedropper to assign the knee controller as the pole target.,said,core,Bone Constraints > Pole Target > Eyedropper,
+2:48,2:54,Re-select the intended controller bone as the pole target.,said,core,Pole Target eyedropper,The spoken description is slightly unclear about the exact selection sequence.
+2:54,2:59,Inspect the foot rotation caused by the pole-target assignment.,said,optional,,
+2:59,3:08,Reset the pole angle to zero.,said,core,Bone Constraints > Pole Angle > 0°,Avoids restricting the pole controller's movement through an unwanted angle offset.
+3:08,3:13,Select the Armature object.,said,core,Object Mode > Select Armature,
+3:13,3:19,Enable the display of bone axes.,said,core,Object Properties > Viewport Display > Axis,"Shows the X, Y and Z bone axes."
+3:19,3:25,Inspect the IK bone's X-axis direction relative to the pole target.,said,core,,Identifies the expected axis orientation.
+3:25,3:32,Switch to Edit Mode and inspect the bone's X-axis orientation.,said,core,Tab,The X-axis is not pointing toward the pole target.
+3:32,3:38,Keep the pole angle at zero and correct the bone orientation in Edit Mode instead.,said,core,,The instructor explains why changing the pole angle is not the preferred solution.
+3:38,3:45,Select the bone and adjust its roll until its X-axis points toward the pole target.,said,core,Bone Properties > Roll,
+3:45,3:49,Set the bone roll to 90 degrees.,said,core,Bone Properties > Roll > 90°,The exact sign may depend on the Armature setup.
+3:49,3:55,Select the other relevant bone and set its roll to 90 degrees.,said,core,Bone Properties > Roll > 90°,Aligns its X-axis toward the pole target.
+3:59,4:02,Return to Pose Mode.,said,core,Ctrl + Tab / Pose Mode,
+4:04,4:09,Select the relevant bone and rotate it to check whether the foot follows.,said,optional,R,Demonstrates that the foot does not yet follow correctly.
+4:12,4:18,Prepare to correct the foot controller's rotation and parenting relationship.,said,core,,
+4:18,4:25,"Enter Edit Mode, select the relevant bone and clear its parent.",said,core,Tab > Alt + P > Clear Parent,
+4:25,4:31,Select the controller bone and parent the previously selected bone to it while keeping its offset.,said,core,Ctrl + P > Keep Offset,
+4:31,4:39,Parent the other relevant bone to its controller while keeping the offset.,said,core,Shift + Click > Ctrl + P > Keep Offset,
+4:39,4:43,Return to Pose Mode and inspect the bone's rotation and position.,said,core,Pose Mode,"The rotation now works, but the position is incorrect."
+4:45,4:50,Select the affected bone and open its Bone Constraints settings.,said,core,Bone Constraints,
+4:50,4:54,Add a Copy Location constraint to the selected bone.,said,core,Add Bone Constraint > Copy Location,
+4:54,5:03,Assign the shin bone as the Copy Location constraint's target.,said,core,Copy Location > Target > Eyedropper,The instructor mentions selecting the shin bone near the knee.
+5:05,5:11,Set the Copy Location constraint's Head/Tail value to 1.,said,core,Copy Location > Head/Tail > 1,Makes the constraint use the bone's tail position.
+5:12,5:19,Rotate the bone and check that it stays in the correct position and follows its controller.,said,optional,R,Tests the parenting and Copy Location setup.
+5:19,5:24,Move the controller downward to check that the foot follows it.,said,optional,G,
+5:24,5:35,Move the pole controller from side to side to test the knee's bending direction.,said,optional,G,Verifies that the pole target works.
+5:35,5:40,Switch to Object Mode to prepare for binding the mesh to the Armature.,said,core,Ctrl + Tab / Object Mode,
+5:40,5:44,Select the mesh first and then Shift-select the Armature.,said,core,Shift + Click,The Armature must be the active object.
+5:44,5:52,Parent the mesh to the Armature using automatic weights.,said,core,Object > Parent > Armature Deform > With Automatic Weights,Creates the mesh's automatic skin weights.
+5:52,5:56,Inspect the mesh deformation after binding it to the Armature.,said,optional,,
+5:56,5:59,Switch to Pose Mode.,said,core,Pose Mode,
+5:59,6:05,Select the main controller bone and move it to test the rigged mesh.,said,optional,G,
+6:05,6:12,Move the foot controller and check that the mesh and foot deform correctly.,said,optional,G,
+6:12,6:18,Rotate the controller around the Z-axis to rotate the leg.,said,optional,R > Z,Demonstrates the final rig functionality.

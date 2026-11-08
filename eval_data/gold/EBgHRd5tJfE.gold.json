@@ -1,0 +1,762 @@
+{
+ "video_id": "EBgHRd5tJfE",
+ "title": "Blender 5.1 Basic Rigging Tutorial | Simple Armature Setup & Automatic Weights (Beginner Guide)",
+ "duration_s": 267.0,
+ "app": "blender",
+ "app_version": "5.1",
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "Select all objects",
+   "t_start": 32.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "A"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "Delete selection",
+   "t_start": 34.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Delete"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "Open add menu",
+   "t_start": 36.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Shift",
+      "A"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "demonstrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 4,
+   "id": "H04",
+   "goal": "Select Cylinder",
+   "t_start": 40.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Add > Mesh > Cylinder",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "demonstrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 5,
+   "id": "H05",
+   "goal": "Enter Edit Mode",
+   "t_start": 49.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Tab"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 6,
+   "id": "H06",
+   "goal": "Scale cylinder",
+   "t_start": 52.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "S"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 7,
+   "id": "H07",
+   "goal": "Click scale tool",
+   "t_start": 59.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Scale icon",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "demonstrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 8,
+   "id": "H08",
+   "goal": "Activate Loop Cut tool",
+   "t_start": 71.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Ctrl",
+      "R"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 9,
+   "id": "H09",
+   "goal": "Create loop cut",
+   "t_start": 75.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "demonstrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 10,
+   "id": "H10",
+   "goal": "Create multiple loop cuts",
+   "t_start": 80.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mouse movement",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "demonstrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 11,
+   "id": "H11",
+   "goal": "Switch to Object Mode",
+   "t_start": 88.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Tab"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 12,
+   "id": "H12",
+   "goal": "Add Armature",
+   "t_start": 97.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shift + A > Armature",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 13,
+   "id": "H13",
+   "goal": "Enable In Front display",
+   "t_start": 110.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Data > Viewport Display > In Front",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 14,
+   "id": "H14",
+   "goal": "Enter Edit Mode",
+   "t_start": 115.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Tab"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 15,
+   "id": "H15",
+   "goal": "Move bone head to top",
+   "t_start": 119.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 16,
+   "id": "H16",
+   "goal": "Move bone tail to bottom",
+   "t_start": 125.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 17,
+   "id": "H17",
+   "goal": "Right click to open context menu",
+   "t_start": 136.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Right Click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "demonstrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 18,
+   "id": "H18",
+   "goal": "Select Subdivide",
+   "t_start": 138.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Subdivide",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 19,
+   "id": "H19",
+   "goal": "Switch to Object Mode",
+   "t_start": 153.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Tab"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 20,
+   "id": "H20",
+   "goal": "Select mesh",
+   "t_start": 163.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Left Click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 21,
+   "id": "H21",
+   "goal": "Add armature to selection",
+   "t_start": 165.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shift + Left Click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 22,
+   "id": "H22",
+   "goal": "Parent with automatic weights",
+   "t_start": 172.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Ctrl + P > Automatic Weights",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 23,
+   "id": "H23",
+   "goal": "Switch to Pose Mode",
+   "t_start": 182.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mode dropdown",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 24,
+   "id": "H24",
+   "goal": "Select a bone",
+   "t_start": 194.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Left Click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 25,
+   "id": "H25",
+   "goal": "Rotate bone",
+   "t_start": 194.0,
+   "t_end": null,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "R"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  }
+ ]
+}

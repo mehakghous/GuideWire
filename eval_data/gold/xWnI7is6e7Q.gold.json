@@ -1,0 +1,1764 @@
+{
+ "video_id": "xWnI7is6e7Q",
+ "title": "Rigging in Houdini with APEX: 01 | Simple FK",
+ "duration_s": 397.0,
+ "app": "houdini",
+ "app_version": null,
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "Create a Cube in the scene.",
+   "t_start": 12.0,
+   "t_end": 14.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Cube > Enter",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Used as a visual reference while creating the skeleton."
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "Create and draw out a skeleton.",
+   "t_start": 17.0,
+   "t_end": 21.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Skeleton",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the skeleton points for the FK rig."
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "Keep the default skeleton point names unchanged.",
+   "t_start": 24.0,
+   "t_end": 30.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The points retain their default names, such as 0, 1 and 2."
+  },
+  {
+   "order": 4,
+   "id": "H04",
+   "goal": "Create a Pack Folder node.",
+   "t_start": 33.0,
+   "t_end": 39.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Pack Folder",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 5,
+   "id": "H05",
+   "goal": "Connect the skeleton to the second input of the Pack Folder.",
+   "t_start": 39.0,
+   "t_end": 43.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Node Connection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Packs the skeleton into the folder."
+  },
+  {
+   "order": 6,
+   "id": "H06",
+   "goal": "Change the Pack Folder type to Skeleton.",
+   "t_start": 43.0,
+   "t_end": 49.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pack Folder > Type > Skeleton",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Changes the packed component type."
+  },
+  {
+   "order": 7,
+   "id": "H07",
+   "goal": "Set the skeleton's name to Base.",
+   "t_start": 49.0,
+   "t_end": 58.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pack Folder > Name",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Follows the default naming convention used by the Auto Rig Component."
+  },
+  {
+   "order": 8,
+   "id": "H08",
+   "goal": "Create an Auto Rig Component node.",
+   "t_start": 58.0,
+   "t_end": 64.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Auto Rig Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 9,
+   "id": "H09",
+   "goal": "Set the Auto Rig Component name to FK.",
+   "t_start": 64.0,
+   "t_end": 68.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Node Name > FK",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 10,
+   "id": "H10",
+   "goal": "Open the Component dropdown and select FK.",
+   "t_start": 70.0,
+   "t_end": 76.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Auto Rig Component > Component > FK",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 11,
+   "id": "H11",
+   "goal": "Locate the Transform promotion group parameter.",
+   "t_start": 76.0,
+   "t_end": 79.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Component Parameters > T Promote Group",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "T represents translation/transform."
+  },
+  {
+   "order": 12,
+   "id": "H12",
+   "goal": "Locate the Rotation promotion group parameter.",
+   "t_start": 79.0,
+   "t_end": 82.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Component Parameters > R Promote Group",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "R represents rotation."
+  },
+  {
+   "order": 13,
+   "id": "H13",
+   "goal": "Locate the Scale promotion group parameter.",
+   "t_start": 79.0,
+   "t_end": 84.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Component Parameters > S Promote Group",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "S represents scale."
+  },
+  {
+   "order": 14,
+   "id": "H14",
+   "goal": "Enter * as the wildcard for the promotion group fields.",
+   "t_start": 84.0,
+   "t_end": 91.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "T Promote Group / R Promote Group / S Promote Group",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Selects all skeleton points for transform, rotation and scale promotion."
+  },
+  {
+   "order": 15,
+   "id": "H15",
+   "goal": "Use the wildcard to include all points in the rig.",
+   "t_start": 91.0,
+   "t_end": 97.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "*",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 16,
+   "id": "H16",
+   "goal": "Identify the common naming pattern of the skeleton points.",
+   "t_start": 100.0,
+   "t_end": 117.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor explains that the points share a common naming convention."
+  },
+  {
+   "order": 17,
+   "id": "H17",
+   "goal": "Replace the general wildcard with point* to target points with the Point naming prefix.",
+   "t_start": 110.0,
+   "t_end": 117.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Promotion Group Fields > point*",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "A more specific alternative to *."
+  },
+  {
+   "order": 18,
+   "id": "H18",
+   "goal": "Apply the FK component configuration.",
+   "t_start": 117.0,
+   "t_end": 125.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Enter"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Generates the FK controls for the selected points."
+  },
+  {
+   "order": 19,
+   "id": "H19",
+   "goal": "Open the Configure Controls functionality.",
+   "t_start": 134.0,
+   "t_end": 138.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Configure Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 20,
+   "id": "H20",
+   "goal": "Create a separate Configure Controls node.",
+   "t_start": 142.0,
+   "t_end": 146.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Configure Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor recommends using the standalone node."
+  },
+  {
+   "order": 21,
+   "id": "H21",
+   "goal": "Compare the Configure Controls options available in the Auto Rig Component with those in the standalone node.",
+   "t_start": 146.0,
+   "t_end": 157.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The standalone node exposes additional dropdown options."
+  },
+  {
+   "order": 22,
+   "id": "H22",
+   "goal": "Inspect the Shape Override options available in the standalone Configure Controls node.",
+   "t_start": 160.0,
+   "t_end": 174.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Configure Controls > Shape Override",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor explains that the embedded configuration has fewer options."
+  },
+  {
+   "order": 23,
+   "id": "H23",
+   "goal": "Use the standalone Configure Controls node instead of relying on the embedded Auto Rig Component configuration.",
+   "t_start": 174.0,
+   "t_end": 180.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Configure Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Recommended because it provides more customization options."
+  },
+  {
+   "order": 24,
+   "id": "H24",
+   "goal": "Set the Control Group field to point*.",
+   "t_start": 182.0,
+   "t_end": 187.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Configure Controls > Control Group",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Targets all points following the Point naming convention."
+  },
+  {
+   "order": 25,
+   "id": "H25",
+   "goal": "Set Shape Override to Box.",
+   "t_start": 187.0,
+   "t_end": 190.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shape Override > Box",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Changes the appearance of the FK controls."
+  },
+  {
+   "order": 26,
+   "id": "H26",
+   "goal": "Enable Use Shape Offset.",
+   "t_start": 190.0,
+   "t_end": 192.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Use Shape Offset",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Allows the control shape to be adjusted independently."
+  },
+  {
+   "order": 27,
+   "id": "H27",
+   "goal": "Increase the shape offset scale values to 4.1.",
+   "t_start": 190.0,
+   "t_end": 197.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shape Offset > Scale",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Your notes record 4.1 for each scale value."
+  },
+  {
+   "order": 28,
+   "id": "H28",
+   "goal": "Enable Use Color.",
+   "t_start": 192.0,
+   "t_end": 197.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Use Color",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 29,
+   "id": "H29",
+   "goal": "Choose a color for the FK controls.",
+   "t_start": 197.0,
+   "t_end": 200.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Color Picker",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor selects a color."
+  },
+  {
+   "order": 30,
+   "id": "H30",
+   "goal": "Create an Add Character node.",
+   "t_start": 197.0,
+   "t_end": 202.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Add Character",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Adds the character to the APEX evaluation scene."
+  },
+  {
+   "order": 31,
+   "id": "H31",
+   "goal": "Connect the Configure Controls output to the Add Character node.",
+   "t_start": 202.0,
+   "t_end": 207.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Node Connection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 32,
+   "id": "H32",
+   "goal": "Create an Animate node.",
+   "t_start": 207.0,
+   "t_end": 212.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Animate",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 33,
+   "id": "H33",
+   "goal": "Connect the Add Character output to the Animate node.",
+   "t_start": 212.0,
+   "t_end": 215.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Node Connection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 34,
+   "id": "H34",
+   "goal": "Inspect the generated FK controls in the Animate node.",
+   "t_start": 212.0,
+   "t_end": 220.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Animate",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Confirms that the character has FK control."
+  },
+  {
+   "order": 35,
+   "id": "H35",
+   "goal": "Introduce a spider-like creature as an example of modifying the skeleton.",
+   "t_start": 223.0,
+   "t_end": 230.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Demonstrates how APEX supports changes to the skeleton."
+  },
+  {
+   "order": 36,
+   "id": "H36",
+   "goal": "Return to the skeleton and select it for modification.",
+   "t_start": 234.0,
+   "t_end": 240.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Skeleton Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 37,
+   "id": "H37",
+   "goal": "Press F to enter Modify mode.",
+   "t_start": 240.0,
+   "t_end": 244.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "F"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 38,
+   "id": "H38",
+   "goal": "Select a skeleton point and move it to adjust the skeleton shape.",
+   "t_start": 244.0,
+   "t_end": 247.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Modify Mode > Move",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 39,
+   "id": "H39",
+   "goal": "Select another skeleton point to modify the structure.",
+   "t_start": 249.0,
+   "t_end": 255.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport Selection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor changes the selected point before continuing."
+  },
+  {
+   "order": 40,
+   "id": "H40",
+   "goal": "Create a Merge node to combine the skeletons.",
+   "t_start": 255.0,
+   "t_end": 259.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Merge",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 41,
+   "id": "H41",
+   "goal": "Connect the skeletons to the Merge node.",
+   "t_start": 259.0,
+   "t_end": 263.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Node Connections",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Combines the skeleton geometry so the changes can be viewed together."
+  },
+  {
+   "order": 42,
+   "id": "H42",
+   "goal": "Move the first skeleton section to a different position.",
+   "t_start": 263.0,
+   "t_end": 264.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Move Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 43,
+   "id": "H43",
+   "goal": "Move the second skeleton section to a different position.",
+   "t_start": 264.0,
+   "t_end": 268.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Move Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the additional skeleton sections for the spider-like example."
+  },
+  {
+   "order": 44,
+   "id": "H44",
+   "goal": "Create or use a Pack Folder to pack the merged skeleton geometry.",
+   "t_start": 268.0,
+   "t_end": 273.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Pack Folder",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 45,
+   "id": "H45",
+   "goal": "Connect the merged skeleton geometry to the Pack Folder.",
+   "t_start": 271.0,
+   "t_end": 273.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Node Connection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 46,
+   "id": "H46",
+   "goal": "Set the Pack Folder type to Skeleton.",
+   "t_start": 273.0,
+   "t_end": 276.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pack Folder > Type > Skeleton",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Maintains the correct component type."
+  },
+  {
+   "order": 47,
+   "id": "H47",
+   "goal": "Re-enter the skeleton name in the Pack Folder.",
+   "t_start": 276.0,
+   "t_end": 284.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pack Folder > Name > Base",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The name is lost when the packed geometry is deselected and reconnected."
+  },
+  {
+   "order": 48,
+   "id": "H48",
+   "goal": "Check the existing FK component after modifying the skeleton.",
+   "t_start": 284.0,
+   "t_end": 291.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "FK Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The previous FK setup no longer works correctly because the point names are no longer unique."
+  },
+  {
+   "order": 49,
+   "id": "H49",
+   "goal": "Identify the duplicate point names in the merged skeleton.",
+   "t_start": 291.0,
+   "t_end": 299.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The merged skeleton contains naming conflicts, such as repeated point indices."
+  },
+  {
+   "order": 50,
+   "id": "H50",
+   "goal": "Create an Attribute Wrangle node.",
+   "t_start": 299.0,
+   "t_end": 305.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Search Attribute Wrangle",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Used to generate unique joint names."
+  },
+  {
+   "order": 51,
+   "id": "H51",
+   "goal": "Open the Attribute Wrangle code editor.",
+   "t_start": 305.0,
+   "t_end": 307.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Attribute Wrangle > VEXpression",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 52,
+   "id": "H52",
+   "goal": "Enter a naming expression that assigns a jnt_ prefix to each point name.",
+   "t_start": 307.0,
+   "t_end": 312.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "VEXpression",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "s@name = \"jnt_\" + itoa(@ptnum);"
+  },
+  {
+   "order": 53,
+   "id": "H53",
+   "goal": "Use the itoa() function to convert the point number from an integer into a string.",
+   "t_start": 312.0,
+   "t_end": 320.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "VEXpression > itoa()",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Allows the point number to be appended to the joint-name prefix."
+  },
+  {
+   "order": 54,
+   "id": "H54",
+   "goal": "Apply the expression to generate unique names for the skeleton points.",
+   "t_start": 320.0,
+   "t_end": 335.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Attribute Wrangle",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Prevents duplicate naming conflicts in the merged skeleton."
+  },
+  {
+   "order": 55,
+   "id": "H55",
+   "goal": "Return to the FK component and inspect the updated skeleton.",
+   "t_start": 338.0,
+   "t_end": 344.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "FK Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The FK component updates automatically when the skeleton changes."
+  },
+  {
+   "order": 56,
+   "id": "H56",
+   "goal": "Identify that the FK controls are not working correctly because the naming convention has changed.",
+   "t_start": 348.0,
+   "t_end": 354.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The FK component still references the old Point naming pattern."
+  },
+  {
+   "order": 57,
+   "id": "H57",
+   "goal": "Change the skeleton point naming convention to use the joint prefix.",
+   "t_start": 354.0,
+   "t_end": 360.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Attribute Wrangle / Skeleton Naming",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The intended naming pattern is now based on jnt_ names."
+  },
+  {
+   "order": 58,
+   "id": "H58",
+   "goal": "Inspect the skeleton and verify that FK controls are generated for the renamed joints.",
+   "t_start": 360.0,
+   "t_end": 364.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "FK Component",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 59,
+   "id": "H59",
+   "goal": "Open the standalone Configure Controls node and change the Control Group from point to joint.",
+   "t_start": 364.0,
+   "t_end": 370.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Configure Controls > Control Group > joint*",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Updates the control selection to match the new naming convention."
+  },
+  {
+   "order": 60,
+   "id": "H60",
+   "goal": "Apply the updated Configure Controls settings to generate controls for all joints.",
+   "t_start": 370.0,
+   "t_end": 373.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Configure Controls",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 61,
+   "id": "H61",
+   "goal": "Open the Animate node and test the FK controls on the modified skeleton.",
+   "t_start": 373.0,
+   "t_end": 380.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Animate",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Confirms that the modified skeleton can be animated using FK controls."
+  },
+  {
+   "order": 62,
+   "id": "H62",
+   "goal": "Introduce the next tutorial topic: creating a basic arm IK rig.",
+   "t_start": 380.0,
+   "t_end": 386.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The actual arm IK setup is not included in this tutorial."
+  }
+ ]
+}

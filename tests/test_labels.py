@@ -174,7 +174,8 @@ def test_selection_skips_videos_that_cannot_be_used_and_never_repeats_a_channel(
 def test_the_prepared_manifest_in_the_repo_is_consistent():
     man = json.loads((ROOT / "eval_data" / "labels" / "manifest.json").read_text(encoding="utf-8"))
     ids = [v["video_id"] for v in man["videos"]]
-    assert len(ids) == len(set(ids)) >= 10 and len({v["channel"] for v in man["videos"]}) == len(ids)
+    held_out = [v for v in man["videos"] if "app" not in v]     # the ten held-out videos; the rigging videos added later carry an "app" and may share a channel or series
+    assert len(ids) == len(set(ids)) >= 10 and len(held_out) >= 10 and len({v["channel"] for v in held_out}) == len(held_out)
     assert sum(len(v["annotators"]) > 1 for v in man["videos"]) >= 3
     reviewed = {e["id"] for e in json.loads((ROOT / "knowledge" / "tutorial_index.json").read_text(encoding="utf-8"))["entries"]}
     assert reviewed.isdisjoint(ids)                                                   # none of the rule-tuning videos

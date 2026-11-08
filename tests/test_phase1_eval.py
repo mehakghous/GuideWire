@@ -1,6 +1,6 @@
 """Phase 1 report: the structure numbers and the accuracy numbers, on hand-made step lists (no model, no network)."""
 from ingestion.eval.gold import GoldSet, GoldStep
-from ingestion.eval.phase1 import accuracy, load_gold, per_app, structure
+from ingestion.eval.phase1 import accuracy, coverage, load_gold, per_app, structure
 from shared.step_record import HowTo, StatePredicate, Step, StepList
 
 
@@ -65,3 +65,22 @@ def test_per_application_average_ignores_missing_rates():
     m = per_app(rows)["maya"]
     assert (m["runs"], m["steps"]) == (2, 10)
     assert m["checkable_end_state"] == 0.4 and m["video_covered"] == 0.4
+
+
+def test_one_step_can_cover_many_small_gold_actions():
+    gold = GoldSet(duration_s=100.0, annotator="test", app="maya", steps=[
+        GoldStep(order=1, goal="create the first joint", t_start=2.0), GoldStep(order=2, goal="create the second joint", t_start=8.0),
+        GoldStep(order=3, goal="create the third joint", t_start=14.0), GoldStep(order=4, goal="bind skin", t_start=60.0),
+        GoldStep(order=5, goal="paint weights", t_start=80.0, importance="optional")])
+    sl = _sl([_step(1, "create joints for the leg: first, second and third joint", 0, 20), _step(2, "bind skin to the skeleton", 55, 70),
+              _step(3, "rename the controls", 90, 99)])
+    c = coverage(sl, gold)
+    assert c["gold_core"] == 4
+    assert c["text_recall_core"] == 1.0                    # three joints under one step, plus skin
+    assert c["step_support"] == round(2 / 3, 3)            # the rename step has no gold action inside it
+
+
+def test_time_only_recall_is_looser_than_text_recall():
+    gold = GoldSet(duration_s=100.0, annotator="test", app="maya", steps=[GoldStep(order=1, goal="open the hypergraph window", t_start=10.0)])
+    c = coverage(_sl([_step(1, "create joints", 0, 20)]), gold)
+    assert c["time_recall_core"] == 1.0 and c["text_recall_core"] == 0.0

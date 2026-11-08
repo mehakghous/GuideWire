@@ -127,7 +127,7 @@ def test_edit_move_delete_add_through_the_screen(win):
     assert r.list.count() == 3
     r.list.setCurrentRow(0)
     r.apply_add("Save the file")
-    assert r.list.count() == 4 and r.list.item(1).text() == "2. Save the file"
+    assert r.list.count() == 4 and r.list.item(1).text().startswith("2. Save the file")
 
 
 def test_empty_text_shows_a_message_and_changes_nothing(win):
@@ -281,3 +281,28 @@ def test_history_and_profile_need_a_login(win):
     assert win.current_screen() is win.login
     win.open_profile()
     assert win.current_screen() is win.login
+
+
+def test_junk_step_is_refused_and_a_manual_step_is_marked(win):
+    r = _open_sample(win)
+    r.apply_add("ss")
+    assert "too short" in r.status.text() and r.list.count() == 4
+    r.list.setCurrentRow(0)
+    r.apply_add("Save the file")
+    assert r.list.currentItem().text().endswith("[manual]")
+    assert "Manual step" in r.detail.text() and "not recognised" in r.detail.text()
+
+
+def test_recognised_step_is_checkable_and_not_marked_manual(win):
+    r = _open_sample(win)
+    r.list.setCurrentRow(0)
+    r.apply_add("Press Tab to enter Edit Mode")
+    assert "[manual]" not in r.list.currentItem().text() and "check this step automatically" in r.detail.text()
+
+
+def test_duplicate_step_is_refused_on_add_and_on_edit(win):
+    r = _open_sample(win)
+    r.apply_add("add a cube to the scene.")
+    assert "already in the list" in r.status.text() and r.list.count() == 4
+    r.apply_edit("s02", "Add a cube to the scene")
+    assert "already in the list" in r.status.text()

@@ -16,6 +16,7 @@ from pathlib import Path
 from shared.step_record import Step, StepList
 
 from .db import Database
+from .step_validation import TextRefused, analyse, check_text
 
 
 class EditError(Exception):
@@ -65,10 +66,11 @@ class StepEditor:
         self.dirty = True
 
     def edit_goal(self, step_id: str, text: str) -> None:
-        text = text.strip()
-        if not text:
-            raise EditError("A step needs some text.")
         s = self.steps.steps[self._index(step_id)]
+        try:
+            text = check_text(text, [x.goal for x in self.steps.steps if x.id != step_id])
+        except TextRefused as e:
+            raise EditError(str(e)) from None
         if s.goal != text:
             s.goal = text
             s.review_status = "reviewed"
@@ -97,15 +99,22 @@ class StepEditor:
         return f"s{n:02d}"
 
     def add(self, text: str, *, after: str | None = None) -> str:
-        """Add a step after `after` (or at the end). Returns the new step id."""
-        text = text.strip()
-        if not text:
-            raise EditError("A step needs some text.")
+        """Add a step after `after` (or at the end). Returns the new step id.
+
+        The text must pass the hard rules (see app/step_validation.py). If the catalog parser recognises the instruction, the new step gets
+        its actions and expected state, so the session engine can check it; otherwise it is a manual step carrying a flag that says so."""
+        try:
+            text = check_text(text, self.goals())
+        except TextRefused as e:
+            raise EditError(str(e)) from None
+        pos = len(self) if after is None else self._index(after) + 1
         sid = self._new_id()
         self._used_ids.add(sid)
-        step = Step(id=sid, order=1, goal=text, review_status="reviewed", provenance="user_text", support="unknown", confidence=1.0)
-        pos = len(self) if after is None else self._index(after) + 1
-        self.steps.steps.insert(pos, step)
+        a = analyse(text, self.steps.app)
+        base = a.step.model_dump() if a.recognised and a.step is not None else {}
+        data = {**base, "id": sid, "order": 1, "goal": text, "review_status": "reviewed", "provenance": "user_text", "flags": a.flags,
+                "confidence": base.get("confidence", 1.0) if base else 1.0}
+        self.steps.steps.insert(pos, Step.model_validate(data))
         self._renumber()
         return sid
 

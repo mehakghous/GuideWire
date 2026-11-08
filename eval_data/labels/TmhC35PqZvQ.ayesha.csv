@@ -1,0 +1,49 @@
+start,end,action,evidence,importance,keys_or_menu,notes
+0:29,0:31,Open the Animation menu tab.,both,core,Animation tab,
+0:31,0:35,Select the Joint Tool.,both,core,Animation > Skeleton > Joint Tool,
+0:35,0:41,Click around the viewport to demonstrate how joints can be created in unwanted positions.,both,optional,Joint Tool,The instructor demonstrates why using orthographic views is preferable.
+0:41,0:45,Undo the incorrectly created joints.,both,core,Ctrl + Z,Clears the unwanted joints.
+0:45,0:50,Switch to the orthographic views.,both,core,Spacebar,"Displays the front, side and other orthographic views."
+0:52,0:57,Select the Side View and click to place the initial pelvis joint.,both,core,Side View > Joint Tool,Establishes the pelvis position.
+0:59,1:06,Switch to the Front View and click to create the hip joint.,both,core,Front View > Joint Tool,Establishes the hip position.
+1:09,1:11,Maximize the Side View.,both,core,Spacebar,
+1:11,1:18,Click and drag downward to position the knee joint.,both,core,Joint Tool > Click and Drag,
+1:20,1:24,Click to create and position the ankle joint.,both,core,Joint Tool,
+1:24,1:27,Click to create the ball-of-foot joint.,both,core,Joint Tool,
+1:27,1:30,Click to create the toe joint.,both,core,Joint Tool,
+1:30,1:33,Press Enter to finish creating the joint chain.,both,core,Enter,Finalizes the Joint Tool operation.
+1:40,1:45,Return to the Perspective View to inspect the created joint chain.,said,optional,Perspective View,
+1:49,1:58,Select the upper leg joint and rename it to Left Thigh.,both,core,Outliner / Joint selection > Rename,Establishes the naming convention for the left leg.
+1:58,2:17,Use the Up and Down arrow keys to navigate between parent and child joints in the hierarchy.,both,optional,Up Arrow / Down Arrow,Up selects the parent; Down selects the child.
+2:18,2:22,Select the child joint and rename it to Left Knee.,both,core,Rename,
+2:22,2:29,Select the next child joint and rename it to Left Ankle.,both,core,Down Arrow > Rename,
+2:29,2:36,Select the next child joint and rename it to Left Toe.,both,core,Down Arrow > Rename,
+2:36,2:46,Select the final child joint and rename it to Left Toe Tip.,both,core,Down Arrow > Rename,
+2:46,3:00,Check that all joints have been named correctly using a consistent left-side prefix.,said,optional,,The naming convention helps with mirroring.
+3:07,3:11,Open the Mirror Joint tool settings.,both,core,Animation > Skeleton > Mirror Joint > Double-click,
+3:18,3:23,Enter left in the Search For field.,both,core,Mirror Joint > Search For,
+3:23,3:28,Enter right in the Replace With field.,both,core,Mirror Joint > Replace With,Replaces the left-side prefix in mirrored joint names.
+3:28,3:33,Click Apply to mirror the joints using the current axis settings.,both,core,Mirror Joint > Apply,The instructor demonstrates the initial mirroring result.
+3:33,3:40,Inspect the mirrored joints and identify that they are reflected across the wrong axis.,both,optional,Viewport,The default XY reflection is not the desired result.
+3:40,3:54,Undo the incorrectly mirrored joints.,both,core,Ctrl + Z,Removes the incorrect mirror operation.
+3:54,4:00,Select the YZ mirror axis.,both,core,Mirror Joint > YZ,Changes the reflection plane.
+4:00,4:05,Click Mirror to mirror the joints across the YZ axis.,both,core,Mirror Joint > Mirror,Creates the joints on the opposite side in the intended position.
+4:05,4:17,Use the Up and Down arrow keys to inspect the mirrored joint hierarchy and verify the names.,both,optional,Up Arrow / Down Arrow,Confirms that the mirrored joints have the correct right-side names.
+4:21,4:26,Locate the IK Handle tool in the Animation tools.,both,core,Animation > Skeleton > IK Handle Tool,
+4:30,4:36,Select the IK Handle tool to activate it.,both,core,IK Handle Tool,
+4:36,4:43,Open the IK Handle tool settings by double-clicking its icon.,both,optional,Double-click IK Handle Tool,Alternative to directly activating the tool.
+4:43,4:46,Click Reset Tool to restore the IK Handle tool settings.,said,optional,Tool Settings > Reset Tool,
+4:46,4:51,Open the Solver dropdown and inspect the default SC Solver selection.,both,core,Tool Settings > Solver,SC Solver is selected by default.
+4:51,5:01,Change the solver from SC Solver to RP Solver.,both,core,Solver > RP Solver,RP stands for Rotate Plane.
+5:01,5:07,Select the thigh joint as the starting joint for the IK handle.,both,core,IK Handle Tool > Click Thigh Joint,
+5:07,5:10,Select the ankle joint as the ending joint for the IK handle.,both,core,IK Handle Tool > Click Ankle Joint,Creates an IK handle between the thigh and ankle.
+5:10,5:14,Inspect the generated IK handle and its associated rotation plane.,both,optional,Viewport,The plane determines the direction in which the joints bend.
+5:17,5:26,"Compare the IK-controlled leg with the opposite leg, which still requires individual joint rotation.",said,optional,,Explains the benefit of IK controls.
+5:28,5:32,Select the newly created IK handle.,both,core,Viewport selection,
+5:32,5:37,Activate the Transform/Move tool.,both,core,Move Tool,
+5:37,5:42,Move the IK handle to reposition the leg.,both,core,W / Move Tool,The thigh and knee joints automatically adjust to the new position.
+5:42,5:50,Observe how the thigh and knee joints adjust when the IK handle is moved.,both,optional,,Demonstrates automatic joint positioning.
+5:53,6:04,Observe how the IK handle can control the foot's ground-contact position during character movement.,said,optional,,Explains the practical use of IK for walking animations.
+6:04,6:11,Undo the recent IK handle movements to return the leg to its original position.,both,core,Ctrl + Z,Restores the leg to its initial position on the ground.
+6:11,6:17,Prepare to configure the same Rotate Plane IK setup on the opposite leg.,said,core,,The instructor moves on to setting up the other side.
+6:17,6:29,Begin setting up the Rotate Plane IK handle on the right leg.,said,core,IK Handle Tool,The transcript does not include the individual operations for this setup.

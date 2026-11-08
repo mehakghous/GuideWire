@@ -1,0 +1,63 @@
+start,end,action,evidence,importance,keys_or_menu,notes
+0:12,0:14,Create a Cube in the scene.,both,optional,Tab > Search Cube > Enter,Used as a visual reference while creating the skeleton.
+0:17,0:21,Create and draw out a skeleton.,both,core,Tab > Search Skeleton,Creates the skeleton points for the FK rig.
+0:24,0:30,Keep the default skeleton point names unchanged.,both,core,,"The points retain their default names, such as 0, 1 and 2."
+0:33,0:39,Create a Pack Folder node.,both,core,Tab > Search Pack Folder,
+0:39,0:43,Connect the skeleton to the second input of the Pack Folder.,both,core,Node Connection,Packs the skeleton into the folder.
+0:43,0:49,Change the Pack Folder type to Skeleton.,both,core,Pack Folder > Type > Skeleton,Changes the packed component type.
+0:49,0:58,Set the skeleton's name to Base.,both,core,Pack Folder > Name,Follows the default naming convention used by the Auto Rig Component.
+0:58,1:04,Create an Auto Rig Component node.,both,core,Tab > Search Auto Rig Component,
+1:04,1:08,Set the Auto Rig Component name to FK.,both,core,Node Name > FK,
+1:10,1:16,Open the Component dropdown and select FK.,both,core,Auto Rig Component > Component > FK,
+1:16,1:19,Locate the Transform promotion group parameter.,both,core,Component Parameters > T Promote Group,T represents translation/transform.
+1:19,1:22,Locate the Rotation promotion group parameter.,both,core,Component Parameters > R Promote Group,R represents rotation.
+1:19,1:24,Locate the Scale promotion group parameter.,both,core,Component Parameters > S Promote Group,S represents scale.
+1:24,1:31,Enter * as the wildcard for the promotion group fields.,both,core,T Promote Group / R Promote Group / S Promote Group,"Selects all skeleton points for transform, rotation and scale promotion."
+1:31,1:37,Use the wildcard to include all points in the rig.,said,core,*,
+1:40,1:57,Identify the common naming pattern of the skeleton points.,said,optional,,The instructor explains that the points share a common naming convention.
+1:50,1:57,Replace the general wildcard with point* to target points with the Point naming prefix.,both,optional,Promotion Group Fields > point*,A more specific alternative to *.
+1:57,2:05,Apply the FK component configuration.,both,core,Enter,Generates the FK controls for the selected points.
+2:14,2:18,Open the Configure Controls functionality.,both,core,Tab > Search Configure Controls,
+2:22,2:26,Create a separate Configure Controls node.,both,core,Tab > Configure Controls,The instructor recommends using the standalone node.
+2:26,2:37,Compare the Configure Controls options available in the Auto Rig Component with those in the standalone node.,said,optional,,The standalone node exposes additional dropdown options.
+2:40,2:54,Inspect the Shape Override options available in the standalone Configure Controls node.,both,optional,Configure Controls > Shape Override,The instructor explains that the embedded configuration has fewer options.
+2:54,3:00,Use the standalone Configure Controls node instead of relying on the embedded Auto Rig Component configuration.,said,core,Tab > Configure Controls,Recommended because it provides more customization options.
+3:02,3:07,Set the Control Group field to point*.,both,core,Configure Controls > Control Group,Targets all points following the Point naming convention.
+3:07,3:10,Set Shape Override to Box.,both,core,Shape Override > Box,Changes the appearance of the FK controls.
+3:10,3:12,Enable Use Shape Offset.,both,core,Use Shape Offset,Allows the control shape to be adjusted independently.
+3:10,3:17,Increase the shape offset scale values to 4.1.,both,optional,Shape Offset > Scale,Your notes record 4.1 for each scale value.
+3:12,3:17,Enable Use Color.,both,core,Use Color,
+3:17,3:20,Choose a color for the FK controls.,both,optional,Color Picker,The instructor selects a color.
+3:17,3:22,Create an Add Character node.,both,core,Tab > Search Add Character,Adds the character to the APEX evaluation scene.
+3:22,3:27,Connect the Configure Controls output to the Add Character node.,both,core,Node Connection,
+3:27,3:32,Create an Animate node.,both,core,Tab > Search Animate,
+3:32,3:35,Connect the Add Character output to the Animate node.,both,core,Node Connection,
+3:32,3:40,Inspect the generated FK controls in the Animate node.,both,core,Animate,Confirms that the character has FK control.
+3:43,3:50,Introduce a spider-like creature as an example of modifying the skeleton.,said,optional,,Demonstrates how APEX supports changes to the skeleton.
+3:54,4:00,Return to the skeleton and select it for modification.,both,core,Skeleton Component,
+4:00,4:04,Press F to enter Modify mode.,both,core,F,
+4:04,4:07,Select a skeleton point and move it to adjust the skeleton shape.,both,core,Modify Mode > Move,
+4:09,4:15,Select another skeleton point to modify the structure.,both,core,Viewport Selection,The instructor changes the selected point before continuing.
+4:15,4:19,Create a Merge node to combine the skeletons.,both,core,Tab > Search Merge,
+4:19,4:23,Connect the skeletons to the Merge node.,both,core,Node Connections,Combines the skeleton geometry so the changes can be viewed together.
+4:23,4:24,Move the first skeleton section to a different position.,both,core,Move Tool,
+4:24,4:28,Move the second skeleton section to a different position.,both,core,Move Tool,Creates the additional skeleton sections for the spider-like example.
+4:28,4:33,Create or use a Pack Folder to pack the merged skeleton geometry.,both,core,Tab > Search Pack Folder,
+4:31,4:33,Connect the merged skeleton geometry to the Pack Folder.,both,core,Node Connection,
+4:33,4:36,Set the Pack Folder type to Skeleton.,both,core,Pack Folder > Type > Skeleton,Maintains the correct component type.
+4:36,4:44,Re-enter the skeleton name in the Pack Folder.,both,core,Pack Folder > Name > Base,The name is lost when the packed geometry is deselected and reconnected.
+4:44,4:51,Check the existing FK component after modifying the skeleton.,both,optional,FK Component,The previous FK setup no longer works correctly because the point names are no longer unique.
+4:51,4:59,Identify the duplicate point names in the merged skeleton.,both,core,,"The merged skeleton contains naming conflicts, such as repeated point indices."
+4:59,5:05,Create an Attribute Wrangle node.,both,core,Tab > Search Attribute Wrangle,Used to generate unique joint names.
+5:05,5:07,Open the Attribute Wrangle code editor.,both,core,Attribute Wrangle > VEXpression,
+5:07,5:12,Enter a naming expression that assigns a jnt_ prefix to each point name.,both,core,VEXpression,"s@name = ""jnt_"" + itoa(@ptnum);"
+5:12,5:20,Use the itoa() function to convert the point number from an integer into a string.,said,core,VEXpression > itoa(),Allows the point number to be appended to the joint-name prefix.
+5:20,5:35,Apply the expression to generate unique names for the skeleton points.,both,core,Attribute Wrangle,Prevents duplicate naming conflicts in the merged skeleton.
+5:38,5:44,Return to the FK component and inspect the updated skeleton.,both,optional,FK Component,The FK component updates automatically when the skeleton changes.
+5:48,5:54,Identify that the FK controls are not working correctly because the naming convention has changed.,both,core,,The FK component still references the old Point naming pattern.
+5:54,6:00,Change the skeleton point naming convention to use the joint prefix.,both,core,Attribute Wrangle / Skeleton Naming,The intended naming pattern is now based on jnt_ names.
+6:00,6:04,Inspect the skeleton and verify that FK controls are generated for the renamed joints.,both,core,FK Component,
+6:04,6:10,Open the standalone Configure Controls node and change the Control Group from point to joint.,both,core,Configure Controls > Control Group > joint*,Updates the control selection to match the new naming convention.
+6:10,6:13,Apply the updated Configure Controls settings to generate controls for all joints.,both,core,Configure Controls,
+6:13,6:20,Open the Animate node and test the FK controls on the modified skeleton.,both,core,Animate,Confirms that the modified skeleton can be animated using FK controls.
+6:20,6:26,Introduce the next tutorial topic: creating a basic arm IK rig.,said,optional,,The actual arm IK setup is not included in this tutorial.

@@ -1,0 +1,26 @@
+start,end,action,evidence,importance,keys_or_menu,notes
+0:00:25,0:00:31,Switch from Modify mode to Create mode.,both,core,Create Mode,
+0:00:31,0:00:42,Create a skeleton and leave the default joint names unchanged.,both,core,Tab > Skeleton,The default names are used later in the IK Driven field.
+0:00:42,0:00:50,"Create a Pack Folder, connect the skeleton to it, and name the packed skeleton Base.",both,core,Tab > Pack Folder,The transcript refers to this as Base Scale; your notes identify the name as Base.
+0:00:50,0:00:52,Set the Pack Folder type to Skeleton.,both,core,Pack Folder > Type,
+0:00:52,0:01:00,Create an Auto Rig Component and rename it IK.,both,core,Tab > Auto Rig Component,Connect the Pack Folder output to this component.
+0:01:00,0:01:05,Select Smooth IK from the Component dropdown.,both,core,Auto Rig Component > Component,
+0:01:05,0:01:21,Open the Driven field and identify the joint names that the IK component must control.,both,core,Auto Rig Component > Driven,"The example uses the default joint names 0, 0.1, and 0.2."
+0:01:21,0:01:47,Add a marker to display joint names while working.,both,optional,Right-click marker icon > + > Marker,Set Marker Text to use the name attribute and set the attribute to point.
+0:01:47,0:01:56,Select the skeleton and enable the marker display to inspect the joint names.,both,optional,Select skeleton > W,This makes the point names visible on the skeleton.
+0:01:56,0:02:11,Enter the joint names into the IK Driven field and press Enter.,both,core,IK > Driven,"Use the actual names displayed by the marker, such as 0, 0.1, and 0.2."
+0:02:11,0:02:26,Check the IK result and identify that it is not working correctly yet.,both,optional,IK component,The IK component needs the FK transforms initialized first.
+0:02:26,0:02:41,Create another Auto Rig Component before the IK component and rename it FK.,both,core,Tab > Auto Rig Component,Connect the FK component before IK in the rigging chain.
+0:02:41,0:03:00,"Select FK and set the transform, rotation, and scale promotion groups to *.",both,core,FK > Component; T/R/S Promote Groups,The wildcard promotes all points' transform channels.
+0:03:00,0:03:13,"Test the FK controls, then return to the IK component and verify that IK now works.",both,core,FK / IK components,FK initializes the transforms required by IK.
+0:03:17,0:03:41,Inspect the IK component's Controls section and identify the generated pole-vector and IK-handle control names.,both,optional,IK > Controls,The example names are arm_pole_L and arm_ik_handle_L (the exact displayed spelling should be followed).
+0:03:41,0:03:50,Remove the _L suffix from the pole-vector and IK-handle control names.,both,core,IK > Controls,Use center controls instead of left/right-specific controls.
+0:03:50,0:04:05,Create a Configure Controls node and add two control configurations.,both,core,Tab > Configure Controls,Configure one entry for each generated IK control.
+0:04:05,0:04:25,Set the first control group to the pole-vector control and the second to the IK-handle control.,both,core,Configure Controls > Control Groups,Use the updated names after removing _L.
+0:04:25,0:04:52,"Configure the appearance of both controls by adjusting their size, shape, and color.",both,optional,Configure Controls > Shape Override / Color,"The example enlarges the controls, uses a blob shape, and assigns red to the IK control."
+0:04:52,0:05:00,Create a Scene Add Character node and connect it after Configure Controls.,both,core,Tab > Scene Add Character,Adds the character to the Apex evaluation scene.
+0:05:00,0:05:12,Create a Scene Animate node and test the IK rig.,both,core,Tab > Scene Animate,The resulting arm IK rig should now be visible and usable.
+0:05:12,0:05:33,Inspect the pole-vector control's initial position and identify that it is placed at the elbow.,both,optional,Pole-vector control,"The IK component is using the middle joint, 0.1, as the initial pole-vector position."
+0:05:33,0:05:43,Move the pole-vector control outward from the elbow to establish a better initial position.,both,core,Pole-vector control,Position it away from the arm so the elbow points in the intended direction.
+0:05:43,0:05:58,Test the IK handle by moving it and observe how the arm flips if the pole vector remains at the elbow.,both,optional,IK handle,"The elbow tries to point toward the pole vector, causing the arm to flip."
+0:05:58,0:06:09,Introduce guides as the next method for defining initial rest positions for controls.,said,optional,,"This is an explanation of the next tutorial, not an operation performed here."

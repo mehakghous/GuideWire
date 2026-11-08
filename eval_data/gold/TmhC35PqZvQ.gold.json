@@ -1,0 +1,1379 @@
+{
+ "video_id": "TmhC35PqZvQ",
+ "title": "Leg Setup & IK Handles",
+ "duration_s": 392.0,
+ "app": "maya",
+ "app_version": null,
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "Open the Animation menu tab.",
+   "t_start": 29.0,
+   "t_end": 31.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Animation tab",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "Select the Joint Tool.",
+   "t_start": 31.0,
+   "t_end": 35.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Animation > Skeleton > Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "Click around the viewport to demonstrate how joints can be created in unwanted positions.",
+   "t_start": 35.0,
+   "t_end": 41.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor demonstrates why using orthographic views is preferable."
+  },
+  {
+   "order": 4,
+   "id": "H04",
+   "goal": "Undo the incorrectly created joints.",
+   "t_start": 41.0,
+   "t_end": 45.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Ctrl",
+      "Z"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Clears the unwanted joints."
+  },
+  {
+   "order": 5,
+   "id": "H05",
+   "goal": "Switch to the orthographic views.",
+   "t_start": 45.0,
+   "t_end": 50.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Spacebar",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Displays the front, side and other orthographic views."
+  },
+  {
+   "order": 6,
+   "id": "H06",
+   "goal": "Select the Side View and click to place the initial pelvis joint.",
+   "t_start": 52.0,
+   "t_end": 57.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Side View > Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Establishes the pelvis position."
+  },
+  {
+   "order": 7,
+   "id": "H07",
+   "goal": "Switch to the Front View and click to create the hip joint.",
+   "t_start": 59.0,
+   "t_end": 66.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Front View > Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Establishes the hip position."
+  },
+  {
+   "order": 8,
+   "id": "H08",
+   "goal": "Maximize the Side View.",
+   "t_start": 69.0,
+   "t_end": 71.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Spacebar",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 9,
+   "id": "H09",
+   "goal": "Click and drag downward to position the knee joint.",
+   "t_start": 71.0,
+   "t_end": 78.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Joint Tool > Click and Drag",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 10,
+   "id": "H10",
+   "goal": "Click to create and position the ankle joint.",
+   "t_start": 80.0,
+   "t_end": 84.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 11,
+   "id": "H11",
+   "goal": "Click to create the ball-of-foot joint.",
+   "t_start": 84.0,
+   "t_end": 87.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 12,
+   "id": "H12",
+   "goal": "Click to create the toe joint.",
+   "t_start": 87.0,
+   "t_end": 90.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Joint Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 13,
+   "id": "H13",
+   "goal": "Press Enter to finish creating the joint chain.",
+   "t_start": 90.0,
+   "t_end": 93.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Enter"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Finalizes the Joint Tool operation."
+  },
+  {
+   "order": 14,
+   "id": "H14",
+   "goal": "Return to the Perspective View to inspect the created joint chain.",
+   "t_start": 100.0,
+   "t_end": 105.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Perspective View",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 15,
+   "id": "H15",
+   "goal": "Select the upper leg joint and rename it to Left Thigh.",
+   "t_start": 109.0,
+   "t_end": 118.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Outliner / Joint selection > Rename",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Establishes the naming convention for the left leg."
+  },
+  {
+   "order": 16,
+   "id": "H16",
+   "goal": "Use the Up and Down arrow keys to navigate between parent and child joints in the hierarchy.",
+   "t_start": 118.0,
+   "t_end": 137.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Up Arrow / Down Arrow",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Up selects the parent; Down selects the child."
+  },
+  {
+   "order": 17,
+   "id": "H17",
+   "goal": "Select the child joint and rename it to Left Knee.",
+   "t_start": 138.0,
+   "t_end": 142.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Rename",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 18,
+   "id": "H18",
+   "goal": "Select the next child joint and rename it to Left Ankle.",
+   "t_start": 142.0,
+   "t_end": 149.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Down Arrow > Rename",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 19,
+   "id": "H19",
+   "goal": "Select the next child joint and rename it to Left Toe.",
+   "t_start": 149.0,
+   "t_end": 156.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Down Arrow > Rename",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 20,
+   "id": "H20",
+   "goal": "Select the final child joint and rename it to Left Toe Tip.",
+   "t_start": 156.0,
+   "t_end": 166.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Down Arrow > Rename",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 21,
+   "id": "H21",
+   "goal": "Check that all joints have been named correctly using a consistent left-side prefix.",
+   "t_start": 166.0,
+   "t_end": 180.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The naming convention helps with mirroring."
+  },
+  {
+   "order": 22,
+   "id": "H22",
+   "goal": "Open the Mirror Joint tool settings.",
+   "t_start": 187.0,
+   "t_end": 191.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Animation > Skeleton > Mirror Joint > Double-click",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 23,
+   "id": "H23",
+   "goal": "Enter left in the Search For field.",
+   "t_start": 198.0,
+   "t_end": 203.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mirror Joint > Search For",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 24,
+   "id": "H24",
+   "goal": "Enter right in the Replace With field.",
+   "t_start": 203.0,
+   "t_end": 208.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mirror Joint > Replace With",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Replaces the left-side prefix in mirrored joint names."
+  },
+  {
+   "order": 25,
+   "id": "H25",
+   "goal": "Click Apply to mirror the joints using the current axis settings.",
+   "t_start": 208.0,
+   "t_end": 213.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mirror Joint > Apply",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor demonstrates the initial mirroring result."
+  },
+  {
+   "order": 26,
+   "id": "H26",
+   "goal": "Inspect the mirrored joints and identify that they are reflected across the wrong axis.",
+   "t_start": 213.0,
+   "t_end": 220.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The default XY reflection is not the desired result."
+  },
+  {
+   "order": 27,
+   "id": "H27",
+   "goal": "Undo the incorrectly mirrored joints.",
+   "t_start": 220.0,
+   "t_end": 234.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Ctrl",
+      "Z"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Removes the incorrect mirror operation."
+  },
+  {
+   "order": 28,
+   "id": "H28",
+   "goal": "Select the YZ mirror axis.",
+   "t_start": 234.0,
+   "t_end": 240.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mirror Joint > YZ",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Changes the reflection plane."
+  },
+  {
+   "order": 29,
+   "id": "H29",
+   "goal": "Click Mirror to mirror the joints across the YZ axis.",
+   "t_start": 240.0,
+   "t_end": 245.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Mirror Joint > Mirror",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the joints on the opposite side in the intended position."
+  },
+  {
+   "order": 30,
+   "id": "H30",
+   "goal": "Use the Up and Down arrow keys to inspect the mirrored joint hierarchy and verify the names.",
+   "t_start": 245.0,
+   "t_end": 257.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Up Arrow / Down Arrow",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Confirms that the mirrored joints have the correct right-side names."
+  },
+  {
+   "order": 31,
+   "id": "H31",
+   "goal": "Locate the IK Handle tool in the Animation tools.",
+   "t_start": 261.0,
+   "t_end": 266.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Animation > Skeleton > IK Handle Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 32,
+   "id": "H32",
+   "goal": "Select the IK Handle tool to activate it.",
+   "t_start": 270.0,
+   "t_end": 276.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK Handle Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 33,
+   "id": "H33",
+   "goal": "Open the IK Handle tool settings by double-clicking its icon.",
+   "t_start": 276.0,
+   "t_end": 283.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Double-click IK Handle Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Alternative to directly activating the tool."
+  },
+  {
+   "order": 34,
+   "id": "H34",
+   "goal": "Click Reset Tool to restore the IK Handle tool settings.",
+   "t_start": 283.0,
+   "t_end": 286.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tool Settings > Reset Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 35,
+   "id": "H35",
+   "goal": "Open the Solver dropdown and inspect the default SC Solver selection.",
+   "t_start": 286.0,
+   "t_end": 291.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tool Settings > Solver",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "SC Solver is selected by default."
+  },
+  {
+   "order": 36,
+   "id": "H36",
+   "goal": "Change the solver from SC Solver to RP Solver.",
+   "t_start": 291.0,
+   "t_end": 301.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Solver > RP Solver",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "RP stands for Rotate Plane."
+  },
+  {
+   "order": 37,
+   "id": "H37",
+   "goal": "Select the thigh joint as the starting joint for the IK handle.",
+   "t_start": 301.0,
+   "t_end": 307.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK Handle Tool > Click Thigh Joint",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 38,
+   "id": "H38",
+   "goal": "Select the ankle joint as the ending joint for the IK handle.",
+   "t_start": 307.0,
+   "t_end": 310.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK Handle Tool > Click Ankle Joint",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates an IK handle between the thigh and ankle."
+  },
+  {
+   "order": 39,
+   "id": "H39",
+   "goal": "Inspect the generated IK handle and its associated rotation plane.",
+   "t_start": 310.0,
+   "t_end": 314.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The plane determines the direction in which the joints bend."
+  },
+  {
+   "order": 40,
+   "id": "H40",
+   "goal": "Compare the IK-controlled leg with the opposite leg, which still requires individual joint rotation.",
+   "t_start": 317.0,
+   "t_end": 326.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Explains the benefit of IK controls."
+  },
+  {
+   "order": 41,
+   "id": "H41",
+   "goal": "Select the newly created IK handle.",
+   "t_start": 328.0,
+   "t_end": 332.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Viewport selection",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 42,
+   "id": "H42",
+   "goal": "Activate the Transform/Move tool.",
+   "t_start": 332.0,
+   "t_end": 337.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Move Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 43,
+   "id": "H43",
+   "goal": "Move the IK handle to reposition the leg.",
+   "t_start": 337.0,
+   "t_end": 342.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "W / Move Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The thigh and knee joints automatically adjust to the new position."
+  },
+  {
+   "order": 44,
+   "id": "H44",
+   "goal": "Observe how the thigh and knee joints adjust when the IK handle is moved.",
+   "t_start": 342.0,
+   "t_end": 350.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Demonstrates automatic joint positioning."
+  },
+  {
+   "order": 45,
+   "id": "H45",
+   "goal": "Observe how the IK handle can control the foot's ground-contact position during character movement.",
+   "t_start": 353.0,
+   "t_end": 364.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Explains the practical use of IK for walking animations."
+  },
+  {
+   "order": 46,
+   "id": "H46",
+   "goal": "Undo the recent IK handle movements to return the leg to its original position.",
+   "t_start": 364.0,
+   "t_end": 371.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Ctrl",
+      "Z"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "both",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Restores the leg to its initial position on the ground."
+  },
+  {
+   "order": 47,
+   "id": "H47",
+   "goal": "Prepare to configure the same Rotate Plane IK setup on the opposite leg.",
+   "t_start": 371.0,
+   "t_end": 377.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor moves on to setting up the other side."
+  },
+  {
+   "order": 48,
+   "id": "H48",
+   "goal": "Begin setting up the Rotate Plane IK handle on the right leg.",
+   "t_start": 377.0,
+   "t_end": 389.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "IK Handle Tool",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The transcript does not include the individual operations for this setup."
+  }
+ ]
+}

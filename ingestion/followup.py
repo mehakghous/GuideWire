@@ -40,7 +40,7 @@ INTENT_PATTERNS: list[tuple[str, re.Pattern]] = [(n, re.compile(p, _I)) for n, p
     ("missing_option", r"(?:don'?t|do not|can'?t|cannot)\s+(?:see|find)|not (?:showing|there|available|visible)|\bmissing\b|greyed|grayed"),
     ("explain_prev", r"(?:previous|last|prior|earlier) step|go over (?:that|it) again|repeat (?:that|the last)"),
     ("explain_rest", r"\brest\b|remaining steps|everything else"),
-    ("next", r"what (?:should|do|can) i do next|what'?s next|what is next|next step|then what"),
+    ("next", r"what (?:should|do|can) i do next|what'?s next|what is next|next step|then what|^(?:ok(?:ay)?[, ]+)?(?:and )?(?:next|then|after that)\W*$"),
     ("continue", r"^(?:continue|go on|go ahead|carry on|proceed)\W*$"),
     ("other_one", r"\bthe other (?:one|option|button|step)\b|\bother one\b"),
     ("version", r"\b(?:my|this|the)\s+(?:blender\s+)?version\b|will (?:this|it) work"),
@@ -194,11 +194,14 @@ def respond(session: Session, text: str, *, kb=None, tutorials: list[dict] | Non
             target = session.step(cand)
         else:
             words = {stem(w) for w in re.findall(r"[a-z]+", text.lower()) if w not in _STOP}
-            hits = [s for s in session.steps.steps if words & {stem(w) for w in re.findall(r"[a-z]+", s.goal.lower())}]
-            if len(hits) > 1:
+            # rank the steps by how many of the asked words their goal has: a clear winner is the target; a tie lists the best matches, not the first ones in the tutorial
+            ranked = sorted(((len(words & {stem(w) for w in re.findall(r"[a-z]+", s.goal.lower())}), s) for s in session.steps.steps), key=lambda t: -t[0])
+            ranked = [(n, s) for n, s in ranked if n > 0]
+            if len(ranked) > 1 and ranked[0][0] == ranked[1][0]:
+                tied = [s for n, s in ranked if n == ranked[0][0]]
                 return _mk(session, text, intent, step, kind="clarification", routelabel="clarify",
-                           clarification="Which step do you mean? " + "; ".join(f"{s.id}: {s.goal}" for s in hits[:4]))
-            target = hits[0] if hits else (session.previous_step() if not words else None)
+                           clarification="Which step do you mean? " + "; ".join(f"{s.id}: {s.goal}" for s in tied[:4]))
+            target = ranked[0][1] if ranked else (session.previous_step() if not words else None)
         if target is None:
             return _mk(session, text, intent, step, kind="clarification", clarification="I could not find that step. Say a step number (1 to "
                        f"{len(session.steps.steps)}) or a word from its description.")

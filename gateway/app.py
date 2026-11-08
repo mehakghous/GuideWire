@@ -18,8 +18,10 @@ from typing import Callable
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from ingestion.answer_model import STATE_INTENTS, ModelAnswerer, default_manual, session_from_tutorial
 from ingestion.budget import BudgetedProvider, BudgetExceeded
 from ingestion.extract import ExtractionError, default_prompt_version, extract_from_text, extract_from_video
+from ingestion.followup import classify_followup, respond
 from ingestion.providers.base import ProviderError, QuotaError
 from ingestion.router import route
 from ingestion.youtube import api as yt_api
@@ -39,10 +41,28 @@ class ExtractIn(BaseModel):
     title_hint: str | None = Field(default=None, max_length=200)
 
 
+class TutorialStepIn(BaseModel):
+    id: str = Field(min_length=1, max_length=20)
+    goal: str = Field(min_length=1, max_length=300)
+    start_s: float | None = Field(default=None, ge=0)
+    how_to: list[str] = Field(default_factory=list, max_length=3)
+
+
+class TutorialIn(BaseModel):
+    """The tutorial the learner is following, as the client holds it (the gateway keeps no session). Brief on purpose: the request body is limited to 64 KB."""
+    title: str | None = Field(default=None, max_length=200)
+    app_version: str | None = Field(default=None, max_length=40)
+    steps: list[TutorialStepIn] = Field(max_length=120)
+    current: str | None = Field(default=None, max_length=20)
+
+
 class AnswerIn(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     version: str | None = Field(default=None, max_length=20)
     app: str = "blender"
+    model: bool = False                                                       # True: answer with the model, grounded on the knowledge base (one paid call)
+    tutorial: TutorialIn | None = None                                        # only used with model=True, or for a session question such as "what is next"
+    history: list[str] = Field(default_factory=list, max_length=3)           # the learner's last messages, oldest first
 
 
 def tokens_from_env() -> dict[str, str]:
@@ -150,8 +170,25 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
 
     @app.post("/v1/answer")
     def answer(body: AnswerIn, uid: str = Depends(user)):
-        # offline knowledge-base route, no paid call; documentation text is never stored (SEC-10)
+        # default: offline knowledge-base route, no paid call; documentation text is never stored (SEC-10).
+        # model=true: one paid call to the model (cost guard, daily cap), with the knowledge base, the manual index and the tutorial as context. Questions that change or read the
+        # learner's progress (done, skip, go back, next, a timestamp) stay rule-based: the model never moves the learner, and the gateway keeps no session.
         try:
+            if body.model:
+                sess = session_from_tutorial(body.app, [s.model_dump() for s in body.tutorial.steps] if body.tutorial else [], title=body.tutorial.title if body.tutorial else None,
+                                             app_version=body.tutorial.app_version if body.tutorial else None, current=body.tutorial.current if body.tutorial else None,
+                                             history=[h[:300] for h in body.history])
+                sess.version = body.version
+                if classify_followup(body.question) in STATE_INTENTS:
+                    return respond(sess, body.question).bundle.model_dump(mode="json")
+                if not slots.acquire(blocking=False):
+                    raise HTTPException(503, "gateway is busy, retry shortly")
+                try:
+                    charge(uid)
+                    answerer = ModelAnswerer(provider_factory(), manual=default_manual())
+                    return provider_call(lambda: answerer(body.question, sess)).model_dump(mode="json")
+                finally:
+                    slots.release()
             return route(body.question, version=body.version, app=body.app).model_dump(mode="json")
         except ValueError as e:                              # JSON-looking text that is not a valid step list (JSONDecodeError and pydantic errors are ValueErrors)
             raise HTTPException(422, str(e).splitlines()[0][:200])

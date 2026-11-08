@@ -1,0 +1,792 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "houdini",
+  "app_version_tutorial": null,
+  "video_id": "LJeap3wpyJA",
+  "title": "Rigging in Houdini with APEX: 02 | Simple IK",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Switch to create mode and drop down the skeleton joints",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Create mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "verifiable": true,
+      "video_start_s": 26.0,
+      "video_end_s": 32.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 0.9,
+      "support": "demonstrated",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP."
+      ],
+      "result": "Joints are placed in the viewport.",
+      "how_to": [
+        {
+          "text": "Switch to create mode in the skeleton viewer state toolbar.",
+          "support": "shown",
+          "evidence": "Instructor switches to create mode and drops down joints."
+        }
+      ],
+      "check": [
+        {
+          "text": "No joint is red: a red joint means a cyclical, invalid hierarchy that must be fixed.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Skeleton (SOP)"
+        }
+      ],
+      "visual_evidence": "The viewport shows the skeleton hierarchy being created.",
+      "evidence": [
+        "So as before, I'm not going to change the name of the skeletons here, or of the joints."
+      ],
+      "flags": [
+        "expected/start state (Skeleton) derived from the knowledge base (houdini.skeleton_sop), not read from the tutorial"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Pack the skeleton node",
+      "actions": [
+        {
+          "verb": "other",
+          "ui_element": null,
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "PREP-06",
+      "verifiable": false,
+      "video_start_s": 40.0,
+      "video_end_s": 50.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 0.9,
+      "support": "demonstrated",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Skeleton is packed and scaled.",
+      "how_to": [
+        {
+          "text": "Pack the skeleton and scale the base.",
+          "support": "shown",
+          "evidence": "Instructor packages the skeleton and scales the base node."
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Network graph shows the pack node added below the skeleton.",
+      "evidence": [
+        "So let's pack this and we're going to go base scale."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Add an APEX AutoRig Component node for IK",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "APEX AutoRig Component",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Component Source",
+          "keys": [],
+          "value": "smooth IK"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-02",
+      "verifiable": true,
+      "video_start_s": 52.0,
+      "video_end_s": 64.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Writing #tag in the Multi IK Segments field: it expects the plain tag names. (official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig))",
+        "Enabling Enable Multithreading for one or two chains: it comes with an overhead and should only be used for many chains. (official: SideFX Houdini docs: IK Chains (SOP))"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A skeleton and the skin shape exist and are packed into one character with APEX Pack Character (defaults: Shape Path /Base.shp, Skeleton Path /Base.skel).",
+        "Before this: The skeleton points carry the tags the components look for (the docs add them with Attribute Adjust Tags); components select joints by tag.",
+        "Before this: A SOP skeleton on the first input and a second skeleton (or points) with the goal and optional twist points on the second input."
+      ],
+      "result": "An APEX AutoRig Component node is added and set to smooth IK.",
+      "how_to": [
+        {
+          "text": "Throw down an APEX AutoRig Component node and select Smooth IK from the component list.",
+          "support": "shown",
+          "evidence": "Instructor drops APEX AutoRig Component and changes the component source to smooth IK."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a APEX AutoRig Component now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=APEX AutoRig Component"
+        },
+        {
+          "text": "After packing, the rig tree view shows the shape and skeleton folders.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig)"
+        },
+        {
+          "text": "The FK Transform component creates Base.rig in the character; pose the rig to test it.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig)"
+        }
+      ],
+      "visual_evidence": "APEX AutoRig Component node is placed in the network view.",
+      "evidence": [
+        "So let's throw down an auto-rig component and let's call this IK. We'll select smooth IK from the component list."
+      ],
+      "flags": [
+        "expected/start state (Skeleton) derived from the knowledge base (houdini.ik_chains), not read from the tutorial"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Add a Marker node to expose joint names",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Marker",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Attribute",
+          "keys": [],
+          "value": "name"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-03",
+      "verifiable": false,
+      "video_start_s": 91.0,
+      "video_end_s": 106.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Plane on a perfectly straight chain: no plane can be computed, so the node shows a warning and falls back to Spine. (official: SideFX Houdini docs: Orient Joints 2.0 (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton is connected to the node's input."
+      ],
+      "result": "A Marker node is added with its text attribute set to name.",
+      "how_to": [
+        {
+          "text": "Add a Marker node and set the text attribute to name.",
+          "support": "shown",
+          "evidence": "Instructor adds a marker node and specifies the name attribute."
+        }
+      ],
+      "check": [
+        {
+          "text": "Use the viewer state together with the parameter editor to see what each chain operation does to the joints' axes.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Orient Joints 2.0 (SOP)"
+        }
+      ],
+      "visual_evidence": "Marker parameter panel shows Text set to 'name'.",
+      "evidence": [
+        "hit plus and put down a marker, and within here we want to have our text, right? So marker text and the attribute we want is the name attribute."
+      ],
+      "flags": [
+        "UI name 'Marker' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Set point indices for the IK driven component",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Driven",
+          "keys": [],
+          "value": "0.0, 1.0, 2.0"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "IKFK-05",
+      "verifiable": false,
+      "video_start_s": 116.0,
+      "video_end_s": 128.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Enabling Enable Multithreading for one or two chains: it comes with an overhead and should only be used for many chains. (official: SideFX Houdini docs: IK Chains (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton on the first input and a second skeleton (or points) with the goal and optional twist points on the second input."
+      ],
+      "result": "The driven joints are configured with indices 0, 1, and 2.",
+      "how_to": [
+        {
+          "text": "Enter point indices 0, 1, and 2 into the driven parameter.",
+          "support": "shown",
+          "evidence": "Instructor sets the driven indices in the parameter interface."
+        }
+      ],
+      "check": [
+        {
+          "text": "Move the goal point: the Tip joint follows it, and the Mid joint bends toward the twist point, or toward its own position when none is given.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: IK Chains (SOP)"
+        }
+      ],
+      "visual_evidence": "Parameter editor fields for driven points are populated.",
+      "evidence": [
+        "We can say 0.0, 1.0, 2.0."
+      ],
+      "flags": [
+        "UI name 'Driven' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Add another APEX AutoRig Component node for FK",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "APEX AutoRig Component",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Component Source",
+          "keys": [],
+          "value": "FK Transform"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-01",
+      "verifiable": true,
+      "video_start_s": 150.0,
+      "video_end_s": 173.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Changing World Space after you already have edits on the pose: it will likely produce erratic results; use separate Rig Pose nodes for mixed local and world-space edits. (official: SideFX Houdini docs: Rig Pose (SOP))",
+        "Using Override and expecting input animation to survive: it replaces the input animation for that point. (official: SideFX Houdini docs: Rig Pose (SOP))"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton or rig is connected to the node's input."
+      ],
+      "result": "An FK AutoRig Component is added before the IK component to initialize FK transforms.",
+      "how_to": [
+        {
+          "text": "Throw down another APEX AutoRig Component node, name it FK, and set the component source.",
+          "support": "shown",
+          "evidence": "Instructor creates a second auto-rig component node named FK."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a APEX AutoRig Component now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=APEX AutoRig Component"
+        },
+        {
+          "text": "Moving a joint in the viewport changes the Transformations entries on the node and the joints below it follow.",
+          "support": "catalog",
+          "evidence": "author: SideFX Houdini docs: Rig Pose (SOP)"
+        }
+      ],
+      "visual_evidence": "Second auto-rig component node connected in the network.",
+      "evidence": [
+        "So before the IK, we're going to throw down another auto-rig component. We'll call this FK."
+      ],
+      "flags": [
+        "expected/start state (Skeleton) derived from the knowledge base (houdini.rig_pose), not read from the tutorial",
+        "same start and expected state as step 3: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Promote transform, rotation, and scale channels for FK component",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "*"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-04",
+      "verifiable": false,
+      "video_start_s": 174.0,
+      "video_end_s": 182.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Transform, rotation, and scale channels are promoted.",
+      "how_to": [
+        {
+          "text": "Press the star key to promote all channels on the FK component.",
+          "support": "shown",
+          "evidence": "Instructor presses star to promote attributes."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that the new attribute shows on the control (Channel Box or Attribute Editor) with the range you set.",
+          "support": "catalog",
+          "evidence": "catalog guidance for CTRL-04; the video did not necessarily show this"
+        }
+      ],
+      "visual_evidence": "Parameter channels become promoted.",
+      "evidence": [
+        "And in this case we'll just hit star... so now all of our transform and rotation and scale channels are promoted."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Remove the left/right specifier 'L' from the control names in the IK component",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Control parameters",
+          "keys": [],
+          "value": ""
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "verifiable": false,
+      "video_start_s": 222.0,
+      "video_end_s": 232.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Leaving On Failure at Error while experimenting: a failure stops everything downstream from cooking. (official: SideFX Houdini docs: Rig Doctor (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP.",
+        "Before this: A SOP skeleton on the input."
+      ],
+      "result": "Control names are adjusted to remove left/right specificity since a center setup is used.",
+      "how_to": [
+        {
+          "text": "Clear the 'L' specifiers from the output control names in the parameter panel.",
+          "support": "shown",
+          "evidence": "Instructor edits the control parameter strings to remove 'L'."
+        }
+      ],
+      "check": [
+        {
+          "text": "No joint is red: a red joint means a cyclical, invalid hierarchy that must be fixed.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Skeleton (SOP)"
+        },
+        {
+          "text": "The node reports no warnings or errors for names or hierarchy.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Rig Doctor (SOP)"
+        }
+      ],
+      "visual_evidence": "Parameter strings for arm pole and arm IK handle are updated.",
+      "evidence": [
+        "So I'm going to get rid of the L because we're not using left or right, we're using center."
+      ],
+      "flags": [
+        "UI name 'Control parameters' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Add an APEX Configure Controls node and create configurations",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "APEX Configure Controls",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Configurations",
+          "keys": [],
+          "value": "2"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "verifiable": true,
+      "video_start_s": 229.0,
+      "video_end_s": 248.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.81,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "APEX Configure Controls node is added and configured with two configurations.",
+      "how_to": [
+        {
+          "text": "Add an APEX Configure Controls node and set the number of configurations to 2.",
+          "support": "shown",
+          "evidence": "Instructor drops APEX Configure Controls and sets configurations to 2."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a APEX Configure Controls now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=APEX Configure Controls"
+        },
+        {
+          "text": "Check that each control is visible, selectable and named for the part it drives.",
+          "support": "catalog",
+          "evidence": "catalog guidance for CTRL-01; the video did not necessarily show this"
+        }
+      ],
+      "visual_evidence": "Configure controls node connected and parameter set to 2 configurations.",
+      "evidence": [
+        "So when I go into my configure controls and create two configurations, I now have those controls selectable."
+      ],
+      "flags": [
+        "starts at 229s, before step 8 ends (232s)"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Rename control pattern for PV control",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Control Name",
+          "keys": [],
+          "value": "pv_ctrl"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "verifiable": false,
+      "video_start_s": 252.0,
+      "video_end_s": 266.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Leaving On Failure at Error while experimenting: a failure stops everything downstream from cooking. (official: SideFX Houdini docs: Rig Doctor (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP.",
+        "Before this: A SOP skeleton on the input."
+      ],
+      "result": "Control is renamed to pv_ctrl.",
+      "how_to": [
+        {
+          "text": "Type pv_ctrl into the control name parameter field.",
+          "support": "shown",
+          "evidence": "Instructor changes control name parameter to pv_ctrl."
+        }
+      ],
+      "check": [
+        {
+          "text": "No joint is red: a red joint means a cyclical, invalid hierarchy that must be fixed.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Skeleton (SOP)"
+        },
+        {
+          "text": "The node reports no warnings or errors for names or hierarchy.",
+          "support": "catalog",
+          "evidence": "official: SideFX Houdini docs: Rig Doctor (SOP)"
+        }
+      ],
+      "visual_evidence": "Control name field updated in the parameter panel.",
+      "evidence": [
+        "And change this to... something like pvctrl."
+      ],
+      "flags": [
+        "UI name 'Control Name' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Change the shape override and color for the IK control",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Shape Override",
+          "keys": [],
+          "value": "blob"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Color",
+          "keys": [],
+          "value": "blue"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "craft",
+      "feature_id": "CTRL-01",
+      "verifiable": false,
+      "video_start_s": 270.0,
+      "video_end_s": 290.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "IK control has a custom blob shape override and blue color.",
+      "how_to": [
+        {
+          "text": "Select shape override as blob and set color to blue/red respectively.",
+          "support": "shown",
+          "evidence": "Instructor sets the shape override to blob and assigns colors."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that each control is visible, selectable and named for the part it drives.",
+          "support": "catalog",
+          "evidence": "catalog guidance for CTRL-01; the video did not necessarily show this"
+        }
+      ],
+      "visual_evidence": "Control shape updates in the viewport to a blob.",
+      "evidence": [
+        "Make it blue... shape override let's use the blob... color we use red for IK."
+      ],
+      "flags": [
+        "UI name 'Shape Override' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Assemble the scene using APEX Pack Character and animate nodes",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "APEX Pack Character (SOP)",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Animate",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "GAME-05",
+      "verifiable": false,
+      "video_start_s": 293.0,
+      "video_end_s": 312.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Character is packed and setup for animation.",
+      "how_to": [
+        {
+          "text": "Throw down an APEX Pack Character node and an animate node to complete the network.",
+          "support": "shown",
+          "evidence": "Instructor adds APEX Pack Character and animate nodes to the network flow."
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Network graph shows the final character packing and animation nodes connected.",
+      "evidence": [
+        "We'll throw down a scene add character and then we'll do an animate... Now we have our little IK rig."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.5-flash-lite",
+  "prompt_version": "v9",
+  "video_duration_s": 377.0,
+  "warnings": [
+    "uncovered 65s after step 12 (312s to 377s): steps may be missing (or this is intro/outro/talk)",
+    "steps cover only 44% of the 377s video: extraction may be incomplete"
+  ],
+  "extracted_at": "2026-11-07T16:52:44.259321Z"
+}

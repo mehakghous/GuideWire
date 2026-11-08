@@ -29,7 +29,8 @@ from shared.answer import AnswerBundle
 
 from . import session as S
 from .features import APPS
-from .followup import respond
+from .answer_model import STATE_INTENTS
+from .followup import classify_followup, respond
 from .router import route
 from .workflows import DEFAULT_STORE, ReviewedWorkflowStore
 
@@ -71,6 +72,7 @@ class Service:
     tutorials: list | None = None
     store: ReviewedWorkflowStore | None = None     # reviewed workflows, if any have been promoted (knowledge/reviewed)
     last_bundle: AnswerBundle | None = None
+    answerer: object | None = None                 # ingestion.answer_model.ModelAnswerer: answers every question that does not change the session; None = rules only
 
     # ------------------------------------------------------------------ construction and persistence
     @classmethod
@@ -112,10 +114,21 @@ class Service:
             return self._result("empty", "clarify", None, "Say something, or /help.")
         if text.startswith("/"):
             return self.command(text)
+        note = None
+        if self.answerer is not None and classify_followup(text) not in STATE_INTENTS:
+            try:
+                bundle = self.answerer(text, self.session)
+            except Exception as e:                           # a provider outage or a budget stop must not end the conversation: fall back to the rules
+                bundle, note = None, f"(the model could not be reached: {type(e).__name__}; this is the rule-based answer)"
+            if bundle is not None:
+                self.session.note(text, "model_answer", "model", self.session.current)
+                return self._result("model_answer", "model", bundle)
         reply = respond(self.session, text, kb=self.kb, tutorials=self.tutorials, store=self.store)
         if reply.bundle.steps and reply.route != "session":
             self.last_bundle = reply.bundle
         out = self._result(reply.intent, reply.route, reply.bundle)
+        if note:
+            out["text"] += "\n" + note
         if reply.bundle.steps and reply.route != "session":
             out["text"] += "\n(say /load last to follow these steps and ask questions about them)"
         return out

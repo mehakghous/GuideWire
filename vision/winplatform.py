@@ -95,6 +95,31 @@ def list_windows() -> list[WindowInfo]:
     return found
 
 
+def windows_above(hwnd: int) -> list[Rect]:
+    """Screen rects of visible windows stacked above `hwnd` (they cover part of it)."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    out: list[Rect] = []
+    state = {"seen": False}
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def visit(h, _lparam):
+        if int(h) == hwnd:
+            state["seen"] = True
+            return False                      # EnumWindows runs top of the stack first
+        if user32.IsWindowVisible(h) and not user32.IsIconic(h) and user32.GetWindowTextLengthW(h) > 0:
+            cloaked = ctypes.c_int(0)
+            ctypes.windll.dwmapi.DwmGetWindowAttribute(wintypes.HWND(h), 14, ctypes.byref(cloaked), 4)
+            if not cloaked.value:
+                out.append(window_rect(int(h)))
+        return True
+
+    user32.EnumWindows(visit, 0)
+    return out if state["seen"] else []
+
+
 def find_window(title_contains: str = "Blender") -> WindowInfo | None:
     """Largest non-minimized visible window whose title contains the text (case-insensitive)."""
     needle = title_contains.lower()

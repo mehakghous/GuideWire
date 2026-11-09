@@ -245,3 +245,17 @@ def test_probe_merge_and_roundtrip(tmp_path):
     info.write_text(json.dumps({"v": 1, "port": server.server_address[1], "token": "wrong"}))
     assert read_probe(info_path=str(info)) is None        # wrong token is refused
     server.shutdown()
+
+
+def test_mask_occluders_and_change_detection():
+    np = pytest.importorskip("numpy")
+    from vision.capture import mask_occluders
+    from vision.guide import frame_changed
+    px = np.full((100, 200, 3), 255, np.uint8)
+    out = mask_occluders(px, Rect(1000, 500, 200, 100), [Rect(1100, 550, 500, 500), Rect(0, 0, 10, 10)])
+    assert out[60, 150].sum() == 0 and out[10, 10].sum() == 765 and px[60, 150].sum() == 765
+    a = np.zeros((54, 96), np.uint8)
+    b = a.copy()
+    assert not frame_changed(a, b)
+    b[:10, :30] = 200
+    assert frame_changed(a, b) and frame_changed(None, a)

@@ -59,6 +59,19 @@ def grab_window(hwnd: int) -> Frame:
     return grab(winplatform.window_rect(hwnd))
 
 
+def mask_occluders(pixels, window: Rect, occluders: list[Rect]):
+    """Black out the parts of a captured window frame that another window covers, so text from
+    the covering window is never read as if it belonged to this one. Returns a new array."""
+    out = pixels.copy()
+    h, w = out.shape[:2]
+    for o in occluders:
+        x0, y0 = max(o.x - window.x, 0), max(o.y - window.y, 0)
+        x1, y1 = min(o.x + o.w - window.x, w), min(o.y + o.h - window.y, h)
+        if x1 > x0 and y1 > y0:
+            out[y0:y1, x0:x1] = 0
+    return out
+
+
 def resized(frame: Frame, max_long_edge: int) -> Frame:
     """Downscale for a model call. `frame.geometry` then records the new image size."""
     import cv2

@@ -21,7 +21,7 @@ FAST University, Karachi Campus. Department of SE. FYP 2026-27.
 /gateway     AI Gateway: the only service that holds provider keys (Ayesha)
 /vision      screen capture, grounding, overlay (Umaima)
 /app         UI, accounts, session engine (Mehak)
-/shared      shared step format (shared/step_record.py, schema 0.7)
+/shared      shared step format (shared/step_record.py, schema 0.11)
 /docs        SRS, SDS and diagrams
 /tests       tests for all components
 ```
@@ -52,6 +52,13 @@ python -m pytest -q          # offline tests; live API tests are deselected
 ruff check .                 # lint
 python -m ingestion.cli --help
 python -m ingestion.cli purge   # delete YouTube-derived run logs and caches older than 30 days
+python -m ingestion.cli video URL --app houdini --tier report --dry-run   # worst-case cost and cache status; calls no model (prompt v7 for Maya/Houdini, --rigging for Blender)
+python -m ingestion.cli video URL --app maya --tier iterate --key dev     # real call through the cost guard (cache, ceilings, runs/budget/cost_log.jsonl)
+python -m verification detect                          # which of Blender, Maya, Houdini are installed (headless checks need them)
+python -m verification check steps.json --scene scene.blend   # check each step's expected state against a real scene
+python -m ingestion.eval.phase1 runs/phase1/*.json      # structure numbers per run and application; accuracy fields fill in once eval_data/gold/<video id>.gold.json exists
+python scripts/dump_app_vocab.py                       # re-dump the real node types / UI names of the installed applications
+python scripts/build_rigging_matrix.py                 # regenerate docs/rigging_matrix.md and .csv (feature x application)
 python -m ingestion.cli ask --app maya "Create joints down the arm\nCreate an IK handle on the leg"   # written rigging steps -> validated step list
 python -m ingestion.cli features steps.json   # which features a step list teaches, and what it assumes
 python -m ingestion.cli find --app maya "make the legs move properly" [--live] [--recency off|low|normal|high]   # plain-language goal -> ranked tutorials

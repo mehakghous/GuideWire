@@ -1,0 +1,1753 @@
+{
+ "video_id": "PctSMB-RGsM",
+ "title": "How to Rig a Leg with Inverse Kinematics in Blender | Quick IK Tutorial for Animation",
+ "duration_s": 386.0,
+ "app": "blender",
+ "app_version": null,
+ "annotator": "ayesha",
+ "verification_note": "human labels from the video via ingestion.eval.labels (docs/labelling_guide.md)",
+ "steps": [
+  {
+   "order": 1,
+   "id": "H01",
+   "goal": "Add a single-bone Armature to the scene.",
+   "t_start": 14.0,
+   "t_end": 17.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shift + A > Armature",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the initial bone."
+  },
+  {
+   "order": 2,
+   "id": "H02",
+   "goal": "Enter Edit Mode on the Armature.",
+   "t_start": 17.0,
+   "t_end": 21.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Tab"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 3,
+   "id": "H03",
+   "goal": "Enable In Front in the Armature's viewport display settings.",
+   "t_start": 23.0,
+   "t_end": 30.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Object Properties > Viewport Display > In Front",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Makes the bones visible through the mesh."
+  },
+  {
+   "order": 4,
+   "id": "H04",
+   "goal": "Select the entire bone.",
+   "t_start": 33.0,
+   "t_end": 36.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 5,
+   "id": "H05",
+   "goal": "Move the selected bone upward.",
+   "t_start": 36.0,
+   "t_end": 39.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 6,
+   "id": "H06",
+   "goal": "Rotate the bone 90 degrees to the right.",
+   "t_start": 39.0,
+   "t_end": 44.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "R > 90",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 7,
+   "id": "H07",
+   "goal": "Scale the bone down.",
+   "t_start": 45.0,
+   "t_end": 48.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "S"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 8,
+   "id": "H08",
+   "goal": "Move the bone into position around the hip.",
+   "t_start": 48.0,
+   "t_end": 53.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Position it where the hip joint should be."
+  },
+  {
+   "order": 9,
+   "id": "H09",
+   "goal": "Select the appropriate section of the bone for extrusion.",
+   "t_start": 53.0,
+   "t_end": 55.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 10,
+   "id": "H10",
+   "goal": "Extrude a bone downward to the knee.",
+   "t_start": 55.0,
+   "t_end": 58.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "E"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 11,
+   "id": "H11",
+   "goal": "Extrude another bone downward to the ankle.",
+   "t_start": 58.0,
+   "t_end": 61.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "E"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 12,
+   "id": "H12",
+   "goal": "Extrude two additional bone segments.",
+   "t_start": 61.0,
+   "t_end": 65.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "E (twice)",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor does not clearly specify their destinations in the transcript."
+  },
+  {
+   "order": 13,
+   "id": "H13",
+   "goal": "Select the ankle bone and extrude a controller bone outward along the Y-axis.",
+   "t_start": 70.0,
+   "t_end": 76.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "E > Y",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the ankle/foot controller."
+  },
+  {
+   "order": 14,
+   "id": "H14",
+   "goal": "Select the knee bone and extrude another controller bone along the Y-axis.",
+   "t_start": 76.0,
+   "t_end": 79.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "E > Y",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the pole controller."
+  },
+  {
+   "order": 15,
+   "id": "H15",
+   "goal": "Select the ankle controller and clear its parent.",
+   "t_start": 81.0,
+   "t_end": 86.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Alt + P > Clear Parent",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Separates the controller from its original bone parent."
+  },
+  {
+   "order": 16,
+   "id": "H16",
+   "goal": "Move the ankle controller forward.",
+   "t_start": 86.0,
+   "t_end": 90.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "G > Y",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 17,
+   "id": "H17",
+   "goal": "Select the knee controller and clear its parent.",
+   "t_start": 93.0,
+   "t_end": 99.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Alt + P > Clear Parent",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 18,
+   "id": "H18",
+   "goal": "Move the knee controller outward.",
+   "t_start": 99.0,
+   "t_end": 102.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "G > Y",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 19,
+   "id": "H19",
+   "goal": "Switch to Pose Mode to inspect the bone positions.",
+   "t_start": 102.0,
+   "t_end": 106.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Ctrl + Tab / Mode Selector > Pose Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 20,
+   "id": "H20",
+   "goal": "Check whether the bones are positioned correctly relative to the mesh's left-right alignment.",
+   "t_start": 108.0,
+   "t_end": 118.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Move the bones horizontally if the mesh is not centered."
+  },
+  {
+   "order": 21,
+   "id": "H21",
+   "goal": "Enter Pose Mode.",
+   "t_start": 118.0,
+   "t_end": 120.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pose Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Repeated mention of the mode transition."
+  },
+  {
+   "order": 22,
+   "id": "H22",
+   "goal": "Select the first bone and Shift-select the second bone.",
+   "t_start": 123.0,
+   "t_end": 126.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Shift",
+      "Click"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The two bones are selected for IK setup."
+  },
+  {
+   "order": 23,
+   "id": "H23",
+   "goal": "Create an inverse kinematic constraint using the active bone.",
+   "t_start": 126.0,
+   "t_end": 132.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shift + I > To Active Bone",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the IK relationship."
+  },
+  {
+   "order": 24,
+   "id": "H24",
+   "goal": "Move the IK controller to test the rig.",
+   "t_start": 132.0,
+   "t_end": 135.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Demonstrates that the IK chain moves."
+  },
+  {
+   "order": 25,
+   "id": "H25",
+   "goal": "Move the controller to observe the knee twisting and bending.",
+   "t_start": 142.0,
+   "t_end": 146.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Demonstrates the pole-target problem."
+  },
+  {
+   "order": 26,
+   "id": "H26",
+   "goal": "Select all bones and clear their transforms.",
+   "t_start": 150.0,
+   "t_end": 153.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "A > Pose > Clear Transform > All",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Resets the rig before further configuration."
+  },
+  {
+   "order": 27,
+   "id": "H27",
+   "goal": "Select the IK-controlled bone to configure its pole target.",
+   "t_start": 156.0,
+   "t_end": 162.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 28,
+   "id": "H28",
+   "goal": "Open Bone Constraints and use the eyedropper to assign the knee controller as the pole target.",
+   "t_start": 162.0,
+   "t_end": 168.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Bone Constraints > Pole Target > Eyedropper",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 29,
+   "id": "H29",
+   "goal": "Re-select the intended controller bone as the pole target.",
+   "t_start": 168.0,
+   "t_end": 174.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pole Target eyedropper",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The spoken description is slightly unclear about the exact selection sequence."
+  },
+  {
+   "order": 30,
+   "id": "H30",
+   "goal": "Inspect the foot rotation caused by the pole-target assignment.",
+   "t_start": 174.0,
+   "t_end": 179.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 31,
+   "id": "H31",
+   "goal": "Reset the pole angle to zero.",
+   "t_start": 179.0,
+   "t_end": 188.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Bone Constraints > Pole Angle > 0°",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Avoids restricting the pole controller's movement through an unwanted angle offset."
+  },
+  {
+   "order": 32,
+   "id": "H32",
+   "goal": "Select the Armature object.",
+   "t_start": 188.0,
+   "t_end": 193.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Object Mode > Select Armature",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 33,
+   "id": "H33",
+   "goal": "Enable the display of bone axes.",
+   "t_start": 193.0,
+   "t_end": 199.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Object Properties > Viewport Display > Axis",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Shows the X, Y and Z bone axes."
+  },
+  {
+   "order": 34,
+   "id": "H34",
+   "goal": "Inspect the IK bone's X-axis direction relative to the pole target.",
+   "t_start": 199.0,
+   "t_end": 205.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Identifies the expected axis orientation."
+  },
+  {
+   "order": 35,
+   "id": "H35",
+   "goal": "Switch to Edit Mode and inspect the bone's X-axis orientation.",
+   "t_start": 205.0,
+   "t_end": 212.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Tab"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The X-axis is not pointing toward the pole target."
+  },
+  {
+   "order": 36,
+   "id": "H36",
+   "goal": "Keep the pole angle at zero and correct the bone orientation in Edit Mode instead.",
+   "t_start": 212.0,
+   "t_end": 218.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor explains why changing the pole angle is not the preferred solution."
+  },
+  {
+   "order": 37,
+   "id": "H37",
+   "goal": "Select the bone and adjust its roll until its X-axis points toward the pole target.",
+   "t_start": 218.0,
+   "t_end": 225.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Bone Properties > Roll",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 38,
+   "id": "H38",
+   "goal": "Set the bone roll to 90 degrees.",
+   "t_start": 225.0,
+   "t_end": 229.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Bone Properties > Roll > 90°",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The exact sign may depend on the Armature setup."
+  },
+  {
+   "order": 39,
+   "id": "H39",
+   "goal": "Select the other relevant bone and set its roll to 90 degrees.",
+   "t_start": 229.0,
+   "t_end": 235.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Bone Properties > Roll > 90°",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Aligns its X-axis toward the pole target."
+  },
+  {
+   "order": 40,
+   "id": "H40",
+   "goal": "Return to Pose Mode.",
+   "t_start": 239.0,
+   "t_end": 242.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Ctrl + Tab / Pose Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 41,
+   "id": "H41",
+   "goal": "Select the relevant bone and rotate it to check whether the foot follows.",
+   "t_start": 244.0,
+   "t_end": 249.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "R"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Demonstrates that the foot does not yet follow correctly."
+  },
+  {
+   "order": 42,
+   "id": "H42",
+   "goal": "Prepare to correct the foot controller's rotation and parenting relationship.",
+   "t_start": 252.0,
+   "t_end": 258.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 43,
+   "id": "H43",
+   "goal": "Enter Edit Mode, select the relevant bone and clear its parent.",
+   "t_start": 258.0,
+   "t_end": 265.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Tab > Alt + P > Clear Parent",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 44,
+   "id": "H44",
+   "goal": "Select the controller bone and parent the previously selected bone to it while keeping its offset.",
+   "t_start": 265.0,
+   "t_end": 271.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Ctrl + P > Keep Offset",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 45,
+   "id": "H45",
+   "goal": "Parent the other relevant bone to its controller while keeping the offset.",
+   "t_start": 271.0,
+   "t_end": 279.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Shift + Click > Ctrl + P > Keep Offset",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 46,
+   "id": "H46",
+   "goal": "Return to Pose Mode and inspect the bone's rotation and position.",
+   "t_start": 279.0,
+   "t_end": 283.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pose Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The rotation now works, but the position is incorrect."
+  },
+  {
+   "order": 47,
+   "id": "H47",
+   "goal": "Select the affected bone and open its Bone Constraints settings.",
+   "t_start": 285.0,
+   "t_end": 290.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Bone Constraints",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 48,
+   "id": "H48",
+   "goal": "Add a Copy Location constraint to the selected bone.",
+   "t_start": 290.0,
+   "t_end": 294.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Add Bone Constraint > Copy Location",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 49,
+   "id": "H49",
+   "goal": "Assign the shin bone as the Copy Location constraint's target.",
+   "t_start": 294.0,
+   "t_end": 303.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Copy Location > Target > Eyedropper",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The instructor mentions selecting the shin bone near the knee."
+  },
+  {
+   "order": 50,
+   "id": "H50",
+   "goal": "Set the Copy Location constraint's Head/Tail value to 1.",
+   "t_start": 305.0,
+   "t_end": 311.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Copy Location > Head/Tail > 1",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Makes the constraint use the bone's tail position."
+  },
+  {
+   "order": 51,
+   "id": "H51",
+   "goal": "Rotate the bone and check that it stays in the correct position and follows its controller.",
+   "t_start": 312.0,
+   "t_end": 319.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "R"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Tests the parenting and Copy Location setup."
+  },
+  {
+   "order": 52,
+   "id": "H52",
+   "goal": "Move the controller downward to check that the foot follows it.",
+   "t_start": 319.0,
+   "t_end": 324.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 53,
+   "id": "H53",
+   "goal": "Move the pole controller from side to side to test the knee's bending direction.",
+   "t_start": 324.0,
+   "t_end": 335.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Verifies that the pole target works."
+  },
+  {
+   "order": 54,
+   "id": "H54",
+   "goal": "Switch to Object Mode to prepare for binding the mesh to the Armature.",
+   "t_start": 335.0,
+   "t_end": 340.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Ctrl + Tab / Object Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 55,
+   "id": "H55",
+   "goal": "Select the mesh first and then Shift-select the Armature.",
+   "t_start": 340.0,
+   "t_end": 344.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "Shift",
+      "Click"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "The Armature must be the active object."
+  },
+  {
+   "order": 56,
+   "id": "H56",
+   "goal": "Parent the mesh to the Armature using automatic weights.",
+   "t_start": 344.0,
+   "t_end": 352.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Object > Parent > Armature Deform > With Automatic Weights",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Creates the mesh's automatic skin weights."
+  },
+  {
+   "order": 57,
+   "id": "H57",
+   "goal": "Inspect the mesh deformation after binding it to the Armature.",
+   "t_start": 352.0,
+   "t_end": 356.0,
+   "tol_s": 5.0,
+   "actions": [],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 58,
+   "id": "H58",
+   "goal": "Switch to Pose Mode.",
+   "t_start": 356.0,
+   "t_end": 359.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "Pose Mode",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "core",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 59,
+   "id": "H59",
+   "goal": "Select the main controller bone and move it to test the rigged mesh.",
+   "t_start": 359.0,
+   "t_end": 365.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 60,
+   "id": "H60",
+   "goal": "Move the foot controller and check that the mesh and foot deform correctly.",
+   "t_start": 365.0,
+   "t_end": 372.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "press_keys",
+     "ui_element": null,
+     "keys": [
+      "G"
+     ],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": null
+  },
+  {
+   "order": 61,
+   "id": "H61",
+   "goal": "Rotate the controller around the Z-axis to rotate the leg.",
+   "t_start": 372.0,
+   "t_end": 378.0,
+   "tol_s": 5.0,
+   "actions": [
+    {
+     "verb": "click",
+     "ui_element": "R > Z",
+     "keys": [],
+     "value": null
+    }
+   ],
+   "preconditions": [],
+   "before_state": null,
+   "after_state": null,
+   "expected_state": [],
+   "evidence_kind": "directly_evidenced",
+   "evidence_type": "narrated",
+   "verification": "human",
+   "verification_confidence": "high",
+   "importance": "optional",
+   "verifiable_from_state": false,
+   "requires": [],
+   "match_terms": [],
+   "note": "Demonstrates the final rig functionality."
+  }
+ ]
+}

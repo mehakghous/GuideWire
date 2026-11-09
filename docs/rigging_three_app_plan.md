@@ -14,6 +14,19 @@ Status: PROPOSAL for review. This replaces the milestone order in `docs/ingestio
 
 **The most important flow is: YouTube video to good step extraction.** Everything below is ordered by what makes that flow more correct, cheaper to test, or checkable. "Good" is defined in phase 1 so it can be measured.
 
+## 0.1 Progress (same day, 2026-10-22, evening)
+
+| Phase 0 item | Status |
+|---|---|
+| Cost controls on the main path (`ingestion/budget.py`: cache, ceilings, log, dry run, tiers, key labels) | **Done**, tested offline (`tests/test_budget.py`); never used with a real call yet. `experiment.cell_key` (Blender A/B runner) still hashes the Blender prompt only |
+| Verification harness | **Done**; real Blender 5.2.2, Maya 2027 and Houdini 22.0.466 scenes (`tests/test_verification.py`) |
+| Real vocabularies from the installs | **Done** for all three (`knowledge/app_vocab/`); profiles corrected (7 wrong Houdini labels, Blender node vocabulary added) |
+| Prompt fix: per-application `node_exists` examples | **Done** as prompt v7; not yet run on a video |
+| Derived states proven in the applications | **Done** for 20 (feature, app) claims: Blender 5, Maya 7, Houdini 8 (`tests/test_effects_verified.py`) |
+
+Phase 2 (knowledge) progress: entries 23 -> 45; features with an entry: Blender 9 -> 19, Maya 29 -> 35, Houdini 10 -> 25; every documented option name is checked against the install. P0 features still without any entry in any application: PREP-01 (units and up axis), PREP-02 (import or create the mesh). Not started: the animation stage (ANIM, CURV, LAYR, LOCO, MOCP) for any application.
+Phase 1 is blocked on your "go" for live Gemini runs and on human gold step lists. Phase 3 is blocked on Mehak and Umaima for the three predicate kinds.
+
 ## 1. Where the main flow stands today (evidence: audit and repository)
 
 - Done and tested offline: contract 0.10, prompt v2 to v6, schema-constrained extraction with bounded retries, validator, instruction composer, scene-chain check on all routes, rigging knowledge base (23 entries), tutorial discovery.

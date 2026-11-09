@@ -1,0 +1,39 @@
+start,end,action,evidence,importance,keys_or_menu,notes
+0:16,0:20,Switch to the Rigging workspace.,both,core,Workspace > Rigging,
+0:22,0:25,Select Rigging from the Shelf.,both,core,Rigging Shelf,
+0:25,0:28,Open the Quick Rig tool.,both,core,Quick Rig icon,
+0:28,0:31,Click the plus button in the Quick Rig tool.,both,core,Quick Rig > +,
+0:31,0:33,Enter a name for the character.,both,core,Character Name,
+0:33,0:40,Select the Step-by-Step option.,both,core,Quick Rig > Step-by-Step,The alternative is One-Click.
+0:40,0:42,Select the character geometry.,both,core,Viewport selection,
+0:40,0:42,Click the plus button under Geometry.,both,core,Geometry > +,Adds the selected geometry.
+0:42,0:46,Create or update the guides.,both,core,Guides > Create/Update,Generates the rigging guides.
+0:46,0:48,Switch to the front view.,both,optional,Spacebar,Allows the guides to be positioned from the front.
+0:48,0:51,Adjust the positions of the generated guides.,both,core,Viewport selection and Move tool,
+0:51,0:55,Expand the guides in the Outliner to identify individual guides.,both,optional,Outliner,Allows individual guides to be selected.
+0:55,1:00,Select the neck guide and move it to the desired neck position.,both,core,Outliner > Neck Guide > Move,Adjusts the neck joint location.
+1:00,1:05,Select the head guide and move it toward the top of the character's head.,both,core,Outliner > Head Guide > Move,
+1:05,1:12,Select the arm guide and move it into the correct position.,both,core,Outliner / Viewport > Move,The instructor adjusts an arm that is positioned too far inward.
+1:12,1:15,Move the shoulder guide to the correct position.,both,core,Outliner / Viewport > Move,
+1:15,1:20,Select the left shoulder and left arm guides.,both,core,Outliner / Viewport selection,Only one side needs adjustment for a symmetrical character.
+1:20,1:28,Use the guide adjustment button to mirror the selected guides to the opposite side.,both,core,User Adjustments > Mirror Left/Right,The button transfers guide positions between the left and right sides.
+1:30,1:35,Continue adjusting the remaining guides to match the character's anatomy.,both,core,Viewport selection and Move tool,
+1:35,1:40,Select the left upper-leg guide and move it into the correct position.,both,core,Outliner / Viewport > Move,
+1:40,1:43,Mirror the upper-leg guide adjustment to the opposite side.,both,core,User Adjustments > Mirror Left/Right,
+1:43,1:48,Check and adjust the remaining guides to ensure they are correctly positioned.,both,core,Viewport / Outliner,Final guide-positioning check.
+1:51,1:56,Click Create/Update Rig under Skeleton and Rig Generation.,both,core,Skeleton and Rig Generation > Create/Update Rig,Generates the character skeleton and rig.
+1:56,2:03,Inspect the generated rig and its joint structure.,both,core,Viewport,Check whether the joints are positioned correctly.
+2:03,2:07,Generate or update the rig after confirming the joint structure.,both,core,Create/Update Rig,The instructor repeats the rig-generation step.
+2:07,2:10,Select the default binding settings.,both,core,Skinning > Default Settings,Alternative: Current Settings.
+2:10,2:15,Select Current Settings to customize the binding configuration.,both,optional,Skinning > Current Settings,Alternative to using default settings.
+2:15,2:19,Adjust the skinning and binding settings.,both,optional,Skinning Settings,
+2:19,2:22,Select Skin Cluster as the binding method.,both,core,Skinning > Skin Cluster,Choose this if you intend to use weight painting later. Proximity Wrap is the alternative.
+2:22,2:28,Apply the selected skinning settings.,both,core,Apply,Binds the character to the generated rig.
+2:28,2:31,Move the character to test the rig's deformation.,both,optional,Viewport / Rig Controls,
+2:31,2:36,Open Weight Painting to correct unsatisfactory skin deformation.,both,optional,Weight Painting,Alternative correction method.
+2:36,2:39,Return to the default binding settings and initiate another rig update.,both,optional,Skinning > Default Settings > Create/Update,Alternative if the current binding does not produce satisfactory results.
+2:39,2:43,Confirm deletion of the existing skin when prompted.,both,optional,Confirmation Dialog > OK,Required when replacing the existing skin.
+2:43,2:47,Inspect the updated character deformation.,both,optional,Viewport,
+2:47,2:54,Evaluate the skinning and weight distribution.,both,optional,Viewport,Checks how well the automatic weights work.
+2:54,2:57,Reopen weight painting and adjust the weights if necessary.,both,optional,Weight Painting,
+,,,,,,

@@ -6,6 +6,7 @@ off Windows instead of failing at import time.
 """
 from __future__ import annotations
 
+import os
 import sys
 from dataclasses import dataclass
 
@@ -109,6 +110,10 @@ def windows_above(hwnd: int) -> list[Rect]:
         if int(h) == hwnd:
             state["seen"] = True
             return False                      # EnumWindows runs top of the stack first
+        pid = wintypes.DWORD(0)
+        user32.GetWindowThreadProcessId(h, ctypes.byref(pid))
+        if pid.value == os.getpid():              # our own overlay is not a covering window
+            return True
         if user32.IsWindowVisible(h) and not user32.IsIconic(h) and user32.GetWindowTextLengthW(h) > 0:
             cloaked = ctypes.c_int(0)
             ctypes.windll.dwmapi.DwmGetWindowAttribute(wintypes.HWND(h), 14, ctypes.byref(cloaked), 4)

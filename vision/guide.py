@@ -80,6 +80,9 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
         """Frame of the window with anything covering it blacked out, plus a thumbnail."""
         frame = grab(w.rect)
         px = mask_occluders(frame.pixels, w.rect, winplatform.windows_above(w.hwnd))
+        if float((px.max(axis=2) == 0).mean()) > 0.5 and not state.get("warned"):
+            state["warned"] = True
+            print("Blender is mostly covered by another window: click on Blender to bring it to the front")
         thumb = cv2.resize(cv2.cvtColor(px, cv2.COLOR_BGR2GRAY), (96, 54), interpolation=cv2.INTER_AREA)
         return px, thumb
 

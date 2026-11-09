@@ -203,3 +203,45 @@ def test_real_frame_ocr_end_to_end():
     assert observe_blender(words, img, layout) == {"mode": "OBJECT", "workspace": "Layout"}
     assert locate(words, "Add > Mesh > Cube").matched == "Add"
     assert locate(words, "Modeling").rect.y < 80
+
+
+def test_guide_text_shows_hidden_steps():
+    from vision.guide import guide_marks, hint_text
+    from vision.locate import Located
+    path = ["File", "Import", "Collada"]
+    assert hint_text(path, None) == "Open: File > Import > Collada"
+    top = Located(Rect(10, 5, 30, 12), "File", 0, 3, 1.0)
+    assert hint_text(path, top) == "Click File, then Import > Collada"
+    last = Located(Rect(10, 5, 30, 12), "Collada", 2, 3, 1.0)
+    assert hint_text(path, last) == "Click Collada"
+    marks = guide_marks(Rect(100, 200, 800, 600), "File > Import > Collada", top)
+    assert marks[0].rect.x < 110 + 1 and marks[0].rect.x > 100 and "Import > Collada" in marks[0].label
+    assert guide_marks(Rect(0, 0, 10, 10), "File", None) == []
+
+
+def test_probe_merge_and_roundtrip(tmp_path):
+    import importlib.util
+    import json
+    import threading
+    from http.server import HTTPServer
+    from pathlib import Path
+
+    from vision.probe_client import merge_observed, read_probe
+    assert merge_observed({"mode": "OBJECT", "workspace": "Layout"}, {"mode": "EDIT_MESH", "active_tool": "builtin.select"}) \
+        == {"mode": "EDIT_MESH", "workspace": "Layout", "active_tool": "builtin.select"}
+    assert merge_observed({"mode": "OBJECT"}, None) == {"mode": "OBJECT"}
+    assert read_probe(info_path=str(tmp_path / "missing.json")) is None
+
+    spec = importlib.util.spec_from_file_location(
+        "guidewire_probe", Path(__file__).parents[1] / "vision" / "blender_addon" / "guidewire_probe.py")
+    probe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(probe)
+    probe._state.update({"mode": "OBJECT", "selection_types": ["MESH"]})
+    server = HTTPServer(("127.0.0.1", 0), probe._make_handler("tok"))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    info = tmp_path / "probe.json"
+    info.write_text(json.dumps({"v": 1, "port": server.server_address[1], "token": "tok"}))
+    assert read_probe(info_path=str(info))["selection_types"] == ["MESH"]
+    info.write_text(json.dumps({"v": 1, "port": server.server_address[1], "token": "wrong"}))
+    assert read_probe(info_path=str(info)) is None        # wrong token is refused
+    server.shutdown()

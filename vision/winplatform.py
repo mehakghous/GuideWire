@@ -110,3 +110,16 @@ def make_click_through(hwnd: int) -> None:
     get = getattr(user32, "GetWindowLongPtrW", user32.GetWindowLongW)
     set_ = getattr(user32, "SetWindowLongPtrW", user32.SetWindowLongW)
     set_(hwnd, GWL_EXSTYLE, apply_style_flags(get(hwnd, GWL_EXSTYLE)))
+    exclude_from_capture(hwnd)
+
+
+WDA_EXCLUDEFROMCAPTURE = 0x11
+
+
+def exclude_from_capture(hwnd: int) -> bool:
+    """Keep the overlay out of screen captures, so our own labels are never read back by OCR.
+
+    Needs Windows 10 2004 or later; returns False (and the overlay still works) if refused."""
+    _require_windows()
+    import ctypes
+    return bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE))

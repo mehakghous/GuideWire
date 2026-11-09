@@ -47,11 +47,15 @@ def main() -> int:
     ap.add_argument("--follow", action="store_true", help="keep the boxes on Blender as it is moved or resized")
     ap.add_argument("--seconds", type=float, default=6, help="how long to keep the overlay up")
     ap.add_argument("--locate", help='UI path to find and highlight, e.g. "Add > Mesh > Cube"')
+    ap.add_argument("--guide", help='live guidance through a menu path, e.g. "File > Save As"')
     args = ap.parse_args()
 
     if args.delay > 0:
         print(f"capturing in {args.delay:g}s: switch to Blender now")
         time.sleep(args.delay)
+    if args.guide:
+        from vision.guide import run_guide
+        return run_guide(args.guide, args.title, args.seconds)
     winplatform.enable_dpi_awareness()
     win = winplatform.find_window(args.title)
     if win is None:

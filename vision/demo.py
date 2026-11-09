@@ -2,6 +2,7 @@
 
     python -m vision.demo            # window title containing "Blender"
     python -m vision.demo --save frame.png --delay 5
+    python -m vision.demo --follow --seconds 30   # drag/resize Blender and watch the boxes follow
 
 Needs Windows, PyQt6, mss, opencv-python and a running Blender at the default layout.
 """
@@ -32,11 +33,19 @@ def save_annotated(pixels, layout, frame_path: str) -> str:
     return out
 
 
+def region_marks(window: Rect, layout) -> list:
+    """One labelled highlight per detected area, in screen coordinates."""
+    return [highlight_mark(Rect(window.x + r.rect.x, window.y + r.rect.y, r.rect.w, r.rect.h), r.name)
+            for r in layout.regions]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--title", default="Blender")
     ap.add_argument("--save", help="write the captured frame to this PNG")
     ap.add_argument("--delay", type=float, default=0, help="seconds to wait before capturing, to switch to Blender")
+    ap.add_argument("--follow", action="store_true", help="keep the boxes on Blender as it is moved or resized")
+    ap.add_argument("--seconds", type=float, default=6, help="how long to keep the overlay up")
     args = ap.parse_args()
 
     if args.delay > 0:
@@ -65,16 +74,30 @@ def main() -> int:
         print(f"saved {os.path.abspath(annotated)} (the same frame with the detected areas drawn on it)")
         os.startfile(os.path.abspath(annotated))  # opens in the default image viewer
 
+    from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import QApplication
     app = QApplication(sys.argv[:1])
     overlay = make_overlay_window()
     overlay.cover(win.rect)
-    marks = [highlight_mark(Rect(win.rect.x + r.rect.x, win.rect.y + r.rect.y, r.rect.w, r.rect.h), r.name)
-             for r in layout.regions]
-    overlay.set_marks(marks)
+    overlay.set_marks(region_marks(win.rect, layout))
     overlay.show_click_through()
-    from PyQt6.QtCore import QTimer
-    QTimer.singleShot(6000, app.quit)
+
+    if args.follow:
+        def current_rect():
+            w = winplatform.find_window(args.title)
+            return w.rect if w else None
+
+        def reground():
+            rect = current_rect()
+            if rect is None:
+                return
+            lay = detect_layout(grab(rect).pixels)
+            print(f"resized to {rect.w}x{rect.h}: confidence {lay.confidence:.2f}")
+            overlay.set_marks(region_marks(rect, lay))
+
+        overlay.follow(current_rect, on_resized=reground)
+        print(f"following the window for {args.seconds:g}s: move or resize Blender")
+    QTimer.singleShot(round(args.seconds * 1000), app.quit)
     return app.exec()
 
 

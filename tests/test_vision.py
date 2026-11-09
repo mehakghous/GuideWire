@@ -116,3 +116,22 @@ def test_real_blender_5_2_default_layout():
     assert region_at(layout, 800, 940) == "timeline"
     assert region_at(layout, 800, 995) == "statusbar"
     assert region_at(layout, 800, 50) == "topbar"
+
+
+def test_window_change_classification():
+    from vision.tracker import classify
+    a = Rect(100, 100, 800, 600)
+    assert classify(None, None).kind == "same"
+    assert classify(None, a).kind == "found"
+    assert classify(a, None).kind == "lost"
+    assert classify(a, a).kind == "same"
+    moved = classify(a, Rect(150, 90, 800, 600))
+    assert (moved.kind, moved.dx, moved.dy) == ("moved", 50, -10)
+    assert classify(a, Rect(100, 100, 900, 600)).kind == "resized"
+
+
+def test_shift_mark_follows_a_window_move():
+    from vision.overlay import shift_mark
+    m = highlight_mark(Rect(200, 200, 50, 20), "Extrude")
+    s = shift_mark(m, 30, -5)
+    assert (s.rect.x, s.rect.y, s.rect.w, s.rect.h, s.label) == (m.rect.x + 30, m.rect.y - 5, m.rect.w, m.rect.h, "Extrude")

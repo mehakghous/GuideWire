@@ -22,7 +22,7 @@ from ingestion.eval import phase1  # noqa: E402
 VIDEOS = [("blender", "EBgHRd5tJfE", 267), ("maya", "8RqfDcoP0jI", 190), ("houdini", "LJeap3wpyJA", 377), ("blender", "PctSMB-RGsM", 386), ("maya", "TmhC35PqZvQ", 392),
           ("houdini", "xWnI7is6e7Q", 397)]
 COLS = [("steps", "steps"), ("core_recall", "1:1 recall"), ("precision", "1:1 prec"), ("text_recall_core", "words-in-span"), ("time_recall_core", "time-in-span"), ("step_support", "support"),
-        ("timestamp_accuracy", "ts-acc"), ("checkable_end_state", "checkable")]
+        ("timestamp_accuracy", "ts-acc"), ("checkable_end_state", "checkable"), ("with_target", "has-target"), ("guidable", "guidable")]
 
 
 def main() -> int:
@@ -30,20 +30,24 @@ def main() -> int:
     ap.add_argument("--tier", choices=["iterate", "report"], default="iterate")
     ap.add_argument("--versions", default="v7,v9")
     ap.add_argument("--windows", default="0", help="comma list of window lengths in seconds; 0 = one pass")
+    ap.add_argument("--model", help="an explicit model id, for example gemini-3.6-flash (overrides --tier; outputs go to runs/compare/<model>/)")
+    ap.add_argument("--meaning", choices=["iterate", "report"], help="score words-found and support by MEANING with a model (one text-only call per video, cached) instead of shared words")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+    judge = phase1.meaning_judge(a.meaning) if a.meaning and not a.dry_run else None
+    tier_dir = a.model or a.tier
     gold_dir = ROOT / "eval_data" / "gold"
     table = []
     for ver in a.versions.split(","):
         for w in (float(x) for x in a.windows.split(",")):
-            out_dir = ROOT / "runs" / "compare" / a.tier / f"{ver}_w{w:g}"
+            out_dir = ROOT / "runs" / "compare" / tier_dir / f"{ver}_w{w:g}"
             out_dir.mkdir(parents=True, exist_ok=True)
             files = []
             for app, vid, dur in VIDEOS:
                 if not (gold_dir / f"{vid}.gold.json").exists():
                     continue
                 out = out_dir / f"{app}_{vid}.json"
-                cmd = [sys.executable, "-m", "ingestion.cli", "video", f"https://www.youtube.com/watch?v={vid}", "--app", app, "--prompt-version", ver, "--tier", a.tier,
+                cmd = [sys.executable, "-m", "ingestion.cli", "video", f"https://www.youtube.com/watch?v={vid}", "--app", app, "--prompt-version", ver, *(["--model", a.model] if a.model else ["--tier", a.tier]),
                        "--duration", str(dur), "-o", str(out)] + (["--window-s", f"{w:g}"] if w else []) + (["--dry-run"] if a.dry_run else [])
                 r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
                 if a.dry_run:
@@ -54,13 +58,13 @@ def main() -> int:
                     continue
                 files.append(out)
             if files:
-                rows = phase1.report(files, gold_dir)
+                rows = phase1.report(files, gold_dir, judge)
                 table.append((f"{ver} w{w:g}", len(rows), {k: round(sum(r[k] for r in rows if r.get(k) is not None) / len(rows), 3) for k, _ in COLS}))
     if table:
         print("setting".ljust(12), "videos", *(n.rjust(13) for _, n in COLS))
         for name, n, m in table:
             print(name.ljust(12), str(n).rjust(6), *(str(m[k]).rjust(13) for k, _ in COLS))
-        (ROOT / "runs" / "compare" / f"summary_{a.tier}.json").write_text(json.dumps([{"setting": n, "videos": c, **m} for n, c, m in table], indent=1), encoding="utf-8")
+        (ROOT / "runs" / "compare" / f"summary_{tier_dir}.json").write_text(json.dumps([{"setting": n, "videos": c, **m} for n, c, m in table], indent=1), encoding="utf-8")
     return 0
 
 

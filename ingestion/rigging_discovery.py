@@ -50,6 +50,7 @@ _STAGES: list[tuple[re.Pattern, tuple[str, ...], str]] = [
     (re.compile(r"\b(?:constraints?|parent constraint|aim constraint)\b", re.I), ("CNST",), "constraints"),
 ]
 _AUTO_RIG = re.compile(r"\b(?:quick rig|auto.?rig\w*|one.?click|auto skinning|advance[d]? skeleton|rigify|mixamo)\b", re.I)
+_EASY_GOAL = re.compile(r"\b(?:beginners?|quick(?:ly)?|fast|easy|easily|simple|new to|first time|never (?:used|rigged))\b", re.I)   # the request says the learner is new or wants it fast
 _SERIES = re.compile(r"\b(?:part|pt|episode|ep|lesson|day)\s*\.?\s*(\d+)\b", re.I)
 _REQUEST_WORDS = frozenset("""and or also plus i want to need how do can you please show me teach learn tutorial tutorials video videos find looking for a an the my
 of in on with using use make making create creating build building set up setup from scratch beginner beginners step by""".split())
@@ -311,9 +312,13 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
         score += (1.0 if e.get("source_tier") == "official" else 0.0) + (0.2 if e.get("licence") == "creativeCommon" else 0.0) + (0.3 if e.get("chapters") else 0.0)
         if goal.stages and any(p.search(text) for p, _, name in _STAGES if name in goal.stages):
             score += 1.0                                       # the title names the stage you asked for, even if no specific area
-        if _AUTO_RIG.search(title) and not _AUTO_RIG.search(query):
-            score -= 1.0
-            notes.append("uses an automatic rigging tool, so there are few manual steps to follow or extract")
+        if _AUTO_RIG.search(title):
+            # an automatic tool has few clicks, but each is easy to follow, so it suits a beginner or a quick goal: no penalty then. It still teaches the tool, not how a rig is built.
+            if _AUTO_RIG.search(query) or _EASY_GOAL.search(query):
+                notes.append("uses an automatic rigging tool: quick to follow, but it teaches the tool, not how a rig is built")
+            else:
+                score -= 0.5
+                notes.append("uses an automatic rigging tool: it teaches the tool, not how a rig is built, and has few manual steps to follow")
         part = _SERIES.search(title)
         if part:
             notes.append(f"part {part.group(1)} of a series: the other parts cover the rest")

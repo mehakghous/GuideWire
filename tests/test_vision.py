@@ -135,3 +135,71 @@ def test_shift_mark_follows_a_window_move():
     m = highlight_mark(Rect(200, 200, 50, 20), "Extrude")
     s = shift_mark(m, 30, -5)
     assert (s.rect.x, s.rect.y, s.rect.w, s.rect.h, s.label) == (m.rect.x + 30, m.rect.y - 5, m.rect.w, m.rect.h, "Extrude")
+
+
+# --- locate / observe: pure text logic on hand-made OCR words ---
+from vision.locate import locate, parse_path  # noqa: E402
+from vision.observe import observe_mode  # noqa: E402
+from vision.ocr import Word  # noqa: E402
+
+
+def _w(text, x, y, line, w=40, h=12):
+    return Word(text, Rect(x, y, w, h), line)
+
+
+def test_parse_path():
+    assert parse_path("Add > Mesh > Cube") == ["Add", "Mesh", "Cube"]
+    assert parse_path("Object") == ["Object"]
+
+
+def test_locate_walks_down_a_menu_path():
+    closed = [_w("Add", 380, 80, 0), _w("Cube", 218, 190, 1)]       # menu closed; "Cube" is the Outliner object
+    r = locate(closed, "Add > Mesh > Cube")
+    assert (r.matched, r.depth, r.complete) == ("Add", 0, False)
+    assert r.rect.x == 380                                           # not the unrelated Cube
+
+    opened = closed + [_w("Mesh", 420, 120, 2), _w("Plane", 520, 150, 3)]
+    assert locate(opened, "Add > Mesh > Cube").matched == "Mesh"
+    full = opened + [_w("Cube", 530, 120, 4)]
+    r = locate(full, "Add > Mesh > Cube")
+    assert (r.matched, r.complete, r.rect.x) == ("Cube", True, 530)
+
+
+def test_locate_matches_multiword_and_tolerates_ocr_noise():
+    words = [_w("Edit", 90, 40, 0), _w("Mode", 140, 40, 0)]
+    assert locate(words, "Edit Mode").rect.w == 90
+    assert locate([_w("Extrudc", 10, 10, 0)], "Extrude") is not None   # one wrong letter
+    assert locate([_w("Cylinder", 10, 10, 0)], "Extrude") is None
+
+
+def test_locate_flags_ambiguity_and_missing():
+    words = [_w("Object", 100, 80, 0), _w("Object", 430, 80, 0)]
+    assert locate(words, "Object").alternatives == 1
+    assert locate(words, "Bevel") is None
+    assert locate(words, "") is None
+
+
+def test_observe_mode_reads_header_and_leaves_edit_mode_unknown():
+    header = Rect(0, 60, 800, 60)
+    obj = [_w("Object", 100, 80, 0), _w("Mode", 150, 80, 0)]
+    assert observe_mode(obj, header) == "OBJECT"
+    edit = [_w("Edit", 100, 80, 0), _w("Mode", 150, 80, 0)]
+    assert observe_mode(edit, header) is None                         # object type unknown: do not guess
+    assert observe_mode(edit, header, edit_object_type="mesh") == "EDIT_MESH"
+    assert observe_mode(edit, Rect(0, 500, 800, 60)) is None          # outside the header
+
+
+def test_real_frame_ocr_end_to_end():
+    pytest.importorskip("winrt.windows.media.ocr")
+    cv2 = pytest.importorskip("cv2")
+    from vision.observe import observe_blender
+    from vision.ocr import OcrUnavailable, read_text
+    img = cv2.imread("tests/fixtures/vision/blender_5_2_default_1920x1008.png")
+    try:
+        words = read_text(img)
+    except OcrUnavailable:
+        pytest.skip("no OCR language pack")
+    layout = detect_layout(img)
+    assert observe_blender(words, img, layout) == {"mode": "OBJECT", "workspace": "Layout"}
+    assert locate(words, "Add > Mesh > Cube").matched == "Add"
+    assert locate(words, "Modeling").rect.y < 80

@@ -46,6 +46,7 @@ def main() -> int:
     ap.add_argument("--delay", type=float, default=0, help="seconds to wait before capturing, to switch to Blender")
     ap.add_argument("--follow", action="store_true", help="keep the boxes on Blender as it is moved or resized")
     ap.add_argument("--seconds", type=float, default=6, help="how long to keep the overlay up")
+    ap.add_argument("--locate", help='UI path to find and highlight, e.g. "Add > Mesh > Cube"')
     args = ap.parse_args()
 
     if args.delay > 0:
@@ -74,12 +75,28 @@ def main() -> int:
         print(f"saved {os.path.abspath(annotated)} (the same frame with the detected areas drawn on it)")
         os.startfile(os.path.abspath(annotated))  # opens in the default image viewer
 
+    marks = region_marks(win.rect, layout)
+    if args.locate:
+        from vision.locate import locate
+        from vision.observe import observe_blender
+        from vision.ocr import read_text
+        words = read_text(frame.pixels)
+        print("observed:", observe_blender(words, frame.pixels, layout))
+        found = locate(words, args.locate)
+        if found is None:
+            print(f"locate {args.locate!r}: not visible (icon-only or the menu is closed)")
+        else:
+            note = "" if found.complete else f"  (path not fully open yet: showing step {found.depth + 1} of {found.total})"
+            print(f"locate {args.locate!r}: {found.matched!r} at {found.rect}, alternatives={found.alternatives}{note}")
+            r = found.rect
+            marks = [highlight_mark(Rect(win.rect.x + r.x, win.rect.y + r.y, r.w, r.h), found.matched)]
+
     from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import QApplication
     app = QApplication(sys.argv[:1])
     overlay = make_overlay_window()
     overlay.cover(win.rect)
-    overlay.set_marks(region_marks(win.rect, layout))
+    overlay.set_marks(marks)
     overlay.show_click_through()
 
     if args.follow:

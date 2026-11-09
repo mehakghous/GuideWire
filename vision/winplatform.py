@@ -154,3 +154,18 @@ def exclude_from_capture(hwnd: int) -> bool:
     _require_windows()
     import ctypes
     return bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE))
+
+
+def left_click_position() -> tuple[int, int] | None:
+    """Screen position of the cursor while the left mouse button is held, else None.
+
+    Passive polling of the button state; nothing is sent to any window."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    if not user32.GetAsyncKeyState(0x01) & 0x8000:      # VK_LBUTTON
+        return None
+    pt = wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(pt))
+    return pt.x, pt.y

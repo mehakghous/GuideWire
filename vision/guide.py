@@ -44,6 +44,14 @@ def guide_marks(window: Rect, ui_element: str, found: Located | None) -> list[Ma
     return [highlight_mark(Rect(window.x + r.x, window.y + r.y, r.w, r.h))]
 
 
+def click_hits(mark_rect: Rect, point: tuple[int, int] | None) -> bool:
+    """True if a click at `point` (screen pixels) landed on the highlighted target."""
+    if point is None:
+        return False
+    x, y = point
+    return mark_rect.x <= x < mark_rect.x + mark_rect.w and mark_rect.y <= y < mark_rect.y + mark_rect.h
+
+
 def changed_box(prev, cur):
     """Bounding box (x0, y0, x1, y1) in thumbnail cells of what changed, or None if nothing did."""
     if prev is None or prev.shape != cur.shape:
@@ -110,6 +118,8 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
     state: dict = {"thumb": None, "rect": None, "box": None}
     cache: dict = {"words": [], "serial": 0}       # touched only by the worker thread
     last: list[str] = []
+    target: list[Rect] = []                        # screen rect of the final item while it is highlighted
+    result = {"done": False}
 
     def snapshot(w):
         """Frame of the window with anything covering it blacked out, plus a thumbnail."""
@@ -142,11 +152,20 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
         if pending and pending[0].done():
             rect, found = pending.pop().result()
             if rect == current.rect:                  # window moved or resized meanwhile: drop it
-                overlay.set_marks(guide_marks(rect, ui_element, found))
+                marks = guide_marks(rect, ui_element, found)
+                overlay.set_marks(marks)
+                target[:] = [marks[0].rect] if marks and found.complete else []
                 text = hint_text(parse_path(ui_element), found)
                 if not last or last[-1] != text:
                     print(text)
                     last.append(text)
+        if target and click_hits(target[0], winplatform.left_click_position()):
+            result["done"] = True                     # the learner clicked the destination
+            overlay.set_marks([])
+            overlay.hide()
+            print(f"Done: clicked {parse_path(ui_element)[-1]}")
+            app.quit()
+            return
         px, thumb = snapshot(current)
         moved = state["rect"] != current.rect
         state["box"] = union_box(state["box"], changed_box(None if moved else state["thumb"], thumb))
@@ -164,5 +183,7 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
     QTimer.singleShot(round(seconds * 1000), app.quit)
     print(f"guiding {ui_element!r} for {seconds:g}s: open the menu in Blender and watch the highlight advance")
     code = app.exec()
+    if not result["done"]:
+        print("Stopped: time ran out before the target was clicked")
     pool.shutdown(wait=False, cancel_futures=True)
     return code

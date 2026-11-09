@@ -268,3 +268,10 @@ def test_mask_occluders_and_change_detection():
     old = [Word("File", Rect(310, 110, 20, 10), 1), Word("Keep", Rect(900, 900, 20, 10), 2)]
     new = [Word("Import", Rect(320, 120, 40, 10), 100001)]
     assert [w.text for w in merge_words(old, new, r)] == ["Keep", "Import"]
+
+
+def test_click_hits_target():
+    from vision.guide import click_hits
+    box = Rect(100, 200, 50, 20)
+    assert click_hits(box, (120, 210)) and not click_hits(box, (99, 210))
+    assert not click_hits(box, (120, 220)) and not click_hits(box, None)

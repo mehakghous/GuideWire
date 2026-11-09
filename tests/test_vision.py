@@ -250,12 +250,21 @@ def test_probe_merge_and_roundtrip(tmp_path):
 def test_mask_occluders_and_change_detection():
     np = pytest.importorskip("numpy")
     from vision.capture import mask_occluders
-    from vision.guide import frame_changed
+    from vision.guide import box_to_rect, changed_box, merge_words, union_box
+    from vision.ocr import Word
     px = np.full((100, 200, 3), 255, np.uint8)
     out = mask_occluders(px, Rect(1000, 500, 200, 100), [Rect(1100, 550, 500, 500), Rect(0, 0, 10, 10)])
     assert out[60, 150].sum() == 0 and out[10, 10].sum() == 765 and px[60, 150].sum() == 765
-    a = np.zeros((54, 96), np.uint8)
+    a = np.zeros((108, 192), np.uint8)
     b = a.copy()
-    assert not frame_changed(a, b)
-    b[:10, :30] = 200
-    assert frame_changed(a, b) and frame_changed(None, a)
+    assert changed_box(a, b) is None
+    b[10:20, 30:60] = 200
+    assert changed_box(a, b) == (30, 10, 60, 20) and changed_box(None, a) == (0, 0, 192, 108)
+    assert union_box(None, (1, 1, 2, 2)) == (1, 1, 2, 2)
+    assert union_box((0, 0, 5, 5), (3, 3, 9, 9)) == (0, 0, 9, 9)
+    r = box_to_rect((30, 10, 60, 20), 1920, 1080, pad=0)
+    assert (r.x, r.y, r.w, r.h) == (300, 100, 300, 100)
+    assert box_to_rect((0, 0, 192, 108), 1920, 1080).w == 1920
+    old = [Word("File", Rect(310, 110, 20, 10), 1), Word("Keep", Rect(900, 900, 20, 10), 2)]
+    new = [Word("Import", Rect(320, 120, 40, 10), 100001)]
+    assert [w.text for w in merge_words(old, new, r)] == ["Keep", "Import"]

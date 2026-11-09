@@ -34,7 +34,7 @@ from .validate import Issue, ValidationFailure, check_structure, refresh_coverag
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou")
 
 
 class ExtractionError(RuntimeError):
@@ -146,7 +146,7 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
     # "v10-nokb" and "v10-outline" are v10 with the knowledge block removed or replaced by typical sequences: a measured experiment (docs/evaluation_report_2026-11-09.md), not a default.
     full_version = version
     version, _, kb_mode = version.partition("-")
-    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds")):
+    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou")):
         raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
     node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10")) else ""
@@ -213,7 +213,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "") + (_PREDICATE_RULES if kb_mode == "preds" else "")
+        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "") + (_PREDICATE_RULES if kb_mode == "preds" else "") + (_HOUDINI_RULES if kb_mode == "hou" and profile.name == "houdini" else "")
     raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
 
 
@@ -276,6 +276,21 @@ EXPECTED STATE FOR MORE STEPS. Besides the kinds listed above you may use three 
   node_count: name = the node or object type, expected_value = a whole number: at least that many exist, e.g. {"kind": "node_count", "name": "joint", "expected_value": 9} after the learner has made nine joints.
 A setting or toggle that is switched on or off or given a value is property_equals with the property path and the value. A step that only moves, rotates or scales has no expected state. Give every mechanics
 step an expected_state when one of these kinds fits; leave it empty only when none fits. Never invent a name, count or attribute the video does not show.
+"""
+
+
+# v10-hou = v10 plus, for HOUDINI ONLY, a rule that spells out what counts as one step in a node network (for the other applications it is the same text as v10). In the labelled Houdini runs the
+# misses were parameter edits (promotion groups set to "*", naming the skeleton, applying a configuration), viewport state keys (F for Modify mode, Enter or Esc to start and stop a Skeleton
+# tool) and node connections ("connect Scene Add Character after Configure Controls"); words found was 29 to 59 % (docs/evaluation_report_2026-11-09.md, sections 1.5 and 4).
+_HOUDINI_RULES = """
+HOUDINI NODE NETWORK. This tutorial builds a network of nodes, so these are all separate steps, each with its own times:
+  - a node created (normally with the Tab menu in the network editor): the node's label as the network editor shows it, and what it is placed after or connected to;
+  - each connection between two nodes: "Connect <node A> to <node B>", naming both nodes;
+  - each parameter changed in the parameter pane: one step per parameter, naming the node, the parameter and the exact value, expression or option typed or chosen ("set Component Source to FK Transform", "type jnt_* in Target Pattern");
+  - each flag switched on a node (display, bypass, template);
+  - each viewport state change: a key that starts, finishes or changes a tool or state (Enter or Esc for the Skeleton tool, F for Modify mode), and each switch of the pane that is shown (scene view, network editor, geometry spreadsheet);
+  - selecting a node, when later steps act on that selection.
+Use the node label as the video shows it, without internal prefixes. When the tutorial types a value, name or expression, copy it exactly into the step. Do not fold several parameters, or a node and its parameters, into one step.
 """
 
 

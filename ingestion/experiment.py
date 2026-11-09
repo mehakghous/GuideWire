@@ -41,6 +41,11 @@ PRICES = {                    # USD per 1M tokens (input, output incl. thinking)
     "gemini-3.6-flash": (0.75, 3.75),
     "gemini-3.8-flash": (0.75, 3.75),
     "gemini-3.5-flash-lite": (0.30, 2.50),
+    # OpenAI, from OpenAI's model pages read 2026-11-09 (GPT-5.6 Luna and Terra after the 30 July 2026 cut; 5.4 mini and nano from their own pages). Output includes hidden reasoning tokens.
+    "gpt-5.6-luna": (0.20, 1.20),
+    "gpt-5.6-terra": (2.00, 12.00),
+    "gpt-5.4-nano": (0.20, 1.25),
+    "gpt-5.4-mini": (0.75, 4.50),
 }
 # The cache key must change when what the MODEL sees changes (prompt text, response schema), not when the stored StepList contract gains fields.
 # Keying on SCHEMA_VERSION silently invalidated every cached result when the contract moved 0.3 -> 0.6 (found 2026-10-11: cached cells were re-called).

@@ -28,7 +28,6 @@ def hint_text(path: list[str], found: Located | None) -> str:
 
 def guide_marks(window: Rect, ui_element: str, found: Located | None) -> list[Mark]:
     """Marks (screen coordinates) for a located path. `window` is where the frame sits on screen."""
-    path = parse_path(ui_element)
     if found is None:
         return []
     r = found.rect

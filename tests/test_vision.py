@@ -275,3 +275,19 @@ def test_click_hits_target():
     box = Rect(100, 200, 50, 20)
     assert click_hits(box, (120, 210)) and not click_hits(box, (99, 210))
     assert not click_hits(box, (120, 220)) and not click_hits(box, None)
+
+
+def test_ground_located_maps_to_screen():
+    from shared.grounding import CaptureGeometry
+    from vision.locate import Located
+    from vision.service import ground_located
+    win = Rect(100, 50, 1000, 500)
+    geo = CaptureGeometry(win, 1000, 500)
+    g = ground_located(geo, win, Located(Rect(10, 20, 40, 10), "File", 0, 1, 1.0))
+    assert g.grounding.status == "ok" and (g.grounding.x, g.grounding.y) == (130, 75)
+    assert g.rect == Rect(110, 70, 40, 10) and g.complete and not g.ambiguous
+    assert ground_located(geo, win, None).grounding.status == "none"
+    amb = ground_located(geo, win, Located(Rect(10, 20, 40, 10), "Object", 0, 2, 1.0, alternatives=1))
+    assert amb.ambiguous and not amb.complete
+    half = CaptureGeometry(win, 500, 250)          # frame downscaled 2x: coordinates scale back up
+    assert ground_located(half, win, Located(Rect(10, 20, 40, 10), "x", 0, 1, 1.0)).rect == Rect(120, 90, 80, 20)

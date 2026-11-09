@@ -43,3 +43,14 @@ def test_no_reply_contains_a_forbidden_claim(rows):
 def test_summary_counts_add_up(rows):
     s = qa_suite.summary(list(rows.values()))
     assert s["all"]["questions"] == 48 and s["all"]["answered"] + s["all"]["clarified"] + s["all"]["declined"] == 48
+
+
+def test_the_beginner_suite_is_well_formed():
+    import collections
+    d = json.loads((FIX / "questions_beginner.json").read_text(encoding="utf-8"))["questions"]
+    ids = [q["id"] for q in d]
+    assert len(d) == 36 and len(set(ids)) == 36
+    assert collections.Counter(q["app"] for q in d) == {"blender": 12, "maya": 12, "houdini": 12}
+    assert all(q["scenario"] == "no_video" and q["reference"] and q["behaviour"] in ("answer", "answer_or_admit", "clarify_or_admit", "admit") for q in d)
+    grades = json.loads((FIX / "grades_beginner_2026-11-09.json").read_text(encoding="utf-8"))["grades"]
+    assert set(grades) == set(ids) and set(grades.values()) <= {"C", "P", "N", "W"}

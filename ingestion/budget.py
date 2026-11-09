@@ -77,6 +77,10 @@ def estimate(model: str, *, video_s: float, text_chars: int, max_output_tokens: 
 
 
 def content_key(model: str, system: str, prompt: str, schema: dict, video_url: str | None, settings: dict) -> str:
+    # GW_REPEAT=2 (or more) gives a repeat run its OWN cache slot, so asking again never overwrites the first answer (`--fresh` alone does: it writes into the same slot). Unset or 1 leaves every key as it was.
+    repeat = int(os.environ.get("GW_REPEAT", "1") or 1)
+    if repeat > 1:
+        settings = {**settings, "repeat": repeat}
     blob = json.dumps({"m": model, "s": system, "p": prompt, "j": schema, "v": video_url, "o": settings}, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:24]
 

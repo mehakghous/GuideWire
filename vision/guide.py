@@ -35,7 +35,8 @@ def guide_marks(window: Rect, ui_element: str, found: Located | None) -> list[Ma
     return [highlight_mark(Rect(window.x + r.x, window.y + r.y, r.w, r.h))]
 
 
-def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, interval_ms: int = 400) -> int:
+def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, interval_ms: int = 400,
+               recordable: bool = False) -> int:
     import sys
     from concurrent.futures import Future, ThreadPoolExecutor
 
@@ -55,6 +56,7 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
         return 1
     app = QApplication(sys.argv[:1])
     overlay = make_overlay_window()
+    overlay.hide_from_capture = not recordable
     overlay.cover(win.rect)
     overlay.show_click_through()
     pool = ThreadPoolExecutor(max_workers=1)

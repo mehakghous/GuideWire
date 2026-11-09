@@ -102,7 +102,7 @@ def find_window(title_contains: str = "Blender") -> WindowInfo | None:
     return max(hits, key=lambda w: w.rect.w * w.rect.h, default=None)
 
 
-def make_click_through(hwnd: int) -> None:
+def make_click_through(hwnd: int, hide_from_capture: bool = True) -> None:
     """Apply click-through, always-on-top, no-focus, no-taskbar flags to an overlay window."""
     _require_windows()
     import ctypes
@@ -110,7 +110,8 @@ def make_click_through(hwnd: int) -> None:
     get = getattr(user32, "GetWindowLongPtrW", user32.GetWindowLongW)
     set_ = getattr(user32, "SetWindowLongPtrW", user32.SetWindowLongW)
     set_(hwnd, GWL_EXSTYLE, apply_style_flags(get(hwnd, GWL_EXSTYLE)))
-    exclude_from_capture(hwnd)
+    if hide_from_capture:
+        exclude_from_capture(hwnd)
 
 
 WDA_EXCLUDEFROMCAPTURE = 0x11

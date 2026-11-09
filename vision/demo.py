@@ -48,6 +48,7 @@ def main() -> int:
     ap.add_argument("--seconds", type=float, default=6, help="how long to keep the overlay up")
     ap.add_argument("--locate", help='UI path to find and highlight, e.g. "Add > Mesh > Cube"')
     ap.add_argument("--guide", help='live guidance through a menu path, e.g. "File > Save As"')
+    ap.add_argument("--recordable", action="store_true", help="with --guide: let screen recorders see the overlay")
     args = ap.parse_args()
 
     if args.delay > 0:
@@ -55,7 +56,7 @@ def main() -> int:
         time.sleep(args.delay)
     if args.guide:
         from vision.guide import run_guide
-        return run_guide(args.guide, args.title, args.seconds)
+        return run_guide(args.guide, args.title, args.seconds, recordable=args.recordable)
     winplatform.enable_dpi_awareness()
     win = winplatform.find_window(args.title)
     if win is None:

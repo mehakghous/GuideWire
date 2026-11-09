@@ -131,11 +131,13 @@ def make_overlay_window():
             self._timer.timeout.connect(tick)
             self._timer.start(interval_ms)
 
+        hide_from_capture = True   # set False to let screen recorders see the overlay
+
         def show_click_through(self) -> None:
             self.show()
             if sys.platform == "win32":
                 from vision import winplatform
-                winplatform.make_click_through(int(self.winId()))
+                winplatform.make_click_through(int(self.winId()), self.hide_from_capture)
 
         def paintEvent(self, _event) -> None:  # noqa: N802 (Qt override)
             p = QPainter(self)

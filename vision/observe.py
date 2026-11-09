@@ -53,7 +53,8 @@ def observe_workspace(words: list[Word], bgr, strip: Rect) -> str | None:
     return seen[0][1] if seen[0][0] - seen[1][0] >= ACTIVE_TAB_CONTRAST else None
 
 
-def observe_blender(words: list[Word], bgr, layout, edit_object_type: str | None = None) -> dict[str, Any]:
+def observe_blender(words: list[Word], bgr, layout, edit_object_type: str | None = None,
+                    mode_hint: str | None = None) -> dict[str, Any]:
     """Observed-state dict for a Blender window from its OCR words and layout."""
     obs: dict[str, Any] = {}
     viewport = layout.get("viewport")
@@ -61,6 +62,11 @@ def observe_blender(words: list[Word], bgr, layout, edit_object_type: str | None
     mode = observe_mode(words, header, edit_object_type)
     if mode:
         obs["mode"] = mode
+    if viewport:
+        from vision.toolbar import find_cells, observe_tool
+        known = obs.get("mode") or mode_hint
+        if known:
+            obs.update(observe_tool(find_cells(bgr, viewport), known))
     topbar = layout.get("topbar")
     if topbar:
         ws = observe_workspace(words, bgr, topbar)

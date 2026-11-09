@@ -15,7 +15,10 @@ input to the application.
 - `regions.py` finds Blender's areas (viewport, outliner, properties, timeline, top bar, status bar).
 - `ocr.py` Windows built-in OCR (no model download, no network).
 - `locate.py` finds a UI path ("Add > Mesh > Cube") on screen; the deepest visible part wins.
-- `observe.py` mode and workspace from the screen.
+- `observe.py` mode, workspace and active tool from the screen.
+- `toolbar.py` finds the icon-only toolbar cells from pixels and names them with `toolbars.json`
+  (Blender's own tool order per mode, dumped from 5.2.3). A cell holding several tools reports the group
+  (`active_tool_candidates`); `active_tool` is set only when the group has one tool.
 - `overlay.py` PyQt6 click-through highlight that follows the window.
 - `guide.py` live guidance: re-reads only the changed screen area, ends when the destination is clicked.
 - `blender_addon/guidewire_probe.py` + `probe_client.py` read-only state over loopback with a
@@ -32,7 +35,10 @@ input to the application.
 own marks are never read back).
 
 ## Limits (known)
-- Icon-only controls (toolbar buttons) are not found; they return `None` / not `ok`.
+- Toolbar tools are found by position, so a toolbar scrolled out of place can be misread. Other icon-only
+  controls (header icons, panel icons) are still not found.
+- Edit Mode and other modes' toolbars come from Blender's own tool list but were not checked on a real
+  frame; only Object Mode was. Detection was also checked at a sharp 2x enlargement, not on a real 2560x1440 capture.
 - Tested on Blender 5.2.3, English UI, default theme, 1920x1080 at 150% scaling.
 - The screen cannot answer `name_exists`, `attribute_exists`, `node_count`; the probe could.
 - Maya 2027 and Houdini 22 adapters are not started.

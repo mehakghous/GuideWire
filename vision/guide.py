@@ -99,8 +99,8 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
 
     from vision import winplatform
     from vision.capture import grab, mask_occluders
-    from vision.locate import locate
     from vision.ocr import read_text
+    from vision.service import find_target
     from vision.overlay import make_overlay_window
 
     winplatform.enable_dpi_awareness()
@@ -143,7 +143,7 @@ def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, inte
             fresh = [replace(wd, rect=Rect(wd.rect.x + r.x, wd.rect.y + r.y, wd.rect.w, wd.rect.h),
                              line=wd.line + base) for wd in read_text(crop, 2.0)]
             cache["words"] = merge_words(cache["words"], fresh, r)
-        return rect, locate(cache["words"], ui_element)
+        return rect, find_target(cache["words"], px, ui_element)
 
     def tick() -> None:
         current = winplatform.find_window(title)

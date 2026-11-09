@@ -42,6 +42,27 @@ def ground_located(geometry: CaptureGeometry, window: Rect, found: Located | Non
     return Guidance(result, rect, found.complete, found.alternatives > 0, found.matched)
 
 
+def find_target(words, pixels, ui_element: str, mode_hint: str | None = None) -> Located | None:
+    """Text first (menus, panels); icon-only toolbar tools by name when the text search fails."""
+    from vision.locate import locate, parse_path
+    from vision.regions import default_layout, detect_layout
+    from vision.toolbar import find_cells, locate_tool, modes_matching
+    found = locate(words, ui_element)
+    if found is not None and found.complete:
+        return found
+    layout = detect_layout(pixels)
+    viewport = (layout if layout.confidence >= 0.5 else default_layout(pixels.shape[1], pixels.shape[0])).get("viewport")
+    if viewport is None:
+        return found
+    cells = find_cells(pixels, viewport)
+    path = parse_path(ui_element)
+    for mode in modes_matching(cells, mode_hint):
+        rect = locate_tool(cells, mode, path[-1]) if path else None
+        if rect is not None:
+            return Located(rect, path[-1], len(path) - 1, len(path), 1.0)
+    return found
+
+
 class VisionService:
     def __init__(self, title: str = "Blender", use_probe: bool = True) -> None:
         self.title = title
@@ -59,13 +80,14 @@ class VisionService:
         return win, (frame, pixels)
 
     def ground(self, ui_element: str) -> Guidance:
-        from vision.locate import locate
         from vision.ocr import read_text
         win, grabbed = self._frame()
         if win is None:
             return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
         frame, pixels = grabbed
-        found = locate(read_text(pixels), ui_element)
+        from vision.probe_client import read_probe
+        probe = read_probe() if self.use_probe else None
+        found = find_target(read_text(pixels), pixels, ui_element, (probe or {}).get("mode"))
         return ground_located(frame.geometry, win.rect, found)
 
     def observe(self) -> dict[str, Any]:
@@ -80,5 +102,6 @@ class VisionService:
         layout = detect_layout(pixels)
         if layout.confidence < 0.5:
             layout = default_layout(pixels.shape[1], pixels.shape[0])
-        screen = observe_blender(read_text(pixels), pixels, layout)
-        return merge_observed(screen, read_probe() if self.use_probe else None)
+        probe = read_probe() if self.use_probe else None
+        screen = observe_blender(read_text(pixels), pixels, layout, mode_hint=(probe or {}).get("mode"))
+        return merge_observed(screen, probe)

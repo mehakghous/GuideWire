@@ -200,7 +200,9 @@ def test_real_frame_ocr_end_to_end():
     except OcrUnavailable:
         pytest.skip("no OCR language pack")
     layout = detect_layout(img)
-    assert observe_blender(words, img, layout) == {"mode": "OBJECT", "workspace": "Layout"}
+    obs = observe_blender(words, img, layout)
+    assert obs["mode"] == "OBJECT" and obs["workspace"] == "Layout"
+    assert "builtin.select_box" in obs["active_tool_candidates"] and "active_tool" not in obs   # a group, not one tool
     assert locate(words, "Add > Mesh > Cube").matched == "Add"
     assert locate(words, "Modeling").rect.y < 80
 
@@ -291,3 +293,53 @@ def test_ground_located_maps_to_screen():
     assert amb.ambiguous and not amb.complete
     half = CaptureGeometry(win, 500, 250)          # frame downscaled 2x: coordinates scale back up
     assert ground_located(half, win, Located(Rect(10, 20, 40, 10), "x", 0, 1, 1.0)).rect == Rect(120, 90, 80, 20)
+
+
+def _real_frame():
+    cv2 = pytest.importorskip("cv2")
+    from pathlib import Path
+    img = cv2.imread(str(Path(__file__).parent / "fixtures" / "vision" / "blender_5_2_default_1920x1008.png"))
+    assert img is not None
+    return cv2, img
+
+
+def test_toolbar_cells_active_tool_and_locate_on_real_frame():
+    cv2, img = _real_frame()
+    from vision.regions import detect_layout
+    from vision.toolbar import find_cells, locate_tool, modes_matching, observe_tool, tool_groups
+    cells = find_cells(img, detect_layout(img).get("viewport"))
+    assert len(cells) == len(tool_groups("OBJECT")) == 10          # matches Blender's own tool list
+    assert [i for i, c in enumerate(cells) if c.active] == [0]
+    assert "builtin.select_box" in observe_tool(cells, "OBJECT")["active_tool_candidates"]
+    move = locate_tool(cells, "OBJECT", "Move")
+    assert move is not None and move.y == cells[2].rect.y and locate_tool(cells, "OBJECT", "Extrude Region") is None
+    assert modes_matching(cells, "OBJECT")[0] == "OBJECT"
+    assert observe_tool(cells[:3] * 8, "OBJECT") == {}              # more cells than tools: say nothing
+
+
+def test_toolbar_detection_is_scale_independent():
+    cv2, img = _real_frame()
+    from vision.regions import detect_layout
+    from vision.toolbar import find_cells
+    big = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_NEAREST)
+    cells = find_cells(big, detect_layout(big).get("viewport"))
+    assert len(cells) == 10 and cells[0].active
+
+
+def test_cut_off_toolbar_matches_longer_modes():
+    from vision.toolbar import Cell, modes_matching, observe_tool
+    cells = [Cell(Rect(16, 100 + 50 * i, 58, 47), i == 9) for i in range(10)]   # edit-mode toolbar cut off at 10 cells
+    modes = modes_matching(cells, "EDIT_MESH")
+    assert modes[0] == "EDIT_MESH" and "OBJECT" in modes
+    assert observe_tool(cells, "EDIT_MESH")["active_tool_candidates"][0] == "builtin.extrude_region"
+
+
+def test_find_target_falls_back_to_toolbar_for_icon_only_tools():
+    cv2, img = _real_frame()
+    pytest.importorskip("winrt.windows.media.ocr")
+    from vision.ocr import read_text
+    from vision.service import find_target
+    words = read_text(img)
+    move = find_target(words, img, "Move")
+    assert move is not None and move.rect.x < 100 and move.complete
+    assert find_target(words, img, "Toolbar > Add Cube").rect.y > move.rect.y

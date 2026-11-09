@@ -15,7 +15,7 @@ SNAP = {"app": "maya", "node_types": {"joint": 3}, "node_names": ["hip_jnt", "kn
 
 
 def test_schema_version_and_value_rules():
-    assert SCHEMA_VERSION == "0.11"
+    assert SCHEMA_VERSION == "0.12"
     StatePredicate(kind="name_exists", target="left_hip_IK_jnt")
     StatePredicate(kind="attribute_exists", target="l_switch_GEO.FK_IK_Switch")
     assert StatePredicate(kind="node_count", target="joint", value=9).value == 9

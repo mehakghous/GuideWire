@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-SCHEMA_VERSION = "0.11"  # 0.11 (additive): PredicateKind name_exists, attribute_exists, node_count (node_count: value = at least that many). 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
+SCHEMA_VERSION = "0.12"  # 0.12 (additive): Step.group_id and Step.group (display group: consecutive steps share one group_id and one short label; steps stay atomic, a UI may fold a group into one line). 0.11 (additive): PredicateKind name_exists, attribute_exists, node_count (node_count: value = at least that many). 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
 
 PredicateKind = Literal[
     "mode",            # target: interaction mode, e.g. OBJECT, EDIT_MESH, SCULPT
@@ -113,6 +113,8 @@ class Step(BaseModel):
     expected_state: list[StatePredicate] = Field(default_factory=list)
     kind: StepKind = "mechanics"
     feature_id: str | None = Field(default=None, pattern=r"^[A-Z]{4}-\d{2}$")  # which catalog feature this step teaches, e.g. "SKEL-01" (ingestion/features.py)
+    group_id: str | None = Field(default=None, pattern=r"^g\d{2,3}$")  # DISPLAY group, e.g. "g03": consecutive steps with the same group_id belong together (ingestion/grouping.py). Optional: absent = ungrouped
+    group: str | None = Field(default=None, min_length=1, max_length=80)  # short label of the display group, e.g. "Rename the leg joints"; the same on every step of a group
     verifiable: bool = False  # derived: True iff expected_state is non-empty and the step is not craft
     video_start_s: float | None = Field(default=None, ge=0)
     video_end_s: float | None = Field(default=None, ge=0)
@@ -160,6 +162,34 @@ class StepList(BaseModel):
     video_duration_s: float | None = None
     warnings: list[str] = Field(default_factory=list)  # list-level findings (coverage gaps etc.)
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @property
+    def groups(self) -> list[tuple[str, str, list["Step"]]]:
+        """(group_id, label, steps) for each display group, in order. An ungrouped step is its own group with id "" and its goal as the label, so a UI can always walk this list."""
+        out: list[tuple[str, str, list[Step]]] = []
+        for st in self.steps:
+            if st.group_id and out and out[-1][0] == st.group_id:
+                out[-1][2].append(st)
+            else:
+                out.append((st.group_id or "", st.group or st.goal, [st]))
+        return out
+
+    @property
+    def group_problems(self) -> list[str]:
+        """Empty when every group_id forms ONE run of consecutive steps and has ONE label, and group and group_id come together."""
+        problems, seen, label = [], set(), {}
+        prev = None
+        for st in self.steps:
+            if bool(st.group_id) != bool(st.group):
+                problems.append(f"{st.id}: group_id and group must be set together")
+            if st.group_id and st.group_id != prev and st.group_id in seen:
+                problems.append(f"{st.id}: group {st.group_id} is not one run of consecutive steps")
+            if st.group_id:
+                if label.setdefault(st.group_id, st.group) != st.group:
+                    problems.append(f"{st.id}: group {st.group_id} has two labels")
+                seen.add(st.group_id)
+            prev = st.group_id
+        return problems
 
     @property
     def order_problems(self) -> list[str]:

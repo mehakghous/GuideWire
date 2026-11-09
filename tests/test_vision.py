@@ -215,7 +215,7 @@ def test_guide_text_shows_hidden_steps():
     last = Located(Rect(10, 5, 30, 12), "Collada", 2, 3, 1.0)
     assert hint_text(path, last) == "Click Collada"
     marks = guide_marks(Rect(100, 200, 800, 600), "File > Import > Collada", top)
-    assert marks[0].rect.x < 110 + 1 and marks[0].rect.x > 100 and "Import > Collada" in marks[0].label
+    assert marks[0].rect.x < 110 + 1 and marks[0].rect.x > 100 and marks[0].label == ""
     assert guide_marks(Rect(0, 0, 10, 10), "File", None) == []
 
 

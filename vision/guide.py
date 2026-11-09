@@ -32,8 +32,8 @@ def guide_marks(window: Rect, ui_element: str, found: Located | None) -> list[Ma
     if found is None:
         return []
     r = found.rect
-    label = hint_text(path, found) + (" (several matches)" if found.alternatives else "")
-    return [highlight_mark(Rect(window.x + r.x, window.y + r.y, r.w, r.h), label)]
+    # Highlight only: no text on screen. The wording (hint_text) is for the app's own panel.
+    return [highlight_mark(Rect(window.x + r.x, window.y + r.y, r.w, r.h))]
 
 
 def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, interval_ms: int = 400) -> int:

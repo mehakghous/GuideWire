@@ -163,7 +163,7 @@ def _offline(args) -> int:
             from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
             from .providers.gemini import GeminiProvider
             try:
-                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb)
+                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb, recheck=args.recheck)
             except BudgetExceeded as e:
                 print(f"error: {e}", file=sys.stderr)
                 return 2
@@ -331,6 +331,7 @@ def main(argv: list[str] | None = None) -> int:
     ch.add_argument("--no-kb", action="store_true")
     ch.add_argument("--model-tier", choices=["iterate", "report"], help="answer questions with a model (grounded on the knowledge base; one paid call per question, through the cost guard); omit for the offline rules only")
     ch.add_argument("--key", choices=["default", "dev", "test"], default="default", help="with --model-tier: which API key variable to read")
+    ch.add_argument("--recheck", action="store_true", help="with --model-tier: when the extracted steps cannot answer a question about the loaded tutorial, look at the video clip around the right moment (one extra call)")
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")

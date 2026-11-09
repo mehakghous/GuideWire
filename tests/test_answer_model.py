@@ -11,7 +11,7 @@ from shared.step_record import HowTo, Step, StepList
 
 def reply(**kw):
     base = {"answer": "Use Skeleton > Create IK Handle.", "grounding": "knowledge_base", "source_ids": [], "step_ids": [], "confidence": "high", "in_tutorial": "not_applicable",
-            "clarifying_question": None}
+            "clarifying_question": None, "wants_steps": False}
     return {**base, **kw}
 
 
@@ -87,3 +87,17 @@ def test_session_commands_do_not_call_the_model(q):
     svc = Service(session(), None, None, None, None, answerer=ModelAnswerer(p))
     svc.message(q)
     assert p.calls == []
+
+
+def test_whats_next_with_no_tutorial_loaded_is_a_question_for_the_model():
+    p = ScriptedProvider([reply(answer="Next, bind the mesh to the skeleton.")])
+    svc = Service(session(False), None, None, None, None, answerer=ModelAnswerer(p))
+    out = svc.message("ok and then whats next after that")
+    assert out["route"] == "model" and "bind the mesh" in out["text"] and len(p.calls) == 1
+
+
+def test_whats_next_with_a_tutorial_loaded_stays_a_progress_command():
+    p = ScriptedProvider([])
+    svc = Service(session(True), None, None, None, None, answerer=ModelAnswerer(p))
+    out = svc.message("ok whats next")
+    assert out["route"] != "model" and p.calls == []

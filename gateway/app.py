@@ -18,10 +18,11 @@ from typing import Callable
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from ingestion.answer_model import STATE_INTENTS, ModelAnswerer, default_manual, session_from_tutorial
+from ingestion.starter_plan import starter_bundle
+from ingestion.answer_model import ModelAnswerer, changes_progress, default_manual, session_from_tutorial
 from ingestion.budget import BudgetedProvider, BudgetExceeded
 from ingestion.extract import ExtractionError, default_prompt_version, extract_from_text, extract_from_video
-from ingestion.followup import classify_followup, respond
+from ingestion.followup import respond
 from ingestion.providers.base import ProviderError, QuotaError
 from ingestion.router import route
 from ingestion.youtube import api as yt_api
@@ -52,6 +53,7 @@ class TutorialIn(BaseModel):
     """The tutorial the learner is following, as the client holds it (the gateway keeps no session). Brief on purpose: the request body is limited to 64 KB."""
     title: str | None = Field(default=None, max_length=200)
     app_version: str | None = Field(default=None, max_length=40)
+    video_url: str | None = Field(default=None, max_length=200)           # the tutorial's public YouTube URL: lets the answer model look at a short clip when the steps cannot answer
     steps: list[TutorialStepIn] = Field(max_length=120)
     current: str | None = Field(default=None, max_length=20)
 
@@ -174,18 +176,22 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
         # model=true: one paid call to the model (cost guard, daily cap), with the knowledge base, the manual index and the tutorial as context. Questions that change or read the
         # learner's progress (done, skip, go back, next, a timestamp) stay rule-based: the model never moves the learner, and the gateway keeps no session.
         try:
+            if not (body.tutorial and body.tutorial.steps):                      # "where do I start": a starter step list from the knowledge base, no model call and no charge
+                plan = starter_bundle(body.question, body.app)
+                if plan is not None:
+                    return plan.model_dump(mode="json")
             if body.model:
                 sess = session_from_tutorial(body.app, [s.model_dump() for s in body.tutorial.steps] if body.tutorial else [], title=body.tutorial.title if body.tutorial else None,
-                                             app_version=body.tutorial.app_version if body.tutorial else None, current=body.tutorial.current if body.tutorial else None,
+                                             app_version=body.tutorial.app_version if body.tutorial else None, current=body.tutorial.current if body.tutorial else None, video_url=body.tutorial.video_url if body.tutorial else None,
                                              history=[h[:300] for h in body.history])
                 sess.version = body.version
-                if classify_followup(body.question) in STATE_INTENTS:
+                if changes_progress(body.question, sess):
                     return respond(sess, body.question).bundle.model_dump(mode="json")
                 if not slots.acquire(blocking=False):
                     raise HTTPException(503, "gateway is busy, retry shortly")
                 try:
                     charge(uid)
-                    answerer = ModelAnswerer(provider_factory(), manual=default_manual())
+                    answerer = ModelAnswerer(provider_factory(), manual=default_manual(), recheck=bool(body.tutorial and body.tutorial.video_url))
                     return provider_call(lambda: answerer(body.question, sess)).model_dump(mode="json")
                 finally:
                     slots.release()

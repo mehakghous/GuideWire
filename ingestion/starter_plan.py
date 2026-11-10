@@ -154,7 +154,9 @@ def plan_from_entries(app: str, entries: list[Entry], title: str | None = None) 
 
 
 _NOT_TOPIC = frozenset({"give", "show", "tell", "list", "need", "want", "get", "write", "step", "plan", "instruction", "implement", "walk", "through", "guide", "please", "me", "how", "do",
-                        "blender", "maya", "houdini", "make", "making", "create", "creating", "set", "setup"})
+                        "blender", "maya", "houdini", "make", "making", "create", "creating", "set", "setup",
+                        # more request words: a knowledge-base phrase such as "build one leg and mirror it" must not make "build a leg with ik" a question about mirroring
+                        "build", "building", "use", "using", "add", "adding", "apply", "applying", "start", "begin", "can", "could", "would", "should", "does", "work", "working"})
 
 
 def _topic_score(e: Entry, q: frozenset[str], rank: int) -> tuple[float, int, int]:

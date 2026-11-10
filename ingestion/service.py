@@ -51,9 +51,16 @@ def render(b: AnswerBundle) -> str:
         out.append(b.clarification)
     out += [q for q in b.questions if q != b.clarification]
     out += [e.text for e in b.explanations]
-    if b.steps and b.route == "rigging_knowledge":                     # a starter plan or topic steps: one line per STAGE, not 20 steps (the steps stay in the bundle for the overlay)
+    if b.steps and b.route == "rigging_knowledge" and (b.steps.title or "").startswith(("Starter plan", "After the skeleton")):
+        # a whole-rig plan: one line per STAGE, not 20 steps (the steps stay in the bundle for the overlay)
         for n, (_gid, label, sts) in enumerate(b.steps.groups, start=1):
             out.append(f"  {n}. {label}" + (f" ({len(sts)} steps)" if len(sts) > 1 else ""))
+    elif b.steps and b.route == "rigging_knowledge":
+        # steps for ONE topic (or "before you rig"): the learner asked for the steps, so every step is written out, under its stage name. The held-out question set showed a stage line alone ("Bind the
+        # geometry (3 steps)") gave a beginner nothing to follow.
+        for _gid, label, sts in b.steps.groups:
+            out.append(f"  {label}:")
+            out += [f"    {st.order}. {st.goal}" for st in sts]
     elif b.steps:
         for st in b.steps.steps:
             flag = f"  [{st.flags[0][:70]}]" if st.flags else ""

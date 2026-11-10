@@ -154,3 +154,19 @@ def test_the_model_can_say_the_learner_wants_steps_and_the_steps_still_come_only
     no = ModelAnswerer(ScriptedProvider([{"answer": "x", "grounding": "knowledge_base", "source_ids": ["maya.ik_handle"], "step_ids": [], "confidence": "high", "in_tutorial": "not_applicable",
                                           "clarifying_question": None, "wants_steps": False}]))("what is ik", Session(app="maya"))
     assert no.steps is None                                                                           # an ordinary question keeps its text answer
+
+
+def test_request_words_do_not_choose_the_topic():
+    for text in ("tell me step by step how to build a leg with ik", "show me how to build a knee with ik, step by step"):
+        b = starter_bundle(text, "maya")
+        assert b is not None and "mirror" not in b.steps.title.lower() and any("ik" in lab.lower() for _, lab, _ in b.steps.groups), text
+
+
+def test_topic_steps_are_written_out_in_the_text_but_a_whole_rig_plan_is_one_line_per_stage():
+    from ingestion.service import render
+    topic = render(starter_bundle("give me the steps to bind a mesh to a skeleton in houdini", "houdini"))
+    assert "Joint Capture" in topic and "Joint Deform" in topic and topic.count("\n") >= 4 and "    1." in topic          # the actual steps, under the stage name
+    plan = render(starter_bundle("where do i start rigging in maya", "maya"))
+    assert "(3 steps)" in plan and "    1." not in plan                                                                 # stages only
+    before = render(starter_bundle("what should i do before rigging in maya", "maya"))
+    assert "Freeze transformations" in before

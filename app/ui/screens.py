@@ -18,6 +18,7 @@ from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, Session
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
 from .bento import ActionTile, Tile, header, page_grid, tidy_list
+from .style import current_palette
 from .workers import run_call
 
 
@@ -117,7 +118,7 @@ class HomeScreen(QWidget):
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
         self.session_button.setObjectName("primary")
-        self.sample_button = ActionTile("Import sample steps", "A small Blender example to try the editor", "lilac", bottom=True)
+        self.sample_button = ActionTile("Import sample steps", "A small Blender example to try the editor", "slate", bottom=True)
         self.new_button = ActionTile("New from text or video link", "Paste instructions or a YouTube link", "mint")
         self.new_button.clicked.connect(self.new_tutorial.emit)
         self.find_button = ActionTile("Find a tutorial", "Say what you want to learn", "soft")
@@ -153,7 +154,7 @@ class HomeScreen(QWidget):
         sub = QLabel("What would you like to learn today?")
         sub.setObjectName("tileHint")
         welcome.body.addWidget(sub)
-        stat = Tile(variant="lilac", padding=20)
+        stat = Tile(variant="slate", padding=20)
         stat.body.addWidget(self.count)
         caption = QLabel("tutorials saved")
         caption.setObjectName("tileHint")
@@ -230,7 +231,7 @@ class StepReviewScreen(QWidget):
     saved = pyqtSignal(int)            # tutorial id
 
     TAGS = {"manual": "  [you confirm]", "partial": "  [partly checked]", "checkable": ""}
-    BADGE_COLOURS = {"checkable": "#1b7a3d", "partial": "#a35f00", "manual": "#5b6677"}
+    BADGE_KEYS = {"checkable": "ok", "partial": "warn", "manual": "muted"}      # palette colours (app/ui/style.py), so they follow the theme
 
     def __init__(self):
         super().__init__()
@@ -359,7 +360,7 @@ class StepReviewScreen(QWidget):
         step = self.editor.steps.steps[self.editor._index(sid)]
         check = checkability(step)
         parts = [f"<p style='font-size:12pt'><b>Step {step.order}</b>&nbsp; {html.escape(step.goal)}</p>",
-                 f"<p><b style='color:{self.BADGE_COLOURS[check.level]}'>{html.escape(check.badge)}.</b> {html.escape(check.text)}</p>"]
+                 f"<p><b style='color:{current_palette()[self.BADGE_KEYS[check.level]]}'>{html.escape(check.badge)}.</b> {html.escape(check.text)}</p>"]
         if step.group:
             members = [s for s in self.editor.steps.steps if s.group_id == step.group_id]
             parts.append(f"<p>Part of: {html.escape(step.group)} (step {members.index(step) + 1} of {len(members)} in this group)</p>")
@@ -475,7 +476,7 @@ class SessionScreen(QWidget):
         top.addWidget(self.title, 1)
         top.addWidget(self.back_button)
         head.body.addLayout(top)
-        step_tile = Tile(variant="accent", padding=24)
+        step_tile = Tile(variant="hero", padding=24)
         step_tile.body.addWidget(self.step_text)
         step_tile.body.addWidget(self.detail, 1)
         progress_tile = Tile("Progress", variant="mint")
@@ -493,7 +494,7 @@ class SessionScreen(QWidget):
         controls.body.addLayout(row2)
         controls.body.addWidget(self.ask_button)
         controls.body.addStretch()
-        guide = Tile("On your screen", variant="lilac")
+        guide = Tile("On your screen", variant="slate")
         about_guide = QLabel("When screen guidance is on, the highlight and automatic step checks are explained here.")
         about_guide.setObjectName("tileHint")
         about_guide.setWordWrap(True)

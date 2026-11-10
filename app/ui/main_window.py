@@ -14,7 +14,7 @@ from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
-from .style import THEMES, build_style
+from .style import THEMES, build_style, set_theme
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
 
@@ -136,7 +136,8 @@ class MainWindow(QMainWindow):
         if app is None:
             return
         theme = self.accounts.preferences(self.user.id).get("theme") if self.user else "light"
-        app.setStyleSheet(build_style(theme if theme in THEMES else "light"))
+        theme = set_theme(theme if theme in THEMES else "light")
+        app.setStyleSheet(build_style(theme))
 
     def on_logged_in(self, user: User) -> None:
         self.user = user

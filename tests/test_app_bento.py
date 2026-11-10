@@ -11,7 +11,8 @@ from PyQt6.QtWidgets import QApplication, QLabel, QPushButton  # noqa: E402
 from app.db import Database  # noqa: E402
 from app.ui.bento import ActionTile, Tile, header, page_grid  # noqa: E402
 from app.ui.main_window import MainWindow  # noqa: E402
-from app.ui.style import PALETTES, STYLE, THEMES, build_style  # noqa: E402
+from app.ui.style import HIGHLIGHT_RGB, PALETTES, STYLE, THEMES, build_style, contrast, current_palette, set_theme  # noqa: E402
+from vision.overlay import HIGHLIGHT_RGB as OVERLAY_RGB  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +27,7 @@ def win(qapp):
     w.close()
     w.db.close()
     qapp.setStyleSheet("")
+    set_theme("light")
 
 
 def _login(w, name="Mehak"):
@@ -52,7 +54,7 @@ def test_the_palettes_define_the_same_colours():
 
 
 def test_every_tile_variant_has_a_rule():
-    for variant in ("soft", "mint", "amber", "lilac", "accent"):
+    for variant in ("soft", "mint", "amber", "slate", "accent", "hero"):
         assert f'QFrame#tile[variant="{variant}"]' in STYLE
 
 
@@ -171,3 +173,82 @@ def test_review_and_start_session_are_disabled_until_there_is_a_tutorial(win):
     win.add_demo_tutorials()
     win.show_home()
     assert win.home.review_button.isEnabled() and win.home.session_button.isEnabled()
+
+
+# ---------------------------------------------------------------- the palette: readable, and not the colours of Blender, Maya or Houdini
+# (foreground, background, minimum contrast ratio). 4.5 is the AA level for normal text; 7 is used where text is the main content.
+READABLE = [
+    ("text", "tile", 7.0), ("text", "canvas", 7.0), ("muted", "tile", 4.5), ("muted", "canvas", 4.5),
+    ("text", "accent_soft", 7.0), ("muted", "accent_soft", 4.5), ("text", "mint", 7.0), ("muted", "mint", 4.5),
+    ("text", "amber", 7.0), ("muted", "amber", 4.5), ("text", "slate", 7.0), ("muted", "slate", 4.5),
+    ("accent_text", "accent", 4.5), ("accent_text", "accent_hover", 4.5),
+    ("accent", "tile", 4.5), ("accent", "accent_soft", 4.5), ("ok", "tile", 4.5), ("warn", "tile", 4.5),
+    ("danger", "field", 4.5), ("danger", "tile", 4.5), ("text", "selected", 7.0), ("text", "field", 7.0),
+]
+
+
+@pytest.mark.parametrize("theme", THEMES)
+@pytest.mark.parametrize("fg,bg,need", READABLE)
+def test_every_text_and_background_pair_is_readable(theme, fg, bg, need):
+    p = PALETTES[theme]
+    assert contrast(p[fg], p[bg]) >= need, f"{theme}: {fg} {p[fg]} on {bg} {p[bg]} is only {contrast(p[fg], p[bg]):.1f}:1"
+
+
+def _hue(hex_colour):
+    import colorsys
+    r, g, b = (int(hex_colour.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    return colorsys.rgb_to_hsv(r, g, b)[0] * 360
+
+
+@pytest.mark.parametrize("theme", THEMES)
+def test_the_accent_is_not_a_colour_the_dcc_applications_use(theme):
+    """Blender and Houdini use orange (about 25 degrees), Maya highlights in green (about 140) and has a blue UI (about 215). The accent keeps clear of all of them."""
+    hue = _hue(PALETTES[theme]["accent"])
+    for taken in (25, 50, 140, 215):
+        assert min(abs(hue - taken), 360 - abs(hue - taken)) >= 25, f"{theme} accent hue {hue:.0f} is too close to {taken}"
+
+
+def test_the_on_screen_highlight_is_the_signature_colour_and_clear_of_the_applications():
+    assert HIGHLIGHT_RGB == OVERLAY_RGB
+    hue = _hue("#%02x%02x%02x" % HIGHLIGHT_RGB)
+    for taken in (25, 50, 140, 215):
+        assert min(abs(hue - taken), 360 - abs(hue - taken)) >= 25
+    assert abs(hue - _hue(PALETTES["light"]["accent"])) < 25            # same family as the app's accent: one colour means GuideWire
+
+
+def test_the_highlight_is_visible_on_a_grey_application_window():
+    for window_grey in ("#2b2b2b", "#3c3c3c", "#4a4a4a"):
+        assert contrast("#%02x%02x%02x" % HIGHLIGHT_RGB, window_grey) >= 3.0
+
+
+def test_the_light_and_dark_sheets_use_the_right_text_on_the_accent():
+    assert f"color: {PALETTES['light']['accent_text']}" in build_style("light")
+    assert f"color: {PALETTES['dark']['accent_text']}" in build_style("dark")
+    assert PALETTES["light"]["accent_text"] != PALETTES["dark"]["accent_text"]
+
+
+# ---------------------------------------------------------------- colours chosen in code follow the theme
+def test_set_theme_and_current_palette_follow_each_other():
+    assert set_theme("dark") == "dark" and current_palette() is PALETTES["dark"]
+    assert set_theme("neon") == "light" and current_palette() is PALETTES["light"]
+
+
+def test_the_step_badge_colours_come_from_the_current_theme(win, qapp):
+    _login(win)
+    win.import_sample()
+    html_light = win.review.detail.text()
+    assert PALETTES["light"]["ok"] in html_light
+    win.accounts.set_preferences(win.user.id, theme="dark")
+    win.apply_theme()
+    win.review.show_detail()
+    assert PALETTES["dark"]["ok"] in win.review.detail.text() and PALETTES["light"]["ok"] not in win.review.detail.text()
+
+
+def test_the_ask_conversation_follows_the_theme(win, qapp):
+    _login(win)
+    win.accounts.set_preferences(win.user.id, theme="dark")
+    win.apply_theme()
+    win.ask_screen._append("You", "hello")
+    win.ask_screen._append("GuideWire", "hi")
+    page = win.ask_screen.transcript.toHtml()
+    assert PALETTES["dark"]["accent"].lstrip("#") in page.lower() and "#222" not in page.lower() and "#1f4e79" not in page.lower()

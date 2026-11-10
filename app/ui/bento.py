@@ -26,7 +26,7 @@ def page_grid(widget: QWidget) -> QGridLayout:
 
 
 class Tile(QFrame):
-    """A rounded box. `body` is the vertical layout to put content in. `variant` is one of: "", soft, mint, amber, lilac, accent."""
+    """A rounded box. `body` is the vertical layout to put content in. `variant` is one of: "", soft, mint, amber, slate, accent, hero (a calm tinted fill with an accent outline)."""
 
     def __init__(self, title: str | None = None, hint: str | None = None, variant: str = "", padding: int = 18):
         super().__init__()

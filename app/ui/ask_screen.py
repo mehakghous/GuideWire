@@ -15,6 +15,7 @@ from shared.step_record import StepList
 from ..ask import Asker, AskResult
 from ..pipeline import APPS
 from .bento import Tile, header, page_grid
+from .style import current_palette
 from .workers import run_call
 
 EXAMPLES = ("Try:  where do i start rigging in maya   |   give me the steps to bind the mesh   |   my knee flips when i move the ik handle   |   what should i do before rigging")
@@ -108,11 +109,12 @@ class AskScreen(QWidget):
         self.last_steps = None
         self.save_button.setVisible(False)
         self.status.setText("")
-        self.transcript.setHtml("<p style='color:#666'>Ask a question below. " + ("This answer will be about the tutorial you chose." if self.tutorial.currentData() is not None else "No tutorial chosen: a general question.") + "</p>")
+        self.transcript.setHtml("<p style='color:" + current_palette()["muted"] + "'>Ask a question below. " + ("This answer will be about the tutorial you chose." if self.tutorial.currentData() is not None else "No tutorial chosen: a general question.") + "</p>")
 
     def _append(self, who: str, text: str) -> None:
         body = html.escape(text).replace("\n", "<br>")
-        color = "#1f4e79" if who == "You" else "#222"
+        pal = current_palette()
+        color = pal["accent"] if who == "You" else pal["text"]
         self.transcript.append(f"<p><b style='color:{color}'>{who}</b><br><span>{body}</span></p>")
 
     # ---- asking

@@ -6,21 +6,27 @@ from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
+from .. import demo_content
 from ..accounts import Accounts, User
+from ..ask import Asker
 from ..db import Database
 from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
+from .ask_screen import AskScreen
+from .find_screen import FindScreen
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
+from .style import STYLE
 
 
 SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline."""
         super().__init__()
         self.setWindowTitle("GuideWire")
-        self.resize(900, 600)
+        self.resize(1000, 680)
         self.db = db
         self.accounts = Accounts(db)
         self.user: User | None = None
@@ -31,8 +37,16 @@ class MainWindow(QMainWindow):
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
+        self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover), sync=sync)
+        self.find_screen = FindScreen(sync=sync)
+        self.find_screen.finder = discover
+        self.ask_screen.load_tutorial = self._tutorial_for_ask
+        if video_provider_factory is not None:
+            from ..pipeline import video_steps
+            self.new_tutorial.video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)
+        self.new_tutorial.sync = sync
         self.stack = QStackedWidget()
-        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial):
+        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen):
             self.stack.addWidget(screen)
         self.setCentralWidget(self.stack)
         self.login.logged_in.connect(self.on_logged_in)
@@ -51,10 +65,64 @@ class MainWindow(QMainWindow):
         self.profile.profile_changed.connect(self.on_profile_changed)
         self.home.open_history.connect(self.open_history)
         self.home.open_profile.connect(self.open_profile)
+        self.home.ask.connect(lambda: self.open_ask())
+        self.home.find.connect(self.open_find)
+        self.find_screen.back.connect(self.show_home)
+        self.find_screen.make_steps.connect(self.steps_from_video)
+        self.home.add_demo.connect(self.add_demo_tutorials)
+        self.ask_screen.back.connect(self.show_home)
+        self.ask_screen.save_steps.connect(self.save_asked_steps)
+        self.session.ask_about.connect(lambda tid: self.open_ask(tid))
         self.stack.setCurrentWidget(self.login)
 
     def current_screen(self):
         return self.stack.currentWidget()
+
+    def add_demo_tutorials(self) -> int:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return 0
+        added = demo_content.add_demo_tutorials(self.db, self.user.id)
+        self.show_home()
+        return added
+
+    def open_find(self) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.find_screen.reset()
+        self.stack.setCurrentWidget(self.find_screen)
+
+    def steps_from_video(self, url: str, app: str) -> None:
+        """A suggested video was chosen: open New tutorial with its link filled in (the user still clicks Create steps)."""
+        self.open_new_tutorial()
+        self.new_tutorial.prefill(url, app)
+
+    def open_ask(self, tutorial_id: int | None = None) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        rows = [(r["id"], r["title"]) for r in self.db.list_tutorials(self.user.id)]
+        self.ask_screen.set_tutorials(rows, select=tutorial_id)          # from Home: a general question; from a session: that tutorial
+        self.stack.setCurrentWidget(self.ask_screen)
+
+    def _tutorial_for_ask(self, tutorial_id: int):
+        """(steps, title, video url) of one of this user's tutorials, for the Ask screen."""
+        from shared.step_record import StepList
+        row = next(r for r in self.db.list_tutorials(self.user.id) if r["id"] == tutorial_id)
+        steps = StepList(source_type=row["source_type"], app=row["app"], title=row["title"], steps=[s for _, s in self.db.get_steps(tutorial_id)])
+        return steps, row["title"], row["source_url"]
+
+    def save_asked_steps(self, steps, title: str) -> None:
+        """The user saved the steps an answer gave: they become one of their tutorials."""
+        if self.user is None:
+            return
+        have = {r["title"] for r in self.db.list_tutorials(self.user.id)}
+        final, n = title, 2
+        while final in have:
+            final, n = f"{title} ({n})", n + 1
+        self.db.save_tutorial(self.user.id, final, steps, source_type="manual")
+        self.ask_screen.saved(final)
 
     def on_logged_in(self, user: User) -> None:
         self.user = user
@@ -134,8 +202,12 @@ class MainWindow(QMainWindow):
 
 
 def main() -> int:
+    from ..ask import default_model_factory
+    from ..discovery import find_tutorials
+    from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
-    window = MainWindow(Database())
+    app.setStyleSheet(STYLE)
+    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=find_tutorials)
     window.show()
     return app.exec()
 

@@ -17,7 +17,7 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database):
+    def __init__(self, db: Database, vision=None):
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(900, 600)
@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
         self.home = HomeScreen()
         self.review = StepReviewScreen()
         self.session = SessionScreen()
+        self.session.vision = vision                # None = sessions run without screen guidance
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
@@ -52,6 +53,10 @@ class MainWindow(QMainWindow):
         self.home.open_history.connect(self.open_history)
         self.home.open_profile.connect(self.open_profile)
         self.stack.setCurrentWidget(self.login)
+
+    def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
+        self.session.stop_guidance()                # never leave the highlight on screen after the app closes
+        super().closeEvent(event)
 
     def current_screen(self):
         return self.stack.currentWidget()
@@ -129,13 +134,21 @@ class MainWindow(QMainWindow):
         except EngineError:
             self.show_home()
             return
-        self.session.load(engine)
+        self.session.load(engine, guidance=bool(self.accounts.preferences(self.user.id).get("overlay", True)))
         self.stack.setCurrentWidget(self.session)
+
+
+def _make_vision():
+    """The real screen-vision service on Windows (observe only); nothing elsewhere, so sessions simply run by hand."""
+    if sys.platform != "win32":
+        return None
+    from vision.service import VisionService
+    return VisionService("Blender")
 
 
 def main() -> int:
     app = QApplication(sys.argv)
-    window = MainWindow(Database())
+    window = MainWindow(Database(), _make_vision())
     window.show()
     return app.exec()
 

@@ -368,3 +368,160 @@ def test_step_with_unreadable_checks_is_marked_in_the_list_and_explained(win):
     assert "Partly checkable" in r.detail.text() and "attribute_exists" in r.detail.text()
     r.list.setCurrentRow(1)
     assert "node_count" in r.detail.text() and "confirm it yourself" in r.detail.text()
+
+
+# ---------------------------------------------------------------- screen guidance in a session
+from concurrent.futures import Future  # noqa: E402
+
+from shared.grounding import GroundingResult, Rect  # noqa: E402
+from vision.service import Guidance  # noqa: E402
+
+
+class _SyncExecutor:
+    def submit(self, fn, *a):
+        f = Future()
+        f.set_result(fn(*a))
+        return f
+
+
+class _FakeOverlay:
+    def __init__(self):
+        self.marks, self.visible, self.log = [], False, []
+
+    def set_marks(self, marks):
+        self.marks = marks
+        self.log.append(len(marks))
+
+    def show(self):
+        self.visible = True
+
+    def hide(self):
+        self.visible = False
+
+
+class _FakeVision:
+    def __init__(self, observed=None, guidance=None, boom=None):
+        self.observed, self.guidance, self.boom, self.asked = observed or {}, guidance, boom, []
+
+    def observe(self):
+        if self.boom:
+            raise self.boom
+        return self.observed
+
+    def ground(self, ui_element):
+        self.asked.append(ui_element)
+        return self.guidance
+
+
+def _guided(w, vision, *, overlay_pref=True):
+    w.session.vision = vision
+    w.session.executor = _SyncExecutor()
+    overlay = _FakeOverlay()
+    w.session.overlay_factory = lambda: overlay
+    w.session.guide_interval_ms = 10_000_000          # tests drive tick() by hand
+    _login(w)
+    if not overlay_pref:
+        w.accounts.set_preferences(w.user.id, overlay=False)
+    w.import_sample()
+    w.review.save_button.click()
+    w.home.tutorials.setCurrentRow(0)
+    w.home.session_button.click()
+    w.session.start_button.click()
+    return w.session, overlay
+
+
+def _pointing(matched="Add"):
+    return Guidance(GroundingResult("ok", 140, 210), Rect(100, 200, 80, 20), False, False, matched)
+
+
+def test_session_without_vision_has_no_guidance(win):
+    s = _session(win)
+    s.start_button.click()
+    s.tick()
+    assert not s._timer.isActive() and s.guide_hint.text() == "" and s._overlay is None
+
+
+def test_guidance_shows_the_highlight_for_the_active_step(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
+    assert s._timer.isActive()
+    s.tick()                                          # starts the reading (synchronous in tests)
+    s.tick()                                          # applies it
+    assert overlay.visible and len(overlay.marks) == 1 and "Open Add" in s.guide_hint.text()
+    assert s.engine.position == 1
+
+
+def test_guidance_completes_a_step_the_screen_shows_done(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "OBJECT", "selection_types": ["MESH"]}, _pointing()))
+    s.tick()
+    s.tick()
+    assert s.engine.position == 2 and "Step 2" in s.step_text.text() and not overlay.visible
+    assert "saw it on screen" in s.guide_hint.text()
+
+
+def test_finishing_the_session_clears_the_highlight_and_stops_the_timer(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
+    s.tick()
+    s.tick()
+    assert overlay.visible
+    for _ in range(4):
+        s.done_button.click()
+    assert not overlay.visible and not s._timer.isActive()
+
+
+def test_leaving_the_session_hides_the_overlay(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
+    s.tick()
+    s.tick()
+    s.back_button.click()
+    assert not overlay.visible and not s._timer.isActive() and win.current_screen() is win.home
+
+
+def test_pressing_done_by_hand_still_works_and_drops_a_stale_reading(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
+    s.tick()                                          # a reading of step 1 is pending
+    s.done_button.click()                             # the learner moves on first
+    s.tick()
+    assert s.engine.position == 2 and not overlay.visible
+
+
+def test_a_vision_failure_leaves_the_session_working_by_hand(win):
+    s, overlay = _guided(win, _FakeVision(boom=RuntimeError("OCR failed")))
+    s.tick()
+    s.tick()
+    assert "OCR failed" in s.guide_hint.text() and s._timer.isActive()      # transient: it will try again
+    s.done_button.click()
+    assert s.engine.position == 2
+
+
+def test_a_missing_component_switches_guidance_off_for_the_session(win):
+    s, overlay = _guided(win, _FakeVision(boom=ImportError("winrt")))
+    s.tick()
+    s.tick()
+    assert not s.guide_enabled and not s._timer.isActive() and "not available" in s.guide_hint.text()
+
+
+def test_the_profile_preference_turns_guidance_off(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()), overlay_pref=False)
+    s.tick()
+    assert not s._timer.isActive() and overlay.marks == [] and "off in your profile" in s.guide_hint.text()
+
+
+def test_an_overlay_failure_never_breaks_the_session(win):
+    s, _ = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
+
+    def broken():
+        raise RuntimeError("no display")
+    s.overlay_factory = broken
+    s.tick()
+    s.tick()
+    assert "no display" in s.guide_hint.text() and not s.guide_enabled
+    s.done_button.click()
+    assert s.engine.position == 2
+
+
+def test_closing_the_window_hides_the_overlay(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
+    s.tick()
+    s.tick()
+    win.close()
+    assert not overlay.visible

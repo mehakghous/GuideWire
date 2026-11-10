@@ -4,11 +4,14 @@ Login and Home work. Step Review and Session are placeholders for now (the edito
 """
 from __future__ import annotations
 
-from PyQt6.QtCore import pyqtSignal
+from concurrent.futures import Future, ThreadPoolExecutor
+
+from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
+from ..guidance import GuidanceController
 from ..pipeline import APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_checks import checkability
@@ -290,6 +293,18 @@ class SessionScreen(QWidget):
         self.detail = QLabel("")
         self.detail.setWordWrap(True)
         self.status = QLabel("")
+        self.guide_hint = QLabel("")
+        self.guide_hint.setWordWrap(True)
+        self.vision = None                          # set by MainWindow: a vision service, or None for a session without screen guidance
+        self.guide: GuidanceController | None = None
+        self.guide_enabled = True                   # the user's preference, and switched off for the session if vision cannot work here
+        self.guide_interval_ms = 1500
+        self.executor: ThreadPoolExecutor | None = None
+        self.overlay_factory = _default_overlay
+        self._overlay = None
+        self._pending: Future | None = None
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self.tick)
         self.start_button = QPushButton("Start")
         self.done_button = QPushButton("Done")
         self.skip_button = QPushButton("Skip")
@@ -299,7 +314,7 @@ class SessionScreen(QWidget):
         self.done_button.clicked.connect(lambda: self._do(self.engine.complete))
         self.skip_button.clicked.connect(lambda: self._do(self.engine.skip))
         self.prev_button.clicked.connect(lambda: self._do(self.engine.back))
-        self.back_button.clicked.connect(self.back.emit)
+        self.back_button.clicked.connect(self._leave)
         row = QHBoxLayout()
         for b in (self.start_button, self.prev_button, self.skip_button, self.done_button):
             row.addWidget(b)
@@ -308,6 +323,7 @@ class SessionScreen(QWidget):
         root.addWidget(self.progress)
         root.addWidget(self.step_text)
         root.addWidget(self.detail)
+        root.addWidget(self.guide_hint)
         root.addLayout(row)
         root.addWidget(self.status)
         root.addStretch()
@@ -317,10 +333,83 @@ class SessionScreen(QWidget):
     def tutorial_id(self) -> int | None:
         return None if self.engine is None else self.engine.db.get_session(self.engine.session_id)["tutorial_id"]
 
-    def load(self, engine: SessionEngine) -> None:
+    def load(self, engine: SessionEngine, *, guidance: bool = True) -> None:
+        self.stop_guidance()
         self.engine = engine
+        self.guide = GuidanceController(engine, self.vision)
+        self.guide_enabled = guidance
         self.status.setText("")
+        self.guide_hint.setText("" if guidance or self.vision is None else "Screen guidance is off in your profile.")
         self.refresh()
+
+    # ---- screen guidance (observe only; see app/guidance.py)
+    def _guiding(self) -> bool:
+        return bool(self.guide and self.guide.available and self.guide_enabled and self.engine and self.engine.state == ACTIVE)
+
+    def _leave(self) -> None:
+        self.stop_guidance()
+        self.back.emit()
+
+    def hideEvent(self, event) -> None:  # noqa: N802 (Qt override)
+        self.stop_guidance()
+        super().hideEvent(event)
+
+    def stop_guidance(self) -> None:
+        self._timer.stop()
+        if self._pending is not None:
+            self._pending.cancel()
+            self._pending = None
+        self._clear_overlay()
+
+    def _clear_overlay(self) -> None:
+        if self._overlay is not None:
+            try:
+                self._overlay.set_marks([])
+                self._overlay.hide()
+            except Exception:
+                pass
+
+    def _show_marks(self, marks: list) -> None:
+        if not marks:
+            self._clear_overlay()
+            return
+        if self._overlay is None:
+            self._overlay = self.overlay_factory()
+        self._overlay.set_marks(marks)
+        self._overlay.show()
+
+    def tick(self) -> None:
+        """One guidance step: apply a finished reading, or start the next one. Vision runs on a worker thread; the engine is only touched here."""
+        if not self._guiding():
+            self.stop_guidance()
+            return
+        if self._pending is not None:
+            if not self._pending.done():
+                return
+            snap, self._pending = self._pending.result(), None
+            out = self.guide.apply(snap)
+            self.guide_hint.setText(out.hint)
+            if out.stop:
+                self.guide_enabled = False
+                self.stop_guidance()
+                return
+            if out.advanced:
+                self._clear_overlay()
+                self.refresh()
+                return
+            try:
+                self._show_marks(out.marks)
+            except Exception as e:                                 # an overlay problem must never break the session
+                self.guide_hint.setText(f"Screen guidance stopped: {e}")
+                self.guide_enabled = False
+                self.stop_guidance()
+            return
+        cur = self.guide.current()
+        if cur is None:
+            return
+        if self.executor is None:
+            self.executor = ThreadPoolExecutor(max_workers=1)
+        self._pending = self.executor.submit(self.guide.compute, *cur)
 
     def _do(self, action) -> None:
         try:
@@ -354,6 +443,26 @@ class SessionScreen(QWidget):
         self.done_button.setEnabled(e.state == ACTIVE)
         self.skip_button.setEnabled(e.state == ACTIVE)
         self.prev_button.setEnabled(e.state == ACTIVE and (e.position or 1) > 1)
+        if self._guiding():
+            self._pending = None                                   # a reading of the previous step is useless now
+            if not self._timer.isActive():
+                self._timer.start(self.guide_interval_ms)
+        else:
+            self.stop_guidance()
+            if e.state != ACTIVE:
+                self.guide_hint.setText("" if self.guide_enabled or self.vision is None else self.guide_hint.text())
+
+
+def _default_overlay():
+    """The real overlay: transparent, click-through, follows the Blender window, hidden from screen capture so OCR never reads its own marks."""
+    from vision import winplatform
+    from vision.overlay import make_overlay_window
+    overlay = make_overlay_window()
+    overlay.hide_from_capture = True
+    overlay.follow(lambda: (lambda w: w.rect if w else None)(winplatform.find_window("Blender")))
+    overlay.show_click_through()
+    return overlay
+
 
 class HistoryScreen(QWidget):
     """The user's past and current sessions, newest first."""

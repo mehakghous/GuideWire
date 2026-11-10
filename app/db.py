@@ -167,6 +167,11 @@ class Database:
                 c.execute("INSERT INTO session_step (session_id, step_id, updated_at) VALUES (?, ?, ?)", (sid, r["id"], now()))
             return sid
 
+    def tutorial_app(self, tutorial_id: int) -> str | None:
+        """The application a tutorial is for (blender, maya or houdini), or None if there is no such tutorial."""
+        row = self.conn.execute("SELECT app FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
+        return None if row is None else row["app"]
+
     def get_session(self, session_id: int) -> sqlite3.Row | None:
         return self.conn.execute("SELECT * FROM session WHERE id = ?", (session_id,)).fetchone()
 

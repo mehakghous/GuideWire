@@ -4,10 +4,11 @@ Login and Home work. Step Review and Session are placeholders for now (the edito
 """
 from __future__ import annotations
 
+import html
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QFrame, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QPushButton, QSplitter, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
@@ -178,26 +179,38 @@ class _Placeholder(QWidget):
 
 
 class StepReviewScreen(QWidget):
-    """List of steps the user can edit, reorder, delete and add, then save. All rules live in StepEditor."""
+    """The steps found for a tutorial: the user checks them, edits, reorders, deletes or adds, then saves. All rules live in StepEditor."""
     back = pyqtSignal()
     saved = pyqtSignal(int)            # tutorial id
+
+    TAGS = {"manual": "  [you confirm]", "partial": "  [partly checked]", "checkable": ""}
+    BADGE_COLOURS = {"checkable": "#1b7a3d", "partial": "#a35f00", "manual": "#5b6677"}
 
     def __init__(self):
         super().__init__()
         self.editor: StepEditor | None = None
         self.db: Database | None = None
         self.user_id: int | None = None
+        self.confirm_discard = self._ask_discard       # replaced in tests so no dialog opens
+        self.hint = QLabel("Check the steps GuideWire found. Edit, reorder, delete or add steps, then press Save.")
+        self.hint.setObjectName("hint")
+        self.hint.setWordWrap(True)
         self.title = QLabel("")
         self.list = QListWidget()
         self.status = QLabel("")
+        self.status.setObjectName("hint")
         self.detail = QLabel("")
+        self.detail.setTextFormat(Qt.TextFormat.RichText)
         self.detail.setWordWrap(True)
-        self.edit_button = QPushButton("Edit text")
+        self.detail.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.edit_button = QPushButton("Edit step")
         self.up_button = QPushButton("Move up")
         self.down_button = QPushButton("Move down")
         self.delete_button = QPushButton("Delete")
+        self.delete_button.setObjectName("danger")
         self.add_button = QPushButton("Add step")
         self.save_button = QPushButton("Save")
+        self.save_button.setObjectName("primary")
         self.back_button = QPushButton("Back")
         self.edit_button.clicked.connect(self.edit_selected)
         self.up_button.clicked.connect(lambda: self.move_selected(-1))
@@ -205,23 +218,58 @@ class StepReviewScreen(QWidget):
         self.delete_button.clicked.connect(self.delete_selected)
         self.add_button.clicked.connect(self.add_step)
         self.save_button.clicked.connect(self.save)
-        self.back_button.clicked.connect(self.back.emit)
+        self.back_button.clicked.connect(self._leave)
         self.list.itemDoubleClicked.connect(lambda _: self.edit_selected())
         self.list.currentRowChanged.connect(lambda _: self.show_detail())
         row = QHBoxLayout()
-        for b in (self.edit_button, self.up_button, self.down_button, self.delete_button, self.add_button):
+        for b in (self.add_button, self.edit_button, self.up_button, self.down_button):
             row.addWidget(b)
+        row.addStretch()
+        row.addWidget(self.delete_button)
+        left = QWidget()
+        left_box = QVBoxLayout(left)
+        left_box.setContentsMargins(0, 0, 0, 0)
+        left_box.addWidget(self.list)
+        left_box.addLayout(row)
+        card = QFrame()
+        card.setObjectName("card")
+        card.setMinimumWidth(320)
+        card_box = QVBoxLayout(card)
+        card_box.setContentsMargins(14, 12, 14, 12)
+        card_box.addWidget(self.detail)
+        card_box.addStretch()
+        split = QSplitter(Qt.Orientation.Horizontal)
+        split.addWidget(left)
+        split.addWidget(card)
+        split.setStretchFactor(0, 3)
+        split.setStretchFactor(1, 2)
+        split.setChildrenCollapsible(False)
+        split.setSizes([560, 440])
         bottom = QHBoxLayout()
         bottom.addWidget(self.status)
         bottom.addStretch()
-        bottom.addWidget(self.save_button)
         bottom.addWidget(self.back_button)
+        bottom.addWidget(self.save_button)
         root = QVBoxLayout(self)
         root.addWidget(self.title)
-        root.addWidget(self.list)
-        root.addWidget(self.detail)
-        root.addLayout(row)
+        root.addWidget(self.hint)
+        root.addWidget(split, 1)
         root.addLayout(bottom)
+
+    # ---- leaving without saving
+    def _ask_discard(self) -> bool:
+        box = QMessageBox(self)
+        box.setWindowTitle("Unsaved changes")
+        box.setText("You have changes that are not saved. Leave without saving them?")
+        leave = box.addButton("Leave without saving", QMessageBox.ButtonRole.DestructiveRole)
+        box.addButton("Keep editing", QMessageBox.ButtonRole.RejectRole)
+        box.exec()
+        return box.clickedButton() is leave
+
+    def _leave(self) -> None:
+        if self.editor is not None and self.editor.dirty and not self.confirm_discard():
+            return
+        self.back.emit()
 
     # ---- opening
     def load(self, editor: StepEditor, db: Database, user_id: int) -> None:
@@ -235,10 +283,10 @@ class StepReviewScreen(QWidget):
 
     def refresh(self, select: str | None = None) -> None:
         assert self.editor is not None
-        self.title.setText(f"<h2>{self.editor.title}</h2>")
+        self.title.setText(f"<h2>{html.escape(self.editor.title)}</h2>")
         self.list.clear()
         for s in self.editor.steps.steps:
-            self.list.addItem(f"{s.order}. {s.goal}" + {"manual": "  [manual]", "partial": "  [partly checkable]", "checkable": ""}[checkability(s).level])
+            self.list.addItem(f"{s.order}. {s.goal}" + self.TAGS[checkability(s).level])
             self.list.item(self.list.count() - 1).setData(0x0100, s.id)     # Qt.ItemDataRole.UserRole
         if self.editor.steps.steps:
             ids = [s.id for s in self.editor.steps.steps]
@@ -249,19 +297,29 @@ class StepReviewScreen(QWidget):
         item = self.list.currentItem()
         return None if item is None else str(item.data(0x0100))
 
+    @staticmethod
+    def _bullets(title: str, items: list[str]) -> str:
+        if not items:
+            return ""
+        return f"<p><b>{title}</b></p><ul>" + "".join(f"<li>{html.escape(i)}</li>" for i in items) + "</ul>"
+
     def show_detail(self) -> None:
-        """Say why the selected step is manual, or what GuideWire will check, and show its warnings."""
+        """The selected step in plain words: what it is, whether GuideWire can check it and why, how to do it, how to tell it worked, and any notes."""
         sid = self.selected_id()
         if self.editor is None or sid is None:
-            self.detail.setText("")
+            self.detail.setText("<p>Select a step to see how GuideWire will handle it.</p>")
             return
         step = self.editor.steps.steps[self.editor._index(sid)]
-        lines = [checkability(step).text]
+        check = checkability(step)
+        parts = [f"<p style='font-size:12pt'><b>Step {step.order}</b>&nbsp; {html.escape(step.goal)}</p>",
+                 f"<p><b style='color:{self.BADGE_COLOURS[check.level]}'>{html.escape(check.badge)}.</b> {html.escape(check.text)}</p>"]
         if step.group:
             members = [s for s in self.editor.steps.steps if s.group_id == step.group_id]
-            lines.insert(0, f"Part of: {step.group} (step {members.index(step) + 1} of {len(members)} in this group)")
-        lines.extend(f"Note: {f}" for f in step.flags)
-        self.detail.setText("\n".join(lines))
+            parts.append(f"<p>Part of: {html.escape(step.group)} (step {members.index(step) + 1} of {len(members)} in this group)</p>")
+        parts.append(self._bullets("How to do it", [h.text for h in step.how_to]))
+        parts.append(self._bullets("How you can tell it worked", [h.text for h in step.check]))
+        parts.append(self._bullets("Notes", step.flags))
+        self.detail.setText("".join(parts))
 
     def _try(self, action) -> bool:
         try:
@@ -282,7 +340,7 @@ class StepReviewScreen(QWidget):
         if sid is None:
             return
         current = self.editor.steps.steps[self.editor._index(sid)].goal
-        text, ok = QInputDialog.getText(self, "Edit step", "Step text", text=current)
+        text, ok = QInputDialog.getText(self, "Edit step", "What should this step say?", text=current)
         if ok:
             self.apply_edit(sid, text)
 
@@ -303,7 +361,7 @@ class StepReviewScreen(QWidget):
             self.refresh(new[0])
 
     def add_step(self) -> None:
-        text, ok = QInputDialog.getText(self, "Add step", "Step text")
+        text, ok = QInputDialog.getText(self, "Add step", "Describe the step, for example: Press Tab to enter Edit Mode")
         if ok:
             self.apply_add(text)
 
@@ -477,7 +535,7 @@ class SessionScreen(QWidget):
             lines = [h.text for h in step.how_to]
             check = checkability(step)
             if check.level != "checkable":
-                lines.append(f"({check.text} Tell it when you are done.)")
+                lines.append(f"({check.full} Press Done when you have finished it.)")
             self.detail.setText("\n".join(lines))
         self.start_button.setEnabled(e.state == NOT_STARTED)
         self.done_button.setEnabled(e.state == ACTIVE)

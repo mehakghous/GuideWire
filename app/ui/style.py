@@ -11,7 +11,11 @@ QPushButton:disabled { color: #9aa4b5; background: #eef1f6; }
 QPushButton#primary { background: #2f6fdb; border-color: #2f6fdb; color: #ffffff; font-weight: 600; }
 QPushButton#primary:hover { background: #2559b3; }
 QLineEdit, QPlainTextEdit, QTextBrowser, QListWidget, QComboBox { background: #ffffff; border: 1px solid #c5cedd; border-radius: 6px; padding: 5px; }
+QListWidget { outline: 0; }
 QListWidget::item { padding: 7px; }
 QListWidget::item:selected { background: #dce9fb; color: #1e2430; }
 QCheckBox { spacing: 8px; }
+QFrame#card { background: #ffffff; border: 1px solid #c5cedd; border-radius: 8px; }
+QPushButton#danger { color: #b3261e; }
+QPushButton#danger:hover { background: #fdecea; border-color: #e5a7a1; }
 """

@@ -46,14 +46,31 @@ def test_a_craft_step_is_manual():
 
 def test_a_step_with_readable_state_is_checkable():
     c = checkability(step(EXAMPLES["mode"][0], EXAMPLES["selection_type"][0]))
-    assert c.level == "checkable" and "once it can read" in c.text
+    assert c.level == "checkable" and c.badge == "Checkable" and "once it can read" in c.text
 
 
 def test_a_step_with_only_unreadable_kinds_is_manual_and_names_them():
     c = checkability(step(EXAMPLES["node_count"][0], EXAMPLES["name_exists"][0]))
-    assert c.level == "manual" and "name_exists, node_count" in c.text
+    assert c.level == "manual" and "that a node has the name you gave it and how many nodes of a type exist" in c.text
 
 
 def test_a_mixed_step_is_partly_checkable():
     c = checkability(step(EXAMPLES["mode"][0], EXAMPLES["attribute_exists"][0]))
-    assert c.level == "partial" and "attribute_exists" in c.text
+    assert c.level == "partial" and "that an attribute was added" in c.text and c.badge == "Partly checkable"
+
+
+@pytest.mark.parametrize("kind", ["name_exists", "attribute_exists", "node_count"])
+def test_the_text_never_shows_an_internal_kind_name(kind):
+    c = checkability(step(EXAMPLES["mode"][0], EXAMPLES[kind][0]))
+    assert kind not in c.text and kind not in c.full
+    c = checkability(step(EXAMPLES[kind][0]))
+    assert kind not in c.text and kind not in c.full
+
+
+def test_full_joins_the_badge_and_the_explanation():
+    c = checkability(step())
+    assert c.full == f"{c.badge}: {c.text}" and c.badge == "You confirm"
+
+
+def test_a_craft_step_says_it_is_judged_by_eye():
+    assert "judged by eye" in checkability(step(EXAMPLES["mode"][0], kind="craft")).text

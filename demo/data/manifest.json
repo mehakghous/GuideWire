@@ -1,0 +1,68 @@
+[
+ {
+  "file": "blender_armature_EBgHRd5tJfE.json",
+  "app": "blender",
+  "title": "Blender 5.1 Basic Rigging Tutorial | Simple Armature Setup & Automatic Weights (Beginner Guide)",
+  "video_id": "EBgHRd5tJfE",
+  "url": "https://www.youtube.com/watch?v=EBgHRd5tJfE",
+  "duration_s": 267.0,
+  "steps": 18,
+  "groups": 8,
+  "guide_path": "Add > Mesh > Cylinder"
+ },
+ {
+  "file": "blender_leg_ik_PctSMB-RGsM.json",
+  "app": "blender",
+  "title": "How to Rig a Leg with Inverse Kinematics in Blender | Quick IK Tutorial for Animation",
+  "video_id": "PctSMB-RGsM",
+  "url": "https://www.youtube.com/watch?v=PctSMB-RGsM",
+  "duration_s": 386.0,
+  "steps": 36,
+  "groups": 16,
+  "guide_path": "Add > Armature > Single Bone"
+ },
+ {
+  "file": "houdini_apex_ik_LJeap3wpyJA.json",
+  "app": "houdini",
+  "title": "Rigging in Houdini with APEX: 02 | Simple IK",
+  "video_id": "LJeap3wpyJA",
+  "url": "https://www.youtube.com/watch?v=LJeap3wpyJA",
+  "duration_s": 377.0,
+  "steps": 10,
+  "groups": 8,
+  "guide_path": null
+ },
+ {
+  "file": "houdini_apex_fk_xWnI7is6e7Q.json",
+  "app": "houdini",
+  "title": "Rigging in Houdini with APEX: 01 | Simple FK",
+  "video_id": "xWnI7is6e7Q",
+  "url": "https://www.youtube.com/watch?v=xWnI7is6e7Q",
+  "duration_s": 397.0,
+  "steps": 15,
+  "groups": 4,
+  "guide_path": null
+ },
+ {
+  "file": "maya_quick_rig_8RqfDcoP0jI.json",
+  "app": "maya",
+  "title": "How to Rig a Character in Maya | Step-by-Step Quick Rig Tutorial for Beginners",
+  "video_id": "8RqfDcoP0jI",
+  "url": "https://www.youtube.com/watch?v=8RqfDcoP0jI",
+  "duration_s": 190.0,
+  "steps": 16,
+  "groups": 5,
+  "guide_path": null
+ },
+ {
+  "file": "maya_leg_ik_TmhC35PqZvQ.json",
+  "app": "maya",
+  "title": "Leg Setup & IK Handles",
+  "video_id": "TmhC35PqZvQ",
+  "url": "https://www.youtube.com/watch?v=TmhC35PqZvQ",
+  "duration_s": 392.0,
+  "steps": 16,
+  "groups": 5,
+  "guide_path": null
+ }
+]

@@ -1,0 +1,6 @@
+/app blender
+/load steps demo/data/blender_armature_EBgHRd5tJfE.json
+what is he doing at 1:30
+i did that
+ok whats next
+why do we parent the mesh with automatic weights

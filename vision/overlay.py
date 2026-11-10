@@ -6,10 +6,12 @@ learner keeps working in Blender. It only draws; it never sends input to the app
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
 from shared.grounding import GroundingResult, Rect
+from vision.tracker import classify
 
 MarkKind = Literal["pointer", "highlight"]
 
@@ -43,6 +45,12 @@ def to_local(mark: Mark, origin: Rect) -> Mark:
     return Mark(mark.kind, Rect(r.x - origin.x, r.y - origin.y, r.w, r.h), mark.label)
 
 
+def shift_mark(mark: Mark, dx: int, dy: int) -> Mark:
+    """The same mark after its window moved by (dx, dy)."""
+    r = mark.rect
+    return Mark(mark.kind, Rect(r.x + dx, r.y + dy, r.w, r.h), mark.label)
+
+
 def visible_marks(marks: list[Mark], origin: Rect) -> list[Mark]:
     """Marks that touch the overlay's area, in local coordinates. Off-window marks are dropped."""
     out = []
@@ -74,7 +82,9 @@ def make_overlay_window():
             self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
             self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
             self._origin = Rect(0, 0, 1, 1)
-            self._marks: list[Mark] = []
+            self._screen_marks: list[Mark] = []   # screen coordinates, kept so a move can shift them
+            self._marks: list[Mark] = []          # the same, local to the overlay, for painting
+            self._timer = None
 
         def _scale(self) -> float:
             screen = QApplication.primaryScreen()
@@ -89,14 +99,45 @@ def make_overlay_window():
             self.update()
 
         def set_marks(self, marks: list[Mark]) -> None:
-            self._marks = visible_marks(marks, self._origin)
+            self._screen_marks = list(marks)
+            self._marks = visible_marks(self._screen_marks, self._origin)
             self.update()
+
+        def follow(self, find_rect: Callable[[], Rect | None], on_resized: Callable[[], None] | None = None,
+                   interval_ms: int = 200) -> None:
+            """Track the application window. A move carries the marks along. A resize clears them,
+            because their positions no longer mean anything, and calls `on_resized` so the caller
+            can capture and ground again. A hidden or minimized window hides the overlay."""
+            from PyQt6.QtCore import QTimer
+            state = {"rect": self._origin if self.isVisible() else None}
+
+            def tick() -> None:
+                change = classify(state["rect"], find_rect())
+                state["rect"] = change.rect
+                if change.kind == "lost":
+                    self.hide()
+                elif change.kind in ("found", "resized"):
+                    self._screen_marks = []
+                    self.cover(change.rect)
+                    self.set_marks([])
+                    self.show_click_through()
+                    if change.kind == "resized" and on_resized:
+                        on_resized()
+                elif change.kind == "moved":
+                    self.cover(change.rect)
+                    self.set_marks([shift_mark(m, change.dx, change.dy) for m in self._screen_marks])
+
+            self._timer = QTimer(self)
+            self._timer.timeout.connect(tick)
+            self._timer.start(interval_ms)
+
+        hide_from_capture = True   # set False to let screen recorders see the overlay
 
         def show_click_through(self) -> None:
             self.show()
             if sys.platform == "win32":
                 from vision import winplatform
-                winplatform.make_click_through(int(self.winId()))
+                winplatform.make_click_through(int(self.winId()), self.hide_from_capture)
 
         def paintEvent(self, _event) -> None:  # noqa: N802 (Qt override)
             p = QPainter(self)

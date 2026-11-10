@@ -11,6 +11,7 @@ from ..accounts import AccountError, Accounts, User
 from ..db import Database
 from ..pipeline import APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
+from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
 
 
@@ -202,7 +203,7 @@ class StepReviewScreen(QWidget):
         self.title.setText(f"<h2>{self.editor.title}</h2>")
         self.list.clear()
         for s in self.editor.steps.steps:
-            self.list.addItem(f"{s.order}. {s.goal}" + ("  [manual]" if not s.verifiable else ""))
+            self.list.addItem(f"{s.order}. {s.goal}" + {"manual": "  [manual]", "partial": "  [partly checkable]", "checkable": ""}[checkability(s).level])
             self.list.item(self.list.count() - 1).setData(0x0100, s.id)     # Qt.ItemDataRole.UserRole
         if self.editor.steps.steps:
             ids = [s.id for s in self.editor.steps.steps]
@@ -220,7 +221,7 @@ class StepReviewScreen(QWidget):
             self.detail.setText("")
             return
         step = self.editor.steps.steps[self.editor._index(sid)]
-        lines = ["GuideWire can check this step automatically." if step.verifiable else "Manual step: GuideWire cannot check it, you confirm it yourself."]
+        lines = [checkability(step).text]
         lines.extend(f"Note: {f}" for f in step.flags)
         self.detail.setText("\n".join(lines))
 
@@ -345,8 +346,9 @@ class SessionScreen(QWidget):
         else:
             self.step_text.setText(f"<b>Step {e.position}:</b> {step.goal}")
             lines = [h.text for h in step.how_to]
-            if not step.verifiable:
-                lines.append("(GuideWire cannot check this step automatically: tell it when you are done.)")
+            check = checkability(step)
+            if check.level != "checkable":
+                lines.append(f"({check.text} Tell it when you are done.)")
             self.detail.setText("\n".join(lines))
         self.start_button.setEnabled(e.state == NOT_STARTED)
         self.done_button.setEnabled(e.state == ACTIVE)

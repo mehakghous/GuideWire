@@ -200,7 +200,7 @@ def test_craft_step_tells_the_user_it_is_manual(win):
     s.start_button.click()
     for _ in range(3):
         s.done_button.click()
-    assert "cannot check this step automatically" in s.detail.text()
+    assert "Manual step" in s.detail.text() and "Tell it when you are done" in s.detail.text()
 
 
 def test_each_open_creates_its_own_session_and_back_goes_home(win):
@@ -344,7 +344,7 @@ def test_recognised_step_is_checkable_and_not_marked_manual(win):
     r = _open_sample(win)
     r.list.setCurrentRow(0)
     r.apply_add("Press Tab to enter Edit Mode")
-    assert "[manual]" not in r.list.currentItem().text() and "check this step automatically" in r.detail.text()
+    assert "[manual]" not in r.list.currentItem().text() and "Checkable step" in r.detail.text()
 
 
 def test_duplicate_step_is_refused_on_add_and_on_edit(win):
@@ -353,3 +353,18 @@ def test_duplicate_step_is_refused_on_add_and_on_edit(win):
     assert "already in the list" in r.status.text() and r.list.count() == 4
     r.apply_edit("s02", "Add a cube to the scene")
     assert "already in the list" in r.status.text()
+
+
+def test_step_with_unreadable_checks_is_marked_in_the_list_and_explained(win):
+    from shared.step_record import StatePredicate
+    r = _open_sample(win)
+    steps = r.editor.steps.steps
+    steps[0].expected_state = [StatePredicate(kind="mode", target="OBJECT"), StatePredicate(kind="attribute_exists", target="a.b")]
+    steps[1].expected_state = [StatePredicate(kind="node_count", target="joint", value=3)]
+    r.refresh()
+    assert r.list.item(0).text().endswith("[partly checkable]")
+    assert r.list.item(1).text().endswith("[manual]")
+    r.list.setCurrentRow(0)
+    assert "Partly checkable" in r.detail.text() and "attribute_exists" in r.detail.text()
+    r.list.setCurrentRow(1)
+    assert "node_count" in r.detail.text() and "confirm it yourself" in r.detail.text()

@@ -10,6 +10,9 @@ mechanism as extraction), with the rule that it may only report what is shown or
     "not shown" when it is not shown is exactly what the "not in the tutorial" rule was written to prevent (docs/evaluation_report_2026-11-09.md, section 3.4);
   * any provider error or budget stop keeps the first answer unchanged.
 One extra call per such question, on a clip of at most WINDOW_BEFORE_S + WINDOW_AFTER_S seconds, through the same cost guard (cache, ceilings, log) as every other call.
+With `extra_windows` (the gateway and chat use 3) it goes on to other parts of the video while the answer is "not shown", because the first guess is the wrong part of the video when the question has no time in it.
+Measured on 27 labelled actions the steps missed, with a time in the question the first clip found 27 and 24 were correct; with no time the first clip found 19 (18 correct) and the sweep found 26 (22 correct, 2 wrong); 36 of 36 unanswerable questions were
+answered "not shown" with and without the sweep (docs/evaluation_report_2026-11-09.md, section 3.10).
 """
 from __future__ import annotations
 
@@ -100,30 +103,65 @@ def pick_window(question: str, session: Session, step_ids: list[str] | None = No
     return Window(start, end, why) if end > start else None
 
 
-def recheck(provider, question: str, session: Session, step_ids: list[str] | None = None) -> tuple[Window, dict] | None:
-    """Ask the video model about the clip. Returns (window, result) or None when there is no video, no moment, or the call failed. Never raises."""
+def windows_to_try(question: str, session: Session, step_ids: list[str] | None = None, extra: int = 0) -> list[Window]:
+    """The clip chosen by `pick_window`, then up to `extra` other parts of the video (the video cut in clips of WINDOW_BEFORE_S + WINDOW_AFTER_S seconds, those that mostly overlap an earlier clip
+    left out, nearest to the first clip first). The sweep is for a question with no time in it, where the first guess can be the wrong part of the video."""
+    first = pick_window(question, session, step_ids)
+    if first is None:
+        return []
+    wins = [first]
+    dur = _duration(session)
+    if extra > 0 and dur:
+        size = WINDOW_BEFORE_S + WINDOW_AFTER_S
+        tiles = [Window(a, min(a + size, int(dur)), "a sweep of the video") for a in range(0, int(dur), size) if min(a + size, int(dur)) - a >= 20]
+        tiles = [t for t in tiles if min(t.end_s, first.end_s) - max(t.start_s, first.start_s) < size / 2]
+        centre = (first.start_s + first.end_s) / 2
+        tiles.sort(key=lambda t: abs((t.start_s + t.end_s) / 2 - centre))
+        wins += tiles[:extra]
+    return wins
+
+
+def recheck(provider, question: str, session: Session, step_ids: list[str] | None = None, extra_windows: int = 0) -> tuple[Window, dict] | None:
+    """Ask the video model about the clip. Returns (window, result) or None when there is no video, no moment, or no call succeeded. Never raises.
+    With `extra_windows` it goes on to other parts of the video while the answer is "not shown", and stops at the first clip that shows it; `result["tried"]` lists every clip asked."""
     url = video_url_of(session)
-    win = pick_window(question, session, step_ids)
-    if url is None or win is None:
+    wins = windows_to_try(question, session, step_ids, extra_windows)
+    if url is None or not wins:
         return None
     old = getattr(provider, "video_seconds", None)
+    tried: list[tuple[int, int]] = []
+    first_ok: tuple[Window, dict] | None = None
     try:
-        if hasattr(provider, "video_seconds"):
-            provider.video_seconds = float(win.end_s - win.start_s)
-        res = provider.generate_json(system=SYSTEM, prompt=f"Learner question: {question}", schema=SCHEMA, video_url=f"{url}#t={win.start_s},{win.end_s}")
-    except Exception:
-        return None
+        for win in wins:
+            if hasattr(provider, "video_seconds"):
+                provider.video_seconds = float(win.end_s - win.start_s)
+            try:
+                res = provider.generate_json(system=SYSTEM, prompt=f"Learner question: {question}", schema=SCHEMA, video_url=f"{url}#t={win.start_s},{win.end_s}")
+            except Exception:
+                break                                                              # an outage or a budget stop: keep what was asked so far
+            if not isinstance(res, dict) or not isinstance(res.get("found"), bool):
+                break
+            tried.append((win.start_s, win.end_s))
+            res = {**res, "tried": list(tried)}
+            if first_ok is None:
+                first_ok = (win, res)
+            if res["found"] and (res.get("answer") or "").strip():
+                return win, res
     finally:
         if hasattr(provider, "video_seconds"):
             provider.video_seconds = old
-    if not isinstance(res, dict) or not isinstance(res.get("found"), bool):
+    if first_ok is None:
         return None
-    return win, res
+    return first_ok[0], {**first_ok[1], "tried": list(tried)}
 
 
 def apply_recheck(text: str, win: Window, res: dict) -> tuple[str, str]:
     """(the answer text, a one-line caveat). Found: the clip's answer with its time. Not found: the first answer plus one honest sentence."""
     span = f"{mmss(win.start_s)} to {mmss(win.end_s)}"
+    tried = res.get("tried") or []
+    if not (res["found"] and (res.get("answer") or "").strip()) and len(tried) > 1:
+        parts = ", ".join(f"{mmss(a)} to {mmss(b)}" for a, b in tried)
+        return text.rstrip() + f" I also checked {len(tried)} parts of the video ({parts}) and it is not shown in any of them.", f"Checked {len(tried)} parts of the video: not shown."
     if res["found"] and (res.get("answer") or "").strip():
         # no exact time: in the first live run the model's "at" time was about 40 s off the human-labelled moment, so only the clip it was shown is reported
         return res["answer"].strip() + f" (the video shows this somewhere in {span})", f"Checked the video around {span}: this is what it shows or says there."

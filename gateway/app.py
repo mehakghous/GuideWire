@@ -191,7 +191,7 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
                     raise HTTPException(503, "gateway is busy, retry shortly")
                 try:
                     charge(uid)
-                    answerer = ModelAnswerer(provider_factory(), manual=default_manual(), recheck=bool(body.tutorial and body.tutorial.video_url))
+                    answerer = ModelAnswerer(provider_factory(), manual=default_manual(), recheck=bool(body.tutorial and body.tutorial.video_url), recheck_sweep=3)
                     return provider_call(lambda: answerer(body.question, sess)).model_dump(mode="json")
                 finally:
                     slots.release()

@@ -164,7 +164,7 @@ def _offline(args) -> int:
             from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
             from .providers.gemini import GeminiProvider
             try:
-                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb, recheck=args.recheck)
+                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb, recheck=args.recheck, recheck_sweep=3 if args.recheck else 0)
             except BudgetExceeded as e:
                 print(f"error: {e}", file=sys.stderr)
                 return 2

@@ -44,6 +44,8 @@ How to answer:
 10. Copy every menu path, tool name, node name and shortcut CHARACTER FOR CHARACTER from the ENTRIES or MANUAL passages. If none of them gives the exact name, name the tool in plain words and say where to look: never write a menu path from memory (a reply that said "Skin > Paint Weights" for "Skin > Paint Skin Weights Tool" misled a learner).
 11. For a how-to question ("how do i make", "how do i add", "how do i attach") give the short ordered sequence: 3 to 6 numbered steps, one action each, using every outline step of the matching ENTRY and the menu or key it gives, and nothing the context does not support. Add one closing line saying what the learner should see when it worked, if an ENTRY gives a check.
 12. For "which tutorial should i watch" or any request to recommend a video or course: you cannot see GuideWire's tutorial list, so do not recommend, name or describe any tutorial, channel or course from memory. Ask ONE short question about what the learner wants to make and their level, say that GuideWire can search tutorials for that goal, and leave answer empty with confidence "low".
+13. Versions: never say or imply that steps, menus or tools written for one version of the application work the same in another version, unless an ENTRY or MANUAL passage says so. Say which version the tutorial shows (when the context gives it), that menus and names can differ in a newer or older version, and that the learner should check the release notes or the manual page for their version.
+14. "Why" questions about the tutorial ("why did he change the solver", "why do we clear the parent"): if the tutorial steps do not give a reason, say plainly that the tutorial does not give a reason (in_tutorial "no"); you may then add a reason from general knowledge, clearly labelled as general knowledge and not as something the instructor said.
 
 Return JSON only."""
 
@@ -199,6 +201,7 @@ class ModelAnswerer:
     provider: object                      # anything with generate_json(system=, prompt=, schema=); wrap it in BudgetedProvider for the cost guard
     manual: object | None = None          # ingestion.kb.index.KnowledgeBase for Blender manual passages
     knowledge: Knowledge | None = None
+    recheck_sweep: int = 0                # with recheck: how many OTHER parts of the video to look at when the first clip does not show it (each is one more call)
     recheck: bool = False                 # when the steps cannot answer a question about the tutorial, look at the video clip around the right moment (ingestion/video_recheck.py); one extra call
 
     def __call__(self, question: str, session: Session | None = None, app: str | None = None) -> AnswerBundle:
@@ -210,7 +213,7 @@ class ModelAnswerer:
         if self.recheck and session is not None and session.steps is not None and raw.get("in_tutorial") == "no" and bundle.explanations:
             from .video_recheck import apply_recheck
             from .video_recheck import recheck as recheck_video
-            got = recheck_video(self.provider, question, session, [s for s in raw.get("step_ids", []) if isinstance(s, str)])
+            got = recheck_video(self.provider, question, session, [s for s in raw.get("step_ids", []) if isinstance(s, str)], self.recheck_sweep)
             if got is not None:
                 win, res = got
                 bundle.explanations[0].text, note = apply_recheck(bundle.explanations[0].text, win, res)

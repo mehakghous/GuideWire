@@ -100,3 +100,34 @@ def test_the_gateway_sends_the_clip_question_only_when_the_client_gives_the_vide
     tut.pop("video_url")
     r2 = c2.post("/v1/answer", json={"question": "what value does he type for the twist", "app": "maya", "model": True, "tutorial": tut}, headers={"Authorization": "Bearer t1"})
     assert r2.status_code == 200 and r2.json()["api_calls"] == 1 and len(prov2.calls) == 1
+
+
+def test_the_sweep_tries_other_parts_of_the_video_nearest_first_and_never_repeats_a_clip():
+    from ingestion.video_recheck import windows_to_try
+    s = tutorial_session()                                                              # a 400 s video; "why that value" is anchored on the step the learner is on (s01 at 10 s)
+    one = windows_to_try("why that value", s, [])
+    assert one == [Window(0, 85, "the step the learner is on")]
+    wins = windows_to_try("why that value", s, [], extra=2)
+    assert wins[0] == one[0] and len(wins) == 3 and all(w.why == "a sweep of the video" for w in wins[1:])
+    assert wins[1].start_s < wins[2].start_s and wins[1].start_s >= 85 - 60                 # the nearest part comes first
+    spans = [(w.start_s, w.end_s) for w in wins]
+    assert all(min(a[1], b[1]) - max(a[0], b[0]) < 60 for i, a in enumerate(spans) for b in spans[i + 1:])
+
+
+def test_a_sweep_stops_at_the_first_clip_that_shows_it_and_a_miss_everywhere_says_how_many_parts_were_checked():
+    from ingestion.video_recheck import apply_recheck, recheck
+    p = ScriptedProvider([{"found": False, "answer": ""}, {"found": True, "answer": "He types 0.5."}])
+    win, res = recheck(p, "why that value", tutorial_session(), [], extra_windows=3)
+    assert res["found"] and len(p.calls) == 2 and len(res["tried"]) == 2 and win.start_s == res["tried"][1][0]                  # stopped at the second clip
+    p2 = ScriptedProvider([{"found": False, "answer": ""}] * 3)
+    win2, res2 = recheck(p2, "why that value", tutorial_session(), [], extra_windows=2)
+    text, note = apply_recheck("That is not in the tutorial.", win2, res2)
+    assert len(p2.calls) == 3 and "I also checked 3 parts of the video" in text and "not shown in any of them" in text and "3 parts" in note
+
+
+def test_a_failure_part_way_through_a_sweep_keeps_what_was_asked():
+    from ingestion.video_recheck import recheck
+    p = ScriptedProvider([{"found": False, "answer": ""}, QuotaError("429")])
+    win, res = recheck(p, "why that value", tutorial_session(), [], extra_windows=3)
+    assert not res["found"] and len(res["tried"]) == 1
+    assert recheck(ScriptedProvider([QuotaError("429")]), "why", tutorial_session(), [], extra_windows=2) is None

@@ -152,7 +152,7 @@ def main(argv=None) -> int:
         else:
             from ..providers.gemini import GeminiProvider
             prov = BudgetedProvider(GeminiProvider(api_key=api_key_for("default"), model=TIERS[a.model_tier]), label="default")
-        answerer = Paced(ModelAnswerer(prov, manual=kb, recheck=a.recheck))
+        answerer = Paced(ModelAnswerer(prov, manual=kb, recheck=a.recheck, recheck_sweep=3 if a.recheck else 0))
     rows = run(a.suite, answerer)
     res = {"summary": summary(rows), "rows": rows}
     if a.out:

@@ -6,6 +6,7 @@ off Windows instead of failing at import time.
 """
 from __future__ import annotations
 
+import os
 import sys
 from dataclasses import dataclass
 
@@ -95,6 +96,35 @@ def list_windows() -> list[WindowInfo]:
     return found
 
 
+def windows_above(hwnd: int) -> list[Rect]:
+    """Screen rects of visible windows stacked above `hwnd` (they cover part of it)."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    out: list[Rect] = []
+    state = {"seen": False}
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def visit(h, _lparam):
+        if int(h) == hwnd:
+            state["seen"] = True
+            return False                      # EnumWindows runs top of the stack first
+        pid = wintypes.DWORD(0)
+        user32.GetWindowThreadProcessId(h, ctypes.byref(pid))
+        if pid.value == os.getpid():              # our own overlay is not a covering window
+            return True
+        if user32.IsWindowVisible(h) and not user32.IsIconic(h) and user32.GetWindowTextLengthW(h) > 0:
+            cloaked = ctypes.c_int(0)
+            ctypes.windll.dwmapi.DwmGetWindowAttribute(wintypes.HWND(h), 14, ctypes.byref(cloaked), 4)
+            if not cloaked.value:
+                out.append(window_rect(int(h)))
+        return True
+
+    user32.EnumWindows(visit, 0)
+    return out if state["seen"] else []
+
+
 def find_window(title_contains: str = "Blender") -> WindowInfo | None:
     """Largest non-minimized visible window whose title contains the text (case-insensitive)."""
     needle = title_contains.lower()
@@ -102,7 +132,7 @@ def find_window(title_contains: str = "Blender") -> WindowInfo | None:
     return max(hits, key=lambda w: w.rect.w * w.rect.h, default=None)
 
 
-def make_click_through(hwnd: int) -> None:
+def make_click_through(hwnd: int, hide_from_capture: bool = True) -> None:
     """Apply click-through, always-on-top, no-focus, no-taskbar flags to an overlay window."""
     _require_windows()
     import ctypes
@@ -110,3 +140,32 @@ def make_click_through(hwnd: int) -> None:
     get = getattr(user32, "GetWindowLongPtrW", user32.GetWindowLongW)
     set_ = getattr(user32, "SetWindowLongPtrW", user32.SetWindowLongW)
     set_(hwnd, GWL_EXSTYLE, apply_style_flags(get(hwnd, GWL_EXSTYLE)))
+    if hide_from_capture:
+        exclude_from_capture(hwnd)
+
+
+WDA_EXCLUDEFROMCAPTURE = 0x11
+
+
+def exclude_from_capture(hwnd: int) -> bool:
+    """Keep the overlay out of screen captures, so our own labels are never read back by OCR.
+
+    Needs Windows 10 2004 or later; returns False (and the overlay still works) if refused."""
+    _require_windows()
+    import ctypes
+    return bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE))
+
+
+def left_click_position() -> tuple[int, int] | None:
+    """Screen position of the cursor while the left mouse button is held, else None.
+
+    Passive polling of the button state; nothing is sent to any window."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    if not user32.GetAsyncKeyState(0x01) & 0x8000:      # VK_LBUTTON
+        return None
+    pt = wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(pt))
+    return pt.x, pt.y

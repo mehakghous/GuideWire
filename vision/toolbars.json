@@ -1,0 +1,1029 @@
+{
+ "_blender": "5.2.3 LTS",
+ "OBJECT": [
+  [
+   {
+    "id": "builtin.select",
+    "label": "Tweak"
+   },
+   {
+    "id": "builtin.select_box",
+    "label": "Select Box"
+   },
+   {
+    "id": "builtin.select_circle",
+    "label": "Select Circle"
+   },
+   {
+    "id": "builtin.select_lasso",
+    "label": "Select Lasso"
+   }
+  ],
+  [
+   {
+    "id": "builtin.cursor",
+    "label": "Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.move",
+    "label": "Move"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rotate",
+    "label": "Rotate"
+   }
+  ],
+  [
+   {
+    "id": "builtin.scale",
+    "label": "Scale"
+   },
+   {
+    "id": "builtin.scale_cage",
+    "label": "Scale Cage"
+   }
+  ],
+  [
+   {
+    "id": "builtin.transform",
+    "label": "Transform"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ],
+  [
+   {
+    "id": "builtin.measure",
+    "label": "Measure"
+   }
+  ],
+  [
+   {
+    "id": "builtin.primitive_cube_add",
+    "label": "Add Cube"
+   },
+   {
+    "id": "builtin.primitive_cone_add",
+    "label": "Add Cone"
+   },
+   {
+    "id": "builtin.primitive_cylinder_add",
+    "label": "Add Cylinder"
+   },
+   {
+    "id": "builtin.primitive_uv_sphere_add",
+    "label": "Add UV Sphere"
+   },
+   {
+    "id": "builtin.primitive_ico_sphere_add",
+    "label": "Add Ico Sphere"
+   }
+  ],
+  [
+   {
+    "id": "builtin.breakdowner",
+    "label": "Breakdowner"
+   },
+   {
+    "id": "builtin.push",
+    "label": "Push"
+   },
+   {
+    "id": "builtin.relax",
+    "label": "Relax"
+   }
+  ]
+ ],
+ "EDIT_MESH": [
+  [
+   {
+    "id": "builtin.select",
+    "label": "Tweak"
+   },
+   {
+    "id": "builtin.select_box",
+    "label": "Select Box"
+   },
+   {
+    "id": "builtin.select_circle",
+    "label": "Select Circle"
+   },
+   {
+    "id": "builtin.select_lasso",
+    "label": "Select Lasso"
+   }
+  ],
+  [
+   {
+    "id": "builtin.cursor",
+    "label": "Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.move",
+    "label": "Move"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rotate",
+    "label": "Rotate"
+   }
+  ],
+  [
+   {
+    "id": "builtin.scale",
+    "label": "Scale"
+   },
+   {
+    "id": "builtin.scale_cage",
+    "label": "Scale Cage"
+   }
+  ],
+  [
+   {
+    "id": "builtin.transform",
+    "label": "Transform"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ],
+  [
+   {
+    "id": "builtin.measure",
+    "label": "Measure"
+   }
+  ],
+  [
+   {
+    "id": "builtin.primitive_cube_add",
+    "label": "Add Cube"
+   },
+   {
+    "id": "builtin.primitive_cone_add",
+    "label": "Add Cone"
+   },
+   {
+    "id": "builtin.primitive_cylinder_add",
+    "label": "Add Cylinder"
+   },
+   {
+    "id": "builtin.primitive_uv_sphere_add",
+    "label": "Add UV Sphere"
+   },
+   {
+    "id": "builtin.primitive_ico_sphere_add",
+    "label": "Add Ico Sphere"
+   }
+  ],
+  [
+   {
+    "id": "builtin.extrude_region",
+    "label": "Extrude Region"
+   },
+   {
+    "id": "builtin.extrude_manifold",
+    "label": "Extrude Manifold"
+   },
+   {
+    "id": "builtin.extrude_along_normals",
+    "label": "Extrude Along Normals"
+   },
+   {
+    "id": "builtin.extrude_individual",
+    "label": "Extrude Individual"
+   },
+   {
+    "id": "builtin.extrude_to_cursor",
+    "label": "Extrude to Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.inset_faces",
+    "label": "Inset Faces"
+   }
+  ],
+  [
+   {
+    "id": "builtin.bevel",
+    "label": "Bevel"
+   }
+  ],
+  [
+   {
+    "id": "builtin.loop_cut",
+    "label": "Loop Cut"
+   },
+   {
+    "id": "builtin.offset_edge_loop_cut",
+    "label": "Offset Edge Loop Cut"
+   }
+  ],
+  [
+   {
+    "id": "builtin.knife",
+    "label": "Knife"
+   },
+   {
+    "id": "builtin.bisect",
+    "label": "Bisect"
+   }
+  ],
+  [
+   {
+    "id": "builtin.poly_build",
+    "label": "Poly Build"
+   }
+  ],
+  [
+   {
+    "id": "builtin.spin",
+    "label": "Spin"
+   }
+  ],
+  [
+   {
+    "id": "builtin.smooth",
+    "label": "Smooth"
+   },
+   {
+    "id": "builtin.randomize",
+    "label": "Randomize"
+   }
+  ],
+  [
+   {
+    "id": "builtin.edge_slide",
+    "label": "Edge Slide"
+   },
+   {
+    "id": "builtin.vertex_slide",
+    "label": "Vertex Slide"
+   }
+  ],
+  [
+   {
+    "id": "builtin.shrink_fatten",
+    "label": "Shrink/Fatten"
+   },
+   {
+    "id": "builtin.push_pull",
+    "label": "Push/Pull"
+   }
+  ],
+  [
+   {
+    "id": "builtin.shear",
+    "label": "Shear"
+   },
+   {
+    "id": "builtin.to_sphere",
+    "label": "To Sphere"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rip_region",
+    "label": "Rip Region"
+   },
+   {
+    "id": "builtin.rip_edge",
+    "label": "Rip Edge"
+   }
+  ]
+ ],
+ "SCULPT": [
+  [
+   {
+    "id": "builtin.brush",
+    "label": "Brush"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.paint",
+    "label": "Paint"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.mask",
+    "label": "Mask"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.draw_face_sets",
+    "label": "Draw Face Sets"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.displacement_eraser",
+    "label": "Multires Displacement Eraser"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.displacement_smear",
+    "label": "Multires Displacement Smear"
+   }
+  ],
+  [
+   {
+    "id": "builtin.primitive_cube_add",
+    "label": "Add Cube"
+   },
+   {
+    "id": "builtin.primitive_cone_add",
+    "label": "Add Cone"
+   },
+   {
+    "id": "builtin.primitive_cylinder_add",
+    "label": "Add Cylinder"
+   },
+   {
+    "id": "builtin.primitive_uv_sphere_add",
+    "label": "Add UV Sphere"
+   },
+   {
+    "id": "builtin.primitive_ico_sphere_add",
+    "label": "Add Ico Sphere"
+   }
+  ],
+  [
+   {
+    "id": "builtin.box_mask",
+    "label": "Box Mask"
+   },
+   {
+    "id": "builtin.lasso_mask",
+    "label": "Lasso Mask"
+   },
+   {
+    "id": "builtin.line_mask",
+    "label": "Line Mask"
+   },
+   {
+    "id": "builtin.polyline_mask",
+    "label": "Polyline Mask"
+   }
+  ],
+  [
+   {
+    "id": "builtin.box_hide",
+    "label": "Box Hide"
+   },
+   {
+    "id": "builtin.lasso_hide",
+    "label": "Lasso Hide"
+   },
+   {
+    "id": "builtin.line_hide",
+    "label": "Line Hide"
+   },
+   {
+    "id": "builtin.polyline_hide",
+    "label": "Polyline Hide"
+   }
+  ],
+  [
+   {
+    "id": "builtin.box_face_set",
+    "label": "Box Face Set"
+   },
+   {
+    "id": "builtin.lasso_face_set",
+    "label": "Lasso Face Set"
+   },
+   {
+    "id": "builtin.line_face_set",
+    "label": "Line Face Set"
+   },
+   {
+    "id": "builtin.polyline_face_set",
+    "label": "Polyline Face Set"
+   }
+  ],
+  [
+   {
+    "id": "builtin.box_trim",
+    "label": "Box Trim"
+   },
+   {
+    "id": "builtin.lasso_trim",
+    "label": "Lasso Trim"
+   },
+   {
+    "id": "builtin.line_trim",
+    "label": "Line Trim"
+   },
+   {
+    "id": "builtin.polyline_trim",
+    "label": "Polyline Trim"
+   }
+  ],
+  [
+   {
+    "id": "builtin.line_project",
+    "label": "Line Project"
+   }
+  ],
+  [
+   {
+    "id": "builtin.mesh_filter",
+    "label": "Mesh Filter"
+   }
+  ],
+  [
+   {
+    "id": "builtin.cloth_filter",
+    "label": "Cloth Filter"
+   }
+  ],
+  [
+   {
+    "id": "builtin.color_filter",
+    "label": "Color Filter"
+   }
+  ],
+  [
+   {
+    "id": "builtin.face_set_edit",
+    "label": "Edit Face Set"
+   }
+  ],
+  [
+   {
+    "id": "builtin.mask_by_color",
+    "label": "Mask by Color"
+   }
+  ],
+  [
+   {
+    "id": "builtin.move",
+    "label": "Move"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rotate",
+    "label": "Rotate"
+   }
+  ],
+  [
+   {
+    "id": "builtin.scale",
+    "label": "Scale"
+   }
+  ],
+  [
+   {
+    "id": "builtin.transform",
+    "label": "Transform"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ]
+ ],
+ "PAINT_VERTEX": [
+  [
+   {
+    "id": "builtin.brush",
+    "label": "Brush"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.blur",
+    "label": "Blur"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.average",
+    "label": "Average"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.smear",
+    "label": "Smear"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ]
+ ],
+ "PAINT_WEIGHT": [
+  [
+   {
+    "id": "builtin.brush",
+    "label": "Brush"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.blur",
+    "label": "Blur"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.average",
+    "label": "Average"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.smear",
+    "label": "Smear"
+   }
+  ],
+  [
+   {
+    "id": "builtin.gradient",
+    "label": "Gradient"
+   }
+  ],
+  [
+   {
+    "id": "builtin.sample_weight",
+    "label": "Sample Weight"
+   },
+   {
+    "id": "builtin.sample_vertex_group",
+    "label": "Sample Vertex Group"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ]
+ ],
+ "PAINT_TEXTURE": [
+  [
+   {
+    "id": "builtin.brush",
+    "label": "Brush"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.soften",
+    "label": "Blur"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.smear",
+    "label": "Smear"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.clone",
+    "label": "Clone"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.fill",
+    "label": "Fill"
+   }
+  ],
+  [
+   {
+    "id": "builtin_brush.mask",
+    "label": "Mask"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ]
+ ],
+ "POSE": [
+  [
+   {
+    "id": "builtin.select",
+    "label": "Tweak"
+   },
+   {
+    "id": "builtin.select_box",
+    "label": "Select Box"
+   },
+   {
+    "id": "builtin.select_circle",
+    "label": "Select Circle"
+   },
+   {
+    "id": "builtin.select_lasso",
+    "label": "Select Lasso"
+   }
+  ],
+  [
+   {
+    "id": "builtin.cursor",
+    "label": "Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.move",
+    "label": "Move"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rotate",
+    "label": "Rotate"
+   }
+  ],
+  [
+   {
+    "id": "builtin.scale",
+    "label": "Scale"
+   },
+   {
+    "id": "builtin.scale_cage",
+    "label": "Scale Cage"
+   }
+  ],
+  [
+   {
+    "id": "builtin.transform",
+    "label": "Transform"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ],
+  [
+   {
+    "id": "builtin.measure",
+    "label": "Measure"
+   }
+  ],
+  [
+   {
+    "id": "builtin.breakdowner",
+    "label": "Breakdowner"
+   },
+   {
+    "id": "builtin.push",
+    "label": "Push"
+   },
+   {
+    "id": "builtin.relax",
+    "label": "Relax"
+   }
+  ]
+ ],
+ "EDIT_ARMATURE": [
+  [
+   {
+    "id": "builtin.select",
+    "label": "Tweak"
+   },
+   {
+    "id": "builtin.select_box",
+    "label": "Select Box"
+   },
+   {
+    "id": "builtin.select_circle",
+    "label": "Select Circle"
+   },
+   {
+    "id": "builtin.select_lasso",
+    "label": "Select Lasso"
+   }
+  ],
+  [
+   {
+    "id": "builtin.cursor",
+    "label": "Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.move",
+    "label": "Move"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rotate",
+    "label": "Rotate"
+   }
+  ],
+  [
+   {
+    "id": "builtin.scale",
+    "label": "Scale"
+   },
+   {
+    "id": "builtin.scale_cage",
+    "label": "Scale Cage"
+   }
+  ],
+  [
+   {
+    "id": "builtin.transform",
+    "label": "Transform"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ],
+  [
+   {
+    "id": "builtin.measure",
+    "label": "Measure"
+   }
+  ],
+  [
+   {
+    "id": "builtin.roll",
+    "label": "Roll"
+   }
+  ],
+  [
+   {
+    "id": "builtin.bone_size",
+    "label": "B-Bone Size"
+   },
+   {
+    "id": "builtin.bone_envelope",
+    "label": "Bone Envelope"
+   }
+  ],
+  [
+   {
+    "id": "builtin.extrude",
+    "label": "Extrude"
+   },
+   {
+    "id": "builtin.extrude_to_cursor",
+    "label": "Extrude to Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.shear",
+    "label": "Shear"
+   }
+  ]
+ ],
+ "EDIT_CURVE": [
+  [
+   {
+    "id": "builtin.select",
+    "label": "Tweak"
+   },
+   {
+    "id": "builtin.select_box",
+    "label": "Select Box"
+   },
+   {
+    "id": "builtin.select_circle",
+    "label": "Select Circle"
+   },
+   {
+    "id": "builtin.select_lasso",
+    "label": "Select Lasso"
+   }
+  ],
+  [
+   {
+    "id": "builtin.cursor",
+    "label": "Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.move",
+    "label": "Move"
+   }
+  ],
+  [
+   {
+    "id": "builtin.rotate",
+    "label": "Rotate"
+   }
+  ],
+  [
+   {
+    "id": "builtin.scale",
+    "label": "Scale"
+   },
+   {
+    "id": "builtin.scale_cage",
+    "label": "Scale Cage"
+   }
+  ],
+  [
+   {
+    "id": "builtin.transform",
+    "label": "Transform"
+   }
+  ],
+  [
+   {
+    "id": "builtin.annotate",
+    "label": "Annotate"
+   },
+   {
+    "id": "builtin.annotate_line",
+    "label": "Annotate Line"
+   },
+   {
+    "id": "builtin.annotate_polygon",
+    "label": "Annotate Polygon"
+   },
+   {
+    "id": "builtin.annotate_eraser",
+    "label": "Annotate Eraser"
+   }
+  ],
+  [
+   {
+    "id": "builtin.measure",
+    "label": "Measure"
+   }
+  ],
+  [
+   {
+    "id": "builtin.draw",
+    "label": "Draw"
+   }
+  ],
+  [
+   {
+    "id": "builtin.pen",
+    "label": "Curve Pen"
+   }
+  ],
+  [
+   {
+    "id": "builtin.extrude",
+    "label": "Extrude"
+   },
+   {
+    "id": "builtin.extrude_cursor",
+    "label": "Extrude to Cursor"
+   }
+  ],
+  [
+   {
+    "id": "builtin.radius",
+    "label": "Radius"
+   }
+  ],
+  [
+   {
+    "id": "builtin.tilt",
+    "label": "Tilt"
+   }
+  ],
+  [
+   {
+    "id": "builtin.shear",
+    "label": "Shear"
+   }
+  ],
+  [
+   {
+    "id": "builtin.randomize",
+    "label": "Randomize"
+   }
+  ]
+ ]
+}

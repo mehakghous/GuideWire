@@ -69,7 +69,7 @@ def test_the_text_never_shows_an_internal_kind_name(kind):
 
 def test_full_joins_the_badge_and_the_explanation():
     c = checkability(step())
-    assert c.full == f"{c.badge}: {c.text}" and c.badge == "You confirm"
+    assert c.full == f"{c.badge}. {c.text}" and c.badge == "You confirm"
 
 
 def test_a_craft_step_says_it_is_judged_by_eye():

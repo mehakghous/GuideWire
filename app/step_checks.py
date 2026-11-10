@@ -42,7 +42,7 @@ class Checkability:
     @property
     def full(self) -> str:
         """Badge and explanation as one sentence, for places with no room for a heading."""
-        return f"{self.badge}: {self.text}"
+        return f"{self.badge}. {self.text}"
 
 
 def _phrase(kinds: list[str]) -> str:

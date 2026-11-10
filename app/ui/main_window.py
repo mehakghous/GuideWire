@@ -14,6 +14,7 @@ from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
+from .style import THEMES, build_style
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
 
@@ -129,12 +130,22 @@ class MainWindow(QMainWindow):
         self.db.save_tutorial(self.user.id, final, steps, source_type="manual")
         self.ask_screen.saved(final)
 
+    def apply_theme(self) -> None:
+        """Show the signed-in user's chosen theme (light or dark); the light one when nobody is signed in."""
+        app = QApplication.instance()
+        if app is None:
+            return
+        theme = self.accounts.preferences(self.user.id).get("theme") if self.user else "light"
+        app.setStyleSheet(build_style(theme if theme in THEMES else "light"))
+
     def on_logged_in(self, user: User) -> None:
         self.user = user
+        self.apply_theme()
         self.show_home()
 
     def on_logout(self) -> None:
         self.user = None
+        self.apply_theme()
         self.stack.setCurrentWidget(self.login)
 
     def show_home(self) -> None:
@@ -147,6 +158,7 @@ class MainWindow(QMainWindow):
 
     def on_profile_changed(self, user: User) -> None:
         self.user = user
+        self.apply_theme()
 
     def open_new_tutorial(self) -> None:
         if self.user is None:

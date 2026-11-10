@@ -10,10 +10,11 @@ import html
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtCore import QUrl
-from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QTextBrowser, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QTextBrowser, QWidget
 
 from ..discovery import DiscoveryResult, Suggestion
 from ..pipeline import APPS
+from .bento import Tile, header, page_grid
 from .workers import run_call
 
 FROM_WORDS = "(from my words)"
@@ -52,23 +53,31 @@ class FindScreen(QWidget):
         self.open_button.clicked.connect(lambda: (s := self.selected()) and self.open_url(s.url))
         self.steps_button.clicked.connect(lambda: (s := self.selected()) and self.make_steps.emit(s.url, self.result.app or ""))
         self.back_button.clicked.connect(self.back.emit)
-        top = QHBoxLayout()
-        top.addWidget(self.goal, 1)
-        top.addWidget(QLabel("Application"))
-        top.addWidget(self.app)
-        top.addWidget(self.search_button)
-        bottom = QHBoxLayout()
-        bottom.addWidget(self.open_button)
-        bottom.addWidget(self.steps_button)
-        bottom.addStretch()
-        bottom.addWidget(self.back_button)
-        root = QVBoxLayout(self)
-        root.addWidget(QLabel("<h2>Find a tutorial</h2>"))
-        root.addLayout(top)
-        root.addWidget(self.message)
-        root.addWidget(self.results)
-        root.addWidget(self.details, 1)
-        root.addLayout(bottom)
+        grid = page_grid(self)
+        grid.addWidget(header("Find a tutorial", "Say what you want to learn and get up to three suggested videos.", back=self.back_button), 0, 0, 1, 2)
+        search = Tile("What do you want to learn?", variant="soft")
+        search.body.addWidget(self.goal)
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Application"))
+        row.addWidget(self.app)
+        row.addStretch()
+        row.addWidget(self.search_button)
+        search.body.addLayout(row)
+        search.body.addWidget(self.message)
+        found = Tile("Suggestions")
+        found.body.addWidget(self.results, 1)
+        about = Tile("About this video")
+        about.body.addWidget(self.details, 1)
+        buttons = QHBoxLayout()
+        buttons.addWidget(self.open_button)
+        buttons.addWidget(self.steps_button)
+        about.body.addLayout(buttons)
+        grid.addWidget(search, 1, 0, 1, 2)
+        grid.addWidget(found, 2, 0)
+        grid.addWidget(about, 2, 1)
+        grid.setRowStretch(2, 1)
+        grid.setColumnStretch(0, 2)
+        grid.setColumnStretch(1, 3)
         self.reset()
 
     def reset(self) -> None:

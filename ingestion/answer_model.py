@@ -40,6 +40,12 @@ How to answer:
 6. If the question is too vague to answer well (for example "all my joints are at the origin" with no hint where), ask ONE short clarifying question, set confidence to "low", and give nothing that you do not know.
 7. Be short and concrete: two to six sentences, or a short numbered list for steps. Plain words. Name the menu path or key exactly as the context gives it.
 8. You cannot see the learner's screen and you cannot change their progress. Do not say you marked, skipped or completed anything.
+9. Set wants_steps to true ONLY when the learner explicitly asks for steps they can follow ("give me the steps", "walk me through", "step by step", "a plan", "what do i do, in order"), however it is worded. For an ordinary question or an explanation set it to false. When it is true, list in source_ids the ENTRIES whose steps the learner needs.
+10. Copy every menu path, tool name, node name and shortcut CHARACTER FOR CHARACTER from the ENTRIES or MANUAL passages. If none of them gives the exact name, name the tool in plain words and say where to look: never write a menu path from memory (a reply that said "Skin > Paint Weights" for "Skin > Paint Skin Weights Tool" misled a learner).
+11. For a how-to question ("how do i make", "how do i add", "how do i attach") give the short ordered sequence: 3 to 6 numbered steps, one action each, using every outline step of the matching ENTRY and the menu or key it gives, and nothing the context does not support. Add one closing line saying what the learner should see when it worked, if an ENTRY gives a check.
+12. For "which tutorial should i watch" or any request to recommend a video or course: you cannot see GuideWire's tutorial list, so do not recommend, name or describe any tutorial, channel or course from memory. Ask ONE short question about what the learner wants to make and their level, say that GuideWire can search tutorials for that goal, and leave answer empty with confidence "low".
+13. Versions: never say or imply that steps, menus or tools written for one version of the application work the same in another version, unless an ENTRY or MANUAL passage says so. Say which version the tutorial shows (when the context gives it), that menus and names can differ in a newer or older version, and that the learner should check the release notes or the manual page for their version.
+14. "Why" questions about the tutorial ("why did he change the solver", "why do we clear the parent"): if the tutorial steps do not give a reason, say plainly that the tutorial does not give a reason (in_tutorial "no"); you may then add a reason from general knowledge, clearly labelled as general knowledge and not as something the instructor said.
 
 Return JSON only."""
 
@@ -53,12 +59,20 @@ SCHEMA = {
         "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
         "in_tutorial": {"type": "string", "enum": ["yes", "no", "not_applicable"]},
         "clarifying_question": {"type": ["string", "null"]},
+        "wants_steps": {"type": "boolean", "description": "true only when the learner explicitly asks for steps, a plan or a walk-through to follow; false for an ordinary question"},
     },
-    "required": ["answer", "grounding", "source_ids", "step_ids", "confidence", "in_tutorial", "clarifying_question"],
+    "required": ["answer", "grounding", "source_ids", "step_ids", "confidence", "in_tutorial", "clarifying_question", "wants_steps"],
 }
 
 # intents that CHANGE the session (done, skipped, jumped, resumed, next): the rule-based follow-up logic handles them, never the model
 STATE_INTENTS = frozenset({"done_stmt", "already_done_q", "skip", "resume", "goto", "task_change", "next", "continue", "timestamp"})
+
+
+def changes_progress(text: str, session: Session) -> bool:
+    """True when `text` is a progress command (done, skip, back, next, a timestamp) AND a tutorial is loaded, so it must be handled by the rules. With NO tutorial loaded there is no progress to change:
+    "i made the skeleton, whats next" is a question about what to do and goes to the model (found 2026-11-09: it got a fixed deflection in all three applications)."""
+    from .followup import classify_followup
+    return bool(session.steps and session.steps.steps) and classify_followup(text) in STATE_INTENTS
 
 
 # ------------------------------------------------------------------------------------------------ retrieval
@@ -159,14 +173,14 @@ def build_prompt(question: str, app: str, session: Session | None, manual=None, 
     return SYSTEM, "\n\n".join(parts) + f"\n\nLEARNER QUESTION: {question}", entries
 
 
-def session_from_tutorial(app: str, steps: list[dict], *, title: str | None = None, app_version: str | None = None, current: str | None = None, history: list[str] | None = None) -> Session:
+def session_from_tutorial(app: str, steps: list[dict], *, title: str | None = None, app_version: str | None = None, current: str | None = None, history: list[str] | None = None, video_url: str | None = None) -> Session:
     """A Session built from a brief step list a client sends (id, goal, start_s, how_to texts), for a stateless caller such as the gateway. The learner's progress is not carried
     over: `current` says which step they are on, nothing is marked done, and `history` is the last few things they said."""
     sess = Session(app=app)
     if steps:
         built = [Step(id=d["id"], order=i, goal=d["goal"], video_start_s=d.get("start_s"), how_to=[HowTo(text=t, support="said") for t in d.get("how_to", [])[:3]])
                  for i, d in enumerate(steps, start=1)]
-        sess.load(StepList(source_type="youtube", app=app, title=title, app_version_tutorial=app_version, steps=built), tutorial={"id": "client", "title": title or "tutorial", "source_type": "youtube"})
+        sess.load(StepList(source_type="youtube", app=app, title=title, app_version_tutorial=app_version, steps=built), tutorial={"id": "client", "title": title or "tutorial", "source_type": "youtube", **({"url": video_url} if video_url else {})})
         if current and sess.step(current) is not None:
             sess.goto(current)
     for h in (history or [])[-3:]:
@@ -187,13 +201,26 @@ class ModelAnswerer:
     provider: object                      # anything with generate_json(system=, prompt=, schema=); wrap it in BudgetedProvider for the cost guard
     manual: object | None = None          # ingestion.kb.index.KnowledgeBase for Blender manual passages
     knowledge: Knowledge | None = None
+    recheck_sweep: int = 0                # with recheck: how many OTHER parts of the video to look at when the first clip does not show it (each is one more call)
+    recheck: bool = False                 # when the steps cannot answer a question about the tutorial, look at the video clip around the right moment (ingestion/video_recheck.py); one extra call
 
     def __call__(self, question: str, session: Session | None = None, app: str | None = None) -> AnswerBundle:
         kb = self.knowledge or load_knowledge()
         app = app or (session.app if session is not None else "blender")
         system, prompt, entries = build_prompt(question, app, session, self.manual, kb)
         raw = self.provider.generate_json(system=system, prompt=prompt, schema=SCHEMA)
-        return self.to_bundle(raw, entries, kb, session, question)
+        bundle = self.to_bundle(raw, entries, kb, session, question)
+        if self.recheck and session is not None and session.steps is not None and raw.get("in_tutorial") == "no" and bundle.explanations:
+            from .video_recheck import apply_recheck
+            from .video_recheck import recheck as recheck_video
+            got = recheck_video(self.provider, question, session, [s for s in raw.get("step_ids", []) if isinstance(s, str)], self.recheck_sweep)
+            if got is not None:
+                win, res = got
+                bundle.explanations[0].text, note = apply_recheck(bundle.explanations[0].text, win, res)
+                bundle.caveats.append(note)
+                bundle.api_calls += 1
+                bundle.reasons.append(f"video recheck of {win.start_s}-{win.end_s} s ({win.why}): found={res['found']}")
+        return bundle
 
     @staticmethod
     def to_bundle(raw: dict, entries: list[Entry], kb: Knowledge, session: Session | None, question: str) -> AnswerBundle:
@@ -218,7 +245,16 @@ class ModelAnswerer:
             reasons=[f"model answer: grounding={raw.get('grounding')}, confidence={conf}, in_tutorial={raw.get('in_tutorial')}, entries offered={[e.id for e in entries]}, used={used}"],
             trust="doc_passage" if raw.get("grounding") in ("knowledge_base", "manual", "tutorial") else "none",
         )
+        if raw.get("wants_steps") is True and not clarifying and (session is None or session.steps is None):
+            # the model judged (by meaning) that the learner wants steps and which topics they need; the STEPS come only from those knowledge-base entries, never from the model
+            from .starter_plan import plan_from_entries
+            chosen = [e for e in entries if e.id in used and (e.outline or e.ui)]
+            sl = plan_from_entries(session.app if session is not None else "blender", chosen) if chosen else None
+            if sl is not None:
+                bundle.steps, bundle.kind, bundle.trust = sl, "procedure", "catalog"
+                bundle.caveats = ["The steps are drafted from GuideWire's knowledge base, not from a tutorial: it is the usual order, and a tutorial may do it differently.", *bundle.caveats]
+                bundle.reasons.append(f"wants_steps: steps built from knowledge base topics {[e.id for e in chosen]}")
         return bundle
 
 
-__all__ = ["ModelAnswerer", "build_prompt", "retrieve_entries", "session_from_tutorial", "default_manual", "STATE_INTENTS", "SCHEMA", "SYSTEM"]
+__all__ = ["changes_progress", "ModelAnswerer", "build_prompt", "retrieve_entries", "session_from_tutorial", "default_manual", "STATE_INTENTS", "SCHEMA", "SYSTEM"]

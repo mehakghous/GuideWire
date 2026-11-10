@@ -1,0 +1,272 @@
+{
+ "_about": "Independent grades of the beginner-suite replies by OpenAI gpt-5.6-terra (a different model family from the answerer and from the first grader), 2026-11-09 night, one run, against the SAME references the first grader wrote (so a reference error is shared). 'gemini' = replies of gemini-3.5-flash-lite with the starter plan; 'luna' = replies of gpt-5.6-luna with the starter plan. A model grader is a second opinion, not a person.",
+ "gemini": {
+  "grades": {
+   "nb01": "W",
+   "nb02": "P",
+   "nb03": "P",
+   "nb04": "C",
+   "nb05": "C",
+   "nb06": "C",
+   "nb07": "P",
+   "nb08": "C",
+   "nb09": "C",
+   "nb10": "P",
+   "nb11": "C",
+   "nb12": "P",
+   "nm01": "P",
+   "nm02": "P",
+   "nm03": "P",
+   "nm04": "P",
+   "nm05": "W",
+   "nm06": "C",
+   "nm07": "C",
+   "nm08": "C",
+   "nm09": "C",
+   "nm10": "C",
+   "nm11": "P",
+   "nm12": "P",
+   "nh01": "P",
+   "nh02": "W",
+   "nh03": "P",
+   "nh04": "C",
+   "nh05": "C",
+   "nh06": "W",
+   "nh07": "C",
+   "nh08": "C",
+   "nh09": "C",
+   "nh10": "P",
+   "nh11": "C",
+   "nh12": "W"
+  },
+  "reasons": {
+   "nb01": "It omits the essential step of adding an armature (Add > Armature > Single Bone), includes non-Blender/Maya-style advice such as “clear history,” and cuts off before giving the required Ctrl+P > With Automatic Weights and posing test.",
+   "nb02": "It correctly recommends applying transforms, cleaning joint topology, and setting a sensible origin, but omits checking outward normals and posing the model in a neutral T- or A-pose.",
+   "nb03": "It mentions adding a bone in an existing armature’s Edit Mode, but omits creating the initial armature, extruding bones into connected parent-child chains with E, and naming the bones as needed.",
+   "nb04": "It gives the correct selection order and Ctrl+P parenting command with With Automatic Weights, which attaches the mesh to the armature.",
+   "nb05": "It correctly identifies bad vertex weights as the likely cause and gives an actionable fix in Weight Paint mode; applying scale is a reasonable additional check.",
+   "nb06": "It correctly gives the Pose Mode workflow, shin/lower-leg selection, IK constraint location, target control, and chain length of 2 for the thigh and shin.",
+   "nb07": "Disabling Deform is useful for a control bone, but the reply omits creating separate control bones and adding constraints such as Copy Rotation or IK to make them drive the deform bones.",
+   "nb08": "The reply accurately explains FK as rotating a parent-to-child bone chain and IK as moving a target so the chain solves automatically, with clear beginner-friendly examples.",
+   "nb09": "It correctly states the required .L/.R naming convention and the Edit Mode Armature > Symmetrize command.",
+   "nb10": "It appropriately notes that no tutorial is loaded and gives broad starting options, but it does not ask about the learner’s goals or level and vaguely refers to an unverified “official Blender Foundation introduction to rigging.”",
+   "nb11": "It gives the required fixes: add a slight rest-pose knee bend, assign/place a pole target, and adjust the IK constraint's Pole Angle.",
+   "nb12": "It correctly explains selecting mesh then armature and using Ctrl+P > With Automatic Weights, but distracts with unnecessary rigging steps and omits testing deformation in Pose Mode and fixing bad weights.",
+   "nm01": "It gives a broadly useful skeleton-first plan and correctly names joint orientation and Maya Skeleton menus, but it omits switching to the Rigging menu set and the specific Create Joints/Smooth Bind steps, reverses the reference bind-before-IK order, uses the non-Maya term “child-of constraint,” and",
+   "nm02": "It correctly recommends freezing transformations and clearing history, but does not give the Delete History menu path and omits centering pivots, cleaning geometry, and using a neutral T- or A-pose.",
+   "nm03": "It correctly identifies Skeleton > Create Joints and the shoulder-to-wrist placement order, but F3 is not reliably the Rigging menu set shortcut and it omits pressing Enter to finish the joint chain.",
+   "nm04": "It identifies the correct Smooth Bind command, but gives the selection order opposite to the reference (root joint then mesh rather than mesh then root), which may confuse a beginner.",
+   "nm05": "The diagnosis is correct, but it gives the incorrect Maya menu/tool name “Skin > Paint Weights” instead of “Skin > Paint Skin Weights,” which can mislead a beginner.",
+   "nm06": "It gives the correct Skeleton > Create IK Handle command and correctly instructs selecting the shoulder joint first and wrist joint second; the elbow-bend tip is useful.",
+   "nm07": "It correctly explains creating a NURBS circle control, freezing transforms, and using a constraint or parenting relationship to drive the joint.",
+   "nm08": "It accurately explains FK as rotating joints down a hierarchy and IK as moving an end control that drives the chain.",
+   "nm09": "It correctly instructs selecting the chain root and using Skeleton > Mirror Joints, including choosing the mirror plane and search/replace naming before mirroring.",
+   "nm10": "It honestly states that no specific Maya rigging tutorial is available in its sources and avoids inventing a specific video or link.",
+   "nm11": "Setting a slight bend and a preferred angle can help establish a solve direction, but it omits the key Pole Vector constraint/control needed to reliably prevent knee flipping.",
+   "nm12": "It correctly identifies joint orientation as the immediate next step and gives the correct Orient Joint menu path, but it gives an unnecessarily long, partially truncated workflow and puts binding the mesh after IK and controls rather than following the requested orient → smooth bind → IK → controls",
+   "nh01": "It gives a plausible skeleton-building starting workflow, but it omits the essential KineFX character-rigging path of importing geometry, using Joint Capture and Joint Deform, adding APEX components/controls, and testing poses, while several detailed shortcuts are not necessary for a beginner.",
+   "nh02": "It incorrectly recommends posing the skeleton before capture, whereas the character should be in a neutral pose, and it omits the needed clean, sensibly scaled mesh in a Geometry network.",
+   "nh03": "It correctly places KineFX skeleton creation at the SOP level, but gives no actionable use of the Skeleton tool or Skeleton SOP to draw joints, nor naming/orienting steps.",
+   "nh04": "It correctly instructs the learner to compute capture weights with a Joint Capture node and then apply deformation with a Joint Deform node.",
+   "nh05": "It correctly identifies bad capture weights as the likely cause and gives actionable options to repaint or recapture them.",
+   "nh06": "Although it identifies the IK Chains SOP, it gives unverified and likely incorrect parameter names/input setup and omits the essential step of setting the leg’s start/end joints and moving the end target to pose it.",
+   "nh07": "It correctly identifies APEX AutoRig Component and Configure Controls as the tools for creating and styling rig controls.",
+   "nh08": "It correctly explains that FK rotates a hierarchy from parent/root to child/tip, while IK moves an end target and solves the intervening joint angles.",
+   "nh09": "It correctly instructs the learner to use the Skeleton Mirror SOP and configure its mirror-plane settings, with useful optional joint-name token replacement guidance.",
+   "nh10": "It gives a plausible general starting direction, but it assumes the learner’s level and does not ask about their goals or point them to a tutorial search as needed for a tailored recommendation.",
+   "nh11": "It correctly identifies the pole-vector/twist ambiguity as the cause and gives an actionable IK Chains adjustment to provide a stable dedicated twist/pole reference.",
+   "nh12": "It gives an incomplete and misleading workflow that puts IK/autorig before binding and never instructs the learner to use the required Joint Capture followed by Joint Deform nodes."
+  },
+  "against_first_grader": {
+   "questions": 36,
+   "agree": 19,
+   "agreement": 0.528,
+   "judge_stricter": [
+    "nb01",
+    "nb02",
+    "nb12",
+    "nm01",
+    "nm02",
+    "nm04",
+    "nm05",
+    "nm11",
+    "nm12",
+    "nh01",
+    "nh02",
+    "nh03",
+    "nh06",
+    "nh12"
+   ],
+   "judge_more_lenient": [
+    "nm10",
+    "nh05",
+    "nh11"
+   ],
+   "disagreements": {
+    "nb01": {
+     "first_grader": "C",
+     "judge": "W",
+     "why": "It omits the essential step of adding an armature (Add > Armature > Single Bone), includes non-Blender/Maya-style advice such as “clear history,” and cuts off before giving the required Ctrl+P > With Automatic Weights and posing test."
+    },
+    "nb02": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It correctly recommends applying transforms, cleaning joint topology, and setting a sensible origin, but omits checking outward normals and posing the model in a neutral T- or A-pose."
+    },
+    "nb12": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It correctly explains selecting mesh then armature and using Ctrl+P > With Automatic Weights, but distracts with unnecessary rigging steps and omits testing deformation in Pose Mode and fixing bad weights."
+    },
+    "nm01": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It gives a broadly useful skeleton-first plan and correctly names joint orientation and Maya Skeleton menus, but it omits switching to the Rigging menu set and the specific Create Joints/Smooth Bind steps, reverses the reference bind-before-IK order, uses the non-Maya term “child-of constraint,” and"
+    },
+    "nm02": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It correctly recommends freezing transformations and clearing history, but does not give the Delete History menu path and omits centering pivots, cleaning geometry, and using a neutral T- or A-pose."
+    },
+    "nm04": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It identifies the correct Smooth Bind command, but gives the selection order opposite to the reference (root joint then mesh rather than mesh then root), which may confuse a beginner."
+    },
+    "nm05": {
+     "first_grader": "C",
+     "judge": "W",
+     "why": "The diagnosis is correct, but it gives the incorrect Maya menu/tool name “Skin > Paint Weights” instead of “Skin > Paint Skin Weights,” which can mislead a beginner."
+    },
+    "nm10": {
+     "first_grader": "P",
+     "judge": "C",
+     "why": "It honestly states that no specific Maya rigging tutorial is available in its sources and avoids inventing a specific video or link."
+    },
+    "nm11": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "Setting a slight bend and a preferred angle can help establish a solve direction, but it omits the key Pole Vector constraint/control needed to reliably prevent knee flipping."
+    },
+    "nm12": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It correctly identifies joint orientation as the immediate next step and gives the correct Orient Joint menu path, but it gives an unnecessarily long, partially truncated workflow and puts binding the mesh after IK and controls rather than following the requested orient → smooth bind → IK → controls"
+    },
+    "nh01": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It gives a plausible skeleton-building starting workflow, but it omits the essential KineFX character-rigging path of importing geometry, using Joint Capture and Joint Deform, adding APEX components/controls, and testing poses, while several detailed shortcuts are not necessary for a beginner."
+    },
+    "nh02": {
+     "first_grader": "P",
+     "judge": "W",
+     "why": "It incorrectly recommends posing the skeleton before capture, whereas the character should be in a neutral pose, and it omits the needed clean, sensibly scaled mesh in a Geometry network."
+    },
+    "nh03": {
+     "first_grader": "C",
+     "judge": "P",
+     "why": "It correctly places KineFX skeleton creation at the SOP level, but gives no actionable use of the Skeleton tool or Skeleton SOP to draw joints, nor naming/orienting steps."
+    },
+    "nh05": {
+     "first_grader": "P",
+     "judge": "C",
+     "why": "It correctly identifies bad capture weights as the likely cause and gives actionable options to repaint or recapture them."
+    },
+    "nh06": {
+     "first_grader": "C",
+     "judge": "W",
+     "why": "Although it identifies the IK Chains SOP, it gives unverified and likely incorrect parameter names/input setup and omits the essential step of setting the leg’s start/end joints and moving the end target to pose it."
+    },
+    "nh11": {
+     "first_grader": "P",
+     "judge": "C",
+     "why": "It correctly identifies the pole-vector/twist ambiguity as the cause and gives an actionable IK Chains adjustment to provide a stable dedicated twist/pole reference."
+    },
+    "nh12": {
+     "first_grader": "C",
+     "judge": "W",
+     "why": "It gives an incomplete and misleading workflow that puts IK/autorig before binding and never instructs the learner to use the required Joint Capture followed by Joint Deform nodes."
+    }
+   }
+  }
+ },
+ "luna": {
+  "grades": {
+   "nb01": "W",
+   "nb02": "P",
+   "nb03": "P",
+   "nb04": "C",
+   "nb05": "N",
+   "nb06": "C",
+   "nb07": "P",
+   "nb08": "C",
+   "nb09": "C",
+   "nb10": "C",
+   "nb11": "C",
+   "nb12": "P",
+   "nm01": "P",
+   "nm02": "P",
+   "nm03": "P",
+   "nm04": "P",
+   "nm05": "P",
+   "nm06": "C",
+   "nm07": "P",
+   "nm08": "C",
+   "nm09": "C",
+   "nm10": "C",
+   "nm11": "P",
+   "nm12": "P",
+   "nh01": "P",
+   "nh02": "P",
+   "nh03": "P",
+   "nh04": "C",
+   "nh05": "P",
+   "nh06": "W",
+   "nh07": "C",
+   "nh08": "C",
+   "nh09": "C",
+   "nh10": "P",
+   "nh11": "C",
+   "nh12": "W"
+  },
+  "reasons": {
+   "nb01": "It omits the essential step of adding an armature (Add > Armature > Single Bone), includes non-Blender/Maya-style advice such as “clear history,” and cuts off before giving the required Ctrl+P > With Automatic Weights and posing test.",
+   "nb02": "It correctly advises clean topology, a neutral T/A pose, applying transforms, and sensible origin/scale, but it omits checking that normals face outward and does not give the actionable Blender path Ctrl+A > All Transforms.",
+   "nb03": "It correctly describes adding bones in Armature Edit Mode and extruding connected bones, but it omits the beginner-critical Add > Armature > Single Bone starting path and naming bones.",
+   "nb04": "It gives the correct selection order, Ctrl+P parenting option with Automatic Weights, and a sensible Pose Mode test.",
+   "nb05": "The reply only asks a clarifying question and does not provide the needed guidance about checking or fixing vertex weights in Weight Paint Mode or redoing Automatic Weights.",
+   "nb06": "It gives the correct Blender workflow: add an IK constraint to the shin in Pose Mode, assign a foot control target, and use chain length 2, with an optional pole target for knee direction.",
+   "nb07": "It correctly explains creating a non-deforming control bone and constraining deform bones to it, but it omits the useful Custom Shape step from the reference for making the controller easy to select and recognize.",
+   "nb08": "It correctly explains FK versus IK, gives appropriate hand/foot examples, and accurately notes Blender's IK constraint and optional pole target.",
+   "nb09": "It correctly instructs using Armature > Symmetrize in Edit Mode with .L/.R bone naming to mirror one side across the X axis.",
+   "nb10": "It honestly states that no specific tutorial list is available and gives a sensible beginner-topic sequence without inventing a video title or link.",
+   "nb11": "It correctly explains using a slight rest-pose knee bend, setting a pole target, and adjusting the IK constraint’s Pole Angle to control the knee direction.",
+   "nb12": "It correctly explains selecting mesh then armature and using Ctrl+P > With Automatic Weights, but distracts with unnecessary rigging steps and omits testing deformation in Pose Mode and fixing bad weights.",
+   "nm01": "It gives a broadly useful skeleton-first plan and correctly names joint orientation and Maya Skeleton menus, but it omits switching to the Rigging menu set and the specific Create Joints/Smooth Bind steps, reverses the reference bind-before-IK order, uses the non-Maya term “child-of constraint,” and",
+   "nm02": "It correctly recommends freezing transformations and clearing history, but does not give the Delete History menu path and omits centering pivots, cleaning geometry, and using a neutral T- or A-pose.",
+   "nm03": "It correctly gives the Rigging menu set and Skeleton > Create Joints workflow, but omits pressing Enter to finish the joint chain.",
+   "nm04": "It gives the correct Smooth Bind command, but reverses the reference selection order and adds unnecessary cleanup steps that are not required to bind the mesh.",
+   "nm05": "It correctly identifies skin weights as the likely cause and advises smoothing/repainting shoulder influences, but it does not give the actionable Maya path Skin > Paint Skin Weights for a beginner.",
+   "nm06": "It gives the correct Skeleton > Create IK Handle workflow, selects the shoulder then wrist, and accurately explains that the resulting handle appears at the wrist.",
+   "nm07": "It correctly recommends NURBS curve controls, freezing transforms, and making them drive joints, but it is vague about using Maya’s Constrain > Parent or Orient commands and the required selection/order.",
+   "nm08": "It accurately explains FK as rotating joints along the chain and IK as moving an end control that drives the chain's rotations; the extra mention of an IK/FK switch is relevant and not misleading.",
+   "nm09": "It correctly instructs the learner to select the chain root, use Skeleton > Mirror Joints, choose the appropriate left-right mirror plane/axis, and optionally search-and-replace joint names before mirroring.",
+   "nm10": "It honestly states that no specific tutorial is available to recommend and gives sensible beginner topic criteria without inventing a video or link.",
+   "nm11": "It correctly identifies the need for a slight knee bend and preferred angle, but it does not give the necessary Pole Vector constraint setup and the instruction to disable the IK handle is vague and potentially misleading.",
+   "nm12": "It correctly identifies joint orientation as the immediate next step and gives the correct Orient Joint menu path, but it gives an unnecessarily long, partially truncated workflow and puts binding the mesh after IK and controls rather than following the requested orient → smooth bind → IK → controls",
+   "nh01": "It gives a plausible skeleton-building starting workflow, but it omits the essential KineFX character-rigging path of importing geometry, using Joint Capture and Joint Deform, adding APEX components/controls, and testing poses, while several detailed shortcuts are not necessary for a beginner.",
+   "nh02": "It gives some relevant rigging prerequisites, but it incorrectly treats a prepared skeleton and skin weights as things needed before rigging and omits the essential clean, sensibly scaled mesh in a Geometry network and neutral pose.",
+   "nh03": "It correctly identifies the Skeleton SOP and how to add it, but it does not clearly explain drawing joints in the viewport or naming and orienting them as needed.",
+   "nh04": "It correctly explains using Joint Capture Biharmonic to create capture weights and then Joint Deform to apply them, with a valid alternative capture method.",
+   "nh05": "It correctly identifies bad capture weights and suggests inspecting/recapturing them, but it omits repainting/recomputing weights and adds questionable advice that straight bones or geometry inherently cause poor bending.",
+   "nh06": "Although it names the correct IK Chains SOP, it invents or misstates the required parameter names and setup (such as Root/Mid/Tip/Goal Name and a mandatory second skeleton), rather than simply defining the leg chain by its start and end joints and moving the end target.",
+   "nh07": "It correctly describes using APEX AutoRig Component nodes followed by APEX Configure Controls to set control shape, size, and colour, with relevant setup context.",
+   "nh08": "It accurately explains FK versus IK with clear joint-chain examples and correctly notes their practical use for direct motion versus hand/foot placement.",
+   "nh09": "It correctly instructs using the Skeleton Mirror SOP at SOP level and selecting the mirror plane, with useful naming and update options.",
+   "nh10": "It gives a plausible generic learning order, but it does not ask about the learner’s goals or level or direct them to tutorial search, so the recommendation is not sufficiently grounded in the question.",
+   "nh11": "It correctly identifies the pole-vector/twist-point cause of IK flipping and gives actionable guidance to set a stable twist point and keep it on the intended bend side.",
+   "nh12": "It gives an incomplete and misleading workflow that puts IK/autorig before binding and never instructs the learner to use the required Joint Capture followed by Joint Deform nodes."
+  }
+ }
+}

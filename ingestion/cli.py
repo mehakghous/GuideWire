@@ -15,7 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows
+from .extract import (PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows,
+                      recommended_video_prompt_version)
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -163,7 +164,7 @@ def _offline(args) -> int:
             from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
             from .providers.gemini import GeminiProvider
             try:
-                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb)
+                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb, recheck=args.recheck, recheck_sweep=3 if args.recheck else 0)
             except BudgetExceeded as e:
                 print(f"error: {e}", file=sys.stderr)
                 return 2
@@ -331,6 +332,7 @@ def main(argv: list[str] | None = None) -> int:
     ch.add_argument("--no-kb", action="store_true")
     ch.add_argument("--model-tier", choices=["iterate", "report"], help="answer questions with a model (grounded on the knowledge base; one paid call per question, through the cost guard); omit for the offline rules only")
     ch.add_argument("--key", choices=["default", "dev", "test"], default="default", help="with --model-tier: which API key variable to read")
+    ch.add_argument("--recheck", action="store_true", help="with --model-tier: when the extracted steps cannot answer a question about the loaded tutorial, look at the video clip around the right moment (one extra call)")
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")
@@ -400,7 +402,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
         p.add_argument("--prompt-version", default=None, choices=list(PROMPT_VERSIONS),
-                       help="default: v7 for Maya and Houdini (and for --rigging), v2 for Blender. v2 = baseline of the earliest live runs; v6 = rigging prompt of the last live run")
+                       help="default for a video: v10-hou for Houdini, v10-preds for Maya and for Blender with --rigging, v2 for other Blender videos (chosen by measurement, report section 1.13); for written text: v7 for Maya and Houdini, v2 for Blender")
         p.add_argument("--tier", choices=["iterate", "report"], help="model tier: iterate = gemini-3.5-flash-lite (cheap, for trying things), report = gemini-3.8-flash (for results you will show)")
         p.add_argument("--model", help="an explicit model id (it must have a price in ingestion/experiment.py)")
         p.add_argument("--key", choices=["default", "dev", "test"], default="default", help="which API key variable to read: GEMINI_API_KEY, GEMINI_API_KEY_DEV or GEMINI_API_KEY_TEST")
@@ -413,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)
     if getattr(args, "prompt_version", 0) is None:
-        args.prompt_version = default_prompt_version(args.app, args.rigging)
+        args.prompt_version = (recommended_video_prompt_version if args.cmd == "video" else default_prompt_version)(args.app, args.rigging)       # video: the measured choice; written text: the older default
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     for noisy in ("httpx", "httpcore", "google_genai", "google.genai"):  # request logs can carry secrets
         logging.getLogger(noisy).setLevel(logging.WARNING)

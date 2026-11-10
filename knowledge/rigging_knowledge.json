@@ -3066,7 +3066,7 @@
       ],
       "ui": [
         {
-          "path": "Add Bone (Shift-A in Edit Mode)",
+          "path": "Add > Single Bone (Shift-A in Edit Mode)",
           "tier": "official",
           "source": "B11",
           "options": [
@@ -3085,7 +3085,7 @@
       ],
       "outline": [
         {
-          "text": "In the 3D Viewport, in Edit Mode on the armature, press Shift-A to add a bone, then adjust Name, Space, Align, Length and Deform in the redo panel.",
+          "text": "In the 3D Viewport, in Edit Mode on the armature, choose Add > Single Bone (Shift-A) to add a bone, then adjust Name, Space, Align, Length and Deform in the redo panel.",
           "tier": "official",
           "sources": [
             "B11"

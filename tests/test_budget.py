@@ -158,3 +158,16 @@ def test_gateway_turns_a_budget_stop_into_a_clear_503_and_calls_nothing(tmp_path
     c = TestClient(create_app(provider_factory=lambda: guarded, tokens={"t": "u"}))
     r = c.post("/v1/extract", json={"text": "create joints", "app": "maya"}, headers={"Authorization": "Bearer t", "Idempotency-Key": "k"})
     assert r.status_code == 503 and "cost guard" in r.json()["detail"] and not inner.calls
+
+
+def test_a_repeat_run_gets_its_own_cache_key_and_repeat_one_is_unchanged(monkeypatch):
+    from ingestion.budget import content_key
+    args = ("m", "sys", "prompt", {"j": 1}, "https://x", {"mr": 1})
+    monkeypatch.delenv("GW_REPEAT", raising=False)
+    base = content_key(*args)
+    monkeypatch.setenv("GW_REPEAT", "1")
+    assert content_key(*args) == base                      # every key recorded before repeats existed is still valid
+    monkeypatch.setenv("GW_REPEAT", "2")
+    two = content_key(*args)
+    monkeypatch.setenv("GW_REPEAT", "3")
+    assert len({base, two, content_key(*args)}) == 3

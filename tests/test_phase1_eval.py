@@ -84,3 +84,16 @@ def test_time_only_recall_is_looser_than_text_recall():
     gold = GoldSet(duration_s=100.0, annotator="test", app="maya", steps=[GoldStep(order=1, goal="open the hypergraph window", t_start=10.0)])
     c = coverage(_sl([_step(1, "create joints", 0, 20)]), gold)
     assert c["time_recall_core"] == 1.0 and c["text_recall_core"] == 0.0
+
+
+def test_overlay_readiness_counts_targets_and_checkable_targets():
+    from shared.step_record import Action
+    a = _step(1, "click the Rigging shelf tab", 0, 10, state=False)
+    a.actions = [Action(verb="click", ui_element="Rigging Shelf Tab")]
+    b = _step(2, "press Tab", 10, 20, state=True)
+    b.actions = [Action(verb="press_keys", keys=["Tab"])]
+    c = _step(3, "explain the setup", 20, 30, state=True)             # nothing to point at
+    c.actions = [Action(verb="click", ui_element="  ")]
+    s = structure(_sl([a, b, c]))
+    assert s["with_target"] == round(2 / 3, 3)                        # a and b can be pointed at
+    assert s["guidable"] == round(1 / 3, 3)                           # only b has a target AND an end state

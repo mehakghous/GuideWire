@@ -22,8 +22,14 @@ from .gold import GoldSet
 from .metrics import evaluate, similarity
 
 
+def _has_target(st) -> bool:
+    """The overlay has something to point at (a named UI element) or the learner something to press (keys)."""
+    return any((a.ui_element or "").strip() or a.keys for a in st.actions)
+
+
 def structure(sl: StepList) -> dict:
-    """Numbers from the model output alone. Rates are over MECHANICS steps where noted (craft steps are never graded)."""
+    """Numbers from the model output alone. Rates are over MECHANICS steps where noted (craft steps are never graded).
+    `with_target` = share of steps the overlay can point at; `guidable` = share of mechanics steps that can be pointed at AND auto-checked (a UI element plus an expected state)."""
     steps = sl.steps
     n = len(steps)
     mech = [s for s in steps if s.kind == "mechanics"]
@@ -38,6 +44,8 @@ def structure(sl: StepList) -> dict:
         "steps": n,
         "mechanics_steps": len(mech),
         "checkable_end_state": rate(sum(1 for s in mech if s.expected_state), len(mech)),
+        "with_target": rate(sum(1 for s in steps if _has_target(s)), n),
+        "guidable": rate(sum(1 for s in mech if _has_target(s) and s.expected_state), len(mech)),
         "with_how_to": rate(sum(1 for s in steps if s.how_to), n),
         "with_check": rate(sum(1 for s in steps if s.check), n),
         "with_time": rate(sum(1 for s in steps if s.video_start_s is not None), n),
@@ -59,35 +67,42 @@ def _step_text(st) -> str:
     return " ".join([st.goal, st.result or "", *(h.text for h in st.how_to), *(a.ui_element or "" for a in st.actions)])
 
 
-def covered_actions(sl: StepList, gold: GoldSet) -> list[tuple]:
-    """For every gold action: (action, inside_a_step_span, inside_a_span_and_words_found). The unit the coverage numbers and the small-action report count."""
+def _words_match(step, g) -> bool:
+    return similarity(_step_text(step), g.goal) >= TEXT_MIN
+
+
+def covered_actions(sl: StepList, gold: GoldSet, matcher=None) -> list[tuple]:
+    """For every gold action: (action, inside_a_step_span, inside_a_span_and_words_found). The unit the coverage numbers and the small-action report count.
+    `matcher(step, gold_step) -> bool` decides "the step says it"; the default counts shared words, `meaning.MeaningJudge.matcher` judges by meaning."""
+    match = matcher or _words_match
     timed = [s for s in sl.steps if s.video_start_s is not None and s.video_end_s is not None]
     out = []
     for g in gold.steps:
         inside = [s for s in timed if s.video_start_s - TIME_TOL_S <= g.t_start <= s.video_end_s + TIME_TOL_S]
-        out.append((g, bool(inside), any(similarity(_step_text(s), g.goal) >= TEXT_MIN for s in inside)))
+        out.append((g, bool(inside), any(match(s, g) for s in inside)))
     return out
 
 
-def coverage(sl: StepList, gold: GoldSet) -> dict:
+def coverage(sl: StepList, gold: GoldSet, matcher=None) -> dict:
     """Many-to-one scoring. A person labels small actions; a step usually covers several, so one step may cover many gold actions.
     * recall: share of CORE gold actions that lie inside some step's time span AND whose words the step's text contains (text_recall_core), or that only
       lie inside a span (time_recall_core, looser: it says the step was there, not that it said the right thing).
     * step support: share of steps that have at least one gold action inside the span whose words the step contains. A step with none is either
       invented, mistimed or about something the labeller did not list: look at it by hand before calling it wrong."""
     timed = [s for s in sl.steps if s.video_start_s is not None and s.video_end_s is not None]
-    core = [(g, t, x) for g, t, x in covered_actions(sl, gold) if g.importance == "core"]
+    core = [(g, t, x) for g, t, x in covered_actions(sl, gold, matcher) if g.importance == "core"]
+    match = matcher or _words_match
     supported = 0
     for s in timed:
         near = [g for g in gold.steps if s.video_start_s - TIME_TOL_S <= g.t_start <= s.video_end_s + TIME_TOL_S]
-        supported += any(similarity(_step_text(s), g.goal) >= TEXT_MIN for g in near)
+        supported += any(match(s, g) for g in near)
     return {"gold_actions": len(gold.steps), "gold_core": len(core),
             "text_recall_core": round(sum(x for _, _, x in core) / len(core), 3) if core else None,
             "time_recall_core": round(sum(t for _, t, _ in core) / len(core), 3) if core else None,
             "step_support": round(supported / len(timed), 3) if timed else None}
 
 
-def accuracy(sl: StepList, gold: GoldSet | None) -> dict:
+def accuracy(sl: StepList, gold: GoldSet | None, matcher=None) -> dict:
     """Recall, precision and timestamp accuracy against a human gold file; all None without one.
     `core_recall` and `precision` are the strict one-to-one match of ingestion/eval/metrics.py: one step can match only ONE gold action, so with
     fewer steps than gold actions they are capped by the step count. The coverage numbers are the ones to read."""
@@ -97,7 +112,7 @@ def accuracy(sl: StepList, gold: GoldSet | None) -> dict:
     r = evaluate(gold, sl)
     return {"gold": True, "core_recall": round(r.core_recall, 3), "precision": round(r.precision, 3),
             "timestamp_accuracy": None if r.timestamp_accuracy is None else round(r.timestamp_accuracy, 3),
-            "state_recall": None if r.state_recall is None else round(r.state_recall, 3), **coverage(sl, gold)}
+            "state_recall": None if r.state_recall is None else round(r.state_recall, 3), **coverage(sl, gold, matcher)}
 
 
 def load_gold(gold_dir: Path, video_id: str | None) -> GoldSet | None:
@@ -108,12 +123,15 @@ def load_gold(gold_dir: Path, video_id: str | None) -> GoldSet | None:
     return GoldSet.model_validate_json(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
-def report(paths: list[Path], gold_dir: Path) -> list[dict]:
+def report(paths: list[Path], gold_dir: Path, judge=None) -> list[dict]:
+    """`judge` (meaning.MeaningJudge) switches the coverage numbers from shared words to meaning; one text-only model call per video with a gold file."""
     rows = []
     for p in paths:
         sl = StepList.model_validate_json(p.read_text(encoding="utf-8"))
+        gold = load_gold(gold_dir, sl.video_id)
+        matcher = judge.matcher(sl, gold) if judge and gold else None
         rows.append({"file": p.name, "app": sl.app, "video_id": sl.video_id, "model": sl.model_id, "prompt": sl.prompt_version,
-                     **structure(sl), **accuracy(sl, load_gold(gold_dir, sl.video_id))})
+                     "matching": "meaning" if matcher else "words", **structure(sl), **accuracy(sl, gold, matcher)})
     return rows
 
 
@@ -122,7 +140,7 @@ def per_app(rows: list[dict]) -> dict[str, dict]:
     by = defaultdict(list)
     for r in rows:
         by[r["app"]].append(r)
-    keys = ("checkable_end_state", "with_how_to", "with_check", "with_time", "with_feature_id", "flags_per_step", "video_covered",
+    keys = ("checkable_end_state", "with_target", "guidable", "with_how_to", "with_check", "with_time", "with_feature_id", "flags_per_step", "video_covered",
             "text_recall_core", "time_recall_core", "step_support")
     out = {}
     for app, rs in by.items():
@@ -134,13 +152,25 @@ def per_app(rows: list[dict]) -> dict[str, dict]:
     return out
 
 
+def meaning_judge(tier: str, key: str = "default"):
+    from dotenv import load_dotenv
+
+    from ..budget import TIERS, BudgetedProvider, api_key_for
+    load_dotenv()
+    from ..providers.gemini import GeminiProvider
+    from .meaning import MeaningJudge
+    return MeaningJudge(BudgetedProvider(GeminiProvider(api_key=api_key_for(key), model=TIERS[tier]), label=key))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="ingestion.eval.phase1")
     ap.add_argument("files", nargs="+", type=Path)
     ap.add_argument("--gold-dir", type=Path, default=Path("eval_data") / "gold")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--meaning", choices=["iterate", "report"], help="match steps to your actions by meaning with a model (one text-only call per video, cost-guarded, cached); default counts shared words")
+    ap.add_argument("--key", choices=["default", "dev", "test"], default="default", help="with --meaning: which API key variable to read")
     a = ap.parse_args(argv)
-    rows = report(a.files, a.gold_dir)
+    rows = report(a.files, a.gold_dir, meaning_judge(a.meaning, a.key) if a.meaning else None)
     out = {"runs": rows, "per_application": per_app(rows),
            "note": "accuracy fields are None until a human gold file exists for the video; structure fields are measured on model output only"}
     print(json.dumps(out, indent=1) if a.json else json.dumps(out, indent=1, ensure_ascii=False))

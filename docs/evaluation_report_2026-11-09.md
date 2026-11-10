@@ -116,6 +116,85 @@ What this means for the knowledge base work: more entries WITH menu paths and of
 * **Actions never shown or said.** The model cannot be scored on actions the labeller also did not list.
 * **The stronger model, repeat runs, and agreement between two labellers.**
 
+### 1.8 Prompt v10 on `gemini-3.6-flash` (run 2026-11-09 evening, outputs in `runs/compare/gemini-3.6-flash/`)
+Six labelled videos, one run each, `scripts/compare_prompts.py --model gemini-3.6-flash --versions v10 --windows 0,60`. Cost of this run from the cost log: about 0.74 USD for 31 calls (an earlier 3.6 Flash run on 8 Nov cost 0.446 USD for six calls).
+
+One pass, all six videos:
+| Model | steps | one-to-one recall | one-to-one precision | words found in span | time inside a span | step support | timestamp accuracy | checkable end state |
+|---|---|---|---|---|---|---|---|---|
+| cheap model (3.5 Flash-Lite), v10 | 19.0 | 49 % | 94 % | 66 % | 86 % | 86 % | 94 % | not recorded |
+| **3.6 Flash, v10, one pass** | 17.8 | 41 % | 79 % | 76 % | 93 % | 92 % | 97 % | 54 % |
+
+This reproduces the figures the labeller reported from the earlier run (41 / 79 / 76 / 93 / 92 / 97). Reading: the stronger model finds more of the right words and times and has fewer unsupported steps, but writes fewer, coarser steps, so the strict one-to-one scores fall. Only 54 % of its steps carry a checkable end state.
+
+60 s clips: **incomplete.** Four of the six videos failed with HTTP 429 RESOURCE_EXHAUSTED (Gemini quota or billing), so only the Blender armature and Maya quick rig videos have clip results. On those same two videos:
+| Setting | steps | one-to-one recall | one-to-one precision | words found | time inside a span | step support | timestamp accuracy |
+|---|---|---|---|---|---|---|---|
+| 3.6 Flash, one pass | 15.5 | 53 % | 93 % | 88 % | 100 % | 100 % | 100 % |
+| 3.6 Flash, 60 s clips | 24.5 | 65 % | 80 % | 88 % | 100 % | 90 % | 94.5 % |
+
+Reading, with n = 2 (a lead, not evidence): clips give about 9 more steps and 12 points more one-to-one recall, at a cost of 13 points of precision and 10 of step support; words found did not change. The same trade-off was seen with the cheap model (section 1.5). The four failed videos, including both Houdini videos, still need the run repeated once quota is available (the cost guard caches finished calls, so a repeat only pays for the missing ones). A second attempt the same evening failed on the same four videos.
+
+### 1.9 Matching by meaning instead of shared words (new, opt-in; `ingestion/eval/meaning.py`, tests `tests/test_meaning_match.py`)
+The words check misses synonyms ("log in" against "sign into the account"), so words found and step support were lower bounds. `--meaning iterate|report` (on `python -m ingestion.eval.phase1` and `scripts/compare_prompts.py`) now asks a model, in text only, once per video: for each of the labeller's actions it lists the steps whose time span contains the action and the model says which of them do that action. The time rule is unchanged, a step covering several actions is credited for each, and a step the model names that was not a candidate is ignored. Strict one-to-one recall and precision still use words. Default is still words.
+
+3.6 Flash v10 one pass, six videos, judged by `gemini-3.5-flash-lite` (cost about 0.03 USD, cached):
+| Video | words found, shared words | words found, meaning | step support, shared words | step support, meaning |
+|---|---|---|---|---|
+| Blender armature | 92 % | 100 % | 100 % | 100 % |
+| Blender leg IK | 84 % | 92 % | 83 % | 96 % |
+| Houdini APEX IK | 65 % | 82 % | 100 % | 100 % |
+| Houdini APEX FK | 49 % | 86 % | 75 % | 100 % |
+| Maya quick rig | 85 % | 85 % | 100 % | 100 % |
+| Maya leg IK | 83 % | 83 % | 96 % | 87 % |
+| **Mean** | **76 %** | **88 %** | **92 %** | **97 %** |
+
+Reading: most of the gap is Houdini, where the model's step wording differs from the labeller's. **Treat the meaning numbers as an upper-leaning estimate.** A spot check of 10 of the 29 new Houdini matches (matched by meaning, not by words) found about 4 clearly right ("Create an Auto Rig Component node" and "Add an APEX AutoRig Component node"), about 4 plausible but loose, and 2 wrong ("Apply the FK component configuration" matched to "Test FK handles in viewport"). The judge is the cheap model, one run, not checked by a person. The stronger judge tier (`--meaning report`) returned HTTP 503 when tried, so it was not compared. Before quoting a meaning number, either rerun with the stronger judge or have a person check a sample of matched pairs. A bug found on the way: the model first returned whole "STEP s01: text" lines instead of ids, which scored zero on five of six videos; the parser now reads both, and a test pins it.
+
+### 1.10 Overlay readiness and prompt `v10-preds` (run 2026-11-09 night; `ingestion/eval/phase1.py`, `ingestion/extract.py`, `tests/test_prompt_v10_preds.py`)
+Two new structure numbers: **has-target** (share of steps with a named UI element or keys, so the overlay has something to point at) and **guidable** (share of mechanics steps with a target AND a checkable end state, so they can be highlighted and auto-completed).
+
+Baseline, v10 on 3.6 Flash (six videos): has-target 100 %, guidable 54 %. Mechanics steps with an end state: Blender 25 of 38, Houdini 12 of 26, Maya 16 of 37. The model was offered seven kinds of state and used only mode, node_exists, active_tool, panel_open, workspace and selection_type; it never produced name_exists, attribute_exists, node_count or property_equals, so renames, option toggles and parameter edits had no end state.
+
+`v10-preds` = v10 plus a block teaching name_exists (every rename), attribute_exists, node_count, and property_equals for a toggle or value; only this version sees the wider schema, older prompts are unchanged. Same six videos, 3.6 Flash, one run each, words found and support judged by meaning (cheap judge):
+
+| | steps | one-to-one recall | one-to-one precision | words found (meaning) | step support (meaning) | time inside a span | timestamp accuracy | guidable |
+|---|---|---|---|---|---|---|---|---|
+| v10 | 17.8 | 41 % | 79 % | 88 % | 97 % | 93 % | 97 % | 54 % |
+| v10-preds | 18.5 | 42 % | 76 % | 90 % | 99.5 % | 93 % | 97 % | 56 % |
+
+Kinds produced by v10-preds: name_exists 8, property_equals 6, attribute_exists 1, node_count 1 (v10: none of these). Mechanics steps with an end state: 63 of 111 (57 %) against 53 of 101 (52 %); Maya 43 % to 56 %, Houdini 46 % to 52 %, Blender 66 % to 59 %.
+
+Reading: **the model does use the new kinds and almost every rename now has an end state, but overall guidable rose only about 2 points, which is within what one run per video can move.** Blender wrote 54 mechanics steps in this run against 38 in the v10 run, so run-to-run spread is large and the comparison is a lead, not proof. Of the 48 mechanics steps still without a state, many are genuinely stateless (move or rotate a bone, open a shelf tab, maximise a panel, mirror guides), some could have used node_exists, property_equals or attribute_exists ("Add an APEX Add Character node", "Assign the Pole Target bone in the IK constraint settings") and were not given one, and connections have no kind at all. So **the realistic ceiling for guidable is below 100 % and probably nearer 70 %**, and the remaining gain would come from a second pass that fills states for steps the first pass left empty (from the step text and the knowledge base, checked against the node vocabulary), not from more prompt wording. Vision has not confirmed it can read the three newer kinds from a screenshot (architecture note, section 5).
+
+### 1.11 Display groups: atomic steps for the overlay, grouped steps for the learner (plan item A1; `ingestion/grouping.py`, `tests/test_grouping.py`, schema 0.12)
+Extraction keeps writing atomic steps (what the overlay points at and completion detection checks). Schema 0.12 adds two optional fields on a step, `group_id` ("g03") and `group` (a short label); consecutive steps with the same id form one display group. `StepList.groups` returns (id, label, steps) for every group and treats an ungrouped step as its own group, so a screen can always walk that one list; `StepList.group_problems` checks the rules. Steps are never merged, reordered or rewritten.
+
+`python -m ingestion.cli group steps.json -o grouped.json` makes one text-only model call (no video; cost-guarded, cached) that decides where groups start and end and names them. Code checks the answer before use: every step in exactly one group, in order, each group a run of consecutive steps, label at most 80 characters, at most 12 steps a group. A rule-breaking answer is sent back once with the problem; after a second failure the list stays ungrouped with a warning (no guess), and a provider outage or budget stop keeps the steps and says so.
+
+Run on the six 3.6 Flash v10-preds step lists with `gemini-3.5-flash-lite`: all six were grouped validly (one needed the retry). **111 steps became 46 groups** (Blender armature 18 to 8, Blender leg IK 36 to 16, Maya quick rig 16 to 5, Maya leg IK 16 to 5, Houdini FK 10 to 8, Houdini IK 15 to 4), total cost about 0.006 USD. Example (Maya leg IK): "Prepare to draw the leg joints (2 steps)", "Draw the leg joint chain (2)", "Rename the leg joints (6)", "Mirror the leg joint chain (3)", "Add the IK handles (3)". Reading: groups follow the tutorial's goals well where steps are fine-grained, and compress little where the steps are already coarse (Houdini FK: 10 steps, 8 groups). **Not measured:** whether a beginner finds the groups easier to follow than the flat list (that needs the user study), and group quality was read by one person, not scored against a labelled grouping. The labeller's sheets have no group column, so there is no gold for this.
+
+Contract note for the app: the fields are additive (an app that ignores them still works), the schema version is now 0.12, and `docs/architecture.md` still says 0.10. The unused-kind test `test_app_step_loader` still fails for the reason in plan item E1.
+
+### 1.12 Run-to-run spread (plan item A5) and the outline check (plan item A4)
+**Spread.** `scripts/compare_prompts.py --repeats 3` asks the model again for repeats 2 and up and reports the mean and range. Gemini quota ran out part-way (HTTP 429, and 503 capacity errors), so only three of the six runs finished all six videos: v10 repeat 1, v10 repeat 2 and v10-preds repeat 1. Repeat 3 of v10 finished 4 videos, v10-preds repeats 2 and 3 finished 1 each; the script now leaves incomplete repeats out of the mean (before, it averaged them in, which gave a misleading 77 % guidable for v10-preds). Cost of the attempt from the cost log: about 0.80 USD for 36 calls, 12 of them errors.
+
+The same prompt (v10) on the same six videos, run twice:
+| Measure | repeat 1 | repeat 2 | gap |
+|---|---|---|---|
+| words found (meaning) | 88 % | 81 % | 7 points |
+| guidable | 54 % | 47 % | 7 points |
+| step support (meaning) | 97 % | 94 % | 3 points |
+| one-to-one recall | 41 % | 42 % | 0.5 point |
+| one-to-one precision | 79 % | 81 % | 2 points |
+Per video the swings are larger: guidable on Maya quick rig was 53 % then 24 %, on Maya leg IK 36 % then 63 %, and the number of steps on Blender leg IK went 24, 28, then 36 with v10-preds. **Reading: differences of about 7 points on words found and guidable, and 3 on support, cannot be told from luck with one run per video.** That includes the earlier results: v10-preds (guidable 56 %) against v10 (54 % and 47 %) is inside the spread, so v10-preds is not shown to help, and the 76 to 88 % jump from meaning matching is a scoring change, not a run-to-run effect. One-to-one recall and precision were steadier (within 2 points). Any prompt change must be judged with several runs; the next Houdini test should use three repeats on the two Houdini videos only (about 12 paid calls, roughly 1 USD at the 3.6 Flash prices seen here), after quota is available.
+
+**Correction to the spread table (found later the same night).** `--fresh` asks the model again but writes the answer into the same cache slot as the first run, so repeats 2 and 3 overwrote repeat 1: after the re-run, the repeat-1 files for the videos where a later repeat finished held the LATER answer (for example Blender leg IK went from 24 steps to 34, equal to repeat 3). The numbers in the table above were computed from the files as they were before that happened and are what was observed, but the original repeat 1 cannot be regenerated, so the table is not reproducible from disk. Fixed: `GW_REPEAT=n` (set by `compare_prompts.py` for repeats 2 and up) now enters the cache key (`ingestion/budget.py`, test in `tests/test_budget.py`), so each repeat has its own slot and repeat 1 keeps its old key. The spread conclusion (differences of about 7 points on words found and guidable are within run-to-run change) rests on repeat 2 against the lost repeat 1 and on the per-video swings seen at the time; it should be re-measured under the fixed keys before it is quoted.
+
+**Houdini prompt `v10-hou` (A3): built, NOT measured.** Prompt v10 plus a Houdini node-network rule (a step per node created, per connection, per parameter with its exact value, per flag, per viewport state change; Houdini only, the other applications get the v10 text exactly; `tests/test_prompt_v10_hou.py`). The measurement (`compare_prompts.py --versions v10,v10-hou --apps houdini --repeats 3`, about 10 paid calls) failed on every call with HTTP 429 RESOURCE_EXHAUSTED: the Gemini quota for `gemini-3.6-flash` was used up by the earlier runs. No Houdini result exists yet.
+
+**Outline check (A4).** `ingestion/outline_check.py` (tests in `tests/test_outline_check.py`, not wired into the CLI or extraction) compares a step list with the knowledge base's ordered outlines and returns hints "possibly missing" and "possibly out of order". On the six v10-preds step lists it raised 5 hints for 111 steps (4 missing, 1 order) and none of the 4 missing items is an action the labeller listed, so it found nothing a reviewer would have wanted. The outlines are too generic for these videos. Conclusion: not adopted; kept as a tested module only.
+
 ## 2. Tutorial quality and YouTube signals: dropped from the plan (decision 2026-11-09)
 
 Views, likes and comments were collected for 12 videos and looked at. Result, in short: popularity did not predict how well a video can be extracted (an 82-view video scored the same as a 49,000-view one), like ratios barely differ between videos (1.2 % to 2.9 %), and dislike counts do not exist in the API since 2021. The project decided these signals will not be used, so there is no proposal and no plan item for them. The small helpers added for the look (`video_statistics` and `top_comments` in `ingestion/youtube/api.py`, `scripts/youtube_signals.py`, `tests/test_youtube_signals.py`) are not used by anything else and can be deleted without effect.
@@ -244,7 +323,7 @@ Decisions: more gold labelling is paused (no time); YouTube signals are dropped;
 
 | # | Item | Why | Effort |
 |---|---|---|---|
-| 1 | When billing is on: run `scripts/compare_prompts.py --tier report --versions v7,v9,v10 --windows 0,60`; pick the default per application from the table; add a Houdini-specific prompt (node, connection, parameter, viewport state) if Houdini is still far behind | The only way to see whether 90 % is reachable | half a day plus about 3 USD |
+| 1 | **IN PROGRESS (2026-11-09 evening):** v10 on `gemini-3.6-flash`, one pass and 60 s clips, run with `scripts/compare_prompts.py --model gemini-3.6-flash --versions v10 --windows 0,60` (new `--model` option; outputs in `runs/compare/gemini-3.6-flash/`). Record the table in section 1.8; pick the default per application from it; add a Houdini-specific prompt (node, connection, parameter, viewport state) if Houdini is still far behind. A first 3.6 Flash run on 8 Nov cost 0.446 USD (cost log) but its outputs were not saved, so its accuracy table cannot be re-checked | The only way to see whether 90 % is reachable | half a day plus about 1 to 2 USD |
 | 2 | Decide what "above 90 %" means for each measure and fix the ones the gold cannot measure (a labeller-granularity note, or a short human review of steps that match no gold row) | Recall measures are capped by the gold itself (section 1.5) | 1 day, no labelling |
 | 3 | Add a fresh question set, graded by a second person, before quoting any answering number (the model answerer is already wired into the gateway and `chat`) | The 91 % is on a development set | 1 day |
 | 4a | Add knowledge-base entries with menu paths and official option names, Houdini first, and re-run the section 1.6 comparison; use outlines to check extracted steps after the fact, not in the prompt | Removing the menu block cost about 10 points of words found | 2 to 3 days |
@@ -254,6 +333,45 @@ Decisions: more gold labelling is paused (no time); YouTube signals are dropped;
 | 7 | Per-step replay in the harness (state after each step) | The harness checks the end state only | 2 to 3 days |
 | 8 | Demo preparation (Nov 22): one video per application with steps, matrix row, harness result | Plan Phase 3 | 2 days |
 | 9 | Paused: more gold (6 to 10 videos, a second labeller, explicit order); needed before any claim of accuracy beyond these six videos | The evidence base is six videos and one labeller | days of labelling |
+
+### 6.1 Additions of 2026-11-09 (evening), merged into the plan above
+Each item says which numbered item it extends. Basis for each is the proposal (line numbers of the .docx text) or a measured result in this report; nothing here is measured unless it says so.
+
+**Track A, step extraction (Ayesha's core part)**
+| # | Item | Extends | Why (basis) |
+|---|---|---|---|
+| A1 | Two-level steps: keep every atomic step for the overlay and completion detection, add an optional display group so the learner sees "Rename the bones" instead of 12 rows. Additive field, so the app keeps working (architecture note, contract rule); agree the field name with Mehak first | 1, 2 | Proposal: one highlighted element per step; automatic progression only for visually distinguishable single actions (proposal line 437). Strict one-to-one scores punish grouping (section 1.1), so grouping is a display choice, not an extraction target |
+| A2 | Success measure for the overlay: share of steps that have a UI element to point at AND a checkable end state (`checkable_end_state` already exists in `phase1.py`), reported beside the word-overlap numbers | 2 | Word overlap is a proxy; the overlay needs a target and a check |
+| A3 | Houdini prompt: one step per node created, per connection, per parameter changed, per viewport state change | 1, 4a | Houdini is the weakest at every setting (section 1.5) |
+| A4 | After extraction, use knowledge-base outlines to flag steps that look missing or out of order (not inside the prompt) | 4a | The outline-in-prompt variant lowered precision (section 1.6) |
+| A5 | Run each chosen setting 3 times on the six videos and report the spread | 2 | Run-to-run spread was never measured (section 1.5) |
+
+**Track B, question answering**
+| # | Item | Extends | Why (basis) |
+|---|---|---|---|
+| B1 | Second pass for tutorial questions: if the extracted steps do not answer, find the nearest time, send the video URL and a short clip window (`#t=start,end`, already in `providers/gemini.py`) with the question, answer with the timestamp; only if the clip does not show it say "I checked about 2:10 to 3:00 and it is not shown". Goes through the cost guard and cache. Cost per clip is an estimate, to be measured | 3, 5 | Today the model sees step text only (`answer_model.py` rule 4) and says "not in the tutorial"; that rule exists because it invented reasons (section 3.4), so the recheck must keep the right to say "not shown" |
+| B2 | "Where do I start" with no video: build a short starter plan from the knowledge base and return it as a step list (an `AnswerBundle` can carry a `StepList`, architecture note section 1), labelled "drafted from GuideWire's knowledge base", so the overlay can highlight it. Text answer stays the default; the step route is on request | 4 | Proposal: a question is routed to discovery or a labelled unsourced draft when no workflow is active (proposal lines 82 and 235); the answer schema today has no steps (`answer_model.py:46-58`) |
+| B3 | New question set: 12 "most asked" beginner questions per application (where to start, what before rigging, skeleton, skinning, IK, controls, FK versus IK, mirror, which tutorial first, flipping knee, what next), plus typed questions that state a level ("I am a beginner"). Levels exist only as typed words in questions for now; no profile field | 3 | None of the 48 current questions asks where to start. Real frequencies come from the user study (proposal line 351), so these are assumptions until then |
+| B4 | OpenAI key (5 USD credit): add a provider adapter behind `providers/base.py`, a price entry for the chosen model, and use it behind the same cost guard. Two uses: (1) as an answering model to compare against Gemini on the new question set; (2) as an independent grader of replies, since the 48 questions were graded by one reader. Keys stay only in the gateway `.env`; never commit it | 3 | The cost guard needs a price for every model (`ingestion/experiment.py`). The existing Gemini cost was about 0.03 USD for 40 answers (section 3.4), so credit goes furthest on short, cached, capped calls |
+
+**Track C, knowledge base**
+| # | Item | Extends | Why (basis) |
+|---|---|---|---|
+| C1 | Audit all 45 entries against the matrix: list entries without menu paths, without an official source, with an unconfirmed official-tier statement; fill P0 gaps PREP-01 and PREP-02 first (they are the "where to start" content), then the animation stage that is not started; Houdini first | 4, 4a | Removing the menu block cost about 10 points of words found (section 1.6); a wrong entry now reaches users through the model (section 3.4) |
+
+**Track D, tutorial discovery**
+| # | Item | Extends | Why (basis) |
+|---|---|---|---|
+| D1 | Auto-rig titles: no penalty for a beginner or "quick" goal, a small penalty only when the goal says learn how rigs work; always add the note "teaches the tool, not how a rig is built". Replaces the flat -1.0 at `rigging_discovery.py:314`. Level read from the request words only | none | The penalty was for extraction convenience, not usefulness to a beginner |
+| D2 | Fit check on the top 3 results (a model watches a short part of each) and, only if a test shows it helps top-three hit rate, thumbnails. Check the proposal's rule that GuideWire does not download or cache YouTube content (line 388) before fetching images | none | Proposal names a video model for the discovery fit check (line 389); thumbnails are a weak, unmeasured signal |
+
+**Track E, housekeeping**
+| # | Item | Why |
+|---|---|---|
+| E1 | Fix `tests/test_app_step_loader.py::test_unknown_kind...`: it uses `node_count` as an unknown kind, but schema 0.11 makes it known. Change the example to a made-up kind, and tell Mehak (her file). Update her architecture note ("schema 0.10", "proposed for 0.11") | 1 failing test after the merge of main |
+| E2 | Merge `main` into each stacked branch, push, open pull requests in order | Stack: extraction, scoring, answering, report |
+
+**Order of work (recommended):** A1 results, then A1/A2 changes, E1 at any time; B3 and C1 in parallel (they feed each other); D1 (small); B2 after C1; B1 after B3 shows how many questions need it; B4 once B3 exists, so the 5 USD is spent on a measured comparison; A3 and A5 when the credit plan is clear; D2 last.
 
 ### Files added or changed in this review (all uncommitted)
 Extraction: `ingestion/extract.py` (prompts v8, v9, v10; clip extraction `extract_from_video_windows`; last-resort time sort), `ingestion/providers/gemini.py` (clip offsets via `#t=start,end`), `ingestion/cli.py` (`--window-s`), `ingestion/validate.py` (coverage warnings as a function; vocabulary matching), `scripts/compare_prompts.py`.

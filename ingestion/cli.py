@@ -93,6 +93,24 @@ def _offline(args) -> int:
         from .workflows import load_steplist
         print(feature_report(load_steplist(args.file)).render())          # a step list, or an answer bundle holding one
         return 0
+    if args.cmd == "group":                                  # one text-only model call (cost-guarded); the steps themselves are never changed
+        from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
+        from .grouping import group_steps
+        from .providers.gemini import GeminiProvider
+        from .workflows import load_steplist
+        sl = load_steplist(args.file)
+        try:
+            provider = BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.tier]), label=args.key)
+            out = group_steps(sl, provider)
+        except BudgetExceeded as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+        for gid, label, steps in out.groups:
+            print(f"{gid or '--'}  {label}  ({len(steps)} step{'s' if len(steps) != 1 else ''}: {steps[0].id}" + (f" to {steps[-1].id})" if len(steps) > 1 else ")"))
+        print("\n".join(w for w in out.warnings if "group" in w))
+        if args.out:
+            Path(args.out).write_text(out.model_dump_json(indent=2), encoding="utf-8")
+        return 0
     if args.cmd == "chain":
         from .scene_chain import chain_report, derive_state
         from .workflows import load_steplist
@@ -251,7 +269,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "chain", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "chain", "group", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -282,7 +300,7 @@ def _dry_run(args, model: str | None) -> int:
             dur = fetch_metadata(vid).duration_s
         from .youtube.metadata import canonical_url
         prompt, url = video_prompt(args.prompt_version, dur, None), canonical_url(vid)
-    r = dry_run(model, video_s=dur, system=system, prompt=prompt, schema=_schema(), video_url=url, ceilings=Ceilings.from_env(max_usd_run=args.max_usd_run))
+    r = dry_run(model, video_s=dur, system=system, prompt=prompt, schema=_schema(args.prompt_version), video_url=url, ceilings=Ceilings.from_env(max_usd_run=args.max_usd_run))
     print(json.dumps({**r, "app": args.app, "prompt_version": args.prompt_version, "video_seconds": dur, "key_label": args.key}, indent=1))
     return 0
 
@@ -368,6 +386,11 @@ def main(argv: list[str] | None = None) -> int:
     ch = sub.add_parser("chain", help="OFFLINE: fill missing expected states from the knowledge base, then check each step's start state follows from earlier steps")
     ch.add_argument("file")
     ch.add_argument("-o", "--out", help="write the step list with the derived states (default: report only)")
+    gr = sub.add_parser("group", help="group consecutive steps into display groups for the learner (schema 0.12); one text-only model call, cost-guarded; the steps are not changed")
+    gr.add_argument("file")
+    gr.add_argument("-o", "--out", help="write the step list with group_id and group set (default: print the groups only)")
+    gr.add_argument("--tier", choices=["iterate", "report"], default="iterate")
+    gr.add_argument("--key", choices=["default", "dev", "test"], default="default")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
     m = sub.add_parser("validate", help="OFFLINE: validate and annotate a manually entered step list (JSON)")
     m.add_argument("file")

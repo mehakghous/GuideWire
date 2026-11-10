@@ -8,7 +8,7 @@ APPS = ("blender", "maya", "houdini")
 
 
 def test_versions_and_defaults_are_unchanged():
-    assert PROMPT_VERSIONS[-5:] == ("v8", "v9", "v10", "v10-nokb", "v10-outline")
+    assert PROMPT_VERSIONS[-7:] == ("v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou")
     assert default_prompt_version("maya") == default_prompt_version("houdini") == "v7"
     assert default_prompt_version("blender") == "v2" and default_prompt_version("blender", rigging=True) == "v7"
 

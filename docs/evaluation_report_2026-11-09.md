@@ -195,6 +195,38 @@ Per video the swings are larger: guidable on Maya quick rig was 53 % then 24 %, 
 
 **Outline check (A4).** `ingestion/outline_check.py` (tests in `tests/test_outline_check.py`, not wired into the CLI or extraction) compares a step list with the knowledge base's ordered outlines and returns hints "possibly missing" and "possibly out of order". On the six v10-preds step lists it raised 5 hints for 111 steps (4 missing, 1 order) and none of the 4 missing items is an action the labeller listed, so it found nothing a reviewer would have wanted. The outlines are too generic for these videos. Conclusion: not adopted; kept as a tested module only.
 
+### 1.13 Complete repeats on `gemini-3.6-flash`: A5 (spread) and A3 (Houdini prompt), run 2026-11-10
+Billing was added, so the runs that had failed on quota were made. Each setting was run 3 times on the labelled videos; every repeat has its own cache slot (`GW_REPEAT`, section 1.12), so no repeat overwrote another and all runs finished all their videos. Words found and support are judged by meaning (`gemini-3.5-flash-lite` as the judge); the cost of the A3 and A5 runs together was about 2.5 USD (35 paid calls).
+
+**A5, six videos, one pass, three repeats (mean, with lowest to highest in brackets):**
+| | steps | one-to-one recall | one-to-one precision | words found | time inside a span | step support | timestamp accuracy | guidable |
+|---|---|---|---|---|---|---|---|---|
+| v10 | 16.2 | 37 % (34-40) | 79 % (78-81) | 86 % (81-88) | 91 % (89-94) | 97 % (96-98) | 97 % (95-98) | 54 % (53-58) |
+| v10-preds | 16.9 | 41 % (39-43) | 79 % (76-83) | 88 % (88-89) | 94 % (93-94) | 96 % (93-100) | 99 % (96-100) | **61 % (58-64)** |
+
+**Reading.** Run-to-run spread of the same prompt over six videos is about 3 to 7 points depending on the measure (words found 7, recall 6, guidable 5, precision 3). **The only difference larger than that spread is `guidable`: v10-preds was higher than v10 in all three repeats (+6 points on average, ranges 58-64 against 53-58),** so teaching the 0.11 state kinds gives a small but consistent gain in steps that can be pointed at and auto-checked. Recall (41 against 37), words found and time inside a span are higher for v10-preds too, but their ranges overlap, so they are not shown. The earlier "7 points of luck" table (section 1.12) came from runs that had overwritten each other; the clean spread is a little smaller.
+
+**A3, Houdini only (two videos), v10 against `v10-hou`:**
+| | steps | one-to-one recall | one-to-one precision | words found | time inside a span | step support | guidable |
+|---|---|---|---|---|---|---|---|
+| v10 | 13.7 | 26 % (23-28) | 63 % (55-70) | 76 % (72-81) | 84 % (77-87) | 96 % (92-100) | 50 % (43-60) |
+| v10-hou | 15.7 | **33 % (32-33)** | 62 % (48-76) | **84 % (77-95)** | 91 % (88-96) | 94 % (88-100) | 53 % (46-60) |
+
+**Reading.** The Houdini node-network rule raises one-to-one recall from 26 % to 33 % with no repeat overlapping (its lowest, 32, is above v10's highest, 28), and words found by about 8 points (the ranges overlap), without losing precision or support. A real but modest gain: **Houdini remains the weakest application** (about 33 % recall, 84 % words found, about 50 % guidable). Two videos, so a lead for those two, not a result for Houdini in general. Not tested: `v10-hou` together with the 0.11 state kinds.
+
+**Houdini, the Houdini rule together with the state kinds (`v10-houpreds`, same two videos, 3 repeats, 6 paid calls, about 0.45 USD):**
+| | steps | one-to-one recall | one-to-one precision | words found | time inside a span | step support | guidable |
+|---|---|---|---|---|---|---|---|
+| v10 | 13.7 | 26 % (23-28) | 63 % (55-70) | 76 % (72-81) | 84 % (77-87) | 96 % (92-100) | 50 % (43-60) |
+| v10-hou | 15.7 | 33 % (32-33) | 62 % (48-76) | 84 % (77-95) | 91 % (88-96) | 94 % (88-100) | 53 % (46-60) |
+| v10-houpreds | 17.2 | 33 % (29-40) | 67 % (64-70) | 84 % (77-88) | 91 % (88-97) | 95 % (90-97) | 51 % (43-66) |
+
+**Reading: the combination is not better than the Houdini rule alone.** Recall (33 %), words found (84 %) and time coverage are the same as `v10-hou`; precision is 5 points higher but its range sits inside `v10-hou`'s; `guidable` did not rise (51 % against 53 %). On Houdini the model almost never used the new state kinds (across the six runs: node_exists in every run, name_exists 4 times, property_equals once, node_count once), so there was little for them to add, and the number of steps jumped between repeats of the same video (16 to 31 on the Houdini IK video). Conclusion for Houdini: use `v10-hou`; the state kinds help on the six-video set (section above) because of Maya and Blender renames and toggles, not Houdini parameters. Two videos, so a lead.
+
+**Defaults wired (2026-11-10).** For extraction from a VIDEO the default prompt is now chosen by these measurements (`recommended_video_prompt_version` in `ingestion/extract.py`): **Houdini `v10-hou`**, **Maya `v10-preds`**, **Blender `v10-preds` with `--rigging`** (the Blender measurements were on rigging videos), and a Blender video that is not about rigging keeps the modelling baseline `v2`. Used by `python -m ingestion.cli video` and the gateway's `/v1/extract` for a YouTube URL; an explicit `--prompt-version` still wins. Written text is not video and keeps `default_prompt_version` (v7 for Maya and Houdini, v2 for Blender). Effect on cost: the new prompts are a little longer, and the dry-run worst case for a 6-minute Houdini video is about 0.09 USD. Tests: `tests/test_prompt_v8_v9.py` (the choice, and the CLI picking it) and `tests/test_budget.py` (its Houdini dry-run now expects `v10-hou`).
+
+**Gemini 4 Carbon, tried and set aside (2026-11-10).** The key can call `gemini-4-carbon` ("our most capable reasoning model" on Google's pages) and `gemini-4-argon`; both are priced at 2 USD in and 10 USD out per million tokens until 2026-11-30 (then 4 and 20), thinking billed as output (prices now in `ingestion/experiment.py`, test in `tests/test_budget.py`). One live run on the Houdini FK video: 31 steps against 11 from 3.6 Flash, one-to-one recall 65 % against 35 % and words found 88 % against 77 %, but one-to-one precision 36 % against 55 %, step support 65 % against 100 % and guidable 39 % against 55 %. Four finished Carbon calls cost 1.37 USD in total (0.18 to 0.66 each, mean 0.34, about 3 to 5 times 3.6 Flash), and **the cost guard's worst-case estimate (0.25 USD per video) was too low for it** (one call cost 0.66) because thinking is billed as output. Decision: stay on 3.6 Flash, because for an overlay that points at one control per step, many unsupported extra steps are worse than a few missing ones. One video, one run each: a lead, not a verdict on Carbon.
+
 ## 2. Tutorial quality and YouTube signals: dropped from the plan (decision 2026-11-09)
 
 Views, likes and comments were collected for 12 videos and looked at. Result, in short: popularity did not predict how well a video can be extracted (an 82-view video scored the same as a 49,000-view one), like ratios barely differ between videos (1.2 % to 2.9 %), and dislike counts do not exist in the API since 2021. The project decided these signals will not be used, so there is no proposal and no plan item for them. The small helpers added for the look (`video_statistics` and `top_comments` in `ingestion/youtube/api.py`, `scripts/youtube_signals.py`, `tests/test_youtube_signals.py`) are not used by anything else and can be deleted without effect.
@@ -398,7 +430,7 @@ Decisions: more gold labelling is paused (no time); YouTube signals are dropped;
 | 5 | Answering details: choose instead of asking when "go back" ties between consecutive steps; say "the tutorial does not give a reason" for why-questions; no promise that old steps work in a newer version | The 9 partly right replies | 1 day |
 | 6 | Teach the extraction prompt the 0.11 predicate kinds with a measured live run (changes `MODEL_SCHEMA_TAG` and every cache key) | In the contract and the harness, never produced | 1 day |
 | 7 | Per-step replay in the harness (state after each step) | The harness checks the end state only | 2 to 3 days |
-| 8 | Demo preparation (Nov 22): one video per application with steps, matrix row, harness result | Plan Phase 3 | 2 days |
+| 8 | Demo preparation (**Nov 12**, moved from Nov 22 on 2026-11-10, so two days from then): one video per application with steps, matrix row, harness result. Scope for two days, from what runs today: (1) a written instruction and the starter plan turned into a step list (no model call); (2) one Blender tutorial's saved extraction (a live extraction needs Gemini quota, which was exhausted on 2026-11-09, so use saved outputs); (3) a few questions with and without a tutorial through the model path; (4) Umaima's `python -m vision.demo` highlighting Blender's panels; (5) Mehak's app opening the step list, the review editor and the session screen (done, skip, back). NOT ready, to be said on the slide: automatic completion from the screen, highlighting a named button or menu item (vision finds panels, not controls), and any overlay for Maya or Houdini | Plan Phase 3 | 2 days: all of it |
 | 9 | Paused: more gold (6 to 10 videos, a second labeller, explicit order); needed before any claim of accuracy beyond these six videos | The evidence base is six videos and one labeller | days of labelling |
 
 ### 6.1 Additions of 2026-11-09 (evening), merged into the plan above

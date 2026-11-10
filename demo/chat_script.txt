@@ -1,0 +1,6 @@
+/app maya
+where do i start rigging in maya
+give me the steps to bind the mesh to the skeleton
+my knee flips when i move the ik handle
+/app blender
+what should i do before rigging

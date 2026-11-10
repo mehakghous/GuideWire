@@ -1,0 +1,1239 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "maya",
+  "app_version_tutorial": "2015",
+  "video_id": "TmhC35PqZvQ",
+  "title": "Leg Setup & IK Handles",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Select the Joint tool from the Animation shelf",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Animation > Joint Tool",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "active_tool",
+          "target": "Create Joints Tool",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g01",
+      "group": "Prepare to draw the leg joints",
+      "verifiable": true,
+      "video_start_s": 27.0,
+      "video_end_s": 34.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The Create Joints Tool becomes active.",
+      "how_to": [
+        {
+          "text": "Click on the Animation shelf tab and select the Joint Tool icon.",
+          "support": "shown",
+          "evidence": "Instructor clicks Animation shelf and then Joint tool icon at 00:27."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that the tool prompt changes to joint creation mode.",
+          "support": "shown",
+          "evidence": "Status line shows joint tool hint at bottom left."
+        }
+      ],
+      "visual_evidence": "Joint tool icon selected on Animation shelf.",
+      "evidence": [
+        "click on the joint tool"
+      ],
+      "flags": [
+        "expected/start state (joint) derived from the knowledge base (maya.create_joints), not read from the tutorial",
+        "UI name 'Animation > Joint Tool' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Switch layout to orthographic 4-view display",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Space"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Prepare to draw the leg joints",
+      "verifiable": false,
+      "video_start_s": 43.0,
+      "video_end_s": 46.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The workspace switches from perspective view to four orthographic viewports.",
+      "how_to": [
+        {
+          "text": "Press the Spacebar to open the 4-view layout.",
+          "support": "shown",
+          "evidence": "Screen splits into Top, Front, Side, and Perspective viewports at 00:44."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify four viewports are visible on screen.",
+          "support": "shown",
+          "evidence": "4-view layout displayed."
+        }
+      ],
+      "visual_evidence": "Viewport splits into four windows.",
+      "evidence": [
+        "by hitting spacebar we will bring up our orthographic views"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Draw the leg joint chain from hip to toe tip",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Side View / Front View",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Enter"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "Create Joints Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        },
+        {
+          "kind": "node_count",
+          "target": "joint",
+          "value": 6.0
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g02",
+      "group": "Draw the leg joint chain",
+      "verifiable": true,
+      "video_start_s": 52.0,
+      "video_end_s": 94.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A 6-joint skeleton leg chain is created.",
+      "how_to": [
+        {
+          "text": "Click in the Side view near top center to place the root/pelvis joint, then click in Front view to set hip offset.",
+          "support": "shown",
+          "evidence": "Clicks in Side view then Front view to position hip joint."
+        },
+        {
+          "text": "Maximize Side view with Spacebar and click sequentially to place knee, ankle, ball of foot, and toe tip joints.",
+          "support": "shown",
+          "evidence": "Instructor places joint chain down the leg to the toe tip at 01:14-01:28."
+        },
+        {
+          "text": "Press Enter to finalize the joint chain.",
+          "support": "shown",
+          "evidence": "Presses Enter to complete joint creation at 01:31."
+        }
+      ],
+      "check": [
+        {
+          "text": "Observe connected joint hierarchy extending from hip to toe tip.",
+          "support": "shown",
+          "evidence": "Green joint chain highlighted in viewport."
+        }
+      ],
+      "visual_evidence": "Complete leg joint chain drawn in viewport.",
+      "evidence": [
+        "hit enter and that will finalize the tool"
+      ],
+      "flags": [
+        "UI name 'Side View / Front View' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Maximize the perspective view panel",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Space"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g02",
+      "group": "Draw the leg joint chain",
+      "verifiable": false,
+      "video_start_s": 99.0,
+      "video_end_s": 104.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Perspective viewport is maximized.",
+      "how_to": [
+        {
+          "text": "Hover over Perspective view and press Spacebar to maximize it.",
+          "support": "shown",
+          "evidence": "Viewport transitions from 4-view to full Perspective view at 01:41."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify perspective view fills the main viewport region.",
+          "support": "shown",
+          "evidence": "Perspective view maximized."
+        }
+      ],
+      "visual_evidence": "Perspective view enlarged to full screen area.",
+      "evidence": [
+        "come back to my perspective view"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Rename the root joint to hip",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "joint1",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > Name",
+          "keys": [],
+          "value": "hip"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "hip",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g03",
+      "group": "Rename the leg joints",
+      "verifiable": true,
+      "video_start_s": 113.0,
+      "video_end_s": 118.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Root joint is renamed to 'hip'.",
+      "how_to": [
+        {
+          "text": "Select the root joint, double-click its name in the Channel Box, enter 'hip' and press Enter.",
+          "support": "shown",
+          "evidence": "Instructor types 'hip' in Channel Box name field at 01:56."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check Channel Box name field shows 'hip'.",
+          "support": "shown",
+          "evidence": "Name field reads 'hip'."
+        }
+      ],
+      "visual_evidence": "Channel Box displays name 'hip'.",
+      "evidence": [
+        "going to name hip"
+      ],
+      "flags": [
+        "UI name 'joint1' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Channel Box > Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Rename the thigh joint to leftThigh",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "joint2",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > Name",
+          "keys": [],
+          "value": "leftThigh"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "leftThigh",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g03",
+      "group": "Rename the leg joints",
+      "verifiable": true,
+      "video_start_s": 119.0,
+      "video_end_s": 125.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Thigh joint is renamed to 'leftThigh'.",
+      "how_to": [
+        {
+          "text": "Select joint2, double-click its name in the Channel Box, type 'leftThigh' and press Enter.",
+          "support": "shown",
+          "evidence": "Instructor types 'leftThigh' into Channel Box at 02:03."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify Channel Box name reads 'leftThigh'.",
+          "support": "shown",
+          "evidence": "Name field displays 'leftThigh'."
+        }
+      ],
+      "visual_evidence": "Channel Box shows name 'leftThigh'.",
+      "evidence": [
+        "call it left thigh"
+      ],
+      "flags": [
+        "UI name 'joint2' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Channel Box > Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Navigate to and rename the knee joint to leftKnee",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Down"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > Name",
+          "keys": [],
+          "value": "leftKnee"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "leftKnee",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g03",
+      "group": "Rename the leg joints",
+      "verifiable": true,
+      "video_start_s": 126.0,
+      "video_end_s": 145.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Knee joint is renamed to 'leftKnee'.",
+      "how_to": [
+        {
+          "text": "Press Down arrow key to select the child knee joint, double-click name in Channel Box, type 'leftKnee' and press Enter.",
+          "support": "shown",
+          "evidence": "Instructor presses Down arrow, types 'leftKnee' in Channel Box at 02:22."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check Channel Box shows 'leftKnee'.",
+          "support": "shown",
+          "evidence": "Name field displays 'leftKnee'."
+        }
+      ],
+      "visual_evidence": "Channel Box displays name 'leftKnee'.",
+      "evidence": [
+        "call this left knee"
+      ],
+      "flags": [
+        "UI name 'Channel Box > Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Navigate to and rename the ankle joint to leftAnkle",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Down"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > Name",
+          "keys": [],
+          "value": "leftAnkle"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "leftAnkle",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g03",
+      "group": "Rename the leg joints",
+      "verifiable": true,
+      "video_start_s": 146.0,
+      "video_end_s": 154.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.535,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Ankle joint is renamed to 'leftAnkle'.",
+      "how_to": [
+        {
+          "text": "Press Down arrow key to move to the ankle joint, double-click name in Channel Box, type 'leftAnkle' and press Enter.",
+          "support": "shown",
+          "evidence": "Instructor types 'leftAnkle' into Channel Box at 02:32."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify Channel Box displays 'leftAnkle'.",
+          "support": "shown",
+          "evidence": "Name field displays 'leftAnkle'."
+        }
+      ],
+      "visual_evidence": "Channel Box shows 'leftAnkle'.",
+      "evidence": [
+        "call this joint here left ankle"
+      ],
+      "flags": [
+        "UI name 'Channel Box > Name' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "goal is almost identical to step 7"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Navigate to and rename the ball joint to leftToe",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Down"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > Name",
+          "keys": [],
+          "value": "leftToe"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "leftToe",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g03",
+      "group": "Rename the leg joints",
+      "verifiable": true,
+      "video_start_s": 155.0,
+      "video_end_s": 160.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Ball joint is renamed to 'leftToe'.",
+      "how_to": [
+        {
+          "text": "Press Down arrow key, double-click name in Channel Box, type 'leftToe' and press Enter.",
+          "support": "shown",
+          "evidence": "Instructor types 'leftToe' at 02:38."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify Channel Box displays 'leftToe'.",
+          "support": "shown",
+          "evidence": "Name field shows 'leftToe'."
+        }
+      ],
+      "visual_evidence": "Channel Box shows 'leftToe'.",
+      "evidence": [
+        "go down to left toe"
+      ],
+      "flags": [
+        "UI name 'Channel Box > Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Navigate to and rename the toe tip joint to leftToeTip",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Down"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Channel Box > Name",
+          "keys": [],
+          "value": "leftToeTip"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "leftToeTip",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g03",
+      "group": "Rename the leg joints",
+      "verifiable": true,
+      "video_start_s": 161.0,
+      "video_end_s": 166.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Toe tip joint is renamed to 'leftToeTip'.",
+      "how_to": [
+        {
+          "text": "Press Down arrow key to select end joint, double-click name in Channel Box, type 'leftToeTip' and press Enter.",
+          "support": "shown",
+          "evidence": "Instructor types 'leftToeTip' in Channel Box at 02:44."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check Channel Box name field shows 'leftToeTip'.",
+          "support": "shown",
+          "evidence": "Name field displays 'leftToeTip'."
+        }
+      ],
+      "visual_evidence": "Channel Box displays name 'leftToeTip'.",
+      "evidence": [
+        "left toe tip"
+      ],
+      "flags": [
+        "UI name 'Channel Box > Name' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Open the Mirror Joint Options dialog",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Skeleton > Mirror Joints",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-04",
+      "group_id": "g04",
+      "group": "Mirror the leg joint chain",
+      "verifiable": false,
+      "video_start_s": 187.0,
+      "video_end_s": 192.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Making the other half with Edit > Duplicate at a Scale of -1: the page says to use Skeleton > Mirror Joint instead. (official: Autodesk Maya help: Mirror joint chains)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The parent joint of the chain you want to mirror exists and is selected."
+      ],
+      "result": "The Mirror Joint Options dialog window opens.",
+      "how_to": [
+        {
+          "text": "Double-click the Mirror Joints shelf icon or click option box next to Skeleton > Mirror Joints.",
+          "support": "shown",
+          "evidence": "Instructor opens Mirror Joint Options window at 03:09."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify 'Mirror Joint Options' window is displayed on screen.",
+          "support": "shown",
+          "evidence": "Mirror Joint Options dialog visible."
+        }
+      ],
+      "visual_evidence": "Mirror Joint Options window opened.",
+      "evidence": [
+        "double click on that"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Set up joint name replacement for mirroring",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Mirror Joint Options > Search For",
+          "keys": [],
+          "value": "left"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Mirror Joint Options > Replace With",
+          "keys": [],
+          "value": "right"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "property_equals",
+          "target": "Mirror Joint Options.Search For",
+          "value": "left"
+        },
+        {
+          "kind": "property_equals",
+          "target": "Mirror Joint Options.Replace With",
+          "value": "right"
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-04",
+      "group_id": "g04",
+      "group": "Mirror the leg joint chain",
+      "verifiable": true,
+      "video_start_s": 197.0,
+      "video_end_s": 207.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Making the other half with Edit > Duplicate at a Scale of -1: the page says to use Skeleton > Mirror Joint instead. (official: Autodesk Maya help: Mirror joint chains)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The parent joint of the chain you want to mirror exists and is selected."
+      ],
+      "result": "Mirroring will replace 'left' with 'right' in created joint names.",
+      "how_to": [
+        {
+          "text": "In the Mirror Joint Options dialog, enter 'left' into Search For.",
+          "support": "shown",
+          "evidence": "Instructor enters 'left' in Search For field at 03:22."
+        },
+        {
+          "text": "Enter 'right' into Replace With.",
+          "support": "shown",
+          "evidence": "Instructor enters 'right' in Replace With field at 03:26."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm Search For contains 'left' and Replace With contains 'right'.",
+          "support": "shown",
+          "evidence": "Fields reflect typed strings."
+        }
+      ],
+      "visual_evidence": "Text fields 'left' and 'right' populated in dialog.",
+      "evidence": [
+        "say find left ... replace with right"
+      ],
+      "flags": [
+        "UI name 'Mirror Joint Options > Search For' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Mirror Joint Options > Replace With' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "goal": "Mirror the left leg joint chain across the YZ plane",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "leftThigh",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Mirror Joint Options > Mirror across YZ",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Mirror Joint Options > Mirror",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "name_exists",
+          "target": "leftThigh",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "rightThigh",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-04",
+      "group_id": "g04",
+      "group": "Mirror the leg joint chain",
+      "verifiable": true,
+      "video_start_s": 236.0,
+      "video_end_s": 244.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Mirroring across XY instead of YZ produces incorrect reflection axis.",
+        "Making the other half with Edit > Duplicate at a Scale of -1: the page says to use Skeleton > Mirror Joint instead. (official: Autodesk Maya help: Mirror joint chains)"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The parent joint of the chain you want to mirror exists and is selected."
+      ],
+      "result": "The left leg skeleton is mirrored to create a correctly named right leg skeleton.",
+      "how_to": [
+        {
+          "text": "Select leftThigh joint, click YZ radio button for 'Mirror across' in Mirror Joint Options dialog.",
+          "support": "shown",
+          "evidence": "Instructor selects YZ radio button at 03:58."
+        },
+        {
+          "text": "Click the Mirror button.",
+          "support": "shown",
+          "evidence": "Clicks Mirror button at 04:00."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify opposite leg joint chain appears mirrored on the right side with 'right' names.",
+          "support": "shown",
+          "evidence": "Right leg hierarchy appears in viewport with names like 'rightThigh'."
+        }
+      ],
+      "visual_evidence": "Right leg joints mirrored across YZ plane.",
+      "evidence": [
+        "click on the YZ, hit mirror"
+      ],
+      "flags": [
+        "UI name 'leftThigh' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Mirror Joint Options > Mirror across YZ' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Mirror Joint Options > Mirror' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "goal": "Open IK Handle Tool settings and set solver to Rotate Plane",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Skeleton > IK Handle Tool",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "IK Handle Settings > Reset Tool",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "IK Handle Settings > Current solver",
+          "keys": [],
+          "value": "Rotate Plane Solver (ikRPsolver)"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "active_tool",
+          "target": "IK Handle Tool",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ikHandle",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-03",
+      "group_id": "g05",
+      "group": "Add the IK handles",
+      "verifiable": true,
+      "video_start_s": 278.0,
+      "video_end_s": 294.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Building the limb as a perfectly straight chain makes the IK solver pick the bend direction unpredictably, so the knee or elbow can flip. (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A joint chain with a slight bend at the knee or elbow, oriented consistently.",
+        "Before this: Know the start joint (hip) and the end joint (ankle) of the limb."
+      ],
+      "result": "IK Handle Tool configured to use ikRPsolver.",
+      "how_to": [
+        {
+          "text": "Double-click the IK Handle tool icon to open Tool Settings.",
+          "support": "shown",
+          "evidence": "Instructor opens Tool Settings for IK Handle Tool at 04:39."
+        },
+        {
+          "text": "Click Reset Tool.",
+          "support": "shown",
+          "evidence": "Instructor clicks Reset Tool button at 04:44."
+        },
+        {
+          "text": "Change Current solver dropdown from Single Chain (ikSCsolver) to Rotate Plane (ikRPsolver).",
+          "support": "shown",
+          "evidence": "Instructor selects ikRPsolver from solver dropdown at 04:52."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify Current solver dropdown shows ikRPsolver.",
+          "support": "shown",
+          "evidence": "Dropdown displays 'ikRPsolver'."
+        }
+      ],
+      "visual_evidence": "Tool Settings configured with ikRPsolver.",
+      "evidence": [
+        "we want it to be the RP solver which stands for rotate plane"
+      ],
+      "flags": [
+        "expected/start state (ikHandle, joint) derived from the knowledge base (maya.ik_handle), not read from the tutorial",
+        "UI name 'Skeleton > IK Handle Tool' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'IK Handle Settings > Reset Tool' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'IK Handle Settings > Current solver' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "goal": "Create an IK handle on the left leg",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "leftThigh",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "leftAnkle",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "IK Handle Tool",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "ikHandle",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-03",
+      "group_id": "g05",
+      "group": "Add the IK handles",
+      "verifiable": true,
+      "video_start_s": 300.0,
+      "video_end_s": 306.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Building the limb as a perfectly straight chain makes the IK solver pick the bend direction unpredictably, so the knee or elbow can flip. (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A joint chain with a slight bend at the knee or elbow, oriented consistently.",
+        "Before this: Know the start joint (hip) and the end joint (ankle) of the limb."
+      ],
+      "result": "An IK handle is created spanning from leftThigh to leftAnkle.",
+      "how_to": [
+        {
+          "text": "With IK Handle Tool active, click on top leftThigh joint.",
+          "support": "shown",
+          "evidence": "Instructor clicks leftThigh joint at 05:01."
+        },
+        {
+          "text": "Click on leftAnkle joint to place end of IK handle.",
+          "support": "shown",
+          "evidence": "Instructor clicks leftAnkle joint at 05:04."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a line with a handle vector triangle (rotate plane handle) appears over left leg chain.",
+          "support": "shown",
+          "evidence": "IK handle line and plane visualizer drawn between thigh and ankle."
+        }
+      ],
+      "visual_evidence": "IK handle created between thigh and ankle joints.",
+      "evidence": [
+        "click on top thigh joint and down to the ankle"
+      ],
+      "flags": [
+        "expected/start state (joint) derived from the knowledge base (maya.ik_handle), not read from the tutorial",
+        "UI name 'leftThigh' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'leftAnkle' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s16",
+      "order": 16,
+      "goal": "Create an IK handle on the right leg",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "rightThigh",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "rightAnkle",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "IK Handle Tool",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "ikHandle",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-03",
+      "group_id": "g05",
+      "group": "Add the IK handles",
+      "verifiable": true,
+      "video_start_s": 376.0,
+      "video_end_s": 384.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Building the limb as a perfectly straight chain makes the IK solver pick the bend direction unpredictably, so the knee or elbow can flip. (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.455,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A joint chain with a slight bend at the knee or elbow, oriented consistently.",
+        "Before this: Know the start joint (hip) and the end joint (ankle) of the limb."
+      ],
+      "result": "An IK handle is created spanning from rightThigh to rightAnkle.",
+      "how_to": [
+        {
+          "text": "Select IK Handle Tool, click rightThigh joint.",
+          "support": "shown",
+          "evidence": "Instructor clicks rightThigh joint at 06:19."
+        },
+        {
+          "text": "Click rightAnkle joint to set handle end point.",
+          "support": "shown",
+          "evidence": "Instructor clicks rightAnkle joint at 06:22."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify second IK handle appears on the right leg chain.",
+          "support": "shown",
+          "evidence": "IK handle line visible on right leg."
+        }
+      ],
+      "visual_evidence": "IK handle constructed on right leg.",
+      "evidence": [
+        "set up this same rotate plane on the right hand side"
+      ],
+      "flags": [
+        "expected/start state (joint) derived from the knowledge base (maya.ik_handle), not read from the tutorial",
+        "UI name 'rightThigh' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'rightAnkle' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "goal is almost identical to step 15",
+        "same start and expected state as step 15: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v10-preds",
+  "video_duration_s": 392.0,
+  "warnings": [
+    "uncovered 70s after step 15 (306s to 376s): steps may be missing (or this is intro/outro/talk)",
+    "steps cover only 40% of the 392s video: extraction may be incomplete",
+    "steps grouped for display into 5 groups (16 steps)"
+  ],
+  "extracted_at": "2026-11-09T08:38:37.091607Z"
+}

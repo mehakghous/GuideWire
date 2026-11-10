@@ -1,0 +1,799 @@
+{
+ "_about": "Beginner and first-steps questions for the answering layer (written 2026-11-09 night, BEFORE any change aimed at them, so this set is held out from the 48-question development suite). All are asked with no tutorial loaded. Most are the 12 questions beginners are assumed to ask (where to start, what before rigging, skeleton, skinning, IK, controls, FK versus IK, mirroring, which tutorial first, flipping knee, what next); the frequencies are ASSUMPTIONS until the user study (proposal line 351) gives real ones. Levels are typed in the question (beginner, new to) only; no profile field. Same fields as questions.json. References are the author's reading of the documentation, written from the application manuals as the author knows them; the Houdini ones were not checked in the installed application. Grade by a person; automated checks only sort.",
+ "questions": [
+  {
+   "id": "nb01",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "start_plan",
+    "level",
+    "beginner"
+   ],
+   "question": "im new to blender how do i start rigging a character",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "armature",
+     "bone"
+    ],
+    [
+     "pose mode",
+     "edit mode",
+     "parent",
+     "weight"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Order: have a finished mesh at the origin; add an armature (Add > Armature > Single Bone) and build the bones in Edit Mode (E extrudes a bone); parent the mesh to the armature (Ctrl+P > With Automatic Weights); test by posing the bones in Pose Mode."
+  },
+  {
+   "id": "nb02",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "start_plan",
+    "typo",
+    "beginner"
+   ],
+   "question": "wat do i do to my model b4 rigging it",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "apply",
+     "scale",
+     "transform"
+    ],
+    [
+     "origin",
+     "pose",
+     "normals",
+     "topology"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Clean the mesh first: apply scale and rotation (Ctrl+A > All Transforms), put the origin at a sensible point, make sure normals face out and the topology is clean where joints bend, and model in a neutral T or A pose."
+  },
+  {
+   "id": "nb03",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "beginner"
+   ],
+   "question": "how do i make bones for my character",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "armature",
+     "bone"
+    ],
+    [
+     "edit mode",
+     "extrude",
+     "add"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Add an armature (Add > Armature > Single Bone), go to Edit Mode and extrude more bones with E, then name them; bones connect in chains from parent to child."
+  },
+  {
+   "id": "nb04",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "skinning",
+    "beginner"
+   ],
+   "question": "how do i attach the mesh to the bones so it moves",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "parent",
+     "automatic weights",
+     "weight"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Select the mesh, then the armature (armature active), press Ctrl+P and choose With Automatic Weights; then test in Pose Mode."
+  },
+  {
+   "id": "nb05",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "troubleshoot",
+    "skinning",
+    "incomplete"
+   ],
+   "question": "my character gets stretched and looks weird when i move the arm",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "weight",
+     "paint"
+    ]
+   ],
+   "must_not": [],
+   "reference": "The weights are probably wrong: check the vertex groups and fix them in Weight Paint Mode, or redo Automatic Weights after checking the mesh and bone placement."
+  },
+  {
+   "id": "nb06",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "ik"
+   ],
+   "question": "how do i add ik to a leg",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "ik",
+     "inverse kinematics"
+    ],
+    [
+     "constraint",
+     "pose mode",
+     "chain"
+    ]
+   ],
+   "must_not": [],
+   "reference": "In Pose Mode select the lower-leg bone, add an Inverse Kinematics constraint in the Bone Constraints tab, set the target (an IK control bone) and the chain length (2 for thigh and shin)."
+  },
+  {
+   "id": "nb07",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "controls"
+   ],
+   "question": "how do i make a control so i dont have to move the bones directly",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "control",
+     "custom shape",
+     "shape",
+     "constraint",
+     "bone"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Make separate control bones, give them a Custom Shape (Bone properties > Viewport Display), and drive the deforming bones from them with constraints such as Copy Rotation or Inverse Kinematics."
+  },
+  {
+   "id": "nb08",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "concept",
+    "beginner"
+   ],
+   "question": "whats the difference between fk and ik",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "forward"
+    ],
+    [
+     "inverse"
+    ]
+   ],
+   "must_not": [],
+   "reference": "FK (forward kinematics) means you rotate each joint in the chain yourself from the top down; IK (inverse kinematics) means you move an end handle (hand or foot) and the chain bends to reach it. FK suits arcs in free swings, IK suits a hand or foot that must stay planted."
+  },
+  {
+   "id": "nb09",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "mirror"
+   ],
+   "question": "how do i make the left side bones match the right side",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "symmetrize",
+     "mirror"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Name bones with .L and .R, then in Edit Mode use Armature > Symmetrize to copy one side to the other."
+  },
+  {
+   "id": "nb10",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "discovery",
+    "level"
+   ],
+   "question": "which tutorial should i watch first for blender rigging",
+   "behaviour": "clarify_or_admit",
+   "must_any": [],
+   "must_not": [
+    "http",
+    "youtube.com"
+   ],
+   "reference": "A tutorial recommendation is not something the system can know from the question alone: a good answer asks which goal or level (or points to the tutorial search), and must not name a specific video or link it did not find."
+  },
+  {
+   "id": "nb11",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "troubleshoot",
+    "ik"
+   ],
+   "question": "my knee bends the wrong way when i use ik",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "pole"
+    ],
+    [
+     "angle",
+     "target",
+     "bend",
+     "rotate"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Set a Pole Target on the IK constraint and adjust the Pole Angle; also give the bones a slight bend in the rest pose so the solver knows the direction."
+  },
+  {
+   "id": "nb12",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "next_step",
+    "start_plan",
+    "incomplete"
+   ],
+   "question": "ok i made the skeleton whats next",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "parent",
+     "weight",
+     "skin",
+     "mesh"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Next, attach the mesh to the skeleton: parent it with Automatic Weights (Ctrl+P), then test in Pose Mode and fix weights where it deforms badly."
+  },
+  {
+   "id": "nm01",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "start_plan",
+    "level",
+    "beginner"
+   ],
+   "question": "where do i start rigging in maya im a beginner",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "joint",
+     "skeleton"
+    ],
+    [
+     "skin",
+     "bind",
+     "ik",
+     "control",
+     "orient"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Order: switch to the Rigging menu set; build the skeleton (Skeleton > Create Joints); orient joints; bind the mesh to the skeleton (Skin > Bind Skin > Smooth Bind); add IK handles (Skeleton > Create IK Handle); add controls; test by posing."
+  },
+  {
+   "id": "nm02",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "start_plan",
+    "beginner"
+   ],
+   "question": "what should i do to my model before rigging",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "freeze",
+     "history",
+     "center pivot",
+     "transform"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Clean the model first: Freeze Transformations (Modify menu), delete history (Edit > Delete by Type > History), centre pivots if needed, keep the geometry clean, and pose the character in a neutral T or A pose."
+  },
+  {
+   "id": "nm03",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "skeleton"
+   ],
+   "question": "how do i make joints for the arm",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "joint"
+    ],
+    [
+     "create joints",
+     "skeleton",
+     "rigging"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Rigging menu set > Skeleton > Create Joints; click in a view to place the joints one after another from shoulder to wrist, then press Enter."
+  },
+  {
+   "id": "nm04",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "skinning"
+   ],
+   "question": "how do i bind my mesh to the skeleton",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "bind skin",
+     "skin"
+    ],
+    [
+     "smooth bind",
+     "joint",
+     "root"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Select the mesh, then the root joint, and choose Skin > Bind Skin > Smooth Bind in the Rigging menu set."
+  },
+  {
+   "id": "nm05",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "troubleshoot",
+    "skinning",
+    "incomplete"
+   ],
+   "question": "the mesh looks torn when i rotate the shoulder",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "weight",
+     "paint skin weights",
+     "skin"
+    ]
+   ],
+   "must_not": [],
+   "reference": "The skin weights need fixing: use Skin > Paint Skin Weights to smooth or reassign the influence of the shoulder and neighbouring joints."
+  },
+  {
+   "id": "nm06",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "ik"
+   ],
+   "question": "how do i add ik to an arm",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "ik handle"
+    ],
+    [
+     "create ik handle",
+     "skeleton",
+     "click"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Rigging menu set > Skeleton > Create IK Handle, then click the start joint (shoulder) and the end joint (wrist); an IK handle appears at the wrist."
+  },
+  {
+   "id": "nm07",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "controls"
+   ],
+   "question": "how do i make controls so i dont have to select the joints",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "control",
+     "curve",
+     "circle",
+     "nurbs"
+    ],
+    [
+     "constraint",
+     "parent",
+     "group"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Make controls from NURBS curves (for example Create > NURBS Primitives > Circle), freeze their transforms, and connect them to the joints with constraints (Constrain > Parent or Orient)."
+  },
+  {
+   "id": "nm08",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "concept",
+    "beginner"
+   ],
+   "question": "what is the difference between fk and ik",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "forward"
+    ],
+    [
+     "inverse"
+    ]
+   ],
+   "must_not": [],
+   "reference": "FK (forward kinematics) means you rotate each joint in the chain yourself from the top down; IK (inverse kinematics) means you move an end handle (hand or foot) and the chain bends to reach it. FK suits arcs in free swings, IK suits a hand or foot that must stay planted."
+  },
+  {
+   "id": "nm09",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "mirror"
+   ],
+   "question": "how do i copy the left joints to the right side",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "mirror joints",
+     "mirror"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Select the root of the chain and use Skeleton > Mirror Joints; choose the mirror axis and the search and replace names (for example L_ to R_)."
+  },
+  {
+   "id": "nm10",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "discovery",
+    "level"
+   ],
+   "question": "what tutorial should i watch first to learn maya rigging",
+   "behaviour": "clarify_or_admit",
+   "must_any": [],
+   "must_not": [
+    "http",
+    "youtube.com"
+   ],
+   "reference": "A tutorial recommendation is not something the system can know from the question alone: a good answer asks which goal or level (or points to the tutorial search), and must not name a specific video or link it did not find."
+  },
+  {
+   "id": "nm11",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "troubleshoot",
+    "ik"
+   ],
+   "question": "my knee flips when i move the ik handle",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "pole vector"
+    ],
+    [
+     "constraint",
+     "preferred angle",
+     "twist"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Add a Pole Vector constraint (a locator or control placed in front of the knee) to the IK handle; also check the joints have a slight bend or a preferred angle so the solver knows the direction."
+  },
+  {
+   "id": "nm12",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "next_step",
+    "start_plan",
+    "incomplete"
+   ],
+   "question": "i made the joints whats next",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "orient",
+     "skin",
+     "bind",
+     "ik",
+     "control"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Next: orient the joints (Skeleton > Orient Joint), bind the mesh (Skin > Bind Skin > Smooth Bind), add IK handles, then controls."
+  },
+  {
+   "id": "nh01",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "start_plan",
+    "level",
+    "beginner"
+   ],
+   "question": "im new to houdini where do i start rigging a character",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "kinefx",
+     "skeleton",
+     "apex",
+     "autorig"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Houdini rigs with KineFX: bring the character geometry in, create or draw a skeleton, bind the geometry to it (Joint Capture then Joint Deform), then add rig components (APEX AutoRig) and controls, and test by posing."
+  },
+  {
+   "id": "nh02",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "start_plan",
+    "beginner"
+   ],
+   "question": "what do i need before i rig a character in houdini",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "geometry",
+     "skeleton",
+     "mesh",
+     "sop"
+    ]
+   ],
+   "must_not": [],
+   "reference": "A clean character mesh at a sensible scale in a Geometry network, in a neutral pose; a skeleton is then built for it with KineFX nodes."
+  },
+  {
+   "id": "nh03",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "skeleton"
+   ],
+   "question": "how do i make a skeleton",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "skeleton"
+    ],
+    [
+     "tool",
+     "sop",
+     "joints",
+     "draw"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Use the Skeleton tool or the Skeleton SOP (KineFX) to draw joints in the viewport; then name and orient them as needed."
+  },
+  {
+   "id": "nh04",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "skinning"
+   ],
+   "question": "how do i attach the mesh to the skeleton",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "capture",
+     "joint capture"
+    ],
+    [
+     "joint deform",
+     "biharmonic",
+     "deform"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Compute capture weights with a Joint Capture node (for example Joint Capture Biharmonic) and apply them with Joint Deform."
+  },
+  {
+   "id": "nh05",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "troubleshoot",
+    "skinning",
+    "incomplete"
+   ],
+   "question": "my character gets stretched strangely when i move the arm",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "capture",
+     "weights",
+     "joint capture"
+    ]
+   ],
+   "must_not": [],
+   "reference": "The capture weights are probably wrong: check the Joint Capture result and repaint or recompute the weights."
+  },
+  {
+   "id": "nh06",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "ik"
+   ],
+   "question": "how do i do ik on a leg",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "ik chains",
+     "ik"
+    ],
+    [
+     "start",
+     "end",
+     "joint",
+     "chain"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Use the IK Chains SOP (KineFX) with the start and end joints of the leg chain; then move the end target to pose it."
+  },
+  {
+   "id": "nh07",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "controls"
+   ],
+   "question": "how do i make controls for the rig",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "apex",
+     "autorig",
+     "controls",
+     "configure"
+    ]
+   ],
+   "must_not": [],
+   "reference": "With APEX, add an AutoRig Component and use Configure Controls to set control shape, size and colour."
+  },
+  {
+   "id": "nh08",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "concept",
+    "beginner"
+   ],
+   "question": "whats the difference between fk and ik",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "forward"
+    ],
+    [
+     "inverse"
+    ]
+   ],
+   "must_not": [],
+   "reference": "FK (forward kinematics) means you rotate each joint in the chain yourself from the top down; IK (inverse kinematics) means you move an end handle (hand or foot) and the chain bends to reach it. FK suits arcs in free swings, IK suits a hand or foot that must stay planted."
+  },
+  {
+   "id": "nh09",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "mirror"
+   ],
+   "question": "how do i mirror the skeleton to the other side",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "skeleton mirror",
+     "mirror"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Use the Skeleton Mirror SOP on the skeleton, choosing the mirror plane."
+  },
+  {
+   "id": "nh10",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "discovery",
+    "level"
+   ],
+   "question": "which houdini rigging tutorial should i watch first",
+   "behaviour": "clarify_or_admit",
+   "must_any": [],
+   "must_not": [
+    "http",
+    "youtube.com"
+   ],
+   "reference": "A tutorial recommendation is not something the system can know from the question alone: a good answer asks which goal or level (or points to the tutorial search), and must not name a specific video or link it did not find."
+  },
+  {
+   "id": "nh11",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "troubleshoot",
+    "ik"
+   ],
+   "question": "my ik leg flips when i move the target",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "pole",
+     "twist",
+     "vector",
+     "ik chains"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Check the pole vector or twist settings of the IK Chains node so the bend direction is fixed (reference is the author's reading of the documentation and was not checked in the application)."
+  },
+  {
+   "id": "nh12",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "next_step",
+    "start_plan",
+    "incomplete"
+   ],
+   "question": "i made the skeleton whats next",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "capture",
+     "joint deform",
+     "ik",
+     "controls",
+     "apex"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Next, bind the geometry (Joint Capture then Joint Deform), then add IK and controls (APEX AutoRig), and test by posing."
+  }
+ ]
+}

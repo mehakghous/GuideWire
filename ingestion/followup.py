@@ -197,16 +197,30 @@ def respond(session: Session, text: str, *, kb=None, tutorials: list[dict] | Non
             # rank the steps by how many of the asked words their goal has: a clear winner is the target; a tie lists the best matches, not the first ones in the tutorial
             ranked = sorted(((len(words & {stem(w) for w in re.findall(r"[a-z]+", s.goal.lower())}), s) for s in session.steps.steps), key=lambda t: -t[0])
             ranked = [(n, s) for n, s in ranked if n > 0]
+            run_note = ""
             if len(ranked) > 1 and ranked[0][0] == ranked[1][0]:
-                tied = [s for n, s in ranked if n == ranked[0][0]]
-                return _mk(session, text, intent, step, kind="clarification", routelabel="clarify",
-                           clarification="Which step do you mean? " + "; ".join(f"{s.id}: {s.goal}" for s in tied[:4]))
-            target = ranked[0][1] if ranked else (session.previous_step() if not words else None)
+                tied = sorted((s for n, s in ranked if n == ranked[0][0]), key=lambda s: s.order)
+                before = [s for s in tied if step is not None and s.order < step.order]
+                if not before:                                               # nothing earlier to go back to: ask, listing the best matches
+                    return _mk(session, text, intent, step, kind="clarification", routelabel="clarify",
+                               clarification="Which step do you mean? " + "; ".join(f"{s.id}: {s.goal}" for s in tied[:4]))
+                # "go back to X": the most recent matching part before the learner's step, and its FIRST step if it is a run of consecutive steps (the start of "renaming the joints")
+                run = [before[-1]]
+                for s in reversed(before[:-1]):
+                    if s.order == run[0].order - 1:
+                        run.insert(0, s)
+                    else:
+                        break
+                target = run[0]
+                others = [s.id for s in tied if s not in run][:3]
+                run_note = (f" This part has {len(run)} steps in a row, {run[0].id} to {run[-1].id}." if len(run) > 1 else "") + (f" Other steps that match: {', '.join(others)}." if others else "")
+            else:
+                target = ranked[0][1] if ranked else (session.previous_step() if not words else None)
         if target is None:
             return _mk(session, text, intent, step, kind="clarification", clarification="I could not find that step. Say a step number (1 to "
                        f"{len(session.steps.steps)}) or a word from its description.")
         session.goto(target.id)
-        return _mk(session, text, intent, target, explanations=[ex(f"Back at {target.id} ({session.status[target.id]}): {_describe(target)}", [target.id])])
+        return _mk(session, text, intent, target, explanations=[ex(f"Back at {target.id} ({session.status[target.id]}): {_describe(target)}" + (run_note if not m else ""), [target.id])])
     if intent == "didnt_work":
         session.mark(step.id, "failed", "user")
         unmet, unknown, _ = _prereq_report(op, session.observed)

@@ -1,0 +1,1198 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "houdini",
+  "app_version_tutorial": "Houdini 20",
+  "video_id": "xWnI7is6e7Q",
+  "title": "Rigging in Houdini with APEX: 01 | Simple FK",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Create a reference box object in Network View",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "box"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Box SOP",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Network View",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Create and pack the skeleton",
+      "verifiable": false,
+      "video_start_s": 11.0,
+      "video_end_s": 16.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A Box SOP node is added to the network view to serve as visual reference.",
+      "how_to": [
+        {
+          "text": "Press Tab in Network View, type 'box', and select Box SOP.",
+          "support": "shown",
+          "evidence": "Instructor opens Tab menu and creates box1 node."
+        }
+      ],
+      "check": [
+        {
+          "text": "Box geometry is visible in the viewport.",
+          "support": "shown",
+          "evidence": "Cube appears in 3D scene view."
+        }
+      ],
+      "visual_evidence": "box1 node appears in Network Editor and cube appears in viewport.",
+      "evidence": [
+        "I'm going to throw down a cube just to have something to look at as I draw out my skeleton."
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Box SOP' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Create a Skeleton SOP node and draw joints in the viewport",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "skeleton"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Scene View",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Network View",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g01",
+      "group": "Create and pack the skeleton",
+      "verifiable": true,
+      "video_start_s": 17.0,
+      "video_end_s": 24.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP."
+      ],
+      "result": "A Skeleton SOP node is created with three connected joint points drawn in the viewport.",
+      "how_to": [
+        {
+          "text": "Press Tab in Network View, type 'skeleton', create Skeleton SOP, and click 3 times in the viewport to place joints.",
+          "support": "shown",
+          "evidence": "Instructor creates skeleton1 SOP and draws a 3-joint skeleton chain."
+        }
+      ],
+      "check": [
+        {
+          "text": "Joint chain with 3 points is created and visible in viewport.",
+          "support": "shown",
+          "evidence": "Skeleton chain with 3 points drawn in viewport."
+        }
+      ],
+      "visual_evidence": "skeleton1 node added and joints drawn in viewport.",
+      "evidence": [
+        "Draw out the skeleton."
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Pack skeleton geometry using Pack Folder SOP",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "packfolder"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Folder Name",
+          "keys": [],
+          "value": "base"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Pack Folder",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "PREP-06",
+      "group_id": "g01",
+      "group": "Create and pack the skeleton",
+      "verifiable": true,
+      "video_start_s": 33.0,
+      "video_end_s": 58.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The skeleton output is packed into a folder primitive named 'base' of type 'skel'.",
+      "how_to": [
+        {
+          "text": "Press Tab in Network View, add Pack Folder SOP, connect skeleton output into second input, and set folder name to 'base'.",
+          "support": "shown",
+          "evidence": "packfolder1 node added, skeleton connected to second input, Name set to base and type to skel."
+        }
+      ],
+      "check": [
+        {
+          "text": "packfolder1 node is connected to skeleton1 node.",
+          "support": "shown",
+          "evidence": "Node connection shown in Network View."
+        }
+      ],
+      "visual_evidence": "packfolder1 node connected to second input of skeleton node; Folder Name set to base.",
+      "evidence": [
+        "First things first, we need to pack it into a pack folder into the second input and call this base skel."
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Folder Name' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Add an APEX AutoRig Component node set to FK",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "autorigcomponent"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Component",
+          "keys": [],
+          "value": "FK"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Pack Folder",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CTRL-08",
+      "group_id": "g02",
+      "group": "Set up the FK autorig component",
+      "verifiable": true,
+      "video_start_s": 60.0,
+      "video_end_s": 74.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [
+        "Houdini 22 builds rigs with APEX components and the Autorig Builder"
+      ],
+      "common_mistakes": [
+        "Writing #tag in the Multi IK Segments field: it expects the plain tag names. (official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig))"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A skeleton and the skin shape exist and are packed into one character with APEX Pack Character (defaults: Shape Path /Base.shp, Skeleton Path /Base.skel).",
+        "Before this: The skeleton points carry the tags the components look for (the docs add them with Attribute Adjust Tags); components select joints by tag."
+      ],
+      "result": "An APEX AutoRig Component node is created and set to FK mode.",
+      "how_to": [
+        {
+          "text": "Press Tab, add 'autorigcomponent' node, connect packfolder1 into input, and choose 'FK' in Component dropdown.",
+          "support": "shown",
+          "evidence": "autorigcomponent1 node created, connected, Component parameter selected as FK."
+        }
+      ],
+      "check": [
+        {
+          "text": "Component dropdown shows FK.",
+          "support": "shown",
+          "evidence": "FK selected in parameter pane."
+        }
+      ],
+      "visual_evidence": "autorigcomponent1 created with Component parameter set to FK.",
+      "evidence": [
+        "Throw down an autorig component and we'll call this FK."
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Component' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Promote transform channels on the FK autorig component",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Target",
+          "keys": [],
+          "value": "point.*"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-02",
+      "group_id": "g02",
+      "group": "Set up the FK autorig component",
+      "verifiable": false,
+      "video_start_s": 88.0,
+      "video_end_s": 128.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [
+        "Use '*' as wildcard pattern to target all joints."
+      ],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Writing #tag in the Multi IK Segments field: it expects the plain tag names. (official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A skeleton and the skin shape exist and are packed into one character with APEX Pack Character (defaults: Shape Path /Base.shp, Skeleton Path /Base.skel).",
+        "Before this: The skeleton points carry the tags the components look for (the docs add them with Attribute Adjust Tags); components select joints by tag."
+      ],
+      "result": "Transform channels for targeted points are promoted, generating FK rotation/translation controls.",
+      "how_to": [
+        {
+          "text": "In autorigcomponent1 parameters, type 'point.*' in Target pattern field to promote channels for all skeleton points.",
+          "support": "shown",
+          "evidence": "Target pattern filled with point.*."
+        }
+      ],
+      "check": [
+        {
+          "text": "FK control gizmos appear in Scene View upon entering node state.",
+          "support": "shown",
+          "evidence": "Rotation handles shown on skeleton joints in viewport."
+        }
+      ],
+      "visual_evidence": "Target parameter typed as point.*; FK rotation gizmos visible in viewport.",
+      "evidence": [
+        "Now we need to promote transform channels... point star acts as a wildcard."
+      ],
+      "flags": [
+        "UI name 'Target' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Add an APEX Configure Controls node",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "configurecontrols"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "group_id": "g03",
+      "group": "Configure controls and test FK",
+      "verifiable": true,
+      "video_start_s": 138.0,
+      "video_end_s": 147.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An APEX Configure Controls node is added to customize control shapes and appearance.",
+      "how_to": [
+        {
+          "text": "Press Tab in Network View, type 'configurecontrols', and create APEX Configure Controls SOP.",
+          "support": "shown",
+          "evidence": "configurecontrols1 node placed below autorigcomponent1."
+        }
+      ],
+      "check": [
+        {
+          "text": "configurecontrols1 node appears in Network View.",
+          "support": "shown",
+          "evidence": "Node shown in network chain."
+        }
+      ],
+      "visual_evidence": "configurecontrols1 SOP node created in network editor.",
+      "evidence": [
+        "Configure our controls... APEX Configure Controls."
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Customize control shapes and color in APEX Configure Controls",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Target",
+          "keys": [],
+          "value": "point.*"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Shape",
+          "keys": [],
+          "value": "box"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Color",
+          "keys": [],
+          "value": "Yellow"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "group_id": "g03",
+      "group": "Configure controls and test FK",
+      "verifiable": false,
+      "video_start_s": 184.0,
+      "video_end_s": 197.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Control shapes are changed to yellow box shapes with adjusted scale and offset.",
+      "how_to": [
+        {
+          "text": "In configurecontrols1, set Target to 'point.*', choose 'box' shape, scale up shape offset, and assign yellow color.",
+          "support": "shown",
+          "evidence": "Target set to point.*, Shape override set to box, color picker changed to yellow/orange."
+        }
+      ],
+      "check": [
+        {
+          "text": "Yellow box control handles appear around joints in Viewport.",
+          "support": "shown",
+          "evidence": "Viewport displays yellow box controls on joint locations."
+        }
+      ],
+      "visual_evidence": "Box shapes and yellow color applied to joint controls in viewport.",
+      "evidence": [
+        "Hit point star... let's use a box, make it bigger in shape offset, use a color."
+      ],
+      "flags": [
+        "UI name 'Target' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Add an APEX Add Character node to package the rig character",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "apexaddcharacter"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "EXPT-08",
+      "group_id": "g03",
+      "group": "Configure controls and test FK",
+      "verifiable": false,
+      "video_start_s": 198.0,
+      "video_end_s": 207.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An APEX Add Character SOP node is added to bundle the rig into character evaluation data.",
+      "how_to": [
+        {
+          "text": "Press Tab in Network View, search 'apexaddcharacter', and append it to configurecontrols1.",
+          "support": "shown",
+          "evidence": "apexaddcharacter1 node added below configurecontrols1."
+        }
+      ],
+      "check": [
+        {
+          "text": "apexaddcharacter1 node is connected in the network graph.",
+          "support": "shown",
+          "evidence": "Node connection visible in network graph."
+        }
+      ],
+      "visual_evidence": "apexaddcharacter1 node added to network.",
+      "evidence": [
+        "APEX Add Character, throw that down so we can add a character to our APEX evaluation scene."
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Add an APEX Animate node and test FK poses",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "apexanimate"
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Enter"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Rig Pose",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-01",
+      "group_id": "g03",
+      "group": "Configure controls and test FK",
+      "verifiable": true,
+      "video_start_s": 208.0,
+      "video_end_s": 220.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Changing World Space after you already have edits on the pose: it will likely produce erratic results; use separate Rig Pose nodes for mixed local and world-space edits. (official: SideFX Houdini docs: Rig Pose (SOP))",
+        "Using Override and expecting input animation to survive: it replaces the input animation for that point. (official: SideFX Houdini docs: Rig Pose (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton or rig is connected to the node's input."
+      ],
+      "result": "An APEX Animate node is added and activated, allowing FK manipulation of control handles in viewport.",
+      "how_to": [
+        {
+          "text": "Press Tab, add 'apexanimate' SOP node, select it, and press Enter in viewport to activate APEX animate tool state.",
+          "support": "shown",
+          "evidence": "apexanimate1 added, viewport interactive state activated, handles dragged."
+        }
+      ],
+      "check": [
+        {
+          "text": "Viewport displays interactive rotation gizmos for FK controls.",
+          "support": "shown",
+          "evidence": "Interactive control gizmos rotate skeleton hierarchy."
+        }
+      ],
+      "visual_evidence": "Interactive rotation handles rotate skeleton points in Scene View.",
+      "evidence": [
+        "Drop down APEX Animate, and we have full FK control."
+      ],
+      "flags": [
+        "expected/start state (Rig Pose, Skeleton) derived from the knowledge base (houdini.rig_pose), not read from the tutorial",
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Duplicate skeleton chains and merge them with Merge SOP",
+      "actions": [
+        {
+          "verb": "other",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "Duplicate skeleton nodes"
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "merge"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g04",
+      "group": "Expand to multi-chain rig and update targets",
+      "verifiable": true,
+      "video_start_s": 257.0,
+      "video_end_s": 269.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.9,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP."
+      ],
+      "result": "Multiple skeleton chains are duplicated and merged into a single geometry stream.",
+      "how_to": [
+        {
+          "text": "Duplicate skeleton nodes in Network View and plug all skeleton outputs into a Merge SOP.",
+          "support": "shown",
+          "evidence": "Three skeleton chains created and connected to merge1 SOP."
+        }
+      ],
+      "check": [
+        {
+          "text": "3 separate skeleton chains visible in viewport.",
+          "support": "shown",
+          "evidence": "Viewport displays 3 side-by-side skeleton chains."
+        }
+      ],
+      "visual_evidence": "Three skeleton chains connected into merge1 node.",
+      "evidence": [
+        "Let's merge our skeletons so we can see the changes that we're making."
+      ],
+      "flags": [
+        "expected/start state (Skeleton) derived from the knowledge base (houdini.skeleton_sop), not read from the tutorial",
+        "expected state already holds before this step, so completing it cannot be verified",
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Connect merged skeletons into Pack Folder SOP",
+      "actions": [
+        {
+          "verb": "drag",
+          "ui_element": "merge1 output",
+          "keys": [],
+          "value": "packfolder1 input 2"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Pack Folder",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "PREP-06",
+      "group_id": "g04",
+      "group": "Expand to multi-chain rig and update targets",
+      "verifiable": false,
+      "video_start_s": 270.0,
+      "video_end_s": 285.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Disconnecting or clearing folder name attribute when rewiring inputs."
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The merged skeleton stream is piped into the second input of packfolder1.",
+      "how_to": [
+        {
+          "text": "Connect the output of merge1 into the second input of packfolder1 and verify folder name remains 'base'.",
+          "support": "shown",
+          "evidence": "Merge output wired to packfolder1 input 2."
+        }
+      ],
+      "check": [
+        {
+          "text": "packfolder1 second input receives merge1 connection.",
+          "support": "shown",
+          "evidence": "Connection wire active in Network View."
+        }
+      ],
+      "visual_evidence": "merge1 wired into second input of packfolder1.",
+      "evidence": [
+        "Throw all that into our pack folder... make sure to set the name again."
+      ],
+      "flags": [
+        "UI name 'merge1 output' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Use Attribute Wrangle to assign unique point names to joints",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Tab Menu",
+          "keys": [],
+          "value": "attribwrangle"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "VEX Code Snippet",
+          "keys": [],
+          "value": "@name = \"jnt_\" + itoa(@ptnum);"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "attribute_exists",
+          "target": "point.name",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-03",
+      "group_id": "g04",
+      "group": "Expand to multi-chain rig and update targets",
+      "verifiable": true,
+      "video_start_s": 300.0,
+      "video_end_s": 332.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving duplicate default names causing APEX control mapping conflicts.",
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Leaving On Failure at Error while experimenting: a failure stops everything downstream from cooking. (official: SideFX Houdini docs: Rig Doctor (SOP))"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP.",
+        "Before this: A SOP skeleton on the input."
+      ],
+      "result": "Each joint point receives a unique name attribute (e.g., jnt_0, jnt_1, jnt_2).",
+      "how_to": [
+        {
+          "text": "Add Attribute Wrangle SOP between merge1 and packfolder1, then type '@name = \"jnt_\" + itoa(@ptnum);' in the snippet code field.",
+          "support": "shown",
+          "evidence": "attribwrangle1 created, VEX snippet typed as shown."
+        }
+      ],
+      "check": [
+        {
+          "text": "Geometry spreadsheet shows unique name attributes per point number.",
+          "support": "shown",
+          "evidence": "Instructor explains point num to string conversion for unique joint names."
+        }
+      ],
+      "visual_evidence": "VEX code snippet `@name = \"jnt_\" + itoa(@ptnum);` typed into attribwrangle1 node.",
+      "evidence": [
+        "Throw down an attribute wrangle... set the name @name = \"jnt_\" + itoa(@ptnum);"
+      ],
+      "flags": [
+        "UI name 'Tab Menu' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'VEX Code Snippet' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "goal": "Update APEX AutoRig Component target pattern to new joint naming convention",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "autorigcomponent1",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Target",
+          "keys": [],
+          "value": "jnt_*"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-08",
+      "group_id": "g04",
+      "group": "Expand to multi-chain rig and update targets",
+      "verifiable": false,
+      "video_start_s": 343.0,
+      "video_end_s": 365.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [
+        "Houdini 22 builds rigs with APEX components and the Autorig Builder"
+      ],
+      "common_mistakes": [
+        "Writing #tag in the Multi IK Segments field: it expects the plain tag names. (official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig))"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A skeleton and the skin shape exist and are packed into one character with APEX Pack Character (defaults: Shape Path /Base.shp, Skeleton Path /Base.skel).",
+        "Before this: The skeleton points carry the tags the components look for (the docs add them with Attribute Adjust Tags); components select joints by tag."
+      ],
+      "result": "AutoRig Component builds FK controls for all newly named joints starting with 'jnt_'.",
+      "how_to": [
+        {
+          "text": "Select autorigcomponent1 and change Target pattern parameter from 'point.*' to 'jnt_*'.",
+          "support": "shown",
+          "evidence": "Target string updated to jnt_* in autorigcomponent1 parameter view."
+        }
+      ],
+      "check": [
+        {
+          "text": "FK rotation gizmos appear on all merged joint chains in viewport.",
+          "support": "shown",
+          "evidence": "FK gizmos display on all 3 legs in 3D viewport."
+        }
+      ],
+      "visual_evidence": "Target pattern changed to jnt_*; rotation widgets visible on all 3 skeleton legs.",
+      "evidence": [
+        "Change all of these to joint... now we have FK on each of them."
+      ],
+      "flags": [
+        "UI name 'autorigcomponent1' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Target' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "goal": "Update APEX Configure Controls target pattern to match joint names",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "configurecontrols1",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Target",
+          "keys": [],
+          "value": "jnt_*"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "group_id": "g04",
+      "group": "Expand to multi-chain rig and update targets",
+      "verifiable": false,
+      "video_start_s": 366.0,
+      "video_end_s": 374.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Custom box control shapes are generated for all joints across all merged chains.",
+      "how_to": [
+        {
+          "text": "Select configurecontrols1 node and update Target pattern parameter to 'jnt_*'.",
+          "support": "shown",
+          "evidence": "Target pattern updated to jnt_* in configurecontrols1 parameter view."
+        }
+      ],
+      "check": [
+        {
+          "text": "Yellow box shapes appear on all joints across all skeleton legs.",
+          "support": "shown",
+          "evidence": "All legs display configured yellow box handles."
+        }
+      ],
+      "visual_evidence": "configurecontrols1 Target set to jnt_*; yellow box controls appear on all 3 chains.",
+      "evidence": [
+        "Go to configure controls, change that to joint... all of our joints are all set up automatically."
+      ],
+      "flags": [
+        "UI name 'Target' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "goal": "Test multi-chain procedural FK rig in APEX Animate viewport state",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "apexanimate1",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Enter"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Rig Pose",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-01",
+      "group_id": "g04",
+      "group": "Expand to multi-chain rig and update targets",
+      "verifiable": true,
+      "video_start_s": 375.0,
+      "video_end_s": 380.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Changing World Space after you already have edits on the pose: it will likely produce erratic results; use separate Rig Pose nodes for mixed local and world-space edits. (official: SideFX Houdini docs: Rig Pose (SOP))",
+        "Using Override and expecting input animation to survive: it replaces the input animation for that point. (official: SideFX Houdini docs: Rig Pose (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 0.95,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton or rig is connected to the node's input."
+      ],
+      "result": "The procedural multi-chain FK rig is fully functional and interactive in the viewport.",
+      "how_to": [
+        {
+          "text": "Select apexanimate1 SOP, press Enter in Viewport, and drag control handles to test multi-chain FK animation.",
+          "support": "shown",
+          "evidence": "Viewport controls tested interactively across all multi-leg joints."
+        }
+      ],
+      "check": [
+        {
+          "text": "Interactive FK rotation controls function on all procedurally generated skeleton chains.",
+          "support": "shown",
+          "evidence": "Control gizmos manipulate individual joints on all three chains."
+        }
+      ],
+      "visual_evidence": "Interactive control handles manipulated across multiple leg chains in Viewport.",
+      "evidence": [
+        "We can go in and animate to our heart's desire. Super cool."
+      ],
+      "flags": [
+        "expected/start state (Rig Pose, Skeleton) derived from the knowledge base (houdini.rig_pose), not read from the tutorial",
+        "UI name 'apexanimate1' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "same start and expected state as step 9: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v10-preds",
+  "video_duration_s": 397.0,
+  "warnings": [
+    "steps grouped for display into 4 groups (15 steps)"
+  ],
+  "extracted_at": "2026-11-09T08:39:22.172542Z"
+}

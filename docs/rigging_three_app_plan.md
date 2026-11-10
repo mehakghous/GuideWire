@@ -36,7 +36,7 @@ Phase 1 is blocked on your "go" for live Gemini runs and on human gold step list
 
 ## 2. Phases
 
-Dates assume the Nov 22 demo and are proposals. Phases overlap; the matrix says what is next.
+Dates assume the demo, which was moved from Nov 22 to **Nov 12** on 2026-11-10 (the dates of Phases 2 and 3 below were written for Nov 22 and now run past it), and are proposals. Phases overlap; the matrix says what is next.
 
 ### Phase 0: foundations (Oct 22 to Oct 26)
 Goals: spend safely, test in real applications, one agreed contract.
@@ -64,12 +64,12 @@ Goals: every P0 feature has at least one cited entry in each application where i
 - Tests that prove it: `tests/test_rigging_knowledge.py` (cited sources, tiers, unknown ids rejected); matrix totals rise; `tests/test_scene_chain.py` effects name only types the profile knows.
 - Out of scope: animation stage (ANIM, CURV, LAYR, LOCO, MOCP), Reddit and Stack Exchange mining, retargeting.
 
-### Phase 3: close the loop in real applications (Nov 8 to Nov 22)
+### Phase 3: close the loop in real applications (Nov 8 to Nov 12; was Nov 22)
 Goals: for the MVP rigging features, build a scene, run the steps' predicates, see met/unmet in the real application.
 - Feature fixtures: for each MVP feature with a derived state, one build script per application next to `tests/fixtures/verification/` plus a test through `verification.runner`.
 - Per-step replay (state after each step) is out of scope for the harness today (it checks the end state); decide whether the demo needs it.
 - Predicate kinds `name_exists`, `attribute_exists`, `node_count`: **blocked on Mehak and Umaima** (`docs/proposal-predicate-kinds.md`); the harness gets the three checkers the day they agree.
-- Demo (Nov 22): per application, one real video, steps, the matrix row for its features, and the harness result on a prepared scene. Limits stated on the slide.
+- Demo (Nov 12, moved from Nov 22; with two days left, scope it to what already runs: see docs/evaluation_report_2026-11-09.md section 6): per application, one real video, steps, the matrix row for its features, and the harness result on a prepared scene. Limits stated on the slide.
 - Out of scope: any vision, overlay or UI work.
 
 ### Phase 4: after the demo (Dec onward)

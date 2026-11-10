@@ -15,7 +15,7 @@ from typing import Any, Callable
 from .metadata import parse_chapters, parse_iso_duration
 
 BASE = "https://www.googleapis.com/youtube/v3/"
-QUOTA_UNITS = {"playlistItems": 1, "videos": 1, "search": 100, "captions": 50}
+QUOTA_UNITS = {"playlistItems": 1, "videos": 1, "commentThreads": 1, "search": 100, "captions": 50}
 Get = Callable[[str, dict, dict], Any]      # (url, params, headers) -> parsed JSON; raises on HTTP errors
 
 
@@ -78,6 +78,35 @@ def videos_metadata(ids: list[str], *, api_key: str | None = None, get: Get | No
                     "chapters": len(parse_chapters(sn.get("description", ""))), "chapter_titles": [c.title for c in parse_chapters(sn.get("description", ""))], "description_head": (sn.get("description") or "")[:600], "published": (sn.get("publishedAt") or "")[:10] or None,
                     "embeddable": st.get("embeddable"), "privacy": st.get("privacyStatus")})
     return out
+
+
+def video_statistics(ids: list[str], *, api_key: str | None = None, get: Get | None = None) -> dict[str, dict]:
+    """Public counters of up to 50 videos in ONE call (1 quota unit): views, likes, comments, and the upload date. A counter the owner hides is None, never 0.
+    The API has not returned a dislike count since December 2021, so there is no dislike field here and none can be reconstructed."""
+    ids = [i for i in dict.fromkeys(ids) if i][:50]
+    if not ids:
+        return {}
+    data = _call("videos", {"part": "snippet,statistics", "id": ",".join(ids), "maxResults": 50}, api_key, get)
+    out = {}
+    for it in data.get("items", []):
+        st = it.get("statistics", {})
+        num = lambda k: int(st[k]) if st.get(k) is not None else None            # noqa: E731 - absent means hidden or disabled, not zero
+        out[it["id"]] = {"views": num("viewCount"), "likes": num("likeCount"), "comments": num("commentCount"),
+                         "published": (it.get("snippet", {}).get("publishedAt") or "")[:10] or None}
+    return out
+
+
+def top_comments(video_id: str, *, api_key: str | None = None, get: Get | None = None, max_results: int = 50, order: str = "relevance") -> list[dict] | None:
+    """Top-level comments of one video (1 quota unit per call of up to 100). Returns text and like count only: no author, no id, so nothing identifies a person.
+    None when comments are disabled for the video. The text is untrusted data written by strangers; it is read and counted, never obeyed."""
+    try:
+        data = _call("commentThreads", {"part": "snippet", "videoId": video_id, "maxResults": min(max_results, 100), "order": order, "textFormat": "plainText"}, api_key, get)
+    except YouTubeApiError as e:
+        if "commentsDisabled" in str(e) or "HTTP 403" in str(e):
+            return None
+        raise
+    return [{"text": (s := it.get("snippet", {}).get("topLevelComment", {}).get("snippet", {})).get("textDisplay", ""), "likes": s.get("likeCount", 0), "published": (s.get("publishedAt") or "")[:10],
+             "replies": it.get("snippet", {}).get("totalReplyCount", 0)} for it in data.get("items", [])]
 
 
 def search_videos(query: str, *, api_key: str | None = None, get: Get | None = None, max_results: int = 10) -> list[dict]:

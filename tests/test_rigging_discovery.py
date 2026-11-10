@@ -166,7 +166,16 @@ def test_an_automatic_rigging_tool_ranks_below_a_manual_tutorial_unless_you_aske
     d = _discover(auto, manual)
     assert d.recommendations[0].title.startswith("Maya character rigging") and "automatic rigging tool" in d.recommendations[1].note
     wanted = _discover(auto, goal="quick rig a character in Maya")
-    assert "automatic rigging tool" not in wanted.recommendations[0].note
+    assert wanted.recommendations[0].score > d.recommendations[1].score          # no penalty when asked for
+    assert "teaches the tool, not how a rig is built" in wanted.recommendations[0].note and "few manual steps" not in wanted.recommendations[0].note
+
+
+def test_an_automatic_rigging_tool_is_not_penalised_for_a_beginner_and_still_carries_the_note():
+    auto = {**_entry("Maya Quick Rig a character: fast auto rig tutorial for beginners", 30), "id": "q"}
+    plain = _discover(auto)
+    beginner = _discover(auto, goal="I am a beginner and want to rig a biped character in Maya with IK legs and skinning")
+    assert beginner.recommendations[0].score == plain.recommendations[0].score + 0.5
+    assert "teaches the tool, not how a rig is built" in beginner.recommendations[0].note
 
 
 def test_series_parts_are_named_as_such_and_titles_naming_the_stage_get_credit():

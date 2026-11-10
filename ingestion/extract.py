@@ -34,7 +34,7 @@ from .validate import Issue, ValidationFailure, check_structure, refresh_coverag
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds")
 
 
 class ExtractionError(RuntimeError):
@@ -74,6 +74,20 @@ class DraftHowTo(BaseModel):
     evidence: str | None = Field(default=None, description="what you saw or heard that supports this line: a quote, or a short description of the screen")
 
 
+# "v10-preds" offers the model the three kinds of schema 0.11 as well, so renames, parameter edits and counts get a checkable end state. Only that version sees the wider schema; every other
+# version keeps DraftPredicate exactly as it was (its request, its cache key and its recorded runs do not change).
+ExtendedPredicateKind = Literal["mode", "active_tool", "workspace", "selection_type", "panel_open", "property_equals", "node_exists", "name_exists", "attribute_exists", "node_count"]
+
+
+class DraftPredicateExt(DraftPredicate):
+    kind: ExtendedPredicateKind
+    name: str = Field(description="the mode / tool id / workspace / selection type / panel name, the property path, the node type, the name the learner typed (name_exists), or object.attribute (attribute_exists)")
+    expected_value: str | float | None = Field(default=None, description="ONLY for kind=property_equals (the value the property must equal) and node_count (a whole number: at least this many exist); otherwise null")
+
+    def to_state(self) -> StatePredicate:
+        return StatePredicate(kind=self.kind, target=self.name, value=self.expected_value if self.kind in ("property_equals", "node_count") else None)
+
+
 class DraftStep(BaseModel):
     """Shape the model is asked to produce (ids/order/flags are assigned by us)."""
 
@@ -108,6 +122,19 @@ class DraftStepList(BaseModel):
     steps: list[DraftStep]
 
 
+class DraftStepExt(DraftStep):
+    start_state: list[DraftPredicateExt] = Field(default_factory=list)
+    expected_state: list[DraftPredicateExt] = Field(default_factory=list)
+
+
+class DraftStepListExt(DraftStepList):
+    steps: list[DraftStepExt]
+
+
+def _extended(prompt_version: str) -> bool:
+    return prompt_version in ("v10-preds", "v10-houpreds")
+
+
 _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Keep tutorial order.
 - actions: use verbs click, select, press_keys, drag, set_value, open_menu, other.
   Put the UI label EXACTLY as the tutorial shows/says it in ui_element (menu paths as "Add > Mesh > Cube").
@@ -119,7 +146,7 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
     # "v10-nokb" and "v10-outline" are v10 with the knowledge block removed or replaced by typical sequences: a measured experiment (docs/evaluation_report_2026-11-09.md), not a default.
     full_version = version
     version, _, kb_mode = version.partition("-")
-    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline")):
+    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou", "houpreds")):
         raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
     node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10")) else ""
@@ -186,7 +213,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "")
+        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "") + (_PREDICATE_RULES if kb_mode in ("preds", "houpreds") else "") + (_HOUDINI_RULES if kb_mode in ("hou", "houpreds") and profile.name == "houdini" else "")
     raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
 
 
@@ -240,6 +267,33 @@ same moment. If nothing is performed in a stretch (only talk, or only the cursor
 """
 
 
+# v10-preds = v10 plus the three newer kinds of expected state. In the v10 runs on gemini-3.6-flash only about half of the mechanics steps had an end state (Blender 66 %, Houdini 46 %,
+# Maya 43 %), and the missing ones were renames, option toggles, parameter edits and connections: nothing the seven older kinds could say.
+_PREDICATE_RULES = """
+EXPECTED STATE FOR MORE STEPS. Besides the kinds listed above you may use three more in expected_state (and only when the video makes the result visible):
+  name_exists: name = the exact name the learner types for a node, object, bone or joint, e.g. "leftToe" or "jnt_L_hip". Use it for every rename step.
+  attribute_exists: name = "object.attribute" as shown in the Channel Box, Attribute Editor, Properties editor or parameter pane, e.g. "l_switch_GEO.FK_IK_Switch". Use it when a step adds an attribute or a parameter.
+  node_count: name = the node or object type, expected_value = a whole number: at least that many exist, e.g. {"kind": "node_count", "name": "joint", "expected_value": 9} after the learner has made nine joints.
+A setting or toggle that is switched on or off or given a value is property_equals with the property path and the value. A step that only moves, rotates or scales has no expected state. Give every mechanics
+step an expected_state when one of these kinds fits; leave it empty only when none fits. Never invent a name, count or attribute the video does not show.
+"""
+
+
+# v10-hou = v10 plus, for HOUDINI ONLY, a rule that spells out what counts as one step in a node network (for the other applications it is the same text as v10). In the labelled Houdini runs the
+# misses were parameter edits (promotion groups set to "*", naming the skeleton, applying a configuration), viewport state keys (F for Modify mode, Enter or Esc to start and stop a Skeleton
+# tool) and node connections ("connect Scene Add Character after Configure Controls"); words found was 29 to 59 % (docs/evaluation_report_2026-11-09.md, sections 1.5 and 4).
+_HOUDINI_RULES = """
+HOUDINI NODE NETWORK. This tutorial builds a network of nodes, so these are all separate steps, each with its own times:
+  - a node created (normally with the Tab menu in the network editor): the node's label as the network editor shows it, and what it is placed after or connected to;
+  - each connection between two nodes: "Connect <node A> to <node B>", naming both nodes;
+  - each parameter changed in the parameter pane: one step per parameter, naming the node, the parameter and the exact value, expression or option typed or chosen ("set Component Source to FK Transform", "type jnt_* in Target Pattern");
+  - each flag switched on a node (display, bypass, template);
+  - each viewport state change: a key that starts, finishes or changes a tool or state (Enter or Esc for the Skeleton tool, F for Modify mode), and each switch of the pane that is shown (scene view, network editor, geometry spreadsheet);
+  - selecting a node, when later steps act on that selection.
+Use the node label as the video shows it, without internal prefixes. When the tutorial types a value, name or expression, copy it exactly into the step. Do not fold several parameters, or a node and its parameters, into one step.
+"""
+
+
 def _knowledge_notes(profile: AppProfile) -> str:
     """v6: the menu paths and option names the researched documentation gives for this application (knowledge/rigging_knowledge.json). They help the model spell what it
     sees the way the application does, and make clear that anything neither seen nor listed must not be written. Official names only; community advice is not put in a prompt."""
@@ -287,6 +341,19 @@ NODE_EXAMPLES = {            # v7: what a node_exists name looks like in each ap
 RIGGING_APPS = ("maya", "houdini")
 
 
+# The prompt to use when extracting steps from a VIDEO, chosen by measurement (docs/evaluation_report_2026-11-09.md, section 1.13; Gemini 3.6 Flash, three complete repeats per setting):
+#   houdini: v10-hou    recall 26 % to 33 % and words found 76 % to 84 % against v10 on the two Houdini videos (the state kinds added nothing on Houdini);
+#   maya and blender: v10-preds    steps that can be pointed at AND auto-checked 54 % to 61 % against v10 on the six videos, higher in all three repeats.
+# Measured on rigging videos only, so Blender gets it only for rigging; a Blender video that is not about rigging keeps the modelling baseline. Written text is NOT video: it keeps `default_prompt_version`.
+RECOMMENDED_VIDEO_PROMPT = {"houdini": "v10-hou", "maya": "v10-preds", "blender": "v10-preds"}
+
+
+def recommended_video_prompt_version(app: str, rigging: bool = False) -> str:
+    if app == "blender" and not rigging:
+        return DEFAULT_PROMPT_VERSION
+    return RECOMMENDED_VIDEO_PROMPT.get(app, DEFAULT_PROMPT_VERSION)
+
+
 def default_prompt_version(app: str, rigging: bool = False) -> str:
     """Rigging and animation is the main use for Maya and Houdini, so they get the newest prompt; Blender keeps the modelling baseline (v2) unless the caller says the video is about rigging."""
     return "v7" if rigging or app in RIGGING_APPS else DEFAULT_PROMPT_VERSION
@@ -318,9 +385,10 @@ This is a character rigging and animation tutorial for {profile.name}.
 MODEL_REQUIRED = ("actions", "expected_state", "video_start_s", "video_end_s", "result", "how_to", "check")
 
 
-def _schema() -> dict:
-    sch = DraftStepList.model_json_schema()
-    req = sch["$defs"]["DraftStep"]["required"]
+def _schema(prompt_version: str | None = None) -> dict:
+    ext = bool(prompt_version) and _extended(prompt_version)
+    sch = (DraftStepListExt if ext else DraftStepList).model_json_schema()
+    req = sch["$defs"]["DraftStepExt" if ext else "DraftStep"]["required"]
     req += [f for f in MODEL_REQUIRED if f not in req]
     return sch
 
@@ -384,7 +452,7 @@ def _run(
 ) -> StepList:
     profile = get_profile(app)
     system = build_system_prompt(profile, prompt_version)
-    schema = _schema()
+    schema = _schema(prompt_version)
     prompt_hash = hashlib.sha256((system + "\n--\n" + prompt).encode("utf-8")).hexdigest()[:16]
     current_prompt = prompt
     last_err, last_issues, last_partial = "", [], None
@@ -400,7 +468,7 @@ def _run(
             usage = getattr(provider, "usage", [])
             if len(usage) > n_usage:
                 rec["usage"] = usage[-1]
-            draft = DraftStepList.model_validate(raw)
+            draft = (DraftStepListExt if _extended(prompt_version) else DraftStepList).model_validate(raw)
             sl = _to_steplist(
                 draft, source_type=source_type, app=app, video_id=video_id,
                 model_id=provider.model_id, prompt_version=prompt_version,

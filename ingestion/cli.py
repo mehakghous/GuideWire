@@ -15,7 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows
+from .extract import (PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows,
+                      recommended_video_prompt_version)
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -93,6 +94,24 @@ def _offline(args) -> int:
         from .workflows import load_steplist
         print(feature_report(load_steplist(args.file)).render())          # a step list, or an answer bundle holding one
         return 0
+    if args.cmd == "group":                                  # one text-only model call (cost-guarded); the steps themselves are never changed
+        from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
+        from .grouping import group_steps
+        from .providers.gemini import GeminiProvider
+        from .workflows import load_steplist
+        sl = load_steplist(args.file)
+        try:
+            provider = BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.tier]), label=args.key)
+            out = group_steps(sl, provider)
+        except BudgetExceeded as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+        for gid, label, steps in out.groups:
+            print(f"{gid or '--'}  {label}  ({len(steps)} step{'s' if len(steps) != 1 else ''}: {steps[0].id}" + (f" to {steps[-1].id})" if len(steps) > 1 else ")"))
+        print("\n".join(w for w in out.warnings if "group" in w))
+        if args.out:
+            Path(args.out).write_text(out.model_dump_json(indent=2), encoding="utf-8")
+        return 0
     if args.cmd == "chain":
         from .scene_chain import chain_report, derive_state
         from .workflows import load_steplist
@@ -145,7 +164,7 @@ def _offline(args) -> int:
             from .budget import TIERS, BudgetedProvider, BudgetExceeded, api_key_for
             from .providers.gemini import GeminiProvider
             try:
-                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb)
+                svc.answerer = ModelAnswerer(BudgetedProvider(GeminiProvider(api_key=api_key_for(args.key), model=TIERS[args.model_tier]), label=args.key), manual=svc.kb, recheck=args.recheck, recheck_sweep=3 if args.recheck else 0)
             except BudgetExceeded as e:
                 print(f"error: {e}", file=sys.stderr)
                 return 2
@@ -251,7 +270,7 @@ def _offline(args) -> int:
     return 0
 
 
-OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "chain", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
+OFFLINE_COMMANDS = ("score", "instructions", "review", "features", "chain", "group", "purge", "ask", "transcript", "validate", "captions", "playlist", "find", "chat")
 
 
 def _one_line(e: BaseException) -> str:
@@ -282,7 +301,7 @@ def _dry_run(args, model: str | None) -> int:
             dur = fetch_metadata(vid).duration_s
         from .youtube.metadata import canonical_url
         prompt, url = video_prompt(args.prompt_version, dur, None), canonical_url(vid)
-    r = dry_run(model, video_s=dur, system=system, prompt=prompt, schema=_schema(), video_url=url, ceilings=Ceilings.from_env(max_usd_run=args.max_usd_run))
+    r = dry_run(model, video_s=dur, system=system, prompt=prompt, schema=_schema(args.prompt_version), video_url=url, ceilings=Ceilings.from_env(max_usd_run=args.max_usd_run))
     print(json.dumps({**r, "app": args.app, "prompt_version": args.prompt_version, "video_seconds": dur, "key_label": args.key}, indent=1))
     return 0
 
@@ -313,6 +332,7 @@ def main(argv: list[str] | None = None) -> int:
     ch.add_argument("--no-kb", action="store_true")
     ch.add_argument("--model-tier", choices=["iterate", "report"], help="answer questions with a model (grounded on the knowledge base; one paid call per question, through the cost guard); omit for the offline rules only")
     ch.add_argument("--key", choices=["default", "dev", "test"], default="default", help="with --model-tier: which API key variable to read")
+    ch.add_argument("--recheck", action="store_true", help="with --model-tier: when the extracted steps cannot answer a question about the loaded tutorial, look at the video clip around the right moment (one extra call)")
     fd = sub.add_parser("find", help="rank tutorials for a learning request (index only; --verify-captions makes Data API calls, about 50 units each)")
     fd.add_argument("text")
     fd.add_argument("--version")
@@ -368,6 +388,11 @@ def main(argv: list[str] | None = None) -> int:
     ch = sub.add_parser("chain", help="OFFLINE: fill missing expected states from the knowledge base, then check each step's start state follows from earlier steps")
     ch.add_argument("file")
     ch.add_argument("-o", "--out", help="write the step list with the derived states (default: report only)")
+    gr = sub.add_parser("group", help="group consecutive steps into display groups for the learner (schema 0.12); one text-only model call, cost-guarded; the steps are not changed")
+    gr.add_argument("file")
+    gr.add_argument("-o", "--out", help="write the step list with group_id and group set (default: print the groups only)")
+    gr.add_argument("--tier", choices=["iterate", "report"], default="iterate")
+    gr.add_argument("--key", choices=["default", "dev", "test"], default="default")
     sub.add_parser("purge", help="OFFLINE: delete run logs, cached extractions and cached captions older than 30 days (YouTube-derived data rule)")
     m = sub.add_parser("validate", help="OFFLINE: validate and annotate a manually entered step list (JSON)")
     m.add_argument("file")
@@ -377,7 +402,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
         p.add_argument("--prompt-version", default=None, choices=list(PROMPT_VERSIONS),
-                       help="default: v7 for Maya and Houdini (and for --rigging), v2 for Blender. v2 = baseline of the earliest live runs; v6 = rigging prompt of the last live run")
+                       help="default for a video: v10-hou for Houdini, v10-preds for Maya and for Blender with --rigging, v2 for other Blender videos (chosen by measurement, report section 1.13); for written text: v7 for Maya and Houdini, v2 for Blender")
         p.add_argument("--tier", choices=["iterate", "report"], help="model tier: iterate = gemini-3.5-flash-lite (cheap, for trying things), report = gemini-3.8-flash (for results you will show)")
         p.add_argument("--model", help="an explicit model id (it must have a price in ingestion/experiment.py)")
         p.add_argument("--key", choices=["default", "dev", "test"], default="default", help="which API key variable to read: GEMINI_API_KEY, GEMINI_API_KEY_DEV or GEMINI_API_KEY_TEST")
@@ -390,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)
     if getattr(args, "prompt_version", 0) is None:
-        args.prompt_version = default_prompt_version(args.app, args.rigging)
+        args.prompt_version = (recommended_video_prompt_version if args.cmd == "video" else default_prompt_version)(args.app, args.rigging)       # video: the measured choice; written text: the older default
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     for noisy in ("httpx", "httpcore", "google_genai", "google.genai"):  # request logs can carry secrets
         logging.getLogger(noisy).setLevel(logging.WARNING)

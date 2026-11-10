@@ -29,8 +29,9 @@ from shared.answer import AnswerBundle
 
 from . import session as S
 from .features import APPS
-from .answer_model import STATE_INTENTS
-from .followup import classify_followup, respond
+from .answer_model import changes_progress
+from .starter_plan import app_in, starter_bundle
+from .followup import respond
 from .router import route
 from .workflows import DEFAULT_STORE, ReviewedWorkflowStore
 
@@ -50,7 +51,17 @@ def render(b: AnswerBundle) -> str:
         out.append(b.clarification)
     out += [q for q in b.questions if q != b.clarification]
     out += [e.text for e in b.explanations]
-    if b.steps:
+    if b.steps and b.route == "rigging_knowledge" and (b.steps.title or "").startswith(("Starter plan", "After the skeleton")):
+        # a whole-rig plan: one line per STAGE, not 20 steps (the steps stay in the bundle for the overlay)
+        for n, (_gid, label, sts) in enumerate(b.steps.groups, start=1):
+            out.append(f"  {n}. {label}" + (f" ({len(sts)} steps)" if len(sts) > 1 else ""))
+    elif b.steps and b.route == "rigging_knowledge":
+        # steps for ONE topic (or "before you rig"): the learner asked for the steps, so every step is written out, under its stage name. The held-out question set showed a stage line alone ("Bind the
+        # geometry (3 steps)") gave a beginner nothing to follow.
+        for _gid, label, sts in b.steps.groups:
+            out.append(f"  {label}:")
+            out += [f"    {st.order}. {st.goal}" for st in sts]
+    elif b.steps:
         for st in b.steps.steps:
             flag = f"  [{st.flags[0][:70]}]" if st.flags else ""
             out.append(f"  {st.order}. {st.goal}{flag}")
@@ -73,6 +84,8 @@ class Service:
     store: ReviewedWorkflowStore | None = None     # reviewed workflows, if any have been promoted (knowledge/reviewed)
     last_bundle: AnswerBundle | None = None
     answerer: object | None = None                 # ingestion.answer_model.ModelAnswerer: answers every question that does not change the session; None = rules only
+    app_known: bool = False                        # True once the application was CHOSEN (the /app command, or a caller that knows it): the session's default of "blender" is not a choice
+    pending_plan: str | None = None                # a "where do I start" question that is waiting for the answer to "which application?"
 
     # ------------------------------------------------------------------ construction and persistence
     @classmethod
@@ -114,14 +127,19 @@ class Service:
             return self._result("empty", "clarify", None, "Say something, or /help.")
         if text.startswith("/"):
             return self.command(text)
+        plan = self._starter_plan(text)
+        if plan is not None:
+            return plan
         note = None
-        if self.answerer is not None and classify_followup(text) not in STATE_INTENTS:
+        if self.answerer is not None and not changes_progress(text, self.session):
             try:
                 bundle = self.answerer(text, self.session)
             except Exception as e:                           # a provider outage or a budget stop must not end the conversation: fall back to the rules
                 bundle, note = None, f"(the model could not be reached: {type(e).__name__}; this is the rule-based answer)"
             if bundle is not None:
                 self.session.note(text, "model_answer", "model", self.session.current)
+                if bundle.steps is not None and bundle.steps.steps:         # the model judged the learner wants steps: they can be loaded or saved like any other steps
+                    self.last_bundle = bundle
                 return self._result("model_answer", "model", bundle)
         reply = respond(self.session, text, kb=self.kb, tutorials=self.tutorials, store=self.store)
         if reply.bundle.steps and reply.route != "session":
@@ -131,6 +149,27 @@ class Service:
             out["text"] += "\n" + note
         if reply.bundle.steps and reply.route != "session":
             out["text"] += "\n(say /load last to follow these steps and ask questions about them)"
+        return out
+
+    def _starter_plan(self, text: str) -> dict | None:
+        """"Where do I start" with no tutorial loaded: a starter step list from the knowledge base, no model call (ingestion/starter_plan.py). The application must be named: the session's default is not
+        the user's choice, so it asks, and the next message that names an application completes the question."""
+        if self.session.steps is not None:
+            return None
+        asked = text
+        if self.pending_plan and app_in(text) and len(text.split()) <= 4:
+            asked = f"{self.pending_plan} {text}"
+        bundle = starter_bundle(asked, self.session.app if self.app_known else None)
+        if bundle is None:
+            return None
+        self.pending_plan = asked if bundle.kind == "clarification" else None
+        if bundle.steps:
+            self.session.app = bundle.steps.app
+            self.last_bundle = bundle
+        self.session.note(text, "starter_plan", "rigging_knowledge", None)
+        out = self._result("starter_plan", bundle.route, bundle)
+        if bundle.steps:
+            out["text"] += f"\n(say /load last to follow all {len(bundle.steps.steps)} steps and ask questions about them)"
         return out
 
     def load(self, bundle: AnswerBundle, tutorial: dict | None = None) -> dict:
@@ -162,6 +201,7 @@ class Service:
                 if args[0].lower() not in APPS:
                     raise ValueError(f"unknown application {args[0]!r}; choose from {', '.join(APPS)}")
                 self.session.app = args[0].lower()
+                self.app_known = True
                 return self._result("app", "command", None, f"Working in {self.session.app}. Load written steps with /load steps FILE.")
             if cmd == "/version" and args:
                 self.session.version = args[0]

@@ -1,0 +1,856 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "houdini",
+  "app_version_tutorial": null,
+  "video_id": "LJeap3wpyJA",
+  "title": "Rigging in Houdini with APEX: 02 | Simple IK",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Create a 3-joint skeleton chain in the viewport using the Skeleton node",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Scene View",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g01",
+      "group": "Create skeleton and pack geometry",
+      "verifiable": true,
+      "video_start_s": 26.0,
+      "video_end_s": 38.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Stash Input when you want to keep your work: it removes all existing changes and copies the input. Use Stash Merge Input to append instead. (official: SideFX Houdini docs: Skeleton (SOP))",
+        "Expecting Delete to remove a joint's children: it reparents them to the deleted joint's parent; Shift+Delete leaves them with their old parent chain broken. (official: SideFX Houdini docs: Skeleton (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: You are working at SOP level, in a geometry network, because the Skeleton node is a SOP."
+      ],
+      "result": "A 3-joint skeleton arm chain is created.",
+      "how_to": [
+        {
+          "text": "Switch to Create mode in the Skeleton node viewer state toolbar.",
+          "support": "shown",
+          "evidence": "Instructor switches skeleton tool mode to Create"
+        },
+        {
+          "text": "Click three times in the Viewport to create a 3-joint arm chain.",
+          "support": "said",
+          "evidence": "drop these down"
+        }
+      ],
+      "check": [
+        {
+          "text": "Three joint points connected by bone segments appear in the viewport.",
+          "support": "shown",
+          "evidence": "3 joints visible in viewport"
+        }
+      ],
+      "visual_evidence": "Three joints are placed in the viewport creating a two-segment arm chain.",
+      "evidence": [
+        "drop these down"
+      ],
+      "flags": [
+        "expected state already holds before this step, so completing it cannot be verified"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Pack the skeleton geometry using a Pack Folder node",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "Pack Folder"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Name",
+          "keys": [],
+          "value": "base"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Folder",
+          "keys": [],
+          "value": "skel"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "Pack Folder",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "PREP-06",
+      "group_id": "g01",
+      "group": "Create skeleton and pack geometry",
+      "verifiable": true,
+      "video_start_s": 39.0,
+      "video_end_s": 49.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The skeleton geometry is packed into the base/skel folder hierarchy.",
+      "how_to": [
+        {
+          "text": "In Network View, press Tab and add a Pack Folder node below Skeleton.",
+          "support": "said",
+          "evidence": "Let's pack this"
+        },
+        {
+          "text": "Set Name parameter to 'base' and Folder parameter to 'skel'.",
+          "support": "said",
+          "evidence": "we're going to go base skel"
+        }
+      ],
+      "check": [
+        {
+          "text": "Pack Folder node is created and wired to Skeleton node.",
+          "support": "shown",
+          "evidence": "packfolder node connected"
+        }
+      ],
+      "visual_evidence": "Pack Folder node created in network view with parameters base and skel.",
+      "evidence": [
+        "Let's pack this",
+        "we're going to go base skel"
+      ],
+      "flags": [
+        "UI name 'Folder' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Add an APEX AutoRig Component node for IK setup",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "APEX AutoRig Component"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Node Name",
+          "keys": [],
+          "value": "IK"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Component",
+          "keys": [],
+          "value": "Smooth IK"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-02",
+      "group_id": "g02",
+      "group": "Add APEX AutoRig Component node",
+      "verifiable": true,
+      "video_start_s": 52.0,
+      "video_end_s": 64.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Writing #tag in the Multi IK Segments field: it expects the plain tag names. (official: SideFX Houdini docs: Rigging a character (KineFX / APEX AutoRig))",
+        "Enabling Enable Multithreading for one or two chains: it comes with an overhead and should only be used for many chains. (official: SideFX Houdini docs: IK Chains (SOP))"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A skeleton and the skin shape exist and are packed into one character with APEX Pack Character (defaults: Shape Path /Base.shp, Skeleton Path /Base.skel).",
+        "Before this: The skeleton points carry the tags the components look for (the docs add them with Attribute Adjust Tags); components select joints by tag.",
+        "Before this: A SOP skeleton on the first input and a second skeleton (or points) with the goal and optional twist points on the second input."
+      ],
+      "result": "An APEX AutoRig Component node is created and set to Smooth IK.",
+      "how_to": [
+        {
+          "text": "Press Tab in Network View and create an APEX AutoRig Component node.",
+          "support": "said",
+          "evidence": "throw down an autorig component"
+        },
+        {
+          "text": "Rename the node to 'IK'.",
+          "support": "said",
+          "evidence": "call this IK"
+        },
+        {
+          "text": "Set Component Source parameter to 'Smooth IK'.",
+          "support": "said",
+          "evidence": "select smooth IK from the component list"
+        }
+      ],
+      "check": [
+        {
+          "text": "The APEX AutoRig Component node is configured with Smooth IK.",
+          "support": "shown",
+          "evidence": "IK node parameter shows smooth ik"
+        }
+      ],
+      "visual_evidence": "APEX AutoRig Component node named IK added to graph with Smooth IK selected.",
+      "evidence": [
+        "throw down an autorig component",
+        "call this IK",
+        "select smooth IK from the component list"
+      ],
+      "flags": [
+        "expected/start state (Skeleton) derived from the knowledge base (houdini.ik_chains), not read from the tutorial",
+        "UI name 'Node Name' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Component' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Display point names in the viewport using a visualizer marker",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Visualizers menu button",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Attribute",
+          "keys": [],
+          "value": "name"
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": "Scene View",
+          "keys": [
+            "W"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-03",
+      "group_id": "g03",
+      "group": "Display point names in the viewport",
+      "verifiable": false,
+      "video_start_s": 80.0,
+      "video_end_s": 114.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Using Plane on a perfectly straight chain: no plane can be computed, so the node shows a warning and falls back to Spine. (official: SideFX Houdini docs: Orient Joints 2.0 (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton is connected to the node's input."
+      ],
+      "result": "Joint point names are visible in the viewport.",
+      "how_to": [
+        {
+          "text": "Right-click the visualizers icon on the lower left toolbar of the Viewport and click '+' to add a Marker visualizer.",
+          "support": "said",
+          "evidence": "right click on this little arrow... hit plus and put down a marker"
+        },
+        {
+          "text": "Set Visualizer Style to Text and Attribute to 'name', targeting 'Point'.",
+          "support": "said",
+          "evidence": "marker text and the attribute we want is the name attribute... set that to point"
+        },
+        {
+          "text": "Press W in the Viewport to toggle visualizer display.",
+          "support": "said",
+          "evidence": "select this and hit W... we can see the names of our points"
+        }
+      ],
+      "check": [
+        {
+          "text": "Point names (point.0, point.1, point.2) are overlaid in the viewport.",
+          "support": "shown",
+          "evidence": "point names displayed in viewport"
+        }
+      ],
+      "visual_evidence": "Viewport displays point names point.0, point.1, point.2.",
+      "evidence": [
+        "right click on this little arrow... hit plus and put down a marker",
+        "marker text and the attribute we want is the name attribute... set that to point",
+        "select this and hit W... we can see the names of our points"
+      ],
+      "flags": [
+        "UI name 'Visualizers menu button' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Specify driven joints in the IK component node",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Driven",
+          "keys": [],
+          "value": "point.0 point.1 point.2"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "IKFK-03",
+      "group_id": "g04",
+      "group": "Specify driven joints in the IK component",
+      "verifiable": false,
+      "video_start_s": 117.0,
+      "video_end_s": 128.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Enabling Enable Multithreading for one or two chains: it comes with an overhead and should only be used for many chains. (official: SideFX Houdini docs: IK Chains (SOP))"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton on the first input and a second skeleton (or points) with the goal and optional twist points on the second input."
+      ],
+      "result": "The IK chain's driven joints are specified.",
+      "how_to": [
+        {
+          "text": "In the IK node's parameter panel, expand the Driven parameter section.",
+          "support": "shown",
+          "evidence": "go into the driven"
+        },
+        {
+          "text": "Enter 'point.0 point.1 point.2' into the Driven joints fields.",
+          "support": "said",
+          "evidence": "point.0 point.1 point.2"
+        }
+      ],
+      "check": [
+        {
+          "text": "The Driven fields list point.0, point.1, and point.2.",
+          "support": "shown",
+          "evidence": "driven inputs set to point.0 point.1 point.2"
+        }
+      ],
+      "visual_evidence": "Driven parameters filled with point.0 point.1 point.2.",
+      "evidence": [
+        "point.0 point.1 point.2"
+      ],
+      "flags": [
+        "UI name 'Driven' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Add an FK AutoRig Component node before IK to initialize FK transforms",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "APEX AutoRig Component"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Node Name",
+          "keys": [],
+          "value": "FK"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Component",
+          "keys": [],
+          "value": "FK Transform"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Driven",
+          "keys": [],
+          "value": ""
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "Skeleton",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-01",
+      "group_id": "g05",
+      "group": "Add FK AutoRig Component node",
+      "verifiable": true,
+      "video_start_s": 144.0,
+      "video_end_s": 174.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Changing World Space after you already have edits on the pose: it will likely produce erratic results; use separate Rig Pose nodes for mixed local and world-space edits. (official: SideFX Houdini docs: Rig Pose (SOP))",
+        "Using Override and expecting input animation to survive: it replaces the input animation for that point. (official: SideFX Houdini docs: Rig Pose (SOP))"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: A SOP skeleton or rig is connected to the node's input."
+      ],
+      "result": "FK transforms are initialized prior to applying IK.",
+      "how_to": [
+        {
+          "text": "Create another APEX AutoRig Component node before the IK node.",
+          "support": "said",
+          "evidence": "throw down another autorig component"
+        },
+        {
+          "text": "Rename the node to 'FK' and set Component to 'FK Transform'.",
+          "support": "said",
+          "evidence": "call this FK... select FK"
+        },
+        {
+          "text": "Set Driven to '*' to promote all transform channels.",
+          "support": "said",
+          "evidence": "in this case we'll just hit star"
+        }
+      ],
+      "check": [
+        {
+          "text": "FK node is inserted upstream of IK node in Network View.",
+          "support": "shown",
+          "evidence": "FK node connected above IK node"
+        }
+      ],
+      "visual_evidence": "New APEX AutoRig Component node named FK connected upstream of IK node.",
+      "evidence": [
+        "throw down another autorig component",
+        "call this FK... select FK",
+        "in this case we'll just hit star"
+      ],
+      "flags": [
+        "expected/start state (Skeleton) derived from the knowledge base (houdini.rig_pose), not read from the tutorial",
+        "UI name 'Node Name' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Component' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Driven' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "same start and expected state as step 3: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Customize control output names in the IK component",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Arm Pole Control",
+          "keys": [],
+          "value": "arm_pole"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Arm IK Control",
+          "keys": [],
+          "value": "arm_ik_handle"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Autorig Component",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-04",
+      "group_id": "g06",
+      "group": "Customize control output names and add configure node",
+      "verifiable": false,
+      "video_start_s": 195.0,
+      "video_end_s": 228.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The control output names for the IK handle and pole vector are updated.",
+      "how_to": [
+        {
+          "text": "Select the IK component node and go to the Controls section.",
+          "support": "shown",
+          "evidence": "within this control section here"
+        },
+        {
+          "text": "Remove the '_l' suffix from the output control names (e.g. rename 'arm_pole_l' to 'arm_pole' and 'arm_ik_handle_l' to 'arm_ik_handle').",
+          "support": "said",
+          "evidence": "get rid of the l cause we're not using left or right"
+        }
+      ],
+      "check": [
+        {
+          "text": "Control parameters display updated control name strings without '_l'.",
+          "support": "shown",
+          "evidence": "control names updated in parameter pane"
+        }
+      ],
+      "visual_evidence": "Control names edited in parameters to remove suffix.",
+      "evidence": [
+        "within this control section here",
+        "get rid of the l cause we're not using left or right"
+      ],
+      "flags": [
+        "UI name 'Arm Pole Control' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Arm IK Control' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Add an APEX Configure Controls node to define control parameters",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "APEX Configure Controls"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Configurations",
+          "keys": [],
+          "value": "2"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "group_id": "g06",
+      "group": "Customize control output names and add configure node",
+      "verifiable": true,
+      "video_start_s": 229.0,
+      "video_end_s": 245.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An APEX Configure Controls node is created with two configuration slots.",
+      "how_to": [
+        {
+          "text": "Add an APEX Configure Controls node downstream from the IK node.",
+          "support": "said",
+          "evidence": "go into my configure controls"
+        },
+        {
+          "text": "Set the Configurations count to 2.",
+          "support": "said",
+          "evidence": "create two configurations"
+        }
+      ],
+      "check": [
+        {
+          "text": "Two configuration blocks appear in the APEX Configure Controls node parameters.",
+          "support": "shown",
+          "evidence": "two configuration entries listed"
+        }
+      ],
+      "visual_evidence": "APEX Configure Controls node created and configurations count set to 2.",
+      "evidence": [
+        "go into my configure controls",
+        "create two configurations"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Configure shape, scale, and color overrides for IK controls",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Control Name 1",
+          "keys": [],
+          "value": "arm_pole"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Color 1",
+          "keys": [],
+          "value": "Blue"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Control Name 2",
+          "keys": [],
+          "value": "arm_ik_handle"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Shape Override 2",
+          "keys": [],
+          "value": "blob"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Color 2",
+          "keys": [],
+          "value": "Red"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "APEX Configure Controls",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "CTRL-01",
+      "group_id": "g07",
+      "group": "Configure shape, scale, and color overrides",
+      "verifiable": false,
+      "video_start_s": 250.0,
+      "video_end_s": 288.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.399,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Custom shape and color styling are applied to the pole vector and IK handle controls.",
+      "how_to": [
+        {
+          "text": "In configuration slot 1, set Control Pattern to 'arm_pole', increase scale, and set color to blue.",
+          "support": "said",
+          "evidence": "change this to arm_pole... make it blue"
+        },
+        {
+          "text": "In configuration slot 2, set Control Pattern to 'arm_ik_handle', set Shape Override to 'blob', adjust rotation, and set color to red.",
+          "support": "said",
+          "evidence": "arm_ik... use the blob... use red for IK"
+        }
+      ],
+      "check": [
+        {
+          "text": "Control shapes and colors update accordingly in the configuration settings.",
+          "support": "shown",
+          "evidence": "blue pole vector and red blob shape configured"
+        }
+      ],
+      "visual_evidence": "Custom shape parameters and colors visible on controls in viewport.",
+      "evidence": [
+        "change this to arm_pole... make it blue",
+        "arm_ik... use the blob... use red for IK"
+      ],
+      "flags": [
+        "UI name 'Control Name 1' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Color 1' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Control Name 2' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Shape Override 2' is not in the houdini vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Color 2' is not in the houdini vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Assemble character scene and test IK rig interaction",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "APEX Pack Character"
+        },
+        {
+          "verb": "open_menu",
+          "ui_element": "Network View",
+          "keys": [],
+          "value": "APEX Animation from Skeleton"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "TEST-02",
+      "group_id": "g08",
+      "group": "Assemble character scene and test rig",
+      "verifiable": false,
+      "video_start_s": 294.0,
+      "video_end_s": 312.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The APEX character assembly is animated and tested in the viewport.",
+      "how_to": [
+        {
+          "text": "Add a Scene Add Character SOP node.",
+          "support": "said",
+          "evidence": "throw down a scene add character"
+        },
+        {
+          "text": "Add an APEX Animate node downstream.",
+          "support": "said",
+          "evidence": "and then we'll do an animate"
+        },
+        {
+          "text": "Select controls in Viewport to test IK handle manipulation and pole vector position.",
+          "support": "said",
+          "evidence": "now we have our little IK rig"
+        }
+      ],
+      "check": [
+        {
+          "text": "The interactive IK rig with blue pole vector and red IK handle appears in the Viewport.",
+          "support": "shown",
+          "evidence": "viewport shows interactive controls on joints"
+        }
+      ],
+      "visual_evidence": "Interactive rig handles displayed and manipulated in viewport.",
+      "evidence": [
+        "throw down a scene add character",
+        "and then we'll do an animate",
+        "now we have our little IK rig"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v10-preds",
+  "video_duration_s": 377.0,
+  "warnings": [
+    "uncovered 65s after step 10 (312s to 377s): steps may be missing (or this is intro/outro/talk)",
+    "steps grouped for display into 8 groups (10 steps)"
+  ],
+  "extracted_at": "2026-11-09T08:35:41.630823Z"
+}

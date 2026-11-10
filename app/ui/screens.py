@@ -6,16 +6,17 @@ from __future__ import annotations
 
 from concurrent.futures import Future, ThreadPoolExecutor
 
-from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
 from ..guidance import GuidanceController
-from ..pipeline import APPS, request_steps
+from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
+from .workers import run_call
 
 
 class LoginScreen(QWidget):
@@ -74,6 +75,9 @@ class HomeScreen(QWidget):
     open_session = pyqtSignal(int)     # tutorial id
     import_sample = pyqtSignal()
     new_tutorial = pyqtSignal()
+    ask = pyqtSignal()
+    find = pyqtSignal()
+    add_demo = pyqtSignal()
     open_history = pyqtSignal()
     open_profile = pyqtSignal()
     logout = pyqtSignal()
@@ -85,8 +89,25 @@ class HomeScreen(QWidget):
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
         self.sample_button = QPushButton("Import sample steps")
-        self.new_button = QPushButton("New from text")
+        self.new_button = QPushButton("New from text or video link")
         self.new_button.clicked.connect(self.new_tutorial.emit)
+        self.find_button = QPushButton("Find a tutorial")
+        self.find_button.clicked.connect(self.find.emit)
+        self.ask_button = QPushButton("Ask GuideWire")
+        self.ask_button.setObjectName("primary")
+        self.ask_button.clicked.connect(self.ask.emit)
+        self.demo_button = QPushButton("Add demo tutorials")
+        self.demo_button.clicked.connect(self.add_demo.emit)
+        self.empty = QLabel("")
+        self.empty.setObjectName("empty")
+        self.empty.setWordWrap(True)
+        self.empty.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.empty.setText(
+            "<b>You have no tutorials yet.</b><br><br>"
+            "&bull; <b>Add demo tutorials</b>: six real video tutorials (Blender, Maya, Houdini) and three starter plans, ready to review and run.<br>"
+            "&bull; <b>Find a tutorial</b>: say what you want to learn and get up to three suggested videos.<br>"
+            "&bull; <b>Ask GuideWire</b>: ask <i>where do I start rigging in Maya?</i> and save the steps it gives you.<br>"
+            "&bull; <b>New from text or video link</b>: paste instructions, or a YouTube link, and the AI turns it into steps.")
         self.history_button = QPushButton("History")
         self.profile_button = QPushButton("Profile")
         self.logout_button = QPushButton("Log out")
@@ -97,19 +118,26 @@ class HomeScreen(QWidget):
         self.session_button.clicked.connect(lambda: self._emit(self.open_session))
         self.logout_button.clicked.connect(self.logout.emit)
         row = QHBoxLayout()
-        row.addWidget(self.review_button)
-        row.addWidget(self.session_button)
+        row.addWidget(self.find_button)
+        row.addWidget(self.ask_button)
         row.addWidget(self.new_button)
+        row.addWidget(self.demo_button)
         row.addWidget(self.sample_button)
-        row.addWidget(self.history_button)
-        row.addWidget(self.profile_button)
         row.addStretch()
-        row.addWidget(self.logout_button)
+        row2 = QHBoxLayout()
+        row2.addWidget(self.review_button)
+        row2.addWidget(self.session_button)
+        row2.addWidget(self.history_button)
+        row2.addWidget(self.profile_button)
+        row2.addStretch()
+        row2.addWidget(self.logout_button)
         root = QVBoxLayout(self)
         root.addWidget(self.greeting)
-        root.addWidget(QLabel("Your tutorials"))
-        root.addWidget(self.tutorials)
         root.addLayout(row)
+        root.addWidget(QLabel("Your tutorials"))
+        root.addWidget(self.empty, 1)
+        root.addWidget(self.tutorials, 1)
+        root.addLayout(row2)
 
     def show_user(self, user: User, tutorials: list[tuple[int, str]]) -> None:
         self.greeting.setText(f"<h2>Welcome, {user.display_name or user.email}</h2>")
@@ -117,6 +145,10 @@ class HomeScreen(QWidget):
         for tid, title in tutorials:
             self.tutorials.addItem(f"{title}")
             self.tutorials.item(self.tutorials.count() - 1).setData(0x0100, tid)   # Qt.ItemDataRole.UserRole
+        self.empty.setVisible(not tutorials)
+        self.tutorials.setVisible(bool(tutorials))
+        if tutorials:
+            self.tutorials.setCurrentRow(0)                                  # something is always selected, so Review and Start session just work
 
     def selected_tutorial(self) -> int | None:
         item = self.tutorials.currentItem()
@@ -225,6 +257,9 @@ class StepReviewScreen(QWidget):
             return
         step = self.editor.steps.steps[self.editor._index(sid)]
         lines = [checkability(step).text]
+        if step.group:
+            members = [s for s in self.editor.steps.steps if s.group_id == step.group_id]
+            lines.insert(0, f"Part of: {step.group} (step {members.index(step) + 1} of {len(members)} in this group)")
         lines.extend(f"Note: {f}" for f in step.flags)
         self.detail.setText("\n".join(lines))
 
@@ -282,6 +317,7 @@ class StepReviewScreen(QWidget):
 class SessionScreen(QWidget):
     """Shows the active step with Done / Skip / Back. All state and rules live in SessionEngine."""
     back = pyqtSignal()
+    ask_about = pyqtSignal(int)        # tutorial id
 
     def __init__(self):
         super().__init__()
@@ -310,6 +346,8 @@ class SessionScreen(QWidget):
         self.skip_button = QPushButton("Skip")
         self.prev_button = QPushButton("Previous step")
         self.back_button = QPushButton("Back")
+        self.ask_button = QPushButton("Ask about this tutorial")
+        self.ask_button.clicked.connect(lambda: self.tutorial_id is not None and self.ask_about.emit(self.tutorial_id))
         self.start_button.clicked.connect(lambda: self._do(self.engine.start))
         self.done_button.clicked.connect(lambda: self._do(self.engine.complete))
         self.skip_button.clicked.connect(lambda: self._do(self.engine.skip))
@@ -318,6 +356,8 @@ class SessionScreen(QWidget):
         row = QHBoxLayout()
         for b in (self.start_button, self.prev_button, self.skip_button, self.done_button):
             row.addWidget(b)
+        row.addStretch()
+        row.addWidget(self.ask_button)
         root = QVBoxLayout(self)
         root.addWidget(self.title)
         root.addWidget(self.progress)
@@ -581,7 +621,9 @@ class NewTutorialScreen(QWidget):
         self.app = QComboBox()
         self.app.addItems(APPS)
         self.text = QPlainTextEdit()
-        self.text.setPlaceholderText("One instruction per line, e.g.\nPress Tab to enter Edit Mode\nSelect the cube\n\nor paste a timed transcript")
+        self.text.setPlaceholderText("One instruction per line, e.g.\nPress Tab to enter Edit Mode\nSelect the cube\n\nor paste a timed transcript, or a YouTube link to a rigging tutorial")
+        self.video_runner = None      # set by the main window: (url, app, on_status) -> PipelineResult; None = no AI model on this computer
+        self.sync = False             # tests run the call inline
         self.message = QLabel("")
         self.message.setWordWrap(True)
         self.notes = QLabel("")
@@ -605,6 +647,11 @@ class NewTutorialScreen(QWidget):
         buttons.addWidget(self.back_button)
         root.addLayout(buttons)
 
+    def prefill(self, text: str, app: str | None = None) -> None:
+        self.text.setPlainText(text)
+        if app in APPS:
+            self.app.setCurrentText(app)
+
     def reset(self) -> None:
         self.title.clear()
         self.text.clear()
@@ -612,10 +659,25 @@ class NewTutorialScreen(QWidget):
         self.notes.setText("")
 
     def create(self) -> None:
-        result = request_steps(self.text.toPlainText(), self.app.currentText())
+        text, app = self.text.toPlainText(), self.app.currentText()
+        link = _YOUTUBE.search(text)
+        if link and self.video_runner is not None:
+            self.create_button.setEnabled(False)
+            self.message.setText("Starting...")
+            self.notes.setText("")
+            runner = self.video_runner
+            run_call(self, lambda status: runner(link.group(0), app, status), self._on_result, on_status=self.message.setText, sync=self.sync)
+            return
+        self._on_result(request_steps(text, app))
+
+    def _on_result(self, result) -> None:
+        self.create_button.setEnabled(True)
+        if isinstance(result, Exception):
+            self.message.setText(f"That did not work ({type(result).__name__}: {str(result)[:120]}).")
+            return
         self.message.setText(result.message)
         self.notes.setText("\n".join(f"Note: {n}" for n in result.notes))
         if result.steps is None:
             return
-        title = self.title.text().strip() or "Untitled tutorial"
+        title = self.title.text().strip() or result.steps.title or "Untitled tutorial"
         self.created.emit(StepEditor(result.steps, title=title))

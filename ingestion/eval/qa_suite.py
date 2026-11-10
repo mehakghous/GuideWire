@@ -71,6 +71,7 @@ def _names(step) -> tuple[str, str]:
 def run_one(q: dict, kb, tutorials, answerer=None) -> dict:
     svc = Service(S.Session(), None, kb, tutorials, None, answerer=answerer)
     svc.session.app = q["app"]
+    svc.app_known = True                              # the suite states the application, as a UI that knows it would
     sl = None
     if q["scenario"] == "video_context":
         sl = StepList.model_validate_json((FIXTURES / f"steps_{q['video']}.json").read_text(encoding="utf-8"))
@@ -132,18 +133,26 @@ def main(argv=None) -> int:
     ap.add_argument("--suite", type=Path, default=SUITE)
     ap.add_argument("-o", "--out", type=Path)
     ap.add_argument("--model-tier", choices=["iterate", "report"], help="answer with a model (grounded on the knowledge base) through the cost guard; omit for the rule-based layer only")
+    ap.add_argument("--provider", choices=["gemini", "openai"], default="gemini", help="which model family answers (openai: text only, so it cannot recheck a video)")
+    ap.add_argument("--openai-model", default=None, help="with --provider openai: the model id (default gpt-5.6-luna)")
+    ap.add_argument("--max-usd", type=float, default=2.0, help="stop before a call that could pass this many dollars in this run")
+    ap.add_argument("--recheck", action="store_true", help="with --model-tier: look at the video clip when the steps cannot answer a question about the tutorial (one extra call)")
     a = ap.parse_args(argv)
     answerer = None
-    if a.model_tier:
+    if a.model_tier or a.provider == "openai":
         from dotenv import load_dotenv
         load_dotenv()
         from ..answer_model import ModelAnswerer
-        from ..budget import TIERS, BudgetedProvider, api_key_for
-        from ..providers.gemini import GeminiProvider
+        from ..budget import TIERS, BudgetedProvider, Ceilings, api_key_for
         from ..service import _default_kb
         kb, _ = _default_kb()
-        prov = BudgetedProvider(GeminiProvider(api_key=api_key_for("default"), model=TIERS[a.model_tier]), label="default")
-        answerer = Paced(ModelAnswerer(prov, manual=kb))
+        if a.provider == "openai":
+            from ..providers.openai_provider import CHEAP_MODEL, OpenAIProvider
+            prov = BudgetedProvider(OpenAIProvider(model=a.openai_model or CHEAP_MODEL), ceilings=Ceilings.from_env(max_usd_run=a.max_usd), label="openai")
+        else:
+            from ..providers.gemini import GeminiProvider
+            prov = BudgetedProvider(GeminiProvider(api_key=api_key_for("default"), model=TIERS[a.model_tier]), label="default")
+        answerer = Paced(ModelAnswerer(prov, manual=kb, recheck=a.recheck, recheck_sweep=3 if a.recheck else 0))
     rows = run(a.suite, answerer)
     res = {"summary": summary(rows), "rows": rows}
     if a.out:

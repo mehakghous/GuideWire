@@ -177,7 +177,7 @@ No fine-tuned models, no local speech or vision models, no embeddings or vector 
 | M2 (**gate**) | Oct 14 – 20 | **Spike S1** (see §12): URL extraction on 5 videos | Go or no-go on the video route recorded in `docs/` |
 | M3 | Oct 20 – Nov 1 | YouTube pipeline: metadata, chapters, segment loop, two-pass extraction, validator, UI-name list, CLI | CLI on 3 unseen videos returns a valid `StepList` in under the target time |
 | M4 | Oct 25 – Nov 15 | `StepEvaluator`: pure function `(Step, observed_state) → met / unmet / unverifiable`; hooked to guidance engine | Table-driven tests; runs against adapter-state fixtures |
-| M5 | Nov 15 – 22 | Stabilise for Nov 22 demo: end-to-end Blender run on a written input and one video; honest limitations list | Demo script rehearsed; known failures documented |
+| M5 | Nov 10 – 12 (was Nov 15 – 22) | Stabilise for the Nov 12 demo (moved from Nov 22 on 2026-11-10): end-to-end Blender run on a written input and one video; honest limitations list | Demo script rehearsed; known failures documented |
 | M6 | Nov 22 – Dec 6 | Written-instruction polish (messy real-world input) | Gold set for written input passes target |
 | FYP-2 | Jan – Mar | Router, doc Q&A, ranking and fit check, version compare, accuracy refinement, evaluation (§10) | Per proposal §7, re-planned from M5 evidence |
 
@@ -205,7 +205,7 @@ No fine-tuned models, no local speech or vision models, no embeddings or vector 
 3. **Remove `youtube-transcript-api`** from `requirements.txt` and add `google-genai`, `httpx`, `pydantic` (already there), `pytest`. Needs a PR to the team's repo.
 4. **Billing.** Who holds a Gemini/YouTube API key, free tier vs a small paid budget (estimated tens of dollars for the whole evaluation)? Free-tier limits are not documented in what I fetched.
 5. **Recording our own gold-set screencasts** (3–5, public YouTube) vs relying only on third-party videos. I recommend recording.
-6. **Overdue work.** The schedule is already behind, so the Nov 22 demo should be scoped as: written to steps plus one video working end-to-end on Blender, nothing more.
+6. **Overdue work.** The schedule is already behind (and the demo moved from Nov 22 to Nov 12 on 2026-11-10), so the demo should be scoped as: written to steps plus one video working end-to-end on Blender, nothing more.
 
 ## 12. Early feasibility experiments (run before building M3)
 

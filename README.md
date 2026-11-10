@@ -52,7 +52,7 @@ python -m pytest -q          # offline tests; live API tests are deselected
 ruff check .                 # lint
 python -m ingestion.cli --help
 python -m ingestion.cli purge   # delete YouTube-derived run logs and caches older than 30 days
-python -m ingestion.cli video URL --app houdini --tier report --dry-run   # worst-case cost and cache status; calls no model (prompt v7 for Maya/Houdini, --rigging for Blender)
+python -m ingestion.cli video URL --app houdini --tier report --dry-run   # worst-case cost and cache status; calls no model (prompt v10-hou for Houdini, v10-preds for Maya and, with --rigging, Blender)
 python -m ingestion.cli video URL --app maya --tier iterate --key dev     # real call through the cost guard (cache, ceilings, runs/budget/cost_log.jsonl)
 python -m verification detect                          # which of Blender, Maya, Houdini are installed (headless checks need them)
 python -m verification check steps.json --scene scene.blend   # check each step's expected state against a real scene

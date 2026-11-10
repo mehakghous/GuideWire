@@ -29,7 +29,9 @@ FAST University, Karachi Campus. Department of SE. FYP 2026-27.
 ## Required versions
 
 - Python 3.11
-- Blender: write the exact version here (everyone uses the same one)
+- Blender 5.2 (everyone uses the same one)
+- Maya 2027
+- Houdini 22.0.466 (Apprentice)
 - Blender layout: default layout, screen at 1920x1080 (or the same display scaling), so screenshots are comparable across team members
 
 ## Setup

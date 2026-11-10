@@ -1,0 +1,1342 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "blender",
+  "app_version_tutorial": "5.1",
+  "video_id": "EBgHRd5tJfE",
+  "title": "Blender 5.1 Basic Rigging Tutorial | Simple Armature Setup & Automatic Weights (Beginner Guide)",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Delete default scene objects",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "A"
+          ],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Delete"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Delete default scene objects",
+      "verifiable": false,
+      "video_start_s": 32.0,
+      "video_end_s": 35.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The scene is cleared of default objects.",
+      "how_to": [
+        {
+          "text": "Press A to select all objects in the scene.",
+          "support": "said",
+          "evidence": "just press a"
+        },
+        {
+          "text": "Press Delete to clear the selection.",
+          "support": "said",
+          "evidence": "and press delete to delete everything"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "The instructor selects all objects and deletes them from the viewport.",
+      "evidence": [
+        "press a and press delete to delete everything"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Add a cylinder mesh object",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Add > Mesh > Cylinder",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "MESH",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "PREP-02",
+      "group_id": "g02",
+      "group": "Add a cylinder mesh object",
+      "verifiable": true,
+      "video_start_s": 36.0,
+      "video_end_s": 41.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A default cylinder mesh is created at the origin.",
+      "how_to": [
+        {
+          "text": "Open the Add menu and select Mesh > Cylinder.",
+          "support": "shown",
+          "evidence": "Add menu clicked in header, Mesh > Cylinder selected"
+        }
+      ],
+      "check": [
+        {
+          "text": "Observe the cylinder in the 3D viewport.",
+          "support": "shown",
+          "evidence": "A cylinder appears at origin"
+        }
+      ],
+      "visual_evidence": "A cylinder object appears in the viewport.",
+      "evidence": [
+        "add a cylinder"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Switch cylinder mesh to Edit Mode",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Edit Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g03",
+      "group": "Edit cylinder mesh shape",
+      "verifiable": true,
+      "video_start_s": 48.0,
+      "video_end_s": 51.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [
+        "Press Tab to toggle Edit Mode"
+      ],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The cylinder object is now in Edit Mode.",
+      "how_to": [
+        {
+          "text": "Click the Mode selector in the upper-left header and choose Edit Mode.",
+          "support": "shown",
+          "evidence": "Mode selector clicked and Edit Mode chosen"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Edit Mesh mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=EDIT_MESH"
+        }
+      ],
+      "visual_evidence": "Viewport header shows Edit Mode.",
+      "evidence": [
+        "go to the edit mode"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Scale down cylinder thickness",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "S"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g03",
+      "group": "Edit cylinder mesh shape",
+      "verifiable": false,
+      "video_start_s": 52.0,
+      "video_end_s": 56.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The cylinder becomes thinner.",
+      "how_to": [
+        {
+          "text": "Press S and drag the cursor inward to scale the mesh smaller.",
+          "support": "shown",
+          "evidence": "Press S overlay appears, mesh shrinks in thickness"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Cylinder diameter decreases in viewport.",
+      "evidence": [
+        "make it a rod",
+        "just press S make it smaller"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Elongate cylinder mesh along vertical axis",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Toolbar > Scale",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Z Scale Handle",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g03",
+      "group": "Edit cylinder mesh shape",
+      "verifiable": false,
+      "video_start_s": 57.0,
+      "video_end_s": 65.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The cylinder mesh is stretched into a tall rod.",
+      "how_to": [
+        {
+          "text": "Select the Scale tool from the Toolbar.",
+          "support": "shown",
+          "evidence": "Toolbar Scale tool icon selected"
+        },
+        {
+          "text": "Drag the blue Z axis handle upward to extend the mesh length.",
+          "support": "shown",
+          "evidence": "Z gizmo handle dragged up to elongate mesh"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "The rod mesh becomes tall along the Z-axis.",
+      "evidence": [
+        "click the scale to just make it longer"
+      ],
+      "flags": [
+        "UI name 'Z Scale Handle' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Activate Loop Cut tool",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Toolbar > Loop Cut",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "active_tool",
+          "target": "builtin.loop_cut",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g04",
+      "group": "Subdivide the mesh vertically",
+      "verifiable": true,
+      "video_start_s": 73.0,
+      "video_end_s": 78.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [
+        "Press Ctrl+R shortcut for Loop Cut"
+      ],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The Loop Cut tool is active.",
+      "how_to": [
+        {
+          "text": "Click the Loop Cut icon on the left toolbar.",
+          "support": "shown",
+          "evidence": "Loop cut icon clicked on toolbar"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Loop cut tool highlighted in toolbar.",
+      "evidence": [
+        "click the loop cut here"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Add loop cuts to subdivide the mesh vertically",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Viewport Mesh",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Loop Cut and Slide > Number of Cuts",
+          "keys": [],
+          "value": "10"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        },
+        {
+          "kind": "active_tool",
+          "target": "builtin.loop_cut",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g04",
+      "group": "Subdivide the mesh vertically",
+      "verifiable": false,
+      "video_start_s": 78.0,
+      "video_end_s": 85.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Multiple horizontal edge loops are added along the cylinder length.",
+      "how_to": [
+        {
+          "text": "Click on the cylinder in the viewport to place a loop cut.",
+          "support": "shown",
+          "evidence": "Click on cylinder mesh"
+        },
+        {
+          "text": "Expand the Loop Cut and Slide panel at the bottom left and increase Number of Cuts to 10.",
+          "support": "shown",
+          "evidence": "Number of Cuts field changed to 10"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Mesh shows multiple horizontal loop cut rings.",
+      "evidence": [
+        "make a few loop cut in this way so that later it can bend easier"
+      ],
+      "flags": [
+        "UI name 'Viewport Mesh' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Switch mesh back to Object Mode",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Object Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g04",
+      "group": "Subdivide the mesh vertically",
+      "verifiable": true,
+      "video_start_s": 89.0,
+      "video_end_s": 92.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The scene returns to Object Mode.",
+      "how_to": [
+        {
+          "text": "Click Mode selector in header and choose Object Mode.",
+          "support": "shown",
+          "evidence": "Mode selector dropdown set to Object Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Object mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=OBJECT"
+        }
+      ],
+      "visual_evidence": "Viewport mode returns to Object Mode.",
+      "evidence": [
+        "back to the object mode here"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Add a single bone armature object",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Add > Armature",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g05",
+      "group": "Add and display armature object",
+      "verifiable": true,
+      "video_start_s": 99.0,
+      "video_end_s": 107.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "A single bone Armature is added to the scene.",
+      "how_to": [
+        {
+          "text": "Open Add menu in header and select Armature > Single Bone.",
+          "support": "shown",
+          "evidence": "Add > Armature clicked"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a ARMATURE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=ARMATURE"
+        },
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "A single bone armature appears at origin.",
+      "evidence": [
+        "just add an armature a single bone"
+      ],
+      "flags": [
+        "expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial",
+        "expected state already holds before this step, so completing it cannot be verified"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Display armature in front of mesh geometry",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Properties > Data > Viewport Display > In Front",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Properties:Data",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "property_equals",
+          "target": "armature.show_in_front",
+          "value": "true"
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g05",
+      "group": "Add and display armature object",
+      "verifiable": true,
+      "video_start_s": 109.0,
+      "video_end_s": 114.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The bone remains visible inside the mesh.",
+      "how_to": [
+        {
+          "text": "Go to Object Data Properties panel on the right.",
+          "support": "shown",
+          "evidence": "Green armature icon panel selected"
+        },
+        {
+          "text": "Expand Viewport Display section and check In Front.",
+          "support": "shown",
+          "evidence": "In Front checkbox checked"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Bone is drawn on top of the cylinder mesh in X-ray view.",
+      "evidence": [
+        "click the data viewport display make sure it show in front"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Switch armature to Edit Mode",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Edit Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g06",
+      "group": "Position and subdivide the bone chain",
+      "verifiable": true,
+      "video_start_s": 116.0,
+      "video_end_s": 118.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The armature is in Edit Mode.",
+      "how_to": [
+        {
+          "text": "Select Edit Mode from header mode selector while armature is selected.",
+          "support": "shown",
+          "evidence": "Mode dropdown switched to Edit Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Edit Armature mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=EDIT_ARMATURE"
+        }
+      ],
+      "visual_evidence": "Mode dropdown reads Edit Mode.",
+      "evidence": [
+        "we are going to the edit mode"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Position upper bone joint at top of mesh",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Bone Tip Joint",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Z Move Handle",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-02",
+      "group_id": "g06",
+      "group": "Position and subdivide the bone chain",
+      "verifiable": false,
+      "video_start_s": 119.0,
+      "video_end_s": 125.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "The bone head/tip joint reaches the top of the cylinder.",
+      "how_to": [
+        {
+          "text": "Select top tip ball of the bone.",
+          "support": "shown",
+          "evidence": "Bone tip selected"
+        },
+        {
+          "text": "Move it upward to align with top of cylinder.",
+          "support": "shown",
+          "evidence": "Dragged Z handle upward"
+        }
+      ],
+      "check": [
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "Top bone joint aligns with top of cylinder mesh.",
+      "evidence": [
+        "the head we just move it to the top"
+      ],
+      "flags": [
+        "UI name 'Bone Tip Joint' is not in the blender vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Z Move Handle' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "goal": "Position lower bone joint at bottom of mesh",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Bone Root Joint",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Z Move Handle",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-02",
+      "group_id": "g06",
+      "group": "Position and subdivide the bone chain",
+      "verifiable": false,
+      "video_start_s": 126.0,
+      "video_end_s": 131.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "The bone tail/root joint aligns with the bottom of the cylinder mesh.",
+      "how_to": [
+        {
+          "text": "Select bottom root ball of the bone.",
+          "support": "shown",
+          "evidence": "Bone tail selected"
+        },
+        {
+          "text": "Drag Z handle down to base of mesh.",
+          "support": "shown",
+          "evidence": "Dragged root down to base of mesh"
+        }
+      ],
+      "check": [
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "Bottom bone joint aligns with base of mesh.",
+      "evidence": [
+        "the tail we move it to the bottom"
+      ],
+      "flags": [
+        "UI name 'Bone Root Joint' is not in the blender vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Z Move Handle' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "goal": "Subdivide single bone into bone chain",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Viewport Context Menu > Subdivide",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Subdivide > Number of Cuts",
+          "keys": [],
+          "value": "10"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-05",
+      "group_id": "g06",
+      "group": "Position and subdivide the bone chain",
+      "verifiable": true,
+      "video_start_s": 137.0,
+      "video_end_s": 149.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The bone is divided into a chain of 11 connected bones.",
+      "how_to": [
+        {
+          "text": "Select bone body, right-click and choose Subdivide.",
+          "support": "shown",
+          "evidence": "Right-click context menu > Subdivide clicked"
+        },
+        {
+          "text": "In lower-left Subdivide panel, change Number of Cuts to 10.",
+          "support": "shown",
+          "evidence": "Number of Cuts field set to 10"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "Check that each joint sits under the right parent in the hierarchy.",
+          "support": "catalog",
+          "evidence": "catalog guidance for SKEL-05; the video did not necessarily show this"
+        }
+      ],
+      "visual_evidence": "Single bone splits into multiple connected bone segments along the mesh.",
+      "evidence": [
+        "right click subdivide subdivide to a few parts"
+      ],
+      "flags": [
+        "UI name 'Viewport Context Menu > Subdivide' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "goal": "Switch armature back to Object Mode",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Object Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g06",
+      "group": "Position and subdivide the bone chain",
+      "verifiable": true,
+      "video_start_s": 150.0,
+      "video_end_s": 155.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Armature is in Object Mode.",
+      "how_to": [
+        {
+          "text": "Select Object Mode from mode selector in header.",
+          "support": "shown",
+          "evidence": "Mode dropdown switched back to Object Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Object mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=OBJECT"
+        }
+      ],
+      "visual_evidence": "Header shows Object Mode.",
+      "evidence": [
+        "switch back to the object mode"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s16",
+      "order": 16,
+      "goal": "Parent mesh to armature with automatic weights",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Cylinder Mesh",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Armature Object",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Ctrl",
+            "P"
+          ],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Set Parent To > With Automatic Weights",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "MODIFIER_ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKIN-01",
+      "group_id": "g07",
+      "group": "Parent mesh to armature with automatic weights",
+      "verifiable": true,
+      "video_start_s": 164.0,
+      "video_end_s": 177.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Selecting the armature first before the mesh will parent the armature to the mesh instead of the reverse.",
+        "Selecting the armature before the mesh (wrong order) parents the wrong way round. (official: Blender manual: Armature Deform Parent)"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The armature's bones that should move the mesh are set to Deform (Properties > Bone > Deform).",
+        "Before this: Mesh in a clean rest pose; apply scale on both the mesh and the armature (see mistakes)."
+      ],
+      "result": "The cylinder mesh is parented to the armature with an Armature Deform modifier and automatic skin weights.",
+      "how_to": [
+        {
+          "text": "Click cylinder mesh to select it.",
+          "support": "shown",
+          "evidence": "Cylinder selected first"
+        },
+        {
+          "text": "Shift-click the Armature to add it to selection as active object.",
+          "support": "shown",
+          "evidence": "Shift held while clicking armature"
+        },
+        {
+          "text": "Press Ctrl+P to open Set Parent To menu.",
+          "support": "shown",
+          "evidence": "Ctrl+P shortcut pressed, popup menu appears"
+        },
+        {
+          "text": "Click With Automatic Weights.",
+          "support": "shown",
+          "evidence": "With Automatic Weights selected from menu"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a MODIFIER_ARMATURE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=MODIFIER_ARMATURE"
+        },
+        {
+          "text": "Go into Pose Mode, rotate a bone, and check the mesh around it follows; undo the pose afterwards.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Armature Deform Parent"
+        }
+      ],
+      "visual_evidence": "Set Parent To menu appears and With Automatic Weights is clicked.",
+      "evidence": [
+        "click the mesh and then hold the shift then click the skeleton press control p with automatic weights"
+      ],
+      "flags": [
+        "expected/start state (ARMATURE, MESH) derived from the knowledge base (blender.armature_deform_parent), not read from the tutorial",
+        "UI name 'Cylinder Mesh' is not in the blender vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Armature Object' is not in the blender vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Set Parent To > With Automatic Weights' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s17",
+      "order": 17,
+      "goal": "Enter Pose Mode on armature",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Armature Object",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Pose Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g08",
+      "group": "Test deformation by posing bones",
+      "verifiable": true,
+      "video_start_s": 181.0,
+      "video_end_s": 188.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The armature enters Pose Mode for posing and testing skin deformation.",
+      "how_to": [
+        {
+          "text": "Select the armature object.",
+          "support": "shown",
+          "evidence": "Armature selected"
+        },
+        {
+          "text": "Choose Pose Mode from upper-left mode dropdown.",
+          "support": "shown",
+          "evidence": "Pose Mode selected from header"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Pose mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=POSE"
+        }
+      ],
+      "visual_evidence": "Viewport mode selector switches to Pose Mode; bone selection turns blue.",
+      "evidence": [
+        "click the skeleton then go to the pose mode"
+      ],
+      "flags": [
+        "UI name 'Armature Object' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s18",
+      "order": 18,
+      "goal": "Test deformation by posing bones",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Bone",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Toolbar > Rotate",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Rotation Gizmo Handle",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "TEST-01",
+      "group_id": "g08",
+      "group": "Test deformation by posing bones",
+      "verifiable": false,
+      "video_start_s": 194.0,
+      "video_end_s": 220.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [
+        "Press R shortcut to rotate selected bone"
+      ],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The mesh deforms and bends smoothly when bones are rotated in Pose Mode.",
+      "how_to": [
+        {
+          "text": "Select a bone in the chain.",
+          "support": "shown",
+          "evidence": "Bone selected in Pose Mode"
+        },
+        {
+          "text": "Select Rotate tool from Toolbar and drag rotation ring to bend bone.",
+          "support": "shown",
+          "evidence": "Rotate tool used to bend bones, mesh bends smoothly along with bones"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify cylinder mesh flexes and deforms following bone movements.",
+          "support": "shown",
+          "evidence": "Mesh deforms around rotated bones"
+        }
+      ],
+      "visual_evidence": "Instructor rotates multiple bones in Pose Mode and mesh bends cleanly.",
+      "evidence": [
+        "select one of the bone and I click rotate to rotate the bone you can see the mesh already automatic bend together"
+      ],
+      "flags": [
+        "UI name 'Rotation Gizmo Handle' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v10-preds",
+  "video_duration_s": 267.0,
+  "warnings": [
+    "uncovered 47s after step 18 (220s to 267s): steps may be missing (or this is intro/outro/talk)",
+    "steps cover only 48% of the 267s video: extraction may be incomplete",
+    "steps grouped for display into 8 groups (18 steps)"
+  ],
+  "extracted_at": "2026-11-09T08:34:00.067660Z"
+}

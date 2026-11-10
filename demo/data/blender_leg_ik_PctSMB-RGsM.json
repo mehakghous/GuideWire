@@ -1,0 +1,2584 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "blender",
+  "app_version_tutorial": "4.3.2",
+  "video_id": "PctSMB-RGsM",
+  "title": "How to Rig a Leg with Inverse Kinematics in Blender | Quick IK Tutorial for Animation",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Add a single bone armature to the scene",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Add > Armature > Single Bone",
+          "keys": [
+            "Shift",
+            "A"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g01",
+      "group": "Add a single bone armature and switch to Edit Mode",
+      "verifiable": true,
+      "video_start_s": 14.0,
+      "video_end_s": 18.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "A single bone armature object is created inside the viewport.",
+      "how_to": [
+        {
+          "text": "Press Shift+A in the 3D Viewport to open the Add menu.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Shift + A'"
+        },
+        {
+          "text": "Select Armature > Single Bone.",
+          "support": "said",
+          "evidence": "create an armature of a single bone"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that Armature appears in the Outliner and viewport.",
+          "support": "shown",
+          "evidence": "Single bone visible at scene origin"
+        }
+      ],
+      "visual_evidence": "Overlay text shows Shift + A, menu menu options Add > Armature > Single Bone highlighted.",
+      "evidence": [
+        "The first step is to press Shift A and create an armature of a single bone."
+      ],
+      "flags": [
+        "expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial",
+        "UI name 'Add > Armature > Single Bone' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Switch to Edit Mode",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Tab"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Add a single bone armature and switch to Edit Mode",
+      "verifiable": true,
+      "video_start_s": 19.0,
+      "video_end_s": 20.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The armature enters Edit Mode.",
+      "how_to": [
+        {
+          "text": "Press Tab key to enter Edit Mode.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Tab'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify top-left mode selector displays Edit Mode.",
+          "support": "shown",
+          "evidence": "Mode selector header shows Edit Mode"
+        }
+      ],
+      "visual_evidence": "Tab overlay key shown, mode header changes to Edit Mode.",
+      "evidence": [
+        "Tab into edit mode."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Enable In Front display for the armature",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Properties:Object > Viewport Display > In Front",
+          "keys": [],
+          "value": "true"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Properties:Object",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "property_equals",
+          "target": "object.show_in_front",
+          "value": "true"
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Add a single bone armature and switch to Edit Mode",
+      "verifiable": true,
+      "video_start_s": 25.0,
+      "video_end_s": 31.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The bone display is forced in front of the leg mesh geometry.",
+      "how_to": [
+        {
+          "text": "Open Object Properties panel on the right sidebar.",
+          "support": "shown",
+          "evidence": "Cursor clicks Object properties icon"
+        },
+        {
+          "text": "Expand Viewport Display sub-panel and check In Front.",
+          "support": "said",
+          "evidence": "go to Object, Viewport Display, and then click In Front"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify bone is visible through the solid mesh.",
+          "support": "shown",
+          "evidence": "Bone renders over the blue leg geometry"
+        }
+      ],
+      "visual_evidence": "In Front checkbox in Object Properties > Viewport Display is clicked and checked.",
+      "evidence": [
+        "if I go to Object, Viewport Display, and then I click In Front, this is going to show this bone in front."
+      ],
+      "flags": [
+        "UI name 'Properties:Object > Viewport Display > In Front' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Move the bone upwards in Edit Mode",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "G"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g02",
+      "group": "Position the hip bone",
+      "verifiable": false,
+      "video_start_s": 34.0,
+      "video_end_s": 38.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The bone is translated upward above the leg.",
+      "how_to": [
+        {
+          "text": "Select the bone, press G key, and move it upward.",
+          "support": "shown",
+          "evidence": "Overlay displays 'G'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Bone moved up along Z axis above mesh.",
+      "evidence": [
+        "select the entire bone, press G, and then move it up."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Rotate the bone 90 degrees horizontally",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "R",
+            "9",
+            "0",
+            "Return"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g02",
+      "group": "Position the hip bone",
+      "verifiable": false,
+      "video_start_s": 38.0,
+      "video_end_s": 43.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The bone rotates 90 degrees to align horizontally.",
+      "how_to": [
+        {
+          "text": "Press R, type 90, and press Return.",
+          "support": "shown",
+          "evidence": "Overlay displays 'R', '9', '0', 'Return'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Bone rotates horizontally by 90 degrees.",
+      "evidence": [
+        "Press R to rotate it to the right, we can type 90 to snap it in place"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Scale down the bone size",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "S"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g02",
+      "group": "Position the hip bone",
+      "verifiable": false,
+      "video_start_s": 44.0,
+      "video_end_s": 46.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The bone is scaled down to a smaller length.",
+      "how_to": [
+        {
+          "text": "Press S and drag the cursor inward to scale down the bone.",
+          "support": "shown",
+          "evidence": "Overlay displays 'S'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Bone scales down in size.",
+      "evidence": [
+        "press S to scale it down"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Position the hip bone at the top of the leg",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "G"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-02",
+      "group_id": "g02",
+      "group": "Position the hip bone",
+      "verifiable": false,
+      "video_start_s": 47.0,
+      "video_end_s": 54.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "The hip bone is located at the anatomical hip region.",
+      "how_to": [
+        {
+          "text": "Press G and drag the bone to the upper hip area of the mesh.",
+          "support": "shown",
+          "evidence": "Overlay displays 'G'"
+        }
+      ],
+      "check": [
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "Bone moved into the top hip section of the leg mesh.",
+      "evidence": [
+        "Press G to move it in place and think about where that actual hip bone would be"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Extrude the thigh bone down to the knee",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "E"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g03",
+      "group": "Extrude the leg bones",
+      "verifiable": true,
+      "video_start_s": 55.0,
+      "video_end_s": 58.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "A thigh bone is extruded from hip joint to knee joint.",
+      "how_to": [
+        {
+          "text": "Select the bone joint end tip and press E to extrude down to the knee.",
+          "support": "shown",
+          "evidence": "Overlay displays 'E'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "New bone extrudes vertically down to the knee level.",
+      "evidence": [
+        "select this part of the bone, press E to extrude down to the knee"
+      ],
+      "flags": [
+        "expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Extrude the shin bone down to the ankle",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "E"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g03",
+      "group": "Extrude the leg bones",
+      "verifiable": true,
+      "video_start_s": 58.0,
+      "video_end_s": 61.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "A shin bone is extruded from knee joint to ankle joint.",
+      "how_to": [
+        {
+          "text": "Press E to extrude a second bone down to the ankle location.",
+          "support": "shown",
+          "evidence": "Overlay displays 'E x2'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "New bone extrudes from knee joint down to ankle joint.",
+      "evidence": [
+        "press E again to extrude down to the ankle"
+      ],
+      "flags": [
+        "expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial",
+        "same start and expected state as step 8: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Extrude the foot bone forward",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "E"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g03",
+      "group": "Extrude the leg bones",
+      "verifiable": true,
+      "video_start_s": 62.0,
+      "video_end_s": 63.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "A foot bone is extruded forward towards the toe area.",
+      "how_to": [
+        {
+          "text": "Press E and drag forward along the foot region.",
+          "support": "shown",
+          "evidence": "Overlay displays 'E'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "Bone extends forward along the sole towards the front.",
+      "evidence": [
+        "press E"
+      ],
+      "flags": [
+        "expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial",
+        "same start and expected state as step 8: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Extrude the toe bone to the end of the foot",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "E"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-01",
+      "group_id": "g03",
+      "group": "Extrude the leg bones",
+      "verifiable": true,
+      "video_start_s": 64.0,
+      "video_end_s": 66.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Leaving Deform on for control bones: they will then move the mesh. (official: Blender manual: Adding Bones)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: An armature object exists and is in Edit Mode: bones can be added to an armature in Edit Mode."
+      ],
+      "result": "A toe bone is extruded to the tip of the foot.",
+      "how_to": [
+        {
+          "text": "Press E once more to extend to the toe tip.",
+          "support": "shown",
+          "evidence": "Overlay displays 'E x2'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "The new bone appears in the Outliner under the armature and is listed in the bone's Name field.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Adding Bones"
+        }
+      ],
+      "visual_evidence": "Bone extends to toe end.",
+      "evidence": [
+        "and then E one more time."
+      ],
+      "flags": [
+        "expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial",
+        "same start and expected state as step 8: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Extrude the IK handle controller bone from the ankle joint",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "E",
+            "Y"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-03",
+      "group_id": "g04",
+      "group": "Extrude the IK handle and pole target control bones",
+      "verifiable": true,
+      "video_start_s": 71.0,
+      "video_end_s": 75.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An IK handle controller bone is extruded backwards from the ankle joint.",
+      "how_to": [
+        {
+          "text": "Select the ankle joint, press E, then press Y to constrain along the Y axis.",
+          "support": "shown",
+          "evidence": "Overlay displays 'E', 'Y'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Inverse Kinematics Constraint"
+        }
+      ],
+      "visual_evidence": "A controller bone extends horizontally backwards from the ankle joint.",
+      "evidence": [
+        "Select where the ankle is, press E and then Y to go straight out."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "goal": "Extrude the pole target control bone from the knee joint",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "E",
+            "Y"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-04",
+      "group_id": "g04",
+      "group": "Extrude the IK handle and pole target control bones",
+      "verifiable": true,
+      "video_start_s": 76.0,
+      "video_end_s": 80.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A pole target control bone is extruded forward from the knee joint.",
+      "how_to": [
+        {
+          "text": "Select the knee joint, press E, then Y, and drag straight out front.",
+          "support": "shown",
+          "evidence": "Overlay displays 'E', 'Y'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a BONE now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=BONE"
+        },
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Inverse Kinematics Constraint"
+        }
+      ],
+      "visual_evidence": "A bone extends horizontally forward from knee joint.",
+      "evidence": [
+        "Select the knee bone, press E, Y, and go straight out."
+      ],
+      "flags": [
+        "same start and expected state as step 12: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "goal": "Clear parenting on the pole target bone",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Clear Parent > Clear Parent",
+          "keys": [
+            "Alt",
+            "P"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-01",
+      "group_id": "g05",
+      "group": "Clear parenting and position the pole target bone",
+      "verifiable": false,
+      "video_start_s": 82.0,
+      "video_end_s": 87.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The pole target bone is unparented from the leg bone chain.",
+      "how_to": [
+        {
+          "text": "Select the pole bone, press Alt+P (or Option+P), and click Clear Parent.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Option / Alt + P x2'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Clear Parent context menu opens and Clear Parent option chosen.",
+      "evidence": [
+        "select this bone, press Option or Alt P, and clear the parent."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "goal": "Move the pole target bone forward away from the leg",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "G",
+            "Y"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "IKFK-04",
+      "group_id": "g05",
+      "group": "Clear parenting and position the pole target bone",
+      "verifiable": false,
+      "video_start_s": 88.0,
+      "video_end_s": 94.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The unparented pole target bone is separated in front of the knee.",
+      "how_to": [
+        {
+          "text": "Press G, Y, and move the pole bone forward.",
+          "support": "shown",
+          "evidence": "Overlay displays 'G', 'Y'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Inverse Kinematics Constraint"
+        }
+      ],
+      "visual_evidence": "Pole bone translates forward along Y axis.",
+      "evidence": [
+        "Press G Y to move it forward."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s16",
+      "order": 16,
+      "goal": "Clear parenting on the IK controller bone",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Clear Parent > Clear Parent",
+          "keys": [
+            "Alt",
+            "P"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-01",
+      "group_id": "g06",
+      "group": "Clear parenting and move the IK controller bone",
+      "verifiable": false,
+      "video_start_s": 95.0,
+      "video_end_s": 98.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The IK controller bone is unparented from the armature hierarchy.",
+      "how_to": [
+        {
+          "text": "Select the IK ankle controller bone, press Alt+P, and click Clear Parent.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Option / Alt + P'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Clear Parent popup menu clicked for IK ankle control bone.",
+      "evidence": [
+        "Press Option or Alt P, clear the parent"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s17",
+      "order": 17,
+      "goal": "Move the IK controller bone backwards",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "G",
+            "Y"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "IKFK-03",
+      "group_id": "g06",
+      "group": "Clear parenting and move the IK controller bone",
+      "verifiable": false,
+      "video_start_s": 99.0,
+      "video_end_s": 102.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The IK controller bone is positioned behind the ankle area.",
+      "how_to": [
+        {
+          "text": "Press G, Y, and move the bone backwards.",
+          "support": "shown",
+          "evidence": "Overlay displays 'G', 'Y'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Inverse Kinematics Constraint"
+        }
+      ],
+      "visual_evidence": "IK controller bone translates backwards along Y axis.",
+      "evidence": [
+        "Press G Y to move it out."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s18",
+      "order": 18,
+      "goal": "Switch to Pose Mode",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Pose Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g07",
+      "group": "Switch to Pose Mode and add Inverse Kinematics constraint",
+      "verifiable": true,
+      "video_start_s": 118.0,
+      "video_end_s": 120.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The viewport switches to Pose Mode.",
+      "how_to": [
+        {
+          "text": "Select Pose Mode from top-left Mode dropdown menu.",
+          "support": "shown",
+          "evidence": "Mode dropdown opens and Pose Mode selected"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify top header displays Pose Mode.",
+          "support": "shown",
+          "evidence": "Mode header shows Pose Mode"
+        }
+      ],
+      "visual_evidence": "Mode dropdown changed from Edit Mode to Pose Mode.",
+      "evidence": [
+        "Now let's go to pose mode."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s19",
+      "order": 19,
+      "goal": "Add Inverse Kinematics constraint to the shin bone",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Add IK > To Active Bone",
+          "keys": [
+            "Shift",
+            "I"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "CONSTRAINT_IK",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-02",
+      "group_id": "g07",
+      "group": "Switch to Pose Mode and add Inverse Kinematics constraint",
+      "verifiable": true,
+      "video_start_s": 122.0,
+      "video_end_s": 130.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "An Inverse Kinematics constraint is applied to the shin bone targeting the controller.",
+      "how_to": [
+        {
+          "text": "Select the IK target bone, Shift-select the shin bone, press Shift+I, and select To Active Bone.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Shift + I'"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify shin bone turns yellow indicating IK constraint.",
+          "support": "shown",
+          "evidence": "Shin bone highlights in yellow with dotted constraint line"
+        }
+      ],
+      "visual_evidence": "Add IK menu opens with 'To Active Bone' selected, yellow IK line connects bones.",
+      "evidence": [
+        "select this bone, hold Shift, select this bone, then press Shift I and then to active bone."
+      ],
+      "flags": [
+        "expected/start state (ARMATURE, BONE) derived from the knowledge base (blender.ik_constraint), not read from the tutorial",
+        "UI name 'Add IK > To Active Bone' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s20",
+      "order": 20,
+      "goal": "Clear all transforms in Pose Mode",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Pose > Clear Transform > All",
+          "keys": [
+            "A"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-04",
+      "group_id": "g08",
+      "group": "Clear all transforms in Pose Mode",
+      "verifiable": false,
+      "video_start_s": 149.0,
+      "video_end_s": 154.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The armature is in Pose Mode."
+      ],
+      "result": "All pose bone transforms reset to rest position.",
+      "how_to": [
+        {
+          "text": "Press A to select all pose bones.",
+          "support": "shown",
+          "evidence": "Overlay displays 'A'"
+        },
+        {
+          "text": "Click Pose > Clear Transform > All.",
+          "support": "said",
+          "evidence": "pose, clear transforms all"
+        }
+      ],
+      "check": [
+        {
+          "text": "Each bone returns to its rest position: location and rotation 0, scale 1 in the bone's Transform panel.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Posing introduction"
+        }
+      ],
+      "visual_evidence": "Pose menu opened and Clear Transform > All selected.",
+      "evidence": [
+        "press A, pose, clear transforms all. That'll put everything back to the beginning."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s21",
+      "order": 21,
+      "goal": "Assign the Pole Target bone in the IK constraint settings",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Properties:Bone Constraints > Inverse Kinematics > Pole Target",
+          "keys": [],
+          "value": "Armature"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Properties:Bone Constraints > Inverse Kinematics > Bone",
+          "keys": [],
+          "value": "Bone.005"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "IKFK-04",
+      "group_id": "g09",
+      "group": "Assign the Pole Target bone and set Pole Angle",
+      "verifiable": false,
+      "video_start_s": 160.0,
+      "video_end_s": 174.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.585,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The pole target bone is bound to the IK constraint solver.",
+      "how_to": [
+        {
+          "text": "Select the shin bone and open Bone Constraint Properties panel.",
+          "support": "shown",
+          "evidence": "Cursor clicks Bone Constraint icon on right panel"
+        },
+        {
+          "text": "In the Pole Target section, select Armature as Target object.",
+          "support": "shown",
+          "evidence": "Target dropdown set to Armature"
+        },
+        {
+          "text": "Select the knee pole bone using the eyedropper or dropdown.",
+          "support": "said",
+          "evidence": "use this eyedropper under pole target and select this bone"
+        }
+      ],
+      "check": [
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Inverse Kinematics Constraint"
+        }
+      ],
+      "visual_evidence": "Pole target set to Armature and Bone.005 in bone constraint properties.",
+      "evidence": [
+        "under the bone constraints on the far right... use this eyedropper under pole target and select this bone."
+      ],
+      "flags": [
+        "removed start_state 'panel_open=Properties:Bone Constraints': not in blender vocabulary",
+        "UI name 'Properties:Bone Constraints > Inverse Kinematics > Pole Target' is not in the blender vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Properties:Bone Constraints > Inverse Kinematics > Bone' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s22",
+      "order": 22,
+      "goal": "Set Pole Angle to 0 degrees",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Properties:Bone Constraints > Inverse Kinematics > Pole Angle",
+          "keys": [],
+          "value": "0°"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "property_equals",
+          "target": "pose_bone.constraints[\"IK\"].pole_angle",
+          "value": 0.0
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "IKFK-04",
+      "group_id": "g09",
+      "group": "Assign the Pole Target bone and set Pole Angle",
+      "verifiable": true,
+      "video_start_s": 187.0,
+      "video_end_s": 189.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Bones with no initial bend give the solver no direction, so the knee can bend backwards; give the leg a slight bend in Edit Mode with the knee pushed forward. (community: BlenderArtists: Knee bending problems with human character | community: BlenderArtists: Inverse Kinematics always at 90 degrees wrong angle)",
+        "A pole target placed behind the knee or very close to it can make the leg flip; put it in front of the knee and a little way out. (community: BlenderArtists: Character doesn't follow knee pole correctly)"
+      ],
+      "confidence": 0.689,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Pole Angle parameter value is set to 0.",
+      "how_to": [
+        {
+          "text": "Type 0 into Pole Angle property box and press Enter.",
+          "support": "shown",
+          "evidence": "Pole Angle field set to 0.0°"
+        }
+      ],
+      "check": [
+        {
+          "text": "Move the target bone: the thigh and shin should rotate so the foot follows. Move the pole target: the knee should turn toward it without flipping.",
+          "support": "catalog",
+          "evidence": "official: Blender manual: Inverse Kinematics Constraint"
+        }
+      ],
+      "visual_evidence": "Value 0 typed into Pole Angle field.",
+      "evidence": [
+        "So I'm going to put that back to zero."
+      ],
+      "flags": [
+        "removed start_state 'panel_open=Properties:Bone Constraints': not in blender vocabulary",
+        "UI name 'Properties:Bone Constraints > Inverse Kinematics > Pole Angle' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s23",
+      "order": 23,
+      "goal": "Enable bone local axes display in Object Data Properties",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Properties:Data > Viewport Display > Axes",
+          "keys": [],
+          "value": "true"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "panel_open",
+          "target": "Properties:Data",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-03",
+      "group_id": "g10",
+      "group": "Enable bone local axes display",
+      "verifiable": false,
+      "video_start_s": 190.0,
+      "video_end_s": 199.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Local X, Y, Z axes tripods are visible on all armature bones.",
+      "how_to": [
+        {
+          "text": "Click Object Data Properties (green armature icon).",
+          "support": "shown",
+          "evidence": "Cursor clicks green armature icon"
+        },
+        {
+          "text": "Under Viewport Display section, enable Axes checkbox.",
+          "support": "said",
+          "evidence": "go under viewport display and if I select axes, we can see these X Y and Z axes"
+        }
+      ],
+      "check": [
+        {
+          "text": "Observe RGB axis indicators on each bone in the viewport.",
+          "support": "shown",
+          "evidence": "X, Y, Z local axis labels visible on bones"
+        }
+      ],
+      "visual_evidence": "Axes checkbox checked in Object Data Properties > Viewport Display.",
+      "evidence": [
+        "click on the armature... go under viewport display and if I select axes, we can see these X Y and Z axes"
+      ],
+      "flags": [
+        "UI name 'Properties:Data > Viewport Display > Axes' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s24",
+      "order": 24,
+      "goal": "Switch to Edit Mode to align bone roll",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Edit Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g11",
+      "group": "Switch to Edit Mode to align bone roll",
+      "verifiable": true,
+      "video_start_s": 206.0,
+      "video_end_s": 208.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Armature switches to Edit Mode.",
+      "how_to": [
+        {
+          "text": "Select Edit Mode from top-left mode selector dropdown.",
+          "support": "shown",
+          "evidence": "Mode dropdown switched to Edit Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Edit Armature mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=EDIT_ARMATURE"
+        }
+      ],
+      "visual_evidence": "Header changes to Edit Mode.",
+      "evidence": [
+        "if we switch to edit mode"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s25",
+      "order": 25,
+      "goal": "Set bone Roll to 90 degrees for leg bones in Edit Mode",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Sidebar > Transform > Roll",
+          "keys": [],
+          "value": "90°"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-02",
+      "group_id": "g11",
+      "group": "Switch to Edit Mode to align bone roll",
+      "verifiable": false,
+      "video_start_s": 219.0,
+      "video_end_s": 234.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Bone roll angle is modified so local X axis points directly towards the pole target.",
+      "how_to": [
+        {
+          "text": "Select the thigh and shin bones in Edit Mode.",
+          "support": "shown",
+          "evidence": "Thigh bone selected"
+        },
+        {
+          "text": "In Sidebar / Bone properties panel under Transform, set Roll to 90.",
+          "support": "said",
+          "evidence": "under roll, we can roll the bone... generally this will be 90 or -90... type in 90"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify local X axis arrow points straight forward toward pole target.",
+          "support": "shown",
+          "evidence": "X axis arrow aligns with pole target vector"
+        }
+      ],
+      "visual_evidence": "Roll field typed as 90 in side panel transform properties.",
+      "evidence": [
+        "In edit mode, select the bone and then under roll... type in 90."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s26",
+      "order": 26,
+      "goal": "Switch to Pose Mode to verify bone orientation",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Pose Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g12",
+      "group": "Switch to Pose Mode to verify bone orientation",
+      "verifiable": true,
+      "video_start_s": 239.0,
+      "video_end_s": 242.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Armature enters Pose Mode with correct IK pole orientation.",
+      "how_to": [
+        {
+          "text": "Switch mode back to Pose Mode.",
+          "support": "shown",
+          "evidence": "Dropdown set to Pose Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Pose mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=POSE"
+        }
+      ],
+      "visual_evidence": "Mode dropdown switched to Pose Mode.",
+      "evidence": [
+        "If I go back to pose mode, now everything is correct."
+      ],
+      "flags": [
+        "same start and expected state as step 18: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s27",
+      "order": 27,
+      "goal": "Switch to Edit Mode for foot bone reparenting",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Edit Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g13",
+      "group": "Reparent foot and toe bones in Edit Mode",
+      "verifiable": true,
+      "video_start_s": 259.0,
+      "video_end_s": 260.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Armature is put back into Edit Mode.",
+      "how_to": [
+        {
+          "text": "Select Edit Mode from top dropdown menu.",
+          "support": "shown",
+          "evidence": "Dropdown changed to Edit Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Edit Armature mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=EDIT_ARMATURE"
+        }
+      ],
+      "visual_evidence": "Edit Mode selected in header.",
+      "evidence": [
+        "First, let's go to edit mode."
+      ],
+      "flags": [
+        "same start and expected state as step 24: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s28",
+      "order": 28,
+      "goal": "Clear parent on the foot bone",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Clear Parent > Clear Parent",
+          "keys": [
+            "Alt",
+            "P"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-01",
+      "group_id": "g13",
+      "group": "Reparent foot and toe bones in Edit Mode",
+      "verifiable": false,
+      "video_start_s": 261.0,
+      "video_end_s": 265.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The foot bone parenting to the shin bone is cleared.",
+      "how_to": [
+        {
+          "text": "Select foot bone, press Alt+P (or Option+P), and click Clear Parent.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Option / Alt + P'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Clear Parent menu opens and Clear Parent option chosen for foot bone.",
+      "evidence": [
+        "Select this bone, press Option or Alt P, clear the parent."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s29",
+      "order": 29,
+      "goal": "Parent foot bone to IK controller bone with Keep Offset",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Make Parent > Keep Offset",
+          "keys": [
+            "Ctrl",
+            "P"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-01",
+      "group_id": "g13",
+      "group": "Reparent foot and toe bones in Edit Mode",
+      "verifiable": false,
+      "video_start_s": 266.0,
+      "video_end_s": 270.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Foot bone is parented to the IK handle controller bone with Keep Offset.",
+      "how_to": [
+        {
+          "text": "Select foot bone, Shift-select IK controller bone, press Ctrl+P, and click Keep Offset.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Command / Ctrl + P'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Make Parent menu opens and Keep Offset option selected.",
+      "evidence": [
+        "select this bone, Control or Command P, parent and keep offset."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s30",
+      "order": 30,
+      "goal": "Parent toe bone to foot bone with Keep Offset",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Make Parent > Keep Offset",
+          "keys": [
+            "Ctrl",
+            "P"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "ORNT-01",
+      "group_id": "g13",
+      "group": "Reparent foot and toe bones in Edit Mode",
+      "verifiable": false,
+      "video_start_s": 271.0,
+      "video_end_s": 278.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Toe bone is parented to foot bone with Keep Offset.",
+      "how_to": [
+        {
+          "text": "Select toe bone, Shift-select foot bone, press Ctrl+P, and select Keep Offset.",
+          "support": "shown",
+          "evidence": "Overlay displays 'Shift', 'Command / Ctrl + P'"
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Make Parent popup menu clicked for Keep Offset.",
+      "evidence": [
+        "select this bone, Command P, parent keep offset."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s31",
+      "order": 31,
+      "goal": "Switch to Pose Mode",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Pose Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "EDIT_ARMATURE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g14",
+      "group": "Switch to Pose Mode and add Copy Location constraint",
+      "verifiable": true,
+      "video_start_s": 279.0,
+      "video_end_s": 281.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The scene is switched to Pose Mode.",
+      "how_to": [
+        {
+          "text": "Select Pose Mode in top mode selector menu.",
+          "support": "shown",
+          "evidence": "Dropdown changes to Pose Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Pose mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=POSE"
+        }
+      ],
+      "visual_evidence": "Pose Mode selected from dropdown.",
+      "evidence": [
+        "Now if we go back into pose mode..."
+      ],
+      "flags": [
+        "same start and expected state as step 18: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s32",
+      "order": 32,
+      "goal": "Add Copy Location constraint to the foot bone targeting the shin bone",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Pose Mode > Bone Constraint properties > Add Bone Constraint > Copy Location",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Properties:Bone Constraints > Copy Location > Target",
+          "keys": [],
+          "value": "Armature"
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Properties:Bone Constraints > Copy Location > Bone",
+          "keys": [],
+          "value": "Bone.001"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "CONSTRAINT_COPY_LOCATION",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CNST-02",
+      "group_id": "g14",
+      "group": "Switch to Pose Mode and add Copy Location constraint",
+      "verifiable": true,
+      "video_start_s": 287.0,
+      "video_end_s": 306.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Relying on the old Offset checkbox behaviour: it does not work correctly with multiple axes and is deprecated; use a Mix mode instead. (official: Blender manual: Copy Rotation Constraint)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The bone or object that should follow exists, and a target object or bone to copy from."
+      ],
+      "result": "A Copy Location bone constraint is added to the foot bone pointing to the shin bone.",
+      "how_to": [
+        {
+          "text": "Select foot bone, open Bone Constraint Properties.",
+          "support": "shown",
+          "evidence": "Cursor selects foot bone and clicks Bone Constraints panel"
+        },
+        {
+          "text": "Click Add Bone Constraint > Copy Location.",
+          "support": "said",
+          "evidence": "click add bone constraint, and we want to copy the location of this shin bone"
+        },
+        {
+          "text": "Set Target to Armature and Bone to shin bone (Bone.001).",
+          "support": "shown",
+          "evidence": "Target dropdown set to Armature, Bone set to Bone.001"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that a CONSTRAINT_COPY_LOCATION now exists (Outliner or Node Editor).",
+          "support": "catalog",
+          "evidence": "expected state: node_exists=CONSTRAINT_COPY_LOCATION"
+        },
+        {
+          "text": "Rotate the target: the owner follows on the axes you enabled.",
+          "support": "catalog",
+          "evidence": "author: Blender manual: Copy Rotation Constraint"
+        }
+      ],
+      "visual_evidence": "Copy Location constraint card added under Bone Constraint properties panel.",
+      "evidence": [
+        "select this bone, then under bone constraints, click add bone constraint, and we want to copy the location of this shin bone."
+      ],
+      "flags": [
+        "expected/start state (BONE) derived from the knowledge base (blender.copy_rotation), not read from the tutorial",
+        "UI name 'Properties:Bone Constraints > Copy Location > Target' is not in the blender vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Properties:Bone Constraints > Copy Location > Bone' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s33",
+      "order": 33,
+      "goal": "Set Head/Tail to 1.0 on Copy Location constraint",
+      "actions": [
+        {
+          "verb": "set_value",
+          "ui_element": "Properties:Bone Constraints > Copy Location > Head/Tail",
+          "keys": [],
+          "value": "1.0"
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "BONE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "property_equals",
+          "target": "pose_bone.constraints[\"Copy Location\"].head_tail",
+          "value": 1.0
+        },
+        {
+          "kind": "node_exists",
+          "target": "CONSTRAINT_COPY_ROTATION",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "CNST-02",
+      "group_id": "g14",
+      "group": "Switch to Pose Mode and add Copy Location constraint",
+      "verifiable": true,
+      "video_start_s": 308.0,
+      "video_end_s": 310.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Relying on the old Offset checkbox behaviour: it does not work correctly with multiple axes and is deprecated; use a Mix mode instead. (official: Blender manual: Copy Rotation Constraint)"
+      ],
+      "confidence": 0.689,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The bone or object that should follow exists, and a target object or bone to copy from."
+      ],
+      "result": "The foot bone snaps to the tail (ankle end) of the shin bone.",
+      "how_to": [
+        {
+          "text": "In Copy Location constraint settings, change Head/Tail slider value to 1.",
+          "support": "shown",
+          "evidence": "Head/Tail slider value set to 1.000"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify foot bone snaps back to the ankle position.",
+          "support": "shown",
+          "evidence": "Foot bone aligns at ankle joint tip"
+        }
+      ],
+      "visual_evidence": "Head/Tail field value set to 1.000.",
+      "evidence": [
+        "in the copy location constraint, just change the head tail to 1."
+      ],
+      "flags": [
+        "expected/start state (CONSTRAINT_COPY_ROTATION, BONE) derived from the knowledge base (blender.copy_rotation), not read from the tutorial",
+        "removed start_state 'panel_open=Properties:Bone Constraints': not in blender vocabulary",
+        "UI name 'Properties:Bone Constraints > Copy Location > Head/Tail' is not in the blender vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s34",
+      "order": 34,
+      "goal": "Switch to Object Mode to bind mesh to armature",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Object Mode",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g15",
+      "group": "Bind leg mesh to armature with Automatic Weights",
+      "verifiable": true,
+      "video_start_s": 339.0,
+      "video_end_s": 341.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The viewport returns to Object Mode.",
+      "how_to": [
+        {
+          "text": "Select Object Mode from top mode dropdown menu.",
+          "support": "shown",
+          "evidence": "Mode dropdown changed to Object Mode"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that you are in Object mode.",
+          "support": "catalog",
+          "evidence": "expected state: mode=OBJECT"
+        }
+      ],
+      "visual_evidence": "Mode selector displays Object Mode.",
+      "evidence": [
+        "So let's go to object mode."
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s35",
+      "order": 35,
+      "goal": "Bind leg mesh to armature with Automatic Weights",
+      "actions": [
+        {
+          "verb": "open_menu",
+          "ui_element": "Object > Parent > Armature Deform > With Automatic Weights",
+          "keys": [
+            "Ctrl",
+            "P"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "ARMATURE",
+          "value": null
+        },
+        {
+          "kind": "node_exists",
+          "target": "MESH",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "MODIFIER_ARMATURE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKIN-01",
+      "group_id": "g15",
+      "group": "Bind leg mesh to armature with Automatic Weights",
+      "verifiable": true,
+      "video_start_s": 341.0,
+      "video_end_s": 351.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Selecting the armature before the mesh (wrong order) parents the wrong way round. (official: Blender manual: Armature Deform Parent)"
+      ],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The armature's bones that should move the mesh are set to Deform (Properties > Bone > Deform).",
+        "Before this: Mesh in a clean rest pose; apply scale on both the mesh and the armature (see mistakes)."
+      ],
+      "result": "An Armature modifier with automatic weights is created on the leg mesh object.",
+      "how_to": [
+        {
+          "text": "Select the leg mesh, Shift-select the armature.",
+          "support": "shown",
+          "evidence": "Mesh highlighted orange, armature highlighted light orange"
+        },
+        {
+          "text": "Click Object > Parent > Armature Deform > With Automatic Weights.",
+          "support": "said",
+          "evidence": "go to Object, then under Object select Parent Armature Deform With Automatic Weights"
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that Armature modifier appears on the leg mesh.",
+          "support": "shown",
+          "evidence": "'Set Parent To' popup confirms Armature Deform With Automatic Weights"
+        }
+      ],
+      "visual_evidence": "Object menu > Parent > Armature Deform With Automatic Weights selected.",
+      "evidence": [
+        "First select the mesh, then select the armature, then go to Object, then under Object select Parent Armature Deform With Automatic Weights."
+      ],
+      "flags": [
+        "expected/start state (ARMATURE, MESH) derived from the knowledge base (blender.armature_deform_parent), not read from the tutorial"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s36",
+      "order": 36,
+      "goal": "Switch to Pose Mode and test the IK leg deformation",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Mode selector > Pose Mode",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "G"
+          ],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "mode",
+          "target": "OBJECT",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "POSE",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "TEST-01",
+      "group_id": "g16",
+      "group": "Switch to Pose Mode and test the IK leg deformation",
+      "verifiable": true,
+      "video_start_s": 357.0,
+      "video_end_s": 378.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.9,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The leg rig and mesh deform smoothly under IK controller manipulation.",
+      "how_to": [
+        {
+          "text": "Switch mode to Pose Mode.",
+          "support": "shown",
+          "evidence": "Mode dropdown changed to Pose Mode"
+        },
+        {
+          "text": "Select IK controller bone, press G key, and move mouse to test leg bending.",
+          "support": "said",
+          "evidence": "select my controller bone, I can press G... armature moves, mesh moves"
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify knee bends towards pole target and foot rotates with controller bone.",
+          "support": "shown",
+          "evidence": "Leg mesh deforms organically as controller bone translates and rotates"
+        }
+      ],
+      "visual_evidence": "Armature controller bone dragged in Pose Mode with G key, leg mesh deforms cleanly.",
+      "evidence": [
+        "If I go to pose mode and I select my controller bone, I can press G and then my armature moves... mesh moves like this... rotates the foot as well"
+      ],
+      "flags": [],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v10-preds",
+  "video_duration_s": 386.0,
+  "warnings": [
+    "steps grouped for display into 16 groups (36 steps)"
+  ],
+  "extracted_at": "2026-11-09T08:37:43.228911Z"
+}

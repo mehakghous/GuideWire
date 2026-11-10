@@ -1,0 +1,1174 @@
+{
+  "schema_version": "0.11",
+  "source_type": "youtube",
+  "app": "maya",
+  "app_version_tutorial": "Maya 2024",
+  "video_id": "8RqfDcoP0jI",
+  "title": "How to Rig a Character in Maya | Step-by-Step Quick Rig Tutorial for Beginners",
+  "steps": [
+    {
+      "id": "s01",
+      "order": 1,
+      "goal": "Switch workspace menu set to Rigging",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Menu Set Selector",
+          "keys": [],
+          "value": "Rigging"
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "mode",
+          "target": "RIGGING",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": true,
+      "video_start_s": 18.0,
+      "video_end_s": 22.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The main menu bar switches to show Rigging menus.",
+      "how_to": [
+        {
+          "text": "Click the Menu Set dropdown menu in the upper-left corner of the interface and select Rigging.",
+          "support": "shown",
+          "evidence": "Instructor selects Rigging from the menu set dropdown."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that Skeleton, Skin, Deform, and Constrain menus appear in the top menu bar.",
+          "support": "shown",
+          "evidence": "Rigging menu options appear on top."
+        }
+      ],
+      "visual_evidence": "Menu set selector changes to Rigging.",
+      "evidence": [
+        "Select Rigging, so now we're in the Rigging workspace."
+      ],
+      "flags": [
+        "UI name 'Menu Set Selector' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s02",
+      "order": 2,
+      "goal": "Open the Rigging shelf tab",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Rigging Shelf Tab",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": null,
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": false,
+      "video_start_s": 22.0,
+      "video_end_s": 24.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The Rigging shelf items become visible.",
+      "how_to": [
+        {
+          "text": "Click on the Rigging tab in the Shelf area.",
+          "support": "shown",
+          "evidence": "Cursor clicks the Rigging tab on the shelf."
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Rigging shelf tools are displayed.",
+      "evidence": [
+        "And then select Rigging on the shelf."
+      ],
+      "flags": [
+        "UI name 'Rigging Shelf Tab' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s03",
+      "order": 3,
+      "goal": "Open the Quick Rig tool window",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig Icon",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-07",
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": false,
+      "video_start_s": 25.0,
+      "video_end_s": 27.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand. (author: no source)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The Quick Rig panel opens on the right side of the screen.",
+      "how_to": [
+        {
+          "text": "Click the Quick Rig icon on the Rigging shelf.",
+          "support": "shown",
+          "evidence": "Cursor clicks Quick Rig icon on shelf."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify that the Quick Rig tool panel opens.",
+          "support": "shown",
+          "evidence": "Quick Rig dialog appears."
+        }
+      ],
+      "visual_evidence": "Quick Rig window opens on screen.",
+      "evidence": [
+        "This icon here is the Quick Rig icon."
+      ],
+      "flags": [
+        "UI name 'Quick Rig Icon' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s04",
+      "order": 4,
+      "goal": "Create and name a new character in Quick Rig",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > Add Character Button",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "set_value",
+          "ui_element": "Rename Character > Text Field",
+          "keys": [],
+          "value": "space_suit"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Rename Character > OK",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "name_exists",
+          "target": "space_suit",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "PREP-06",
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": true,
+      "video_start_s": 28.0,
+      "video_end_s": 33.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.553,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A new character node named space_suit is created in Quick Rig.",
+      "how_to": [
+        {
+          "text": "Click the + button next to Character in the Quick Rig panel.",
+          "support": "shown",
+          "evidence": "Plus button clicked next to Character dropdown."
+        },
+        {
+          "text": "In the Rename Character dialog, type space_suit into the Enter Name box and click OK.",
+          "support": "shown",
+          "evidence": "Instructor types space_suit and clicks OK."
+        }
+      ],
+      "check": [
+        {
+          "text": "Ensure space_suit is selected in the Character dropdown menu.",
+          "support": "shown",
+          "evidence": "Character dropdown displays space_suit."
+        }
+      ],
+      "visual_evidence": "Character named space_suit selected in Quick Rig window.",
+      "evidence": [
+        "First click the plus button in Maya's Quick Rig and then label your character."
+      ],
+      "flags": [
+        "UI name 'Quick Rig > Add Character Button' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Rename Character > Text Field' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Rename Character > OK' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s05",
+      "order": 5,
+      "goal": "Switch Quick Rig mode to Step-by-Step",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > Step-by-Step Radio Button",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-07",
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": false,
+      "video_start_s": 34.0,
+      "video_end_s": 39.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand. (author: no source)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Step-by-step options section becomes visible in the Quick Rig window.",
+      "how_to": [
+        {
+          "text": "Click the Step-by-Step radio button at the top of the Quick Rig panel.",
+          "support": "shown",
+          "evidence": "Radio button selected for Step-by-Step mode."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm that sections 1) Geometry, 2) Guides, 3) User Adjustment of Guides, 4) Skeleton and Control Rig, and 5) Binding are expanded.",
+          "support": "shown",
+          "evidence": "Step-by-step workflow stages visible."
+        }
+      ],
+      "visual_evidence": "Step-by-step interface options expand in Quick Rig panel.",
+      "evidence": [
+        "Select Step-by-Step."
+      ],
+      "flags": [
+        "UI name 'Quick Rig > Step-by-Step Radio Button' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s06",
+      "order": 6,
+      "goal": "Assign the character mesh geometry to Quick Rig",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Viewport > Mesh",
+          "keys": [],
+          "value": "purple_space_suit_mesh"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > 1) Geometry > Add Selected Geometry (+)",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "PREP-02",
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": false,
+      "video_start_s": 40.0,
+      "video_end_s": 43.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The character mesh is added to the Quick Rig geometry list.",
+      "how_to": [
+        {
+          "text": "Select the character mesh purple_space_suit_mesh in the viewport.",
+          "support": "shown",
+          "evidence": "Mesh highlights in viewport."
+        },
+        {
+          "text": "Under section 1) Geometry, click the + button to assign the selected mesh.",
+          "support": "shown",
+          "evidence": "Plus button clicked next to geometry field."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify purple_space_suit_mesh appears in the Geometry text box.",
+          "support": "shown",
+          "evidence": "Mesh name is listed in Geometry field."
+        }
+      ],
+      "visual_evidence": "Mesh added to 1) Geometry section.",
+      "evidence": [
+        "Select the geometry and click this plus button."
+      ],
+      "flags": [
+        "UI name 'Viewport > Mesh' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Quick Rig > 1) Geometry > Add Selected Geometry (+)' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s07",
+      "order": 7,
+      "goal": "Generate placement guides for the skeleton",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > 2) Guides > Create / Update",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-07",
+      "group_id": "g01",
+      "group": "Switch to Rigging workspace and open tool",
+      "verifiable": false,
+      "video_start_s": 44.0,
+      "video_end_s": 46.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand. (author: no source)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Spherical guide markers are generated throughout the character mesh.",
+      "how_to": [
+        {
+          "text": "Under section 2) Guides, click Create / Update.",
+          "support": "shown",
+          "evidence": "Create / Update button clicked under Guides."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm spherical guide objects appear inside the mesh in the viewport.",
+          "support": "shown",
+          "evidence": "Green joint guides populate the character mesh."
+        }
+      ],
+      "visual_evidence": "Guides appear over the character body.",
+      "evidence": [
+        "Then create and update the guides."
+      ],
+      "flags": [
+        "UI name 'Quick Rig > 2) Guides > Create / Update' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s08",
+      "order": 8,
+      "goal": "Adjust neck and head guide positions",
+      "actions": [
+        {
+          "verb": "press_keys",
+          "ui_element": null,
+          "keys": [
+            "Space"
+          ],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Outliner > Neck / Head Guides",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Move Tool Manipulator",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "Move Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-02",
+      "group_id": "g02",
+      "group": "Adjust guide positions",
+      "verifiable": false,
+      "video_start_s": 47.0,
+      "video_end_s": 66.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "The Neck and Head guide spheres are repositioned to align with the character anatomical landmarks.",
+      "how_to": [
+        {
+          "text": "Press Spacebar to switch to Front orthographic view for precise guide alignment.",
+          "support": "shown",
+          "evidence": "Viewport switches to orthographic front view."
+        },
+        {
+          "text": "Select the Neck guide (or double-click from Outliner) and drag the vertical Y axis manipulator arrow to align with the character base of neck.",
+          "support": "shown",
+          "evidence": "Instructor selects Neck guide and moves it vertically."
+        },
+        {
+          "text": "Select the Head guide and drag it to the top of the head.",
+          "support": "shown",
+          "evidence": "Head guide moved upward to head top."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that neck and head guide markers rest exactly on top of corresponding body features.",
+          "support": "shown",
+          "evidence": "Neck and head guides positioned correctly."
+        }
+      ],
+      "visual_evidence": "Neck and Head guides dragged to new anatomical heights in front view.",
+      "evidence": [
+        "Press spacebar to look from the front... select them... move it up or down depending if I want to change where the neck is."
+      ],
+      "flags": [
+        "UI name 'Outliner > Neck / Head Guides' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Move Tool Manipulator' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s09",
+      "order": 9,
+      "goal": "Adjust arm and shoulder guide positions on the left side",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > LeftArm / LeftShoulder Guides",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Move Tool Manipulator",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "Move Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-02",
+      "group_id": "g02",
+      "group": "Adjust guide positions",
+      "verifiable": false,
+      "video_start_s": 67.0,
+      "video_end_s": 75.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Left shoulder and arm guides match the left arm structure.",
+      "how_to": [
+        {
+          "text": "Select LeftArm in Outliner and drag its manipulator to place it inside the elbow/wrist region.",
+          "support": "shown",
+          "evidence": "LeftArm guide moved outward along X axis."
+        },
+        {
+          "text": "Select LeftShoulder in Outliner and drag it into position at the left shoulder joint.",
+          "support": "shown",
+          "evidence": "LeftShoulder guide adjusted."
+        }
+      ],
+      "check": [
+        {
+          "text": "In the Outliner or hierarchy the joints form one chain, each parented to the one before it, and from the front and side views each joint sits at a bend point inside the mesh.",
+          "support": "catalog",
+          "evidence": "tutorial: Tutorial narration (auto captions fetched 2026-10-16): Juzz 3D World 'How to create an IK/FK Rig', wugi1I6Zelo | tutorial: Tutorial narration: Academic Phoenix Plus 'Rigging for Beginners: IK Legs in Maya', r0aFUjBb-Yo"
+        }
+      ],
+      "visual_evidence": "Left arm and shoulder guide spheres moved outward into arm geometry.",
+      "evidence": [
+        "Move the arm here, and then move the shoulder over."
+      ],
+      "flags": [
+        "UI name 'Outliner > LeftArm / LeftShoulder Guides' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Move Tool Manipulator' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "goal": "Mirror guide adjustments from left side to right side",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner",
+          "keys": [],
+          "value": "LeftShoulder, LeftArm"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > 3) User Adjustment of Guides > Mirror Left to Right Guides Button",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-04",
+      "group_id": "g02",
+      "group": "Adjust guide positions",
+      "verifiable": false,
+      "video_start_s": 76.0,
+      "video_end_s": 89.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Making the other half with Edit > Duplicate at a Scale of -1: the page says to use Skeleton > Mirror Joint instead. (official: Autodesk Maya help: Mirror joint chains)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: The parent joint of the chain you want to mirror exists and is selected."
+      ],
+      "result": "Right shoulder and arm guides mirror the position of left side guides.",
+      "how_to": [
+        {
+          "text": "Select LeftShoulder and LeftArm in the Outliner.",
+          "support": "shown",
+          "evidence": "Left shoulder and arm nodes highlighted in Outliner."
+        },
+        {
+          "text": "Under 3) User Adjustment of Guides, click the Mirror left to right guides button (left-to-right red arrow icon).",
+          "support": "shown",
+          "evidence": "Instructor clicks left-to-right mirror button."
+        }
+      ],
+      "check": [
+        {
+          "text": "Verify right side arm and shoulder guides automatically update to match the left side.",
+          "support": "shown",
+          "evidence": "Right arm guides move symmetrically."
+        }
+      ],
+      "visual_evidence": "Right side guides jump to mirror left arm and shoulder guide positions.",
+      "evidence": [
+        "Select left shoulder and left arm... click this button, it moves them from the left to the right."
+      ],
+      "flags": [
+        "UI name 'Quick Rig > 3) User Adjustment of Guides > Mirror Left to Right Guides Button' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "goal": "Adjust upper leg guide position",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Outliner > LeftUpLeg Guide",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Move Tool Manipulator",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "Move Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "SKEL-02",
+      "group_id": "g02",
+      "group": "Adjust guide positions",
+      "verifiable": false,
+      "video_start_s": 90.0,
+      "video_end_s": 109.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "A perfectly straight limb chain makes later IK unpredictable (the knee can flip). (community: Autodesk Community: Arm bending wrong way | community: Polycount: IK joints need a slight bend / straight chain problem)"
+      ],
+      "confidence": 0.65,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Leg guides are positioned centered inside the leg mesh.",
+      "how_to": [
+        {
+          "text": "Select LeftUpLeg in Outliner and drag its manipulator horizontally into proper hip/leg alignment.",
+          "support": "shown",
+          "evidence": "LeftUpLeg guide moved sideways."
+        }
+      ],
+      "check": [
+        {
+          "text": "In the Outliner or hierarchy the joints form one chain, each parented to the one before it, and from the front and side views each joint sits at a bend point inside the mesh.",
+          "support": "catalog",
+          "evidence": "tutorial: Tutorial narration (auto captions fetched 2026-10-16): Juzz 3D World 'How to create an IK/FK Rig', wugi1I6Zelo | tutorial: Tutorial narration: Academic Phoenix Plus 'Rigging for Beginners: IK Legs in Maya', r0aFUjBb-Yo"
+        }
+      ],
+      "visual_evidence": "Left leg guide sphere centered in character thigh region.",
+      "evidence": [
+        "This is the left upper leg, I might move that right here."
+      ],
+      "flags": [
+        "UI name 'Outliner > LeftUpLeg Guide' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Move Tool Manipulator' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "goal": "Generate skeleton and HumanIK control rig from guides",
+      "actions": [
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > 4) Skeleton and Control Rig > Create / Update",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKEL-07",
+      "group_id": "g03",
+      "group": "Generate skeleton and bind skin",
+      "verifiable": true,
+      "video_start_s": 110.0,
+      "video_end_s": 124.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand. (author: no source)"
+      ],
+      "confidence": 0.765,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "A full HumanIK skeleton and control rig controllers appear on the character.",
+      "how_to": [
+        {
+          "text": "Under 4) Skeleton and Control Rig, click Create / Update.",
+          "support": "shown",
+          "evidence": "Create / Update button clicked under Skeleton and Control Rig."
+        }
+      ],
+      "check": [
+        {
+          "text": "Observe skeleton joints and circular control effectors appearing on character limbs.",
+          "support": "shown",
+          "evidence": "Skeleton and HIK control rig visible in viewport and HumanIK panel."
+        }
+      ],
+      "visual_evidence": "Joints and control rig handles created automatically.",
+      "evidence": [
+        "Click Create / Update Rig... you can see the rig and see if it's going to have the correct joint structure."
+      ],
+      "flags": [
+        "UI name 'Quick Rig > 4) Skeleton and Control Rig > Create / Update' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "goal": "Configure skin binding method and bind mesh to skeleton",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Quick Rig > 5) Binding > Settings Dropdown",
+          "keys": [],
+          "value": "Current settings"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > 5) Binding > Options Box Button",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "select",
+          "ui_element": "Bind Skin Options > Deformer Type",
+          "keys": [],
+          "value": "Skin Cluster"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Bind Skin Options > Apply and Close",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "skinCluster",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKIN-01",
+      "group_id": "g03",
+      "group": "Generate skeleton and bind skin",
+      "verifiable": true,
+      "video_start_s": 125.0,
+      "video_end_s": 147.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Do not use Delete by Type > History on a bound mesh: it can remove the skin cluster, leaving the skeleton moving but the mesh stuck. Use Delete by Type > Non-Deformer History on a bound mesh instead. (community: Autodesk Community: Mesh is no longer moving with skeleton)",
+        "Binding a mesh that was not frozen and cleaned first causes odd results such as the mesh merging toward the first joint. (community: Unity forum: Smooth bind problem when importing from Maya)"
+      ],
+      "confidence": 0.47,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: Delete history and freeze transformations on the mesh first.",
+        "Before this: The skeleton is oriented and in a clean rest pose (T-pose or A-pose).",
+        "Before this: Select the skeleton's root joint and the mesh."
+      ],
+      "result": "The character mesh is bound to the skeleton using a Skin Cluster deformer.",
+      "how_to": [
+        {
+          "text": "Under 5) Binding, select Current settings in the dropdown menu.",
+          "support": "shown",
+          "evidence": "Instructor switches dropdown to Current settings."
+        },
+        {
+          "text": "Click the small Options Box button beside the Binding settings dropdown to open Bind Skin Options.",
+          "support": "shown",
+          "evidence": "Bind Skin Options window opens."
+        },
+        {
+          "text": "In Bind Skin Options window, set Deformer Type to Skin Cluster.",
+          "support": "shown",
+          "evidence": "Deformer Type dropdown set to Skin Cluster."
+        },
+        {
+          "text": "Click Apply and Close.",
+          "support": "shown",
+          "evidence": "Instructor clicks Apply and Close button."
+        }
+      ],
+      "check": [
+        {
+          "text": "Check that skin cluster binding is applied to the character mesh.",
+          "support": "shown",
+          "evidence": "Bind Skin Options closes and skin cluster is generated."
+        }
+      ],
+      "visual_evidence": "Bind Skin Options configured to Skin Cluster and applied.",
+      "evidence": [
+        "Choose current settings and then change the settings here... choose skin cluster... apply."
+      ],
+      "flags": [
+        "expected/start state (joint) derived from the knowledge base (maya.bind_skin), not read from the tutorial",
+        "UI name 'Quick Rig > 5) Binding > Settings Dropdown' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Quick Rig > 5) Binding > Options Box Button' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Bind Skin Options > Deformer Type' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Bind Skin Options > Apply and Close' is not in the maya vocabulary (it may be real but missing from the list): please check"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "goal": "Test character limb deformation using rig controls",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Viewport > Right Wrist Control Effector",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Move Tool Manipulator",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "Move Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "TEST-02",
+      "group_id": "g04",
+      "group": "Test limb deformation and re-bind skin",
+      "verifiable": false,
+      "video_start_s": 148.0,
+      "video_end_s": 155.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.585,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "Moving the control effector deforms the arm geometry in real time.",
+      "how_to": [
+        {
+          "text": "Select an IK control handle (such as the right wrist effector) in the viewport.",
+          "support": "shown",
+          "evidence": "Right arm control handle selected."
+        },
+        {
+          "text": "Drag the Move Tool handles to test arm pose deformation.",
+          "support": "shown",
+          "evidence": "Instructor drags hand control and character arm moves."
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Character arm mesh deforms as hand control handle is moved.",
+      "evidence": [
+        "We should be able to see our character move."
+      ],
+      "flags": [
+        "UI name 'Viewport > Right Wrist Control Effector' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Move Tool Manipulator' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "TEST-02 (Control behaviour tests) needs an add-on or a script in maya: the tutorial is using something outside the application"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "goal": "Re-bind skin using default binding settings",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Quick Rig > 5) Binding > Settings Dropdown",
+          "keys": [],
+          "value": "Default settings"
+        },
+        {
+          "verb": "click",
+          "ui_element": "Quick Rig > 5) Binding > Create / Update",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "click",
+          "ui_element": "Confirm Deletion Dialog > OK",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "node_exists",
+          "target": "joint",
+          "value": null
+        }
+      ],
+      "expected_state": [
+        {
+          "kind": "node_exists",
+          "target": "skinCluster",
+          "value": null
+        }
+      ],
+      "kind": "mechanics",
+      "feature_id": "SKIN-01",
+      "group_id": "g04",
+      "group": "Test limb deformation and re-bind skin",
+      "verifiable": true,
+      "video_start_s": 156.0,
+      "video_end_s": 164.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [
+        "Do not use Delete by Type > History on a bound mesh: it can remove the skin cluster, leaving the skeleton moving but the mesh stuck. Use Delete by Type > Non-Deformer History on a bound mesh instead. (community: Autodesk Community: Mesh is no longer moving with skeleton)",
+        "Binding a mesh that was not frozen and cleaned first causes odd results such as the mesh merging toward the first joint. (community: Unity forum: Smooth bind problem when importing from Maya)"
+      ],
+      "confidence": 0.553,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [
+        "Before this: Delete history and freeze transformations on the mesh first.",
+        "Before this: The skeleton is oriented and in a clean rest pose (T-pose or A-pose).",
+        "Before this: Select the skeleton's root joint and the mesh."
+      ],
+      "result": "The existing skin cluster is replaced with default skin binding weights.",
+      "how_to": [
+        {
+          "text": "Under 5) Binding, switch settings dropdown back to Default settings.",
+          "support": "shown",
+          "evidence": "Dropdown changed to Default settings."
+        },
+        {
+          "text": "Click Create / Update under Binding.",
+          "support": "shown",
+          "evidence": "Create / Update button clicked under Binding."
+        },
+        {
+          "text": "When the Confirm deletion prompt appears, click OK to delete existing skin cluster.",
+          "support": "shown",
+          "evidence": "Instructor clicks OK on confirmation popup."
+        }
+      ],
+      "check": [
+        {
+          "text": "Confirm skin cluster is updated with default weight settings.",
+          "support": "shown",
+          "evidence": "New skin binding applied to character."
+        }
+      ],
+      "visual_evidence": "Confirmation popup accepted and binding updated to default.",
+      "evidence": [
+        "Try to use default settings... click Create / Update... press OK."
+      ],
+      "flags": [
+        "expected/start state (joint) derived from the knowledge base (maya.bind_skin), not read from the tutorial",
+        "UI name 'Quick Rig > 5) Binding > Settings Dropdown' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Quick Rig > 5) Binding > Create / Update' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Confirm Deletion Dialog > OK' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "same start and expected state as step 13: the two cannot be told apart by state"
+      ],
+      "review_status": "drafted_automatically"
+    },
+    {
+      "id": "s16",
+      "order": 16,
+      "goal": "Verify character rig movement across body controls",
+      "actions": [
+        {
+          "verb": "select",
+          "ui_element": "Viewport > Arm & Leg Rig Controls",
+          "keys": [],
+          "value": null
+        },
+        {
+          "verb": "drag",
+          "ui_element": "Move Tool Manipulator",
+          "keys": [],
+          "value": null
+        }
+      ],
+      "start_state": [
+        {
+          "kind": "active_tool",
+          "target": "Move Tool",
+          "value": null
+        }
+      ],
+      "expected_state": [],
+      "kind": "mechanics",
+      "feature_id": "TEST-02",
+      "group_id": "g05",
+      "group": "Verify character rig movement",
+      "verifiable": false,
+      "video_start_s": 165.0,
+      "video_end_s": 180.0,
+      "depends_on": [],
+      "verification": null,
+      "alternatives": [],
+      "version_dependent": [],
+      "common_mistakes": [],
+      "confidence": 0.585,
+      "model_confidence": 1.0,
+      "support": "both",
+      "provenance": null,
+      "source_refs": [],
+      "assumptions": [],
+      "result": "All character limb controls deform the mesh accurately.",
+      "how_to": [
+        {
+          "text": "Select various control effectors (arm, leg) in the viewport.",
+          "support": "shown",
+          "evidence": "Instructor selects right wrist effector and right ankle effector."
+        },
+        {
+          "text": "Drag the Move Tool manipulators to test range of motion and weight painting.",
+          "support": "shown",
+          "evidence": "Hand and foot controls moved to verify body pose deformation."
+        }
+      ],
+      "check": [],
+      "visual_evidence": "Character arm and leg posing smoothly with control effectors.",
+      "evidence": [
+        "We can go back and see what we have and how well it is working."
+      ],
+      "flags": [
+        "UI name 'Viewport > Arm & Leg Rig Controls' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "UI name 'Move Tool Manipulator' is not in the maya vocabulary (it may be real but missing from the list): please check",
+        "TEST-02 (Control behaviour tests) needs an add-on or a script in maya: the tutorial is using something outside the application"
+      ],
+      "review_status": "drafted_automatically"
+    }
+  ],
+  "model_id": "gemini-3.6-flash",
+  "prompt_version": "v10-preds",
+  "video_duration_s": 190.0,
+  "warnings": [
+    "steps grouped for display into 5 groups (16 steps)"
+  ],
+  "extracted_at": "2026-11-09T08:34:52.970716Z"
+}

@@ -16,6 +16,9 @@ from vision.tracker import classify
 MarkKind = Literal["pointer", "highlight"]
 
 POINTER_RADIUS = 14
+# GuideWire's signature colour (iris). Blender and Houdini use orange, Maya highlights in green, so a violet ring is never mistaken for the application's own
+# selection. Same value as the app's accent family; defined here so vision/ does not import the PyQt app package.
+HIGHLIGHT_RGB = (179, 136, 255)
 HIGHLIGHT_PAD = 4
 
 
@@ -146,12 +149,12 @@ def make_overlay_window():
             for m in self._marks:
                 r = QRect(round(m.rect.x / k), round(m.rect.y / k),
                           round(m.rect.w / k), round(m.rect.h / k))
-                p.setPen(QPen(QColor(255, 190, 0), 3))
+                p.setPen(QPen(QColor(*HIGHLIGHT_RGB), 3))
                 if m.kind == "pointer":
-                    p.setBrush(QColor(255, 190, 0, 70))
+                    p.setBrush(QColor(*HIGHLIGHT_RGB, 70))
                     p.drawEllipse(r)
                 else:
-                    p.setBrush(QColor(255, 190, 0, 40))
+                    p.setBrush(QColor(*HIGHLIGHT_RGB, 45))
                     p.drawRoundedRect(r, 4, 4)
                 if m.label:
                     p.setFont(QFont("Segoe UI", 10))

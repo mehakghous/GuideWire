@@ -138,6 +138,8 @@ class Service:
                 bundle, note = None, f"(the model could not be reached: {type(e).__name__}; this is the rule-based answer)"
             if bundle is not None:
                 self.session.note(text, "model_answer", "model", self.session.current)
+                if bundle.steps is not None and bundle.steps.steps:         # the model judged the learner wants steps: they can be loaded or saved like any other steps
+                    self.last_bundle = bundle
                 return self._result("model_answer", "model", bundle)
         reply = respond(self.session, text, kb=self.kb, tutorials=self.tutorials, store=self.store)
         if reply.bundle.steps and reply.route != "session":

@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision` is the screen-guidance service (observe only); None means sessions run without it."""
         super().__init__()
         self.setWindowTitle("GuideWire")
-        self.resize(1000, 680)
+        self.resize(1120, 760)
         self.db = db
         self.accounts = Accounts(db)
         self.user: User | None = None

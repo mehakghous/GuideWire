@@ -80,6 +80,13 @@ class ActionTile(QPushButton):
         self.hint_label.setText(hint)
 
 
+def tidy_list(lst) -> None:
+    """A list that never scrolls sideways: long lines are trimmed with an ellipsis (the full text is the item's tooltip)."""
+    lst.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    lst.setTextElideMode(Qt.TextElideMode.ElideRight)
+    lst.setWordWrap(False)
+
+
 def header(title: str, subtitle: str = "", back: QPushButton | None = None, extra: QWidget | None = None) -> Tile:
     """The page's top tile: its title and a one-line hint, with the Back button and anything else on the right."""
     tile = Tile(variant="soft", padding=16)

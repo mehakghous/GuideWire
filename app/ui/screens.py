@@ -17,7 +17,7 @@ from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
-from .bento import ActionTile, Tile, header, page_grid
+from .bento import ActionTile, Tile, header, page_grid, tidy_list
 from .workers import run_call
 
 
@@ -113,6 +113,7 @@ class HomeScreen(QWidget):
         self.greeting.setObjectName("pageTitle")
         self.greeting.setTextFormat(Qt.TextFormat.RichText)
         self.tutorials = QListWidget()
+        tidy_list(self.tutorials)
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
         self.session_button.setObjectName("primary")
@@ -188,6 +189,7 @@ class HomeScreen(QWidget):
         for tid, title in tutorials:
             self.tutorials.addItem(f"{title}")
             self.tutorials.item(self.tutorials.count() - 1).setData(0x0100, tid)   # Qt.ItemDataRole.UserRole
+            self.tutorials.item(self.tutorials.count() - 1).setToolTip(title)
         self.empty.setVisible(not tutorials)
         self.review_button.setEnabled(bool(tutorials))
         self.session_button.setEnabled(bool(tutorials))
@@ -243,6 +245,7 @@ class StepReviewScreen(QWidget):
         self.title.setObjectName("pageTitle")
         self.title.setTextFormat(Qt.TextFormat.RichText)
         self.list = QListWidget()
+        tidy_list(self.list)
         self.status = QLabel("")
         self.status.setObjectName("hint")
         self.detail = QLabel("")
@@ -331,6 +334,7 @@ class StepReviewScreen(QWidget):
         for s in self.editor.steps.steps:
             self.list.addItem(f"{s.order}. {s.goal}" + self.TAGS[checkability(s).level])
             self.list.item(self.list.count() - 1).setData(0x0100, s.id)     # Qt.ItemDataRole.UserRole
+            self.list.item(self.list.count() - 1).setToolTip(s.goal)
         if self.editor.steps.steps:
             ids = [s.id for s in self.editor.steps.steps]
             self.list.setCurrentRow(ids.index(select) if select in ids else 0)
@@ -651,6 +655,7 @@ class HistoryScreen(QWidget):
     def __init__(self):
         super().__init__()
         self.list = QListWidget()
+        tidy_list(self.list)
         self.empty = QLabel("")
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(self.back.emit)

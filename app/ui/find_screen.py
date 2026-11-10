@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidg
 
 from ..discovery import DiscoveryResult, Suggestion
 from ..pipeline import APPS
-from .bento import Tile, header, page_grid
+from .bento import Tile, header, page_grid, tidy_list
 from .workers import run_call
 
 FROM_WORDS = "(from my words)"
@@ -41,6 +41,7 @@ class FindScreen(QWidget):
         self.message.setWordWrap(True)
         self.message.setObjectName("hint")
         self.results = QListWidget()
+        tidy_list(self.results)
         self.details = QTextBrowser()
         self.open_button = QPushButton("Open in browser")
         self.steps_button = QPushButton("Turn this video into steps")

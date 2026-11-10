@@ -1,0 +1,619 @@
+{
+ "_about": "A HELD-OUT question set for the answering layer (written 2026-11-10, after the beginner set had been used to tune the answer rules, and before any run on this set): 30 questions, 10 per application, no tutorial loaded. It is meant to be run ONCE, after the last change, so that its result is not fitted to it. It differs from the beginner set: naming and orientation, bone roll, FK/IK switches, mirroring weights, concepts (freeze transformations, pole vector, Rig Doctor, APEX AutoRig), 'give me the steps' and 'walk me through' requests in new wording (tag steps_request), two beginner starts and one tutorial-recommendation request per application. References are the author's reading of the vendor documentation (many from the sources already in the knowledge base); they were not checked in the installed applications. Grading by a model grader is a second opinion, not a person.",
+ "questions": [
+  {
+   "id": "hb01",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "naming"
+   ],
+   "question": "how do i name my bones left and right properly",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     ".l",
+     ".r",
+     "suffix",
+     "left"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Give bones a side suffix, .L and .R (for example arm.L and arm.R), so Blender can pair them for Symmetrize and mirrored posing."
+  },
+  {
+   "id": "hb02",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "troubleshoot",
+    "roll"
+   ],
+   "question": "my bones point the wrong way when i rotate them, i think the roll is off",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "roll"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Fix the bone roll in Edit Mode: Armature > Bone Roll > Recalculate Roll (Shift-N), choosing the axis the bones should align to."
+  },
+  {
+   "id": "hb03",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "constraints"
+   ],
+   "question": "how do i make one bone copy the rotation of another",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "copy rotation"
+    ],
+    [
+     "constraint"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Add a Copy Rotation bone constraint on the follower bone and set its Target (and the Bone, for an armature target)."
+  },
+  {
+   "id": "hb04",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "steps_request",
+    "ik"
+   ],
+   "question": "give me the steps to rig an arm with ik in blender",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "ik",
+     "inverse kinematics"
+    ],
+    [
+     "pose mode",
+     "constraint",
+     "chain"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Pose Mode, select the forearm bone, add an Inverse Kinematics constraint, set the target and a chain length of 2 (upper arm and forearm), optionally a pole target for the elbow direction."
+  },
+  {
+   "id": "hb05",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "mirror"
+   ],
+   "question": "ok what do i click to mirror my armature to the other side",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "symmetrize"
+    ]
+   ],
+   "must_not": [],
+   "reference": "In Edit Mode choose Armature > Symmetrize; the bones need .L and .R names so Blender can pair them."
+  },
+  {
+   "id": "hb06",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "concept",
+    "troubleshoot"
+   ],
+   "question": "i dont get what apply scale does and why my rig acts strange without it",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "apply",
+     "scale"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Applying transforms (Ctrl+A) makes the object's scale 1 and rotation 0 without moving it, so modifiers, constraints and bone deformation are not distorted by a leftover scale."
+  },
+  {
+   "id": "hb07",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "steps_request",
+    "skinning"
+   ],
+   "question": "can you walk me through attaching my mesh and checking that it deforms",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "parent",
+     "automatic weights"
+    ],
+    [
+     "pose mode",
+     "test",
+     "pose"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Select the mesh, then the armature, Ctrl+P > With Automatic Weights; then in Pose Mode rotate bones to check the deformation."
+  },
+  {
+   "id": "hb08",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "howto",
+    "organise"
+   ],
+   "question": "how can i hide the bones i dont want the animator to touch",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "bone collection",
+     "collection",
+     "hide"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Put those bones in a Bone Collection (Armature properties > Bone Collections) and turn the collection's visibility off."
+  },
+  {
+   "id": "hb09",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "start_plan",
+    "level",
+    "beginner"
+   ],
+   "question": "im a complete beginner, what is the very first thing i should do to start rigging",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "armature",
+     "bone",
+     "apply",
+     "transform"
+    ]
+   ],
+   "must_not": [],
+   "reference": "A starting order for a beginner: prepare the mesh, build the skeleton, bind the mesh to it, then add IK, controls and constraints, testing by posing as you go."
+  },
+  {
+   "id": "hb10",
+   "scenario": "no_video",
+   "app": "blender",
+   "tags": [
+    "discovery"
+   ],
+   "question": "which tutorials are good for learning rigging in blender",
+   "behaviour": "clarify_or_admit",
+   "must_any": [],
+   "must_not": [
+    "http",
+    "youtube.com"
+   ],
+   "reference": "A tutorial recommendation is not something the system can know from the question alone: a good answer asks which goal or level (or points to the tutorial search), and must not name a specific video, channel or link."
+  },
+  {
+   "id": "hm01",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "concept",
+    "prep"
+   ],
+   "question": "what does freeze transformations do and when should i use it",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "freeze"
+    ],
+    [
+     "zero",
+     "reset"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Freeze Transformations resets the translate, rotate and scale values to zero (or one for scale) without moving the object, so the current position becomes the new zero; use it on the mesh and on controls before binding or constraining."
+  },
+  {
+   "id": "hm02",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "orient"
+   ],
+   "question": "how do i orient my joints so the x axis points down the bone",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "orient joint"
+    ],
+    [
+     "primary",
+     "axis",
+     "options"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Skeleton > Orient Joint (options box): choose the Primary Axis that should point down the bone and a Secondary Axis for the up direction, then apply."
+  },
+  {
+   "id": "hm03",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "ikfk"
+   ],
+   "question": "i want a switch on my control to change between fk and ik, how do i do that",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "attribute"
+    ],
+    [
+     "set driven key",
+     "driven"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Add a custom attribute (Modify > Add Attribute) on a control, then use Set Driven Key to link it to the IK blend or the visibility of the FK and IK controls."
+  },
+  {
+   "id": "hm04",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "steps_request",
+    "constraints"
+   ],
+   "question": "show me the steps to parent a control to a joint so it drives it",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "parent",
+     "constraint"
+    ],
+    [
+     "constrain"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Select the control, then the joint, and choose Constrain > Parent (options box); the control then drives the joint."
+  },
+  {
+   "id": "hm05",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "troubleshoot",
+    "skinning"
+   ],
+   "question": "my skin weights are too soft near the elbow and it collapses",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "weight",
+     "paint"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Use Skin > Paint Skin Weights Tool to adjust the influence of the elbow and neighbouring joints, using smooth or add and replace to firm it up."
+  },
+  {
+   "id": "hm06",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "howto",
+    "skinning"
+   ],
+   "question": "how do i copy the skin weights from the left leg to the right",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "mirror skin weights"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Skin > Mirror Skin Weights (options box): choose the mirror plane and the direction (left to right) and apply."
+  },
+  {
+   "id": "hm07",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "concept",
+    "ik"
+   ],
+   "question": "what is a pole vector and do i really need one",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "pole vector"
+    ],
+    [
+     "knee",
+     "elbow",
+     "direction",
+     "ik"
+    ]
+   ],
+   "must_not": [],
+   "reference": "A pole vector constraint on an IK handle controls the direction the knee or elbow points, which stops it flipping; it is optional but usual for limbs."
+  },
+  {
+   "id": "hm08",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "steps_request",
+    "ik"
+   ],
+   "question": "tell me step by step how to build a leg with ik",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "ik handle"
+    ],
+    [
+     "joint",
+     "skeleton"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Create the leg joints (hip, knee, ankle) with a slight bend, then Skeleton > Create IK Handle, clicking the hip then the ankle, then add a pole vector if the knee flips."
+  },
+  {
+   "id": "hm09",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "start_plan",
+    "beginner"
+   ],
+   "question": "where do i begin rigging a character in maya",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "joint",
+     "skeleton",
+     "freeze"
+    ]
+   ],
+   "must_not": [],
+   "reference": "A starting order for a beginner: prepare the mesh, build the skeleton, bind the mesh to it, then add IK, controls and constraints, testing by posing as you go."
+  },
+  {
+   "id": "hm10",
+   "scenario": "no_video",
+   "app": "maya",
+   "tags": [
+    "discovery"
+   ],
+   "question": "whats the best youtube tutorial for maya character rigging?",
+   "behaviour": "clarify_or_admit",
+   "must_any": [],
+   "must_not": [
+    "http",
+    "youtube.com"
+   ],
+   "reference": "A tutorial recommendation is not something the system can know from the question alone: a good answer asks which goal or level (or points to the tutorial search), and must not name a specific video, channel or link."
+  },
+  {
+   "id": "hh01",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "mirror"
+   ],
+   "question": "how do i mirror joints in kinefx",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "skeleton mirror"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Use the Skeleton Mirror SOP on the skeleton, choosing the mirror plane; its Find Tokens and Replace Tokens parameters rename the copied joints (for example left to right)."
+  },
+  {
+   "id": "hh02",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "orient"
+   ],
+   "question": "how do i orient my joints in houdini",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "orient joints"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Connect the skeleton to an Orient Joints SOP and choose the forward (aim) and up vectors for the chain."
+  },
+  {
+   "id": "hh03",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "concept"
+   ],
+   "question": "what is rig doctor for",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "rig doctor"
+    ],
+    [
+     "skeleton",
+     "topology",
+     "validate",
+     "check"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Rig Doctor checks and repairs a skeleton's structure after its topology changes, so later nodes can rely on a fixed topology and a name attribute."
+  },
+  {
+   "id": "hh04",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "steps_request",
+    "skinning"
+   ],
+   "question": "give me the steps to bind a mesh to a skeleton in houdini",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "joint capture",
+     "capture"
+    ],
+    [
+     "joint deform",
+     "deform"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Create capture weights with a Joint Capture node (for example Joint Capture Biharmonic) from the skin geometry and the skeleton, then connect Joint Deform after it."
+  },
+  {
+   "id": "hh05",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "howto",
+    "pose"
+   ],
+   "question": "how can i pose my skeleton and keep the pose",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "rig pose"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Add a Rig Pose SOP and pose joints in its viewport state; Rig Stash Pose can store a pose."
+  },
+  {
+   "id": "hh06",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "troubleshoot",
+    "skinning"
+   ],
+   "question": "my capture weights look wrong near the shoulder, whats up",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "capture",
+     "weights"
+    ]
+   ],
+   "must_not": [],
+   "reference": "The capture weights probably need recomputing or repainting: check the Joint Capture result around the shoulder and fix it."
+  },
+  {
+   "id": "hh07",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "concept"
+   ],
+   "question": "what is apex autorig",
+   "behaviour": "answer_or_admit",
+   "must_any": [
+    [
+     "apex",
+     "autorig"
+    ],
+    [
+     "component",
+     "rig",
+     "controls"
+    ]
+   ],
+   "must_not": [],
+   "reference": "APEX AutoRig builds a rig from modular components (for example FK or IK parts) applied to a packed character; Configure Controls sets the control shapes."
+  },
+  {
+   "id": "hh08",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "steps_request",
+    "ik"
+   ],
+   "question": "walk me through setting up ik on an arm in houdini",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "ik chains"
+    ],
+    [
+     "skeleton",
+     "joint",
+     "start",
+     "end"
+    ]
+   ],
+   "must_not": [],
+   "reference": "Add an IK Chains SOP, connect the skeleton to its first input and the IK targets to the second, and set the root, mid and tip joint names of the arm."
+  },
+  {
+   "id": "hh09",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "start_plan",
+    "beginner"
+   ],
+   "question": "first steps for rigging a character in houdini?",
+   "behaviour": "answer",
+   "must_any": [
+    [
+     "kinefx",
+     "skeleton",
+     "apex",
+     "autorig"
+    ]
+   ],
+   "must_not": [],
+   "reference": "A starting order for a beginner: prepare the mesh, build the skeleton, bind the mesh to it, then add IK, controls and constraints, testing by posing as you go."
+  },
+  {
+   "id": "hh10",
+   "scenario": "no_video",
+   "app": "houdini",
+   "tags": [
+    "discovery"
+   ],
+   "question": "which kinefx tutorial should i start with",
+   "behaviour": "clarify_or_admit",
+   "must_any": [],
+   "must_not": [
+    "http",
+    "youtube.com"
+   ],
+   "reference": "A tutorial recommendation is not something the system can know from the question alone: a good answer asks which goal or level (or points to the tutorial search), and must not name a specific video, channel or link."
+  }
+ ]
+}

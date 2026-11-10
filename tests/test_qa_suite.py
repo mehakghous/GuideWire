@@ -54,3 +54,12 @@ def test_the_beginner_suite_is_well_formed():
     assert all(q["scenario"] == "no_video" and q["reference"] and q["behaviour"] in ("answer", "answer_or_admit", "clarify_or_admit", "admit") for q in d)
     grades = json.loads((FIX / "grades_beginner_2026-11-09.json").read_text(encoding="utf-8"))["grades"]
     assert set(grades) == set(ids) and set(grades.values()) <= {"C", "P", "N", "W"}
+
+
+def test_the_heldout_suite_is_well_formed():
+    import collections
+    d = json.loads((FIX / "questions_heldout.json").read_text(encoding="utf-8"))["questions"]
+    assert len(d) == 30 and len({q["id"] for q in d}) == 30 and collections.Counter(q["app"] for q in d) == {"blender": 10, "maya": 10, "houdini": 10}
+    assert all(q["scenario"] == "no_video" and q["reference"] for q in d)
+    beginner = {q["question"] for q in json.loads((FIX / "questions_beginner.json").read_text(encoding="utf-8"))["questions"]}
+    assert not beginner & {q["question"] for q in d}                                     # no question is shared with the set the answer rules were tuned on

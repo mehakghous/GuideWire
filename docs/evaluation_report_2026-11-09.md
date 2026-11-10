@@ -355,6 +355,36 @@ Net: about 68 % to 76 to 79 % on this grader in four changes, for about 1 USD of
 
 **Step 4, for a person.** `scripts/review_sheet.py make` wrote `eval_data/review/beginner_review.csv`: the 36 current replies with the question, the reference and Terra's grade and reason in the LAST columns, and empty `human_grade` and `human_note` columns. Grading it takes about an hour; `scripts/review_sheet.py check <file>` then reports whether the person agrees more with Terra or with the first grader, which says whose numbers to trust and which references are wrong (`tests/test_review_sheet.py`).
 
+### 3.10 A real test of the video recheck, with the human labels as ground truth (`ingestion/eval/recheck_eval.py`, `tests/test_recheck_eval.py`; run 2026-11-10)
+The recheck (section 3.7) was tested on actions the extracted steps MISSED: 64 labelled core actions across the six videos (steps from the 3.6 Flash v10 one-pass runs); a spread of up to 5 per video, 27 in all, each asked WITH a time ("how does he do this: <the labelled action>? around 2:10", the labelled time rounded to 10 s) and WITHOUT one, so the clip has to be chosen from the steps alone. Controls: 36 UNANSWERABLE questions (the background music, the instructor's email, a course price; asked at the start and around the middle of each video; the right outcome is "not shown"), and 18 DECOYS (real actions from the other labelled video of the same application that share no words with this video's actions). The clip model was `gemini-3.5-flash-lite`; whether a found answer matches the labelled action was judged by `gpt-5.6-terra` (text only). The whole evaluation cost about 0.9 USD of Gemini calls.
+
+| | First clip only | With a sweep of up to 3 more parts of the video |
+|---|---|---|
+| With a time in the question (27) | 27 found; 24 correct, 2 partly, 1 wrong | the same (the first clip always held the moment) |
+| Without a time (27) | clip held the moment 14 times; 19 found: **18 correct, 1 partly, 0 wrong** | 26 found: **22 correct, 2 partly, 2 wrong**; 37 clips asked instead of 27 |
+| Unanswerable (36) | **36 said "not shown", 0 invented** | **36 said "not shown", 0 invented** (120 clips asked) |
+| Decoys (18) | 17 said "not shown", 1 answered | 16 said "not shown", 2 answered |
+
+Reading: **with a time the recheck is accurate (89 % fully correct, 96 % correct or partly), and with no time the first guess was the wrong part of the video about half the time (14 of 27 clips held the moment), which the sweep mostly repairs (found 70 % to 96 %, fully correct 67 % to 81 %) at the price of two wrong answers and about three times as many clips on questions that cannot be answered.** Not one of the 36 unanswerable questions got an answer, with or without the sweep, so on this sample the clip model did not invent answers when asked about things that are not there. The sweep is therefore on wherever the recheck is on (the gateway and `chat --recheck` use 3 extra parts; `ModelAnswerer.recheck_sweep`). Caveats: the questions repeat the labelled action's words, so a model could echo them; the decoys are the check, and the one decoy that was answered in both settings ("use the wildcard to include all points in the rig", Houdini FK video) is plausibly something that really happens in that video (the labels of the sibling video and the knowledge base both mention it) and needs a person to look; the judge is a model; 27 questions; one labeller's misses; the clip model was the cheap one.
+
+### 3.11 A fresh held-out set, and what it showed (`tests/fixtures/qa_suite/questions_heldout.json`; run 2026-11-10)
+30 new questions (10 per application) written before any run on them, different from the beginner set: naming and orientation, bone roll, FK/IK switches, mirroring weights, concepts (freeze transformations, pole vector, Rig Doctor, APEX AutoRig), "give me the steps" and "walk me through" requests in new wording, two beginner starts and one tutorial request per application. Run once through the final pipeline, graded by Terra only (no person yet).
+
+| | Questions | C | P | W | Useful |
+|---|---|---|---|---|---|
+| **All, blind run** | 30 | 16 | 12 | 2 | **73 %** |
+| Model's answers | 24 | 14 | 8 | 2 | 75 % |
+| Steps routes (starter plan, topic steps) | 6 | 2 | 4 | 0 | 67 % |
+| Blender / Maya / Houdini | 10 each | | | | 80 % / 70 % / 70 % |
+| Tutorial requests (3) | 3 | 3 | 0 | 0 | 100 % (all ask the goal and level, none names a video) |
+| "Give me the steps" requests (6) | 6 | 0 | 5 | 1 | 42 % |
+
+**Reading: about 73 % on questions the answer rules were not tuned on, against 76 to 79 % on the development set: the gain from section 3.9 mostly held, a little smaller, as expected.** The weak spot is the requests for steps (5 of 6 only partly right: they omit a detail, such as the selection order or the joint chain a beginner needs). The two wrong answers: Maya "parent a control to a joint" gave the selection order backwards, and Houdini "capture weights look wrong near the shoulder" repeated claims (angled bones, avoiding NURBS) the grader did not accept. Two flaws of my own were exposed and fixed: (1) before the model run, looking at what the deterministic steps route returned for these questions showed it answering "build a leg with ik" with the steps for MIRRORING joints, because a knowledge-base phrase "build one leg and mirror it" shared two request words; request words (build, use, add, apply, start, begin, can, could, would, should, does, work) no longer choose a topic; **I saw that output on the held-out wording, so the steps route is not blind on this set**; (2) the blind run then showed that topic steps were returned as a single stage line ("Bind the geometry (3 steps)") with none of the instructions, because I had shortened the text for the broad "where do I start" plan and applied it to topic requests too; topic steps are now written out under the stage name and only whole-rig plans stay as stage lines. Re-run after fix 2, **which is not blind**: 17 C, 11 P, 2 W, **75 %** (one question improved). The 73 % is the honest figure.
+
+**Other answering fixes made (plan item 5), measured only by tests and by reading replies, not scored:** "go back to X" with several matching steps now jumps to the start of the most recent matching run before the learner's step ("go back to renaming the joints" goes to the first of the six renaming steps and says the run is s02 to s07) and asks only when there is nothing earlier (`tests/test_goback_ties.py`); the answer model must not say that steps from one version work the same in another (the Maya 2017 tutorial reply for "does this work in maya 2024" now says menus and tools can differ and to check the release notes) and must say so when the steps give no reason for a "why did he" question.
+
+**Knowledge-base gap not filled.** The step that creates the Blender armature object (Add > Armature) could not be sourced: the manual page the knowledge base cites (Adding Bones) covers adding bones in Edit Mode only, the Structure and Introduction pages could not be read through their navigation, and the manual's raw source files returned HTTP 404. Nothing unsourced was added; the plan says an armature object must exist first.
+
 ## 4. Application-specific improvement recommendations
 All items are PROPOSED unless marked. Each cites what the labelled runs showed.
 

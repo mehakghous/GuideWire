@@ -41,6 +41,10 @@ PRICES = {                    # USD per 1M tokens (input, output incl. thinking)
     "gemini-3.6-flash": (0.75, 3.75),
     "gemini-3.8-flash": (0.75, 3.75),
     "gemini-3.5-flash-lite": (0.30, 2.50),
+    # Gemini 4 Carbon (the most capable) and Argon (faster, lower token spend per turn): one price for both, standard paid tier, from Google's pricing page read 2026-11-10. This is the
+    # INTRODUCTORY price, which ends 2026-11-30 (see PRICES_FROM_DEC_2026). Thinking tokens are billed as output. The page does not give a separate video price for these two models.
+    "gemini-4-carbon": (2.00, 10.00),
+    "gemini-4-argon": (2.00, 10.00),
     # OpenAI, from OpenAI's model pages read 2026-11-09 (GPT-5.6 Luna and Terra after the 30 July 2026 cut; 5.4 mini and nano from their own pages). Output includes hidden reasoning tokens.
     "gpt-5.6-luna": (0.20, 1.20),
     "gpt-5.6-terra": (2.00, 12.00),
@@ -59,12 +63,15 @@ class StopExperiment(RuntimeError):
 
 
 # Checked against https://ai.google.dev/gemini-api/docs/pricing on 2026-10-16: the 3.6 and 3.8 Flash prices above hold "through December 31, 2026"; from 2027-01-01 the page lists these.
+PRICES_FROM_DEC_2026 = {"gemini-4-carbon": (4.00, 20.00), "gemini-4-argon": (4.00, 20.00)}      # the introductory price ends 2026-11-30
 PRICES_FROM_2027 = {"gemini-3.6-flash": (1.50, 7.50), "gemini-3.8-flash": (1.50, 7.50)}
 
 
 def price_of(model: str, on=None) -> tuple[float, float]:
     from datetime import date as _date
     on = on or _date.today()
+    if on >= _date(2026, 12, 1) and model in PRICES_FROM_DEC_2026:
+        return PRICES_FROM_DEC_2026[model]
     if on >= _date(2027, 1, 1) and model in PRICES_FROM_2027:
         return PRICES_FROM_2027[model]
     return PRICES.get(model, PRICES["gemini-3.6-flash"])  # unknown model: assume the dearer known price

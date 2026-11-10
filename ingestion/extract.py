@@ -34,7 +34,7 @@ from .validate import Issue, ValidationFailure, check_structure, refresh_coverag
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds")
 
 
 class ExtractionError(RuntimeError):
@@ -132,7 +132,7 @@ class DraftStepListExt(DraftStepList):
 
 
 def _extended(prompt_version: str) -> bool:
-    return prompt_version == "v10-preds"
+    return prompt_version in ("v10-preds", "v10-houpreds")
 
 
 _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Keep tutorial order.
@@ -146,7 +146,7 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
     # "v10-nokb" and "v10-outline" are v10 with the knowledge block removed or replaced by typical sequences: a measured experiment (docs/evaluation_report_2026-11-09.md), not a default.
     full_version = version
     version, _, kb_mode = version.partition("-")
-    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou")):
+    if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou", "houpreds")):
         raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
     node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10")) else ""
@@ -213,7 +213,7 @@ Rules:
   (version_dependent), and common mistakes only if stated or obvious.
 - app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
 """
-        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "") + (_PREDICATE_RULES if kb_mode == "preds" else "") + (_HOUDINI_RULES if kb_mode == "hou" and profile.name == "houdini" else "")
+        return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "") + (_PREDICATE_RULES if kb_mode in ("preds", "houpreds") else "") + (_HOUDINI_RULES if kb_mode in ("hou", "houpreds") and profile.name == "houdini" else "")
     raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
 
 
@@ -339,6 +339,19 @@ NODE_EXAMPLES = {            # v7: what a node_exists name looks like in each ap
     "blender": "for example ARMATURE or BONE (objects and bones), CONSTRAINT_IK or CONSTRAINT_COPY_ROTATION (a constraint on a bone or object), MODIFIER_ARMATURE (a modifier): Blender's upper-case type names, with CONSTRAINT_ or MODIFIER_ in front",
 }
 RIGGING_APPS = ("maya", "houdini")
+
+
+# The prompt to use when extracting steps from a VIDEO, chosen by measurement (docs/evaluation_report_2026-11-09.md, section 1.13; Gemini 3.6 Flash, three complete repeats per setting):
+#   houdini: v10-hou    recall 26 % to 33 % and words found 76 % to 84 % against v10 on the two Houdini videos (the state kinds added nothing on Houdini);
+#   maya and blender: v10-preds    steps that can be pointed at AND auto-checked 54 % to 61 % against v10 on the six videos, higher in all three repeats.
+# Measured on rigging videos only, so Blender gets it only for rigging; a Blender video that is not about rigging keeps the modelling baseline. Written text is NOT video: it keeps `default_prompt_version`.
+RECOMMENDED_VIDEO_PROMPT = {"houdini": "v10-hou", "maya": "v10-preds", "blender": "v10-preds"}
+
+
+def recommended_video_prompt_version(app: str, rigging: bool = False) -> str:
+    if app == "blender" and not rigging:
+        return DEFAULT_PROMPT_VERSION
+    return RECOMMENDED_VIDEO_PROMPT.get(app, DEFAULT_PROMPT_VERSION)
 
 
 def default_prompt_version(app: str, rigging: bool = False) -> str:

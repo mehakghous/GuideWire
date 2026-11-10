@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 from ingestion.starter_plan import starter_bundle
 from ingestion.answer_model import ModelAnswerer, changes_progress, default_manual, session_from_tutorial
 from ingestion.budget import BudgetedProvider, BudgetExceeded
-from ingestion.extract import ExtractionError, default_prompt_version, extract_from_text, extract_from_video
+from ingestion.extract import ExtractionError, default_prompt_version, extract_from_text, extract_from_video, recommended_video_prompt_version
 from ingestion.followup import respond
 from ingestion.providers.base import ProviderError, QuotaError
 from ingestion.router import route
@@ -162,7 +162,7 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
                 if hasattr(provider, "video_seconds"):
                     provider.video_seconds = body.duration_s
                 sl = provider_call(lambda: extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint,
-                                                      prompt_version=default_prompt_version(body.app))
+                                                      prompt_version=recommended_video_prompt_version(body.app))
                                    if vid else extract_from_text(provider, body.text, app=body.app, prompt_version=default_prompt_version(body.app)))
             finally:
                 slots.release()

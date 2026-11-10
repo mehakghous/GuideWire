@@ -15,7 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows
+from .extract import (PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows,
+                      recommended_video_prompt_version)
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
 
@@ -401,7 +402,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("-o", "--out")
         p.add_argument("--media-resolution", help="e.g. MEDIA_RESOLUTION_HIGH")
         p.add_argument("--prompt-version", default=None, choices=list(PROMPT_VERSIONS),
-                       help="default: v7 for Maya and Houdini (and for --rigging), v2 for Blender. v2 = baseline of the earliest live runs; v6 = rigging prompt of the last live run")
+                       help="default for a video: v10-hou for Houdini, v10-preds for Maya and for Blender with --rigging, v2 for other Blender videos (chosen by measurement, report section 1.13); for written text: v7 for Maya and Houdini, v2 for Blender")
         p.add_argument("--tier", choices=["iterate", "report"], help="model tier: iterate = gemini-3.5-flash-lite (cheap, for trying things), report = gemini-3.8-flash (for results you will show)")
         p.add_argument("--model", help="an explicit model id (it must have a price in ingestion/experiment.py)")
         p.add_argument("--key", choices=["default", "dev", "test"], default="default", help="which API key variable to read: GEMINI_API_KEY, GEMINI_API_KEY_DEV or GEMINI_API_KEY_TEST")
@@ -414,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--run-log", help="append every attempt (raw response, usage, issues) to this JSONL file")
     args = ap.parse_args(argv)
     if getattr(args, "prompt_version", 0) is None:
-        args.prompt_version = default_prompt_version(args.app, args.rigging)
+        args.prompt_version = (recommended_video_prompt_version if args.cmd == "video" else default_prompt_version)(args.app, args.rigging)       # video: the measured choice; written text: the older default
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     for noisy in ("httpx", "httpcore", "google_genai", "google.genai"):  # request logs can carry secrets
         logging.getLogger(noisy).setLevel(logging.WARNING)

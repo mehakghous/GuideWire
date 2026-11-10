@@ -142,7 +142,7 @@ def test_cli_dry_run_and_budget_stop_make_no_model_call(monkeypatch, capsys, tmp
     monkeypatch.setattr(c, "GeminiProvider", Never)
     assert c.main(["video", "https://www.youtube.com/watch?v=dc3iRo0hb3g", "--no-metadata", "--duration", "1151", "--app", "houdini", "--dry-run", "--tier", "report"]) == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["model"] == "gemini-3.8-flash" and out["prompt_version"] == "v7" and out["video_seconds"] == 1151 and out["cached"] is False
+    assert out["model"] == "gemini-3.8-flash" and out["prompt_version"] == "v10-hou" and out["video_seconds"] == 1151 and out["cached"] is False      # the measured default for a Houdini video (was v7)
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     assert c.main(["video", "https://www.youtube.com/watch?v=dc3iRo0hb3g", "--no-metadata", "--duration", "1151", "--app", "maya", "--max-usd-run", "0.01"]) == 3
     assert "stopped by the budget guard" in capsys.readouterr().err
@@ -171,3 +171,11 @@ def test_a_repeat_run_gets_its_own_cache_key_and_repeat_one_is_unchanged(monkeyp
     two = content_key(*args)
     monkeypatch.setenv("GW_REPEAT", "3")
     assert len({base, two, content_key(*args)}) == 3
+
+
+def test_gemini_4_prices_rise_on_the_first_of_december_2026():
+    from datetime import date
+
+    from ingestion.experiment import price_of
+    for m in ("gemini-4-carbon", "gemini-4-argon"):
+        assert price_of(m, date(2026, 11, 30)) == (2.00, 10.00) and price_of(m, date(2026, 12, 1)) == (4.00, 20.00)

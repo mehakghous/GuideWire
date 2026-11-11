@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Jost',Futura,'Century Gothic',sans-serif}
+</style>
+</helmet>
+<div style="width:1120px;height:760px;display:flex;overflow:hidden;background:{{bg}};color:{{fg}}">
+<nav style="width:232px;flex:none;box-sizing:border-box;border-right:4px solid {{fg}};padding:28px 0 24px;display:flex;flex-direction:column;justify-content:space-between">
+<div>
+<div style="padding:0 24px 28px;display:flex;align-items:center;gap:7px">
+<span style="width:16px;height:16px;border-radius:50%;background:{{ac}}"></span>
+<span style="width:16px;height:16px;background:{{fg}}"></span>
+<span style="width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid {{fg}}"></span>
+<span style="margin-left:6px;font-size:22px;font-weight:800">guidewire</span>
+</div>
+<a href="Home.dc.html" style="display:flex;align-items:center;gap:12px;padding:13px 24px;background:{{fg}};color:{{bg}};text-decoration:none;font-size:18px;font-weight:800;border-top:1px solid {{fg}}"><span style="width:10px;height:10px;border-radius:50%;background:{{ac}}"></span>home</a>
+<a href="Find.dc.html" style="display:flex;align-items:center;gap:12px;padding:13px 24px;color:{{fg}};text-decoration:none;font-size:18px;font-weight:500;border-top:1px solid {{fg}}"><span style="width:10px;height:10px;border:2px solid {{fg}};box-sizing:border-box"></span>find a tutorial</a>
+<a href="Ask.dc.html" style="display:flex;align-items:center;gap:12px;padding:13px 24px;color:{{fg}};text-decoration:none;font-size:18px;font-weight:500;border-top:1px solid {{fg}}"><span style="width:10px;height:10px;border:2px solid {{fg}};box-sizing:border-box"></span>ask guidewire</a>
+<a href="New.dc.html" style="display:flex;align-items:center;gap:12px;padding:13px 24px;color:{{fg}};text-decoration:none;font-size:18px;font-weight:500;border-top:1px solid {{fg}}"><span style="width:10px;height:10px;border:2px solid {{fg}};box-sizing:border-box"></span>new tutorial</a>
+<a href="History.dc.html" style="display:flex;align-items:center;gap:12px;padding:13px 24px;color:{{fg}};text-decoration:none;font-size:18px;font-weight:500;border-top:1px solid {{fg}}"><span style="width:10px;height:10px;border:2px solid {{fg}};box-sizing:border-box"></span>history</a>
+<a href="Profile.dc.html" style="display:flex;align-items:center;gap:12px;padding:13px 24px;color:{{fg}};text-decoration:none;font-size:18px;font-weight:500;border-top:1px solid {{fg}};border-bottom:1px solid {{fg}}"><span style="width:10px;height:10px;border:2px solid {{fg}};box-sizing:border-box"></span>profile</a>
+</div>
+<div style="padding:0 24px;display:flex;flex-direction:column;gap:4px">
+<div style="font-size:16px;font-weight:700">Demo Learner</div>
+<a href="Main.dc.html" style="font-size:15px;color:{{mut}};text-underline-offset:4px">log out</a>
+</div>
+</nav>
+<main style="flex:1;min-width:0;box-sizing:border-box;padding:36px 40px;display:flex;flex-direction:column;gap:26px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px">
+<h1 style="margin:0;font-size:58px;line-height:0.96;font-weight:800;letter-spacing:-0.025em">what are you<br>learning today?</h1>
+<div style="position:relative;width:120px;height:110px;flex:none">
+<div style="position:absolute;left:0;top:0;width:84px;height:84px;border-radius:50%;background:{{ac}}"></div>
+<div style="position:absolute;left:46px;top:40px;width:64px;height:64px;border:5px solid {{fg}};box-sizing:border-box"></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:3px solid {{fg}}">
+<a href="Find.dc.html" style="background:{{ac}};color:{{onAc}};text-decoration:none;padding:20px 22px;display:flex;flex-direction:column;gap:10px;min-height:128px;justify-content:space-between">
+<span style="font-size:24px;font-weight:800;line-height:1">find a tutorial</span>
+<span style="font-size:15px;line-height:1.3">say your goal and level. get up to three videos.</span>
+</a>
+<a href="Ask.dc.html" style="color:{{fg}};text-decoration:none;padding:20px 22px;display:flex;flex-direction:column;gap:10px;min-height:128px;justify-content:space-between;border-left:3px solid {{fg}}">
+<span style="font-size:24px;font-weight:800;line-height:1">ask guidewire</span>
+<span style="font-size:15px;line-height:1.3">where to start, why a step works, what comes next.</span>
+</a>
+<a href="New.dc.html" style="color:{{fg}};text-decoration:none;padding:20px 22px;display:flex;flex-direction:column;gap:10px;min-height:128px;justify-content:space-between;border-left:3px solid {{fg}}">
+<span style="font-size:24px;font-weight:800;line-height:1">new tutorial</span>
+<span style="font-size:15px;line-height:1.3">paste steps or a YouTube link. the AI writes the steps.</span>
+</a>
+</div>
+<div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid {{fg}};padding-bottom:8px">
+<span style="font-size:22px;font-weight:800">your tutorials</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:{{mut}}">9 saved</span>
+</div>
+<sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+<a href="Session.dc.html" style="display:grid;grid-template-columns:minmax(0,1fr) 90px 80px 110px;gap:16px;align-items:center;padding:11px 0;border-bottom:1px solid {{fg}};text-decoration:none;color:{{fg}}">
+<span style="font-size:17px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{r.title}}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:{{mut}}">{{r.app}}</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:{{mut}}">{{r.steps}} steps</span>
+<span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;text-align:right">{{r.state}}</span>
+</a>
+</sc-for>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const d = !!this.props.dark;
+return {
+bg: d ? '#121212' : '#F2F1EC',
+fg: d ? '#F2F1EC' : '#111111',
+mut: d ? '#A3A39D' : '#6B6B66',
+ac: d ? '#FF5A3D' : '#D92B14',
+onAc: d ? '#111111' : '#FFFFFF',
+rows: [
+{ title: 'Blender 5.1 Basic Rigging Tutorial | Simple Armature Setup', app: 'blender', steps: 18, state: 'step 7 of 18' },
+{ title: 'How to Rig a Leg with Inverse Kinematics in Blender', app: 'blender', steps: 36, state: 'not started' },
+{ title: 'How to Rig a Character in Maya | Quick Rig', app: 'maya', steps: 16, state: 'done' },
+{ title: 'Leg Setup & IK Handles', app: 'maya', steps: 16, state: 'not started' },
+{ title: 'Rigging in Houdini with APEX: 01 | Simple FK', app: 'houdini', steps: 15, state: 'not started' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

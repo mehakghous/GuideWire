@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Find a Tutorial</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:12px 20px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.btn.s{background:#F3EFE4;color:var(--ink);padding:10px 16px;font-size:15px}.btn.s:hover{background:#fff}
+.chip{display:inline-flex;align-items:center;border-radius:10px;padding:8px 15px;background:#F3EFE4;font-size:15px;font-weight:500;color:var(--ink);text-decoration:none}
+.chip.on{background:var(--plum);color:#F6F1E6}
+.inp{border:0;background:transparent;font:600 22px 'Instrument Sans',sans-serif;color:var(--ink);outline:none;width:100%;padding:4px 0}
+.res{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:18px;align-items:center;padding:12px;border-radius:14px;background:var(--sunk)}
+.res:hover{background:#E2DBCB}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="find" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 0 12px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">Find a Tutorial</span><h1 style="font-size:44px;line-height:1">Say What You Want to Learn</h1></div>
+<form style="border-radius:22px;background:#DCDFB8;padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+<label for="g" class="lab" style="color:#4A4D28">Your Goal and Level</label>
+<input class="inp" id="g" type="text" value="I am a beginner and want to rig a leg with IK in Maya">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+<div style="display:flex;gap:8px"><a class="chip on" href="Find.dc.html">From My Words</a><a class="chip" href="Find.dc.html">Blender</a><a class="chip" href="Find.dc.html">Maya</a><a class="chip" href="Find.dc.html">Houdini</a></div>
+<a class="btn" href="Find.dc.html">Find Tutorials <span aria-hidden="true">&#8594;</span></a>
+</div>
+</form>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div class="res"><div style="height:76px;border-radius:10px;background:#5A3A47;position:relative"><svg viewBox="0 0 120 76" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><rect x="42" y="22" width="36" height="32" rx="8" fill="#F3EFE4" opacity="0.92"/><path d="M55 31 L68 38 L55 45 Z" fill="#5A3A47"/></svg></div>
+<div style="min-width:0"><div style="font-size:17px;font-weight:600;line-height:1.2">Leg Setup &amp; IK Handles</div><div class="m" style="font-size:12.5px;color:#6F6168;margin-top:5px">Maya · 6:32 · 2024 · Best Match</div></div>
+<div style="display:flex;gap:8px;align-items:center"><a href="Find.dc.html" style="font-size:14px;font-weight:600;color:#5A3A47;padding:8px 10px">Open</a><a class="btn s" href="Import.dc.html">Turn into Steps</a></div></div>
+<div class="res"><div style="height:76px;border-radius:10px;background:#5F6334;position:relative"><svg viewBox="0 0 120 76" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><rect x="42" y="22" width="36" height="32" rx="8" fill="#F3EFE4" opacity="0.92"/><path d="M55 31 L68 38 L55 45 Z" fill="#5F6334"/></svg></div>
+<div style="min-width:0"><div style="font-size:17px;font-weight:600;line-height:1.2">How to Rig a Character in Maya | Quick Rig</div><div class="m" style="font-size:12.5px;color:#6F6168;margin-top:5px">Maya · 3:10 · 2025</div></div>
+<div style="display:flex;gap:8px;align-items:center"><a href="Find.dc.html" style="font-size:14px;font-weight:600;color:#5A3A47;padding:8px 10px">Open</a><a class="btn s" href="Import.dc.html">Turn into Steps</a></div></div>
+<div class="res"><div style="height:76px;border-radius:10px;background:#3B232D;position:relative"><svg viewBox="0 0 120 76" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><rect x="42" y="22" width="36" height="32" rx="8" fill="#F3EFE4" opacity="0.92"/><path d="M55 31 L68 38 L55 45 Z" fill="#3B232D"/></svg></div>
+<div style="min-width:0"><div style="font-size:17px;font-weight:600;line-height:1.2">Inverse Kinematics for Beginners</div><div class="m" style="font-size:12.5px;color:#6F6168;margin-top:5px">Maya · 12:04 · 2023</div></div>
+<div style="display:flex;gap:8px;align-items:center"><a href="Find.dc.html" style="font-size:14px;font-weight:600;color:#5A3A47;padding:8px 10px">Open</a><a class="btn s" href="Import.dc.html">Turn into Steps</a></div></div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:auto;margin-bottom:6px;font-size:14px;line-height:1.35;color:#6F6168"><span style="width:10px;height:10px;border-radius:3px;background:#5F6334;flex:none"></span>Ranked from title, channel and length only. GuideWire has not watched these videos. Today's results are saved.</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

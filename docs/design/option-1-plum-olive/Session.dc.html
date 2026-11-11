@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Guided Session</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:#2A171F}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:13px 26px;font-weight:600;font-size:17px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible,.inp:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.btn.s{background:var(--sunk);color:var(--ink)}.btn.s:hover{background:#DDD6C4}
+.btn.t{background:transparent;color:var(--plum);padding:13px 14px}.btn.t:hover{background:var(--plums)}
+.chip{display:inline-flex;border-radius:10px;padding:8px 14px;background:var(--plums);color:var(--plum);font-size:14px;font-weight:600;text-decoration:none}
+.chip:hover{background:#DFCDD3}
+.inp{border:0;background:var(--sunk);border-radius:12px;padding:13px 16px;font:500 16px 'Instrument Sans',sans-serif;color:var(--ink);outline:none;width:100%}
+.inp:focus{box-shadow:0 0 0 3px var(--olives),0 0 0 5px var(--olive)}
+.mi{padding:8px 14px;border-radius:8px;font-size:14px;color:#E6DDD8;white-space:nowrap}
+</style>
+</helmet>
+<div class="gw" style="width:1280px;height:800px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<section style="flex:1;min-width:0;border-radius:22px;background:#2E1C24;position:relative;overflow:hidden">
+<div style="display:flex;align-items:center;gap:6px;padding:12px 18px;background:#241218;color:#CDBFC5;font-size:14px">
+<span style="display:flex;gap:6px;margin-right:14px"><i style="width:11px;height:11px;border-radius:3px;background:#5A3A47"></i><i style="width:11px;height:11px;border-radius:3px;background:#5A3A47"></i><i style="width:11px;height:11px;border-radius:3px;background:#5A3A47"></i></span>
+<span class="mi">File</span><span class="mi">Edit</span><span class="mi">Render</span><span class="mi">Window</span><span class="mi" style="background:#4A2E3A;color:#F3EFE4">Object</span><span class="mi">Help</span>
+<span class="m" style="margin-left:auto;font-size:12px;color:#9C8B93">Blender 5.2 · Rigging</span>
+</div>
+<svg viewBox="0 0 800 700" style="position:absolute;left:0;top:46px;width:100%;height:calc(100% - 46px)" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs>
+<radialGradient id="fl" cx="50%" cy="70%" r="60%"><stop offset="0" stop-color="#4A2E3A"/><stop offset="1" stop-color="#2E1C24" stop-opacity="0"/></radialGradient>
+<linearGradient id="cy" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8C8573"/><stop offset="0.35" stop-color="#E3DDCC"/><stop offset="0.7" stop-color="#B5AE9C"/><stop offset="1" stop-color="#6E685A"/></linearGradient>
+</defs>
+<rect width="800" height="700" fill="url(#fl)"/>
+<g stroke="#5A3A47" stroke-width="1" fill="none" opacity=".85"><path d="M60 560 H740 M120 520 H680 M180 485 H620 M235 455 H565 M285 430 H515"/><path d="M400 400 L400 600 M300 400 L170 600 M500 400 L630 600 M200 400 L-40 600 M600 400 L840 600"/></g>
+<ellipse cx="400" cy="470" rx="110" ry="20" fill="#1F1116"/>
+<path d="M330 180 V440 C330 462 470 462 470 440 V180 Z" fill="url(#cy)"/>
+<ellipse cx="400" cy="180" rx="70" ry="22" fill="#E8E2D3"/>
+<ellipse cx="400" cy="180" rx="70" ry="22" fill="none" stroke="#B5AE9C" stroke-width="2"/>
+<polygon points="400,452 386,390 400,200 414,390" fill="#B9BE78" stroke="#3B232D" stroke-width="2" stroke-linejoin="round" opacity=".9"/>
+<circle cx="400" cy="452" r="8" fill="#F3EFE4" stroke="#3B232D" stroke-width="3"/><circle cx="400" cy="200" r="8" fill="#F3EFE4" stroke="#3B232D" stroke-width="3"/>
+<g stroke-width="3" stroke-linecap="round"><line x1="690" y1="120" x2="730" y2="130" stroke="#D3A9BA"/><line x1="690" y1="120" x2="690" y2="80" stroke="#B9BE78"/><line x1="690" y1="120" x2="665" y2="148" stroke="#F3EFE4"/></g>
+<circle cx="730" cy="130" r="6" fill="#D3A9BA"/><circle cx="690" cy="80" r="6" fill="#B9BE78"/><circle cx="665" cy="148" r="6" fill="#F3EFE4"/>
+</svg>
+<div style="position:absolute;left:236px;top:50px;width:290px;border-radius:12px;background:#3B232D;padding:8px;display:flex;flex-direction:column;gap:2px;font-size:14px;color:#E6DDD8">
+<div class="mi">Set Origin</div>
+<div class="mi">Transform</div>
+<div class="mi" style="display:flex;justify-content:space-between;background:#4A2E3A;color:#F3EFE4">Parent <span aria-hidden="true">&#8250;</span></div>
+<div style="margin:6px 6px 4px;padding:6px;border-radius:10px;background:#2E1C24;display:flex;flex-direction:column;gap:2px">
+<div class="mi">Object</div><div class="mi">Armature Deform</div>
+<div class="mi" style="background:#DCDFB8;color:#2B2E14;font-weight:600;box-shadow:0 0 0 3px #3B232D,0 0 0 6px #B9BE78,0 0 22px 4px rgba(185,190,120,.5)">With Automatic Weights</div>
+<div class="mi">With Empty Groups</div>
+</div>
+</div>
+<div style="position:absolute;left:540px;top:150px;display:flex;align-items:center;gap:10px;color:#DCDFB8">
+<svg width="46" height="24" viewBox="0 0 46 24" aria-hidden="true"><path d="M44 12 H6 M16 3 L5 12 L16 21" stroke="#B9BE78" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<span class="m" style="font-size:13px">Click Here</span>
+</div>
+<div style="position:absolute;left:20px;bottom:18px;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;background:rgba(243,239,228,.1);color:#E6DDD8;font-size:13px"><span style="width:9px;height:9px;border-radius:2px;background:#B9BE78"></span>GuideWire is watching this window. You do the clicking.</div>
+</section>
+<aside style="width:430px;flex:none;border-radius:22px;background:#F3EFE4;padding:24px 24px 22px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<dc-import name="Logo" tone="light" size="26" hint-size="150px,26px"></dc-import>
+<a href="Home.dc.html" style="font-size:14px;font-weight:600;color:#5A3A47;padding:7px 12px;border-radius:10px;background:#E9DCE0;text-decoration:none;flex:none">Pause</a>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;font-size:14px"><span style="font-weight:600">Weight the Mesh</span><span class="m" style="color:#6F6168;font-size:13px">Step 7 of 18</span></div>
+<div style="display:flex;gap:3px"><i style="flex:1;height:8px;border-radius:2px;background:#5F6334"></i><i style="flex:1;height:8px;border-radius:2px;background:#5F6334"></i><i style="flex:1;height:8px;border-radius:2px;background:#5F6334"></i><i style="flex:1;height:8px;border-radius:2px;background:#5F6334"></i><i style="flex:1;height:8px;border-radius:2px;background:#5F6334"></i><i style="flex:1;height:8px;border-radius:2px;background:#5F6334"></i><i style="flex:1;height:8px;border-radius:2px;background:#5A3A47"></i><i style="flex:1;height:8px;border-radius:2px;background:#E1DACB"></i><i style="flex:1;height:8px;border-radius:2px;background:#E1DACB"></i><i style="flex:1;height:8px;border-radius:2px;background:#E1DACB"></i><i style="flex:1;height:8px;border-radius:2px;background:#E1DACB"></i><i style="flex:1;height:8px;border-radius:2px;background:#E1DACB"></i></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;padding:22px;border-radius:16px;background:#FAF8F2">
+<span class="lab">Do This Now</span>
+<h1 style="font-size:31px;line-height:1.05">Parent the Mesh with Automatic Weights</h1>
+<div style="display:inline-flex;align-self:flex-start;border-radius:8px;background:#E9DCE0;padding:8px 12px"><span class="m" style="font-size:13px;color:#3B232D">Object &#8250; Parent &#8250; With Automatic Weights</span></div>
+<div style="font-size:15.5px;line-height:1.45;color:#4B3B43">Select the armature, then the mesh, then use the highlighted menu item. You will know it worked when the mesh follows the bone.</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px"><a class="btn" href="Session.dc.html">Done <span aria-hidden="true">&#10003;</span></a><a class="btn s" href="Session.dc.html">Skip</a><a class="btn t" href="Session.dc.html">Back</a></div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+<span class="lab">Not Clear?</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><a class="chip" href="Ask.dc.html">Why Automatic Weights?</a><a class="chip" href="Ask.dc.html">What If It Fails?</a></div>
+<div style="display:flex;gap:8px"><input class="inp" id="q" type="text" placeholder="Ask About This Step" aria-label="Ask about this step"><a class="btn" href="Ask.dc.html" aria-label="Ask" style="padding:13px 18px">&#8594;</a></div>
+</div>
+</aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

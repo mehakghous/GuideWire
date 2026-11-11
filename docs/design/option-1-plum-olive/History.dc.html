@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>History</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.ev{display:grid;grid-template-columns:34px minmax(0,1fr) 70px;gap:18px;align-items:center;padding:16px 20px;border-radius:14px;background:var(--sunk);text-decoration:none;color:var(--ink)}
+.ev:hover{background:#E2DBCB}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="history" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 14px 12px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">4 Sessions</span><h1 style="font-size:44px;line-height:1">Session History</h1></div>
+<div style="display:flex;gap:28px"><div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:40px;line-height:1">41</div><div style="font-size:13px;color:#6F6168">Steps Done</div></div><div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:40px;line-height:1">1</div><div style="font-size:13px;color:#6F6168">Finished</div></div></div>
+</div>
+<div style="position:relative;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0">
+<div class="lab" style="padding-left:4px">Today</div>
+<a class="ev" href="Session.dc.html"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="#D6CEBB" stroke-width="5"/><circle cx="17" cy="17" r="13" fill="none" stroke="#5F6334" stroke-width="5" stroke-dasharray="32 82" transform="rotate(-90 17 17)"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:18px">Blender 5.1 Basic Rigging Tutorial</b><span style="font-size:14px;color:#6F6168">Blender · Step 7 of 18 · You stopped at Parent the Mesh</span></span><span class="m" style="font-size:13px;text-align:right;color:#5A3A47;font-weight:500">Resume</span></a>
+<div class="lab" style="padding-left:4px;margin-top:6px">Yesterday</div>
+<a class="ev" href="Session.dc.html"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="2" width="30" height="30" rx="8" fill="#5F6334"/><path d="M10 17 l5 5 l9 -10" fill="none" stroke="#F3EFE4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:18px">How to Rig a Character in Maya | Quick Rig</b><span style="font-size:14px;color:#6F6168">Maya · All 16 Steps</span></span><span class="m" style="font-size:13px;text-align:right;color:#6F6168">Review</span></a>
+<div class="lab" style="padding-left:4px;margin-top:6px">Earlier</div>
+<a class="ev" href="Session.dc.html"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="#D6CEBB" stroke-width="5"/><circle cx="17" cy="17" r="13" fill="none" stroke="#5F6334" stroke-width="5" stroke-dasharray="22 82" transform="rotate(-90 17 17)"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:18px">Rigging in Houdini with APEX: 01 | Simple FK</b><span style="font-size:14px;color:#6F6168">Houdini · 4 of 15 · 3 Days Ago</span></span><span class="m" style="font-size:13px;text-align:right;color:#5A3A47;font-weight:500">Resume</span></a>
+<a class="ev" href="Session.dc.html"><svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="#D6CEBB" stroke-width="5"/><circle cx="17" cy="17" r="13" fill="none" stroke="#5F6334" stroke-width="5" stroke-dasharray="10 82" transform="rotate(-90 17 17)"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:18px">Leg Setup &amp; IK Handles</b><span style="font-size:14px;color:#6F6168">Maya · 2 of 16 · Last Week</span></span><span class="m" style="font-size:13px;text-align:right;color:#5A3A47;font-weight:500">Resume</span></a>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

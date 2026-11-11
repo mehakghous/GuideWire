@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:13px 22px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.btn.l{background:#F3EFE4;color:#3B232D}.btn.l:hover{background:#fff}
+.btn.g{background:rgba(255,255,255,.14);color:#F3EFE4}.btn.g:hover{background:rgba(255,255,255,.22)}
+.row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:var(--sunk);text-decoration:none;color:var(--ink)}
+.row:hover{background:#DDD6C4}
+.li{display:grid;grid-template-columns:44px minmax(0,1fr) 120px;gap:14px;align-items:center;padding:9px 12px;border-radius:14px;text-decoration:none;color:var(--ink)}
+.li:hover{background:var(--sunk)}
+.ab{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="home" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 0 12px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">Good Evening, Demo</span><h1 style="font-size:44px;line-height:1">Continue Learning</h1></div>
+<section style="border-radius:22px;background:linear-gradient(115deg,#5A3A47 0%,#4A2E3A 60%,#3B232D 100%);color:#F3EFE4;padding:28px 32px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;flex:none">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<div style="display:flex;flex-direction:column;gap:6px"><span class="lab" style="color:#D9C4CC">Continue · Blender</span><h2 style="font-size:27px;line-height:1.08">Blender 5.1 Basic Rigging Tutorial</h2><div style="font-size:15.5px;color:#EADFE3">Goal 4 of 8: Weight the Mesh</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:3px;height:10px"><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#F3EFE4;border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i></div><span class="m" style="font-size:13px">Step 7 of 18</span></div>
+<div style="display:flex;gap:10px;margin-top:2px"><a class="btn l" href="Session.dc.html">Resume Guidance <span aria-hidden="true">&#8594;</span></a><a class="btn g" href="Review.dc.html">Review Steps</a></div>
+</div>
+<div style="border-radius:14px;background:rgba(255,255,255,.09);padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+<span class="lab" style="color:#D9C4CC">Up Next</span>
+<div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;line-height:1.12">Parent the Mesh with Automatic Weights</div>
+<div class="m" style="font-size:12.5px;color:#EADFE3;line-height:1.5">Object &#8250; Parent &#8250; With Automatic Weights</div>
+</div>
+</section>
+<div style="display:grid;grid-template-columns:320px minmax(0,1fr);gap:26px;flex:1;min-height:0">
+<div style="display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:20px">Start Something New</h3>
+<a class="row" href="Find.dc.html"><svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true"><circle cx="15" cy="15" r="9" fill="none" stroke="#5A3A47" stroke-width="3"/><path d="M22 22 L30 30" stroke="#5A3A47" stroke-width="4" stroke-linecap="round"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:16px">Find a Tutorial</b><span style="font-size:13px;color:#6F6168">Say your goal and level</span></span></a>
+<a class="row" href="Ask.dc.html"><svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true"><path d="M5 8 C5 5 8 4 11 4 H24 C28 4 30 6 30 10 V18 C30 22 28 24 24 24 H16 L9 30 V24 C6 24 5 22 5 18 Z" fill="none" stroke="#5F6334" stroke-width="3" stroke-linejoin="round"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:16px">Ask GuideWire</b><span style="font-size:13px;color:#6F6168">Where to start, or why a step works</span></span></a>
+<a class="row" href="Import.dc.html"><svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true"><rect x="4" y="7" width="26" height="20" rx="5" fill="none" stroke="#5A3A47" stroke-width="3"/><path d="M14 13 L22 17 L14 21 Z" fill="#5A3A47"/></svg><span style="display:flex;flex-direction:column"><b style="font-size:16px">Import a Video or Text</b><span style="font-size:13px;color:#6F6168">The AI writes the steps</span></span></a>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px"><h3 style="font-size:20px">Your Library</h3><a href="Library.dc.html" style="font-size:15px;font-weight:600;color:#5A3A47">See All 9</a></div>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#DCDFB8;color:#4A4D28">B</span><span style="display:flex;flex-direction:column;gap:5px;min-width:0"><b style="font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Armature and Automatic Weights</b><span style="height:5px;border-radius:3px;background:#E1DACB"><i style="display:block;width:39%;height:100%;border-radius:3px;background:#5F6334"></i></span></span><span class="m" style="font-size:12.5px;color:#5A3A47;text-align:right">7 of 18</span></a>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#E9DCE0;color:#5A3A47">M</span><span style="display:flex;flex-direction:column;gap:5px;min-width:0"><b style="font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Quick Rig a Character in Maya</b><span style="height:5px;border-radius:3px;background:#E1DACB"><i style="display:block;width:100%;height:100%;border-radius:3px;background:#5F6334"></i></span></span><span class="m" style="font-size:12.5px;color:#5F6334;text-align:right">Finished</span></a>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#E8E2D3;color:#3B232D">H</span><span style="display:flex;flex-direction:column;gap:5px;min-width:0"><b style="font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Houdini APEX: Simple FK</b><span style="height:5px;border-radius:3px;background:#E1DACB"><i style="display:block;width:27%;height:100%;border-radius:3px;background:#5F6334"></i></span></span><span class="m" style="font-size:12.5px;color:#5A3A47;text-align:right">4 of 15</span></a>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

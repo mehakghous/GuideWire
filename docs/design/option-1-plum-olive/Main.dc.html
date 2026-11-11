@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sign In</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:13px 22px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.btn.t{background:transparent;color:var(--plum);padding:13px 12px}.btn.t:hover{background:var(--plums)}
+.inp{border:0;background:var(--sunk);border-radius:12px;padding:12px 16px;font:500 16px 'Instrument Sans',sans-serif;color:var(--ink);outline:none;width:100%}
+.inp:focus{box-shadow:0 0 0 3px var(--olives),0 0 0 5px var(--olive)}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<section style="width:620px;flex:none;border-radius:22px;background:#2E1C24;position:relative;overflow:hidden">
+<svg viewBox="0 0 620 732" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true">
+<defs>
+<linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5A3A47"/><stop offset="0.6" stop-color="#3B232D"/><stop offset="1" stop-color="#2A171F"/></linearGradient>
+<linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A2E3A"/><stop offset="0.6" stop-color="#8A5A6E"/><stop offset="1" stop-color="#E9DCE0"/></linearGradient>
+<radialGradient id="lamp" cx="50%" cy="0%" r="90%"><stop offset="0" stop-color="#F2C879" stop-opacity="0.4"/><stop offset="1" stop-color="#F2C879" stop-opacity="0"/></radialGradient>
+<radialGradient id="scr" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#B9BE78" stop-opacity="0.4"/><stop offset="1" stop-color="#B9BE78" stop-opacity="0"/></radialGradient>
+<filter id="paint" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="5" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="5"/></filter>
+<filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="2"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.08 0"/></filter>
+</defs>
+<rect width="620" height="732" fill="url(#wall)"/>
+<g filter="url(#paint)" opacity="0.45" stroke-linecap="round" fill="none"><path d="M30 330 L240 312 M60 380 L310 360 M380 400 L600 372 M20 470 L190 458" stroke="#6C4756" stroke-width="22"/><path d="M80 140 L300 124 M340 300 L560 290" stroke="#4A2E3A" stroke-width="30"/></g>
+<g filter="url(#paint)">
+<path d="M400 250 V130 C400 70 570 70 570 130 V250 Z" fill="url(#dusk)" stroke="#241218" stroke-width="9"/>
+<path d="M485 76 V250 M400 166 H570" stroke="#241218" stroke-width="6"/>
+<circle cx="534" cy="118" r="15" fill="#FFF1C2"/><circle cx="534" cy="118" r="32" fill="#FFF1C2" opacity="0.18"/>
+<path d="M396 254 H576" stroke="#241218" stroke-width="10" stroke-linecap="round"/>
+<rect x="36" y="400" width="240" height="12" rx="3" fill="#241218"/>
+<rect x="52" y="352" width="20" height="48" rx="2" fill="#8E9455"/><rect x="74" y="342" width="18" height="58" rx="2" fill="#D3A9BA"/><rect x="94" y="358" width="22" height="42" rx="2" fill="#F3EFE4"/>
+<path d="M190 400 L200 366 H244 L252 400 Z" fill="#6C4756"/>
+<path d="M222 366 C202 330 188 316 172 318 C182 340 202 356 222 366 Z M226 366 C242 322 262 310 280 314 C268 338 248 356 226 366 Z M224 366 C224 328 224 304 226 284 C240 306 238 344 224 366 Z" fill="#6D7339"/>
+</g>
+<path d="M300 0 V150" stroke="#241218" stroke-width="4"/>
+<path d="M268 190 C268 160 332 160 332 190 Z" fill="#241218"/><ellipse cx="300" cy="192" rx="32" ry="7" fill="#FFF1C2"/>
+<path d="M262 196 L180 640 H470 L338 196 Z" fill="url(#lamp)"/>
+<g filter="url(#paint)"><rect x="330" y="450" width="236" height="170" rx="12" fill="#1E1115"/><rect x="340" y="460" width="216" height="148" rx="6" fill="#2E1C24"/><rect x="432" y="620" width="30" height="24" fill="#1E1115"/>
+<rect x="354" y="476" width="70" height="9" rx="3" fill="#5A3A47"/><rect x="354" y="492" width="86" height="9" rx="3" fill="#B9BE78"/><rect x="354" y="508" width="60" height="9" rx="3" fill="#5A3A47"/>
+<ellipse cx="500" cy="500" rx="30" ry="9" fill="#BDB6A2"/><path d="M470 500 V570 C470 582 530 582 530 570 V500 Z" fill="#9C9684"/><ellipse cx="500" cy="570" rx="30" ry="9" fill="#8C8573"/></g>
+<circle cx="450" cy="534" r="170" fill="url(#scr)"/>
+<path d="M0 646 C160 636 420 640 620 648 V732 H0 Z" fill="#2A171F"/>
+<path d="M0 646 C160 636 420 640 620 648" stroke="#8A5A6E" stroke-width="3" fill="none" opacity="0.6"/>
+<path d="M200 646 V616 H230 V646 Z" fill="#F3EFE4"/><path d="M230 622 C244 622 244 640 230 640" stroke="#F3EFE4" stroke-width="5" fill="none"/>
+<rect width="620" height="732" filter="url(#grain)"/>
+</svg>
+<div style="position:absolute;left:40px;top:36px"><dc-import name="Logo" tone="dark" size="38" hint-size="190px,38px"></dc-import></div>
+<div style="position:absolute;left:40px;top:112px;width:330px;color:#F3EFE4;display:flex;flex-direction:column;gap:14px">
+<h1 style="font-size:40px;line-height:1.04">Your Tutorial, Sitting Right Beside You.</h1>
+<div style="font-size:16px;line-height:1.4;color:#E6DDD8">GuideWire follows along inside your 3D app, points at the next click, and answers when a step is unclear. You stay the artist.</div>
+</div>
+</section>
+<section style="flex:1;min-width:0;padding:6px 8px 10px 14px;display:flex;flex-direction:column;justify-content:center;gap:0">
+<form style="position:relative;z-index:1;background:#FAF8F2;border-radius:20px;padding:24px 24px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 0 #E8E2D3">
+<h2 style="font-size:30px;line-height:1">Create Your Account</h2>
+<div style="display:flex;flex-direction:column;gap:5px"><label for="n" style="font-size:14px;font-weight:600">Name</label><input class="inp" id="n" type="text" value="Demo Learner"></div>
+<div style="display:flex;flex-direction:column;gap:5px"><label for="e" style="font-size:14px;font-weight:600">Email</label><input class="inp" id="e" type="email" value="demo@guidewire.test"></div>
+<div style="display:flex;flex-direction:column;gap:5px"><label for="p" style="font-size:14px;font-weight:600">Password <span style="font-weight:400;color:#6F6168">(8 characters or more)</span></label><input class="inp" id="p" type="password" value="guidewire-demo"></div>
+<div style="display:flex;align-items:center;gap:6px"><a class="btn" href="Home.dc.html">Create Account <span aria-hidden="true">&#8594;</span></a><a class="btn t" href="Home.dc.html">Sign In Instead</a></div>
+</form>
+<div style="font-size:13px;line-height:1.4;color:#6F6168;padding:12px 4px 0">Passwords are hashed on this computer. GuideWire only watches your screen and never clicks for you.</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

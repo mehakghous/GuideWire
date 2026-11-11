@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Logo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display:inline-flex;align-items:center;gap:{{gap}}px">
+<svg viewBox="0 0 52 48" width="{{mw}}" height="{{size}}" role="img" aria-label="GuideWire">
+<path d="M33.5 14.4 A15 15 0 1 0 37 24" fill="none" stroke="{{ring}}" stroke-width="6" stroke-linecap="round"/>
+<path d="M25 24 H44" fill="none" stroke="{{bar}}" stroke-width="3.5" stroke-linecap="round"/>
+<circle cx="46" cy="24" r="3.8" fill="{{bar}}"/>
+</svg>
+<sc-if value="{{full}}" hint-placeholder-val="{{ true }}">
+<span style="font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-0.03em;font-size:{{fs}}px;line-height:1;white-space:nowrap;color:{{guide}}">Guide<span style="color:{{bar}}">Wire</span></span>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"tone":{"editor":"enum","default":"light","options":["light","dark"]},"variant":{"editor":"enum","default":"full","options":["full","mark"]},"size":{"editor":"int","default":40},"$preview":{"width":220,"height":48}}'>
+class Component extends DCLogic {
+renderVals() {
+const dark = (this.props.tone ?? 'light') === 'dark';
+const size = Number(this.props.size ?? 40);
+return {
+size,
+mw: Math.round(size * 52 / 48),
+gap: Math.round(size * 0.26),
+fs: Math.round(size * 0.64),
+full: (this.props.variant ?? 'full') === 'full',
+ring: dark ? '#F3EFE4' : '#5A3A47',
+bar: dark ? '#B9BE78' : '#5F6334',
+guide: dark ? '#F3EFE4' : '#3B232D'
+};
+}
+}
+</script>
+</body>
+</html>

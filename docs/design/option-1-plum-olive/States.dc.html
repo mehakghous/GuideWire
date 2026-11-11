@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>States and Dialogs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h2{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:12px;padding:11px 18px;font-weight:600;font-size:15px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.btn.s{background:#F3EFE4;color:var(--ink)}.btn.s:hover{background:#fff}
+.btn.d{background:#8A2F3C;color:#fff}.btn.d:hover{background:#9A3A47}
+.btn.l{background:#F3EFE4;color:#3B232D}
+.sk{border-radius:4px;background:#DDD6C4}
+.chip{display:inline-flex;border-radius:10px;padding:8px 15px;background:#F3EFE4;font-size:14px;font-weight:500;color:var(--ink);text-decoration:none}
+.chip.on{background:var(--plum);color:#F6F1E6}
+.p{border-radius:22px;padding:24px 26px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;min-width:0}
+.ic{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:14px;padding:14px;overflow:hidden">
+<section class="p" style="background:#E8E2D3">
+<span class="lab">Empty Library</span>
+<div class="ic" style="background:#F3EFE4;margin-top:22px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M4 16 L9 6 H21 L26 16 V24 H4 Z M4 16 H11 C11 19 13 20 15 20 C17 20 19 19 19 16 H26" fill="none" stroke="#5A3A47" stroke-width="2.5" stroke-linejoin="round"/></svg></div>
+<h2 style="font-size:25px;line-height:1.05;margin-top:6px">No Tutorials Yet</h2>
+<div style="font-size:14.5px;line-height:1.45;color:#4B3B43">Add six demo tutorials, find one on YouTube, or ask where to start.</div>
+<div style="display:flex;gap:8px;margin-top:auto"><a class="btn" href="Library.dc.html">Add Demos</a><a class="btn s" href="Find.dc.html">Find One</a></div>
+</section>
+<section class="p" style="background:linear-gradient(165deg,#5A3A47 0%,#3B232D 100%);color:#F3EFE4">
+<span class="lab" style="color:#D9C4CC">Loading Steps</span>
+<div class="ic" style="background:rgba(255,255,255,.1);margin-top:22px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="11" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="4"/><path d="M15 4 A11 11 0 0 1 26 15" fill="none" stroke="#B9BE78" stroke-width="4" stroke-linecap="round"/></svg></div>
+<h2 style="font-size:25px;line-height:1.05;margin-top:6px">Reading Your Steps</h2>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:4px"><div class="sk" style="width:80%;height:14px;background:rgba(255,255,255,.28)"></div><div class="sk" style="width:58%;height:14px;background:rgba(255,255,255,.22)"></div><div class="sk" style="width:68%;height:14px;background:rgba(255,255,255,.16)"></div></div>
+<div style="margin-top:auto;font-size:14px;color:#EADFE3">This takes a moment.</div>
+</section>
+<section class="p" style="background:#E9DCE0">
+<span class="lab" style="color:#5A3A47">Error</span>
+<div class="ic" style="background:#F3EFE4;margin-top:22px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M15 4 L27 25 H3 Z" fill="none" stroke="#8A2F3C" stroke-width="2.5" stroke-linejoin="round"/><path d="M15 12 V18 M15 21.5 V22" stroke="#8A2F3C" stroke-width="2.8" stroke-linecap="round"/></svg></div>
+<h2 style="font-size:24px;line-height:1.05;margin-top:6px">Couldn't Reach the AI Model</h2>
+<div style="font-size:14.5px;line-height:1.45;color:#4B3B43">Your video wasn't charged. Check your connection, then try again. Steps you already have still work offline.</div>
+<div style="display:flex;gap:8px;margin-top:auto"><a class="btn" href="States.dc.html">Try Again</a><a class="btn s" href="Ask.dc.html">Use Offline Answers</a></div>
+</section>
+<section class="p" style="background:#DCDFB8">
+<span class="lab" style="color:#4A4D28">Workflow Complete</span>
+<div class="ic" style="background:#5F6334;margin-top:22px"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M7 15 l6 6 l11 -12" fill="none" stroke="#F3EFE4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<h2 style="font-size:25px;line-height:1.05;margin-top:6px">Rig Complete</h2>
+<div style="font-size:14.5px;line-height:1.45;color:#3B3D1E">18 of 18 steps done in 22 minutes. Nice work.</div>
+<div style="display:flex;gap:8px;margin-top:auto"><a class="btn" href="Library.dc.html">Back to Library</a><a class="btn s" href="Find.dc.html">Next Tutorial</a></div>
+</section>
+<section class="p" style="background:#E8E2D3">
+<span class="lab">Welcome · 1 of 3</span>
+<h2 style="font-size:25px;line-height:1.05;margin-top:22px;max-width:260px">Which App Are You Learning In?</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px"><a class="chip on" href="States.dc.html">Blender</a><a class="chip" href="States.dc.html">Maya</a><a class="chip" href="States.dc.html">Houdini</a></div>
+<div style="font-size:14px;line-height:1.4;color:#6F6168;margin-top:6px">GuideWire tailors menu names and shortcuts to the app you pick.</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto"><div style="display:flex;gap:6px"><i style="width:26px;height:8px;border-radius:3px;background:#5F6334"></i><i style="width:8px;height:8px;border-radius:3px;background:#C9C2AE"></i><i style="width:8px;height:8px;border-radius:3px;background:#C9C2AE"></i></div><a class="btn" href="States.dc.html">Next &#8594;</a></div>
+</section>
+<section class="p" style="background:#3B232D;align-items:center;justify-content:center">
+<span class="lab" style="position:absolute;left:26px;top:24px;color:#D9C4CC">Dialog</span>
+<div style="width:300px;border-radius:16px;background:#F3EFE4;padding:22px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 50px rgba(0,0,0,.4)">
+<h2 style="font-size:21px;line-height:1.1">Delete This Tutorial?</h2>
+<div style="font-size:14.5px;line-height:1.45;color:#4B3B43">&ldquo;Leg Setup &amp; IK Handles&rdquo; and its progress will be removed. This can't be undone.</div>
+<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><a class="btn s" href="States.dc.html" style="background:#E8E2D3">Keep It</a><a class="btn d" href="States.dc.html">Delete</a></div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

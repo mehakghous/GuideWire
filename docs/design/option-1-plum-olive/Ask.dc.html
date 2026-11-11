@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ask GuideWire</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:12px 22px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.chip{display:inline-flex;border-radius:10px;padding:8px 14px;background:var(--plums);color:var(--plum);font-size:14px;font-weight:600;text-decoration:none}
+.chip:hover{background:#DFCDD3}
+.inp{border:0;background:transparent;font:500 17px 'Instrument Sans',sans-serif;color:var(--ink);outline:none;flex:1;min-width:0;padding:14px 8px 14px 18px}
+.sw{width:42px;height:24px;border-radius:7px;background:#CFC7B4;position:relative;flex:none}
+.sw i{position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:5px;background:#fff}
+.sw.on{background:var(--olive)}.sw.on i{left:21px}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="ask" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 14px 12px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">Ask GuideWire</span><h1 style="font-size:42px;line-height:1">Ask While You Work</h1></div>
+<div style="display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:12px;background:#DCDFB8;font-size:14px"><span style="width:9px;height:9px;border-radius:2px;background:#5F6334"></span><span><b>In Context</b> · Step 7, Parent the Mesh</span><a class="btn" href="Ask.dc.html" style="padding:6px 12px;font-size:14px;background:#F3EFE4;color:#2B1D25">Change</a></div>
+</div>
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:16px;overflow:hidden;padding-top:6px">
+<div style="align-self:flex-end;max-width:380px;background:#5A3A47;color:#F6F1E6;padding:13px 18px;border-radius:14px 14px 4px 14px;font-size:17px">Why do we parent the mesh with automatic weights?</div>
+<div style="display:flex;gap:12px;max-width:660px">
+<div style="flex:none;width:40px;height:40px;border-radius:10px;background:#3B232D;display:flex;align-items:center;justify-content:center"><dc-import name="Logo" tone="dark" variant="mark" size="24" hint-size="26px,24px"></dc-import></div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:#E8E2D3;border-radius:4px 14px 14px 14px;padding:18px 22px;display:flex;flex-direction:column;gap:10px;font-size:16.5px;line-height:1.45">
+<span>The tutorial does not say why, so I will not guess from it.</span>
+<span>In general, automatic weights tell Blender how strongly each bone pulls each part of the mesh, so the mesh bends when you move a bone. You can paint the weights later if a joint looks wrong.</span>
+<span class="m" style="font-size:12.5px;color:#6F6168">General knowledge, not from the video. Model answer, about 0.1 cent.</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><a class="chip" href="Ask.dc.html">Show Me Where to Click</a><a class="chip" href="Ask.dc.html">What If the Mesh Does Not Move?</a><a class="chip" href="Session.dc.html">Back to Step 7</a></div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;border-radius:12px;background:#E8E2D3;padding:5px">
+<input class="inp" id="q" type="text" placeholder="Ask About This Step or the Tutorial" aria-label="Your question">
+<a class="btn" href="Ask.dc.html" aria-label="Send">Ask <span aria-hidden="true">&#8594;</span></a>
+</div>
+<div style="display:flex;align-items:center;gap:10px;font-size:14px;color:#6F6168;padding-left:6px"><span class="sw on" role="img" aria-label="On"><i></i></span>Use the AI Model for Explanations</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

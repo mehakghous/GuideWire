@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Library</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:12px 20px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn.l{background:#F3EFE4;color:#3B232D}.btn.l:hover{background:#fff}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.chip{display:inline-flex;align-items:center;border-radius:10px;padding:9px 16px;background:var(--sunk);font-size:15px;font-weight:500;color:var(--ink);text-decoration:none}
+.chip:hover{background:#DDD6C4}
+.chip.on{background:var(--plum);color:#F6F1E6}
+.li{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 14px;border-radius:14px;text-decoration:none;color:var(--ink)}
+.li:hover{background:var(--sunk)}
+.ab{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:20px}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="library" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 0 12px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">9 Tutorials and Plans</span><h1 style="font-size:44px;line-height:1">Your Library</h1></div>
+<a class="btn" href="Import.dc.html">+ Import</a>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="chip on" href="Library.dc.html">All</a><a class="chip" href="Library.dc.html">Blender</a><a class="chip" href="Library.dc.html">Maya</a><a class="chip" href="Library.dc.html">Houdini</a><a class="chip" href="Library.dc.html">In Progress</a><a class="chip" href="Library.dc.html">Finished</a></div>
+<div style="flex:1;min-height:0;display:grid;grid-template-columns:290px minmax(0,1fr);gap:22px">
+<a href="Session.dc.html" style="border-radius:22px;background:linear-gradient(160deg,#5A3A47 0%,#3B232D 100%);overflow:hidden;text-decoration:none;color:#F3EFE4;display:flex;flex-direction:column;justify-content:space-between;padding:26px">
+<span class="lab" style="color:#D9C4CC">In Progress · Blender</span>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="font-family:'Syne',sans-serif;font-weight:800;font-size:74px;line-height:.9;letter-spacing:-0.04em">7<span style="font-size:34px;color:#B9BE78">/18</span></div>
+<h2 style="font-size:22px;line-height:1.1">Basic Rigging: Armature and Automatic Weights</h2>
+<div style="display:grid;grid-template-columns:repeat(18,minmax(0,1fr));gap:2px;height:8px"><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#B9BE78;border-radius:2px"></i><i style="background:#F3EFE4;border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i><i style="background:rgba(255,255,255,.18);border-radius:2px"></i></div>
+<span class="btn l" style="align-self:flex-start">Resume Guidance &#8594;</span>
+</div>
+</a>
+<div style="display:flex;flex-direction:column;gap:2px;min-height:0">
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#DCDFB8;color:#4A4D28">B</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:16px">Rig a Leg with Inverse Kinematics</b><span class="m" style="font-size:12.5px;color:#6F6168">Blender · 36 Steps · New</span></span><span class="m" style="font-size:12.5px;color:#5A3A47;font-weight:500">Start</span></a>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#E9DCE0;color:#5A3A47">M</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:16px">Quick Rig a Character in Maya</b><span class="m" style="font-size:12.5px;color:#6F6168">Maya · 16 Steps · Finished</span></span><span class="m" style="font-size:12.5px;color:#5F6334;font-weight:500">Done</span></a>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#E9DCE0;color:#5A3A47">M</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:16px">Leg Setup and IK Handles</b><span class="m" style="font-size:12.5px;color:#6F6168">Maya · 16 Steps · 2 Done</span></span><span class="m" style="font-size:12.5px;color:#5A3A47;font-weight:500">Resume</span></a>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#E8E2D3;color:#3B232D">H</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:16px">Houdini APEX: Simple FK</b><span class="m" style="font-size:12.5px;color:#6F6168">Houdini · 15 Steps · 4 Done</span></span><span class="m" style="font-size:12.5px;color:#5A3A47;font-weight:500">Resume</span></a>
+<a class="li" href="Session.dc.html"><span class="ab" style="background:#E8E2D3;color:#3B232D">H</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b style="font-size:16px">Houdini APEX: Simple IK</b><span class="m" style="font-size:12.5px;color:#6F6168">Houdini · 10 Steps · New</span></span><span class="m" style="font-size:12.5px;color:#5A3A47;font-weight:500">Start</span></a>
+<div style="display:flex;align-items:center;gap:12px;margin-top:auto;padding:12px 18px;border-radius:14px;background:#E9DCE0"><span class="lab" style="color:#5A3A47">Starter Plans</span><span style="font-size:14.5px">Where to start rigging, from the knowledge base</span><a href="Ask.dc.html" style="margin-left:auto;font-size:14.5px;font-weight:600;color:#5A3A47;white-space:nowrap">Open &#8594;</a></div>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

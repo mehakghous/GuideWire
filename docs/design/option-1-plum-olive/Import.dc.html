@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Import</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.chip{display:inline-flex;align-items:center;border-radius:10px;padding:9px 16px;background:var(--sunk);font-size:15px;font-weight:500;color:var(--ink);text-decoration:none}
+.chip.on{background:var(--plum);color:#F6F1E6}
+.inp{border:0;background:var(--sunk);border-radius:12px;padding:14px 18px;font:500 16px 'JetBrains Mono',monospace;color:var(--ink);outline:none;width:100%}
+.inp:focus{box-shadow:0 0 0 3px var(--olives),0 0 0 5px var(--olive)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:12px 22px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="import" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 0 12px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">Import</span><h1 style="font-size:44px;line-height:1">Turn a Source into Steps</h1></div>
+<div style="display:flex;gap:8px"><a class="chip on" href="Import.dc.html">Video Link</a><a class="chip" href="Import.dc.html">Pasted Text</a><a class="chip" href="Import.dc.html">Written Instructions</a></div>
+<form style="display:flex;flex-direction:column;gap:12px">
+<label for="u" class="lab">YouTube Address (Public, Up to 25 Minutes)</label>
+<input class="inp" id="u" type="text" value="https://www.youtube.com/watch?v=EBgHRd5tJfE">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div style="display:flex;gap:8px"><a class="chip on" href="Import.dc.html">Blender</a><a class="chip" href="Import.dc.html">Maya</a><a class="chip" href="Import.dc.html">Houdini</a></div><span style="font-size:14px;color:#6F6168">About 1 minute and 7 cents</span></div>
+</form>
+<section style="flex:1;min-height:0;border-radius:22px;background:linear-gradient(120deg,#4A2E3A 0%,#3B232D 100%);color:#F3EFE4;padding:28px 32px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:6px"><span class="lab" style="color:#D9C4CC">Working on It</span><h2 style="font-size:27px">Writing the Steps</h2></div>
+<div style="display:flex;flex-direction:column;gap:13px;max-width:440px">
+<div style="display:flex;align-items:center;gap:12px;font-size:16px"><span style="width:22px;height:22px;border-radius:6px;background:#B9BE78;color:#2B2E14;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">&#10003;</span>Watched the Video</div>
+<div style="display:flex;align-items:center;gap:12px;font-size:16px;font-weight:600"><span style="width:22px;height:22px;border-radius:6px;border:3px solid #B9BE78"></span>Writing 18 Small Steps</div>
+<div style="display:flex;align-items:center;gap:12px;font-size:16px;color:#BBAAB2"><span style="width:22px;height:22px;border-radius:6px;border:2px solid #6C4756"></span>Grouping Them into Goals</div>
+</div>
+<div style="display:flex;align-items:center;gap:12px"><div style="flex:1;height:10px;border-radius:4px;background:rgba(255,255,255,.15)"><div style="width:62%;height:100%;border-radius:4px;background:#B9BE78"></div></div><span class="m" style="font-size:13px">62%</span></div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

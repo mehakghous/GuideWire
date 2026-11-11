@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Logo Sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{font-family:'Instrument Sans',system-ui,sans-serif;color:#2B1D25;background:#F3EFE4}
+.gw *{box-sizing:border-box}
+.gw h2{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;color:#6F6168}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:560px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) 170px;gap:14px">
+<section style="border-radius:22px;background:#E8E2D3;padding:26px;display:flex;flex-direction:column;justify-content:space-between">
+<span class="lab">Logo on Alabaster</span>
+<dc-import name="Logo" tone="light" size="96" hint-size="520px,96px"></dc-import>
+<div style="font-size:14.5px;line-height:1.45;color:#4B3B43;max-width:440px">A G drawn as one ring, with the guide wire pulled out through its opening and ending in a bead. It reads as a path leading you to the next step.</div>
+</section>
+<section style="border-radius:22px;background:#3B232D;padding:26px;display:flex;flex-direction:column;justify-content:space-between">
+<span class="lab" style="color:#D9C4CC">Logo on Plum Wine</span>
+<dc-import name="Logo" tone="dark" size="96" hint-size="520px,96px"></dc-import>
+<div style="font-size:14.5px;line-height:1.45;color:#EADFE3;max-width:440px">The ring turns alabaster and the wire turns olive, so the bead stays the one point of color.</div>
+</section>
+<section style="border-radius:22px;background:#E9DCE0;padding:22px 26px;display:flex;align-items:flex-end;gap:26px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab" style="color:#5A3A47">Symbol Sizes</span><div style="display:flex;align-items:flex-end;gap:22px"><dc-import name="Logo" tone="light" variant="mark" size="64" hint-size="70px,64px"></dc-import><dc-import name="Logo" tone="light" variant="mark" size="40" hint-size="44px,40px"></dc-import><dc-import name="Logo" tone="light" variant="mark" size="24" hint-size="26px,24px"></dc-import><dc-import name="Logo" tone="light" variant="mark" size="16" hint-size="18px,16px"></dc-import></div></div>
+</section>
+<section style="border-radius:22px;background:#DCDFB8;padding:22px 26px;display:flex;align-items:flex-end;gap:26px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab" style="color:#4A4D28">Browser Favicon</span><div style="display:flex;align-items:flex-end;gap:18px">
+<div style="width:64px;height:64px;border-radius:14px;background:#3B232D;display:flex;align-items:center;justify-content:center"><dc-import name="Logo" tone="dark" variant="mark" size="38" hint-size="41px,38px"></dc-import></div>
+<div style="width:32px;height:32px;border-radius:8px;background:#3B232D;display:flex;align-items:center;justify-content:center"><dc-import name="Logo" tone="dark" variant="mark" size="20" hint-size="22px,20px"></dc-import></div>
+<div style="width:16px;height:16px;border-radius:4px;background:#3B232D;display:flex;align-items:center;justify-content:center"><dc-import name="Logo" tone="dark" variant="mark" size="11" hint-size="12px,11px"></dc-import></div>
+</div></div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":560}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

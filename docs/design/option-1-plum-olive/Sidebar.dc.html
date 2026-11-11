@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.sb a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;color:#E6DDD8;text-decoration:none;font-size:16px;font-weight:500}
+.sb a:hover{background:rgba(255,255,255,.08)}
+.sb a:focus-visible{outline:3px solid #B9BE78;outline-offset:2px}
+.sb a.on{background:#F3EFE4;color:#3B232D;font-weight:600}
+</style>
+</helmet>
+<div class="sb" style="width:232px;height:732px;border-radius:22px;background:#3B232D;color:#F3EFE4;padding:26px 14px 14px;display:flex;flex-direction:column;justify-content:space-between;font-family:'Instrument Sans',system-ui,sans-serif;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;gap:30px">
+<div style="padding:0 6px;overflow:hidden"><dc-import name="Logo" tone="dark" size="28" hint-size="150px,28px"></dc-import></div>
+<nav style="display:flex;flex-direction:column;gap:4px">
+<sc-for list="{{items}}" as="it" hint-placeholder-count="7">
+<a href="{{it.href}}" class="{{it.cls}}"><span style="width:8px;height:8px;border-radius:2px;background:{{it.dot}};flex:none"></span>{{it.label}}</a>
+</sc-for>
+</nav>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="background:rgba(255,255,255,.07);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+<div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.04em;color:#C9BAC0">Companion</div>
+<div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600"><span style="width:9px;height:9px;border-radius:2px;background:#B9BE78"></span>Watching Blender</div>
+<div style="font-size:13px;color:#C9BAC0;line-height:1.35">Step 7 of 18 is ready to guide.</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 6px 4px 14px">
+<div style="font-size:15px;font-weight:600">Demo Learner</div>
+<a href="Main.dc.html" style="padding:6px 10px;font-size:14px;color:#C9BAC0">Log Out</a>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","default":"home","options":["home","library","find","ask","import","history","settings"]},"$preview":{"width":232,"height":732}}'>
+class Component extends DCLogic {
+renderVals() {
+const a = this.props.active ?? 'home';
+const defs = [
+['home', 'Home', 'Home.dc.html'],
+['library', 'Library', 'Library.dc.html'],
+['find', 'Find a Tutorial', 'Find.dc.html'],
+['ask', 'Ask GuideWire', 'Ask.dc.html'],
+['import', 'Import', 'Import.dc.html'],
+['history', 'History', 'History.dc.html'],
+['settings', 'Settings', 'Settings.dc.html']
+];
+return { items: defs.map(([k, label, href]) => ({ label, href, cls: k === a ? 'on' : '', dot: k === a ? '#5F6334' : '#8B6F7B' })) };
+}
+}
+</script>
+</body>
+</html>

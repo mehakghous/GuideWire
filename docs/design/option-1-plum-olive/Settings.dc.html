@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+.gw{--paper:#F3EFE4;--raised:#FAF8F2;--sunk:#E8E2D3;--plum:#5A3A47;--plumd:#3B232D;--plums:#E9DCE0;--olive:#5F6334;--olives:#DCDFB8;--ink:#2B1D25;--mut:#6F6168;font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);background:var(--paper)}
+.gw *{box-sizing:border-box}
+.gw h1,.gw h2,.gw h3{font-family:'Syne',sans-serif;font-weight:700;letter-spacing:-0.02em;margin:0}
+.m{font-family:'JetBrains Mono',monospace}
+.lab{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.02em;color:var(--mut)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:12px 22px;font-weight:600;font-size:16px;text-decoration:none;background:var(--plum);color:#F6F1E6}
+.btn:hover{background:#6C4756}
+.btn:focus-visible,.gw a:focus-visible{outline:3px solid var(--olive);outline-offset:3px}
+.btn.s{background:#F3EFE4;color:var(--ink)}.btn.s:hover{background:#fff}
+.inp{border:0;background:#F3EFE4;border-radius:12px;padding:13px 16px;font:500 16px 'Instrument Sans',sans-serif;color:var(--ink);outline:none;width:100%}
+.inp:focus{box-shadow:0 0 0 3px var(--olives),0 0 0 5px var(--olive)}
+.sw{width:46px;height:26px;border-radius:8px;background:#CFC7B4;position:relative;flex:none}
+.sw i{position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:6px;background:#fff}
+.sw.on{background:var(--olive)}.sw.on i{left:23px}
+.set{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+</style>
+</helmet>
+<div class="gw" style="width:1120px;height:760px;display:flex;gap:14px;padding:14px;overflow:hidden">
+<dc-import name="Sidebar" active="settings" hint-size="232px,732px"></dc-import>
+<main style="flex:1;min-width:0;padding:14px 14px 14px 12px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="lab">Settings</span><h1 style="font-size:44px;line-height:1">Preferences</h1></div>
+<div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px">
+<section style="border-radius:22px;background:#E8E2D3;padding:24px 26px;display:flex;flex-direction:column;gap:6px">
+<h3 style="font-size:20px;margin-bottom:8px">While You Work</h3>
+<div class="set"><div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px">On-Screen Highlight</b><span style="font-size:14px;color:#6F6168">Mark the next item in your 3D app</span></div><span class="sw on" role="img" aria-label="On"><i></i></span></div>
+<div class="set"><div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px">Check Steps Automatically</b><span style="font-size:14px;color:#6F6168">Mark a step done when the app shows it</span></div><span class="sw on" role="img" aria-label="On"><i></i></span></div>
+<div class="set"><div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px">Use the AI Model</b><span style="font-size:14px;color:#6F6168">For explanations and video steps</span></div><span class="sw on" role="img" aria-label="On"><i></i></span></div>
+<div class="set"><div style="display:flex;flex-direction:column;gap:2px"><b style="font-size:16px">Confirm Before Leaving a Session</b><span style="font-size:14px;color:#6F6168">Progress is saved either way</span></div><span class="sw" role="img" aria-label="Off"><i></i></span></div>
+</section>
+<div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:20px">Appearance</h3>
+<div style="display:flex;gap:12px">
+<div style="flex:1;border-radius:14px;background:#F3EFE4;box-shadow:0 0 0 3px #5F6334;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:6px"><i style="width:22px;height:22px;border-radius:6px;background:#3B232D"></i><i style="width:22px;height:22px;border-radius:6px;background:#5F6334"></i><i style="width:22px;height:22px;border-radius:6px;background:#E8E2D3"></i></div><b style="font-size:16px">Alabaster</b></div>
+<div style="flex:1;border-radius:14px;background:#2A1F25;color:#F3EFE4;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;gap:6px"><i style="width:22px;height:22px;border-radius:6px;background:#D3A9BA"></i><i style="width:22px;height:22px;border-radius:6px;background:#B9BE78"></i><i style="width:22px;height:22px;border-radius:6px;background:#3B2C33"></i></div><b style="font-size:16px">Plum Night</b></div>
+</div>
+</section>
+<section style="border-radius:22px;background:#E9DCE0;padding:22px 26px;display:flex;flex-direction:column;gap:12px;flex:1">
+<h3 style="font-size:20px">Your Account</h3>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="dn" style="font-size:14px;font-weight:600">Display Name</label><input class="inp" id="dn" type="text" value="Demo Learner"></div>
+<div style="display:flex;flex-direction:column;gap:6px"><label for="np" style="font-size:14px;font-weight:600">New Password <span style="font-weight:400;color:#6F6168">(8 characters or more)</span></label><input class="inp" id="np" type="password" value=""></div>
+<div style="display:flex;gap:8px;margin-top:auto"><a class="btn" href="Settings.dc.html">Save Changes</a><a class="btn s" href="Settings.dc.html">Change Password</a></div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

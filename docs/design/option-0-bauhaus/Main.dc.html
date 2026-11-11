@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Login</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Jost',Futura,'Century Gothic',sans-serif}
+a{color:#111}
+input::placeholder{color:#6B6B66}
+</style>
+</helmet>
+<div style="width:1120px;height:760px;display:flex;background:#F2F1EC;color:#111;overflow:hidden">
+<div style="width:520px;flex:none;background:#111;position:relative;overflow:hidden">
+<div style="position:absolute;left:150px;top:90px;width:300px;height:300px;border-radius:50%;background:#D92B14"></div>
+<div style="position:absolute;left:60px;top:250px;width:210px;height:210px;border:6px solid #F2F1EC;box-sizing:border-box"></div>
+<div style="position:absolute;left:290px;top:300px;width:0;height:0;border-left:100px solid transparent;border-right:100px solid transparent;border-bottom:172px solid #F2F1EC"></div>
+<div style="position:absolute;left:52px;bottom:52px;right:52px;color:#F2F1EC">
+<div style="font-size:56px;line-height:0.98;font-weight:800;letter-spacing:-0.02em">learn the tool<br>while you use it.</div>
+<div style="margin-top:20px;font-size:18px;line-height:1.4;max-width:380px">guidewire reads your screen and points. you do every click.</div>
+</div>
+</div>
+<div style="flex:1;min-width:0;padding:64px 64px 48px;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="width:18px;height:18px;border-radius:50%;background:#D92B14"></span>
+<span style="width:18px;height:18px;background:#111"></span>
+<span style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:18px solid #111"></span>
+<span style="margin-left:8px;font-size:24px;font-weight:800">guidewire</span>
+</div>
+<form style="display:flex;flex-direction:column;gap:26px">
+<h1 style="margin:0;font-size:44px;line-height:1;font-weight:800;letter-spacing:-0.02em">create your<br>account</h1>
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="name" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase">name</label>
+<input id="name" type="text" value="Demo Learner" style="border:0;border-bottom:3px solid #111;background:transparent;font:500 22px 'Jost',sans-serif;padding:6px 0;color:#111;outline:none">
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="email" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase">email</label>
+<input id="email" type="email" value="demo@guidewire.test" style="border:0;border-bottom:3px solid #111;background:transparent;font:500 22px 'Jost',sans-serif;padding:6px 0;color:#111;outline:none">
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="pw" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase">password, 8 characters or more</label>
+<input id="pw" type="password" value="guidewire-demo" style="border:0;border-bottom:3px solid #111;background:transparent;font:500 22px 'Jost',sans-serif;padding:6px 0;color:#111;outline:none">
+</div>
+<div style="display:flex;align-items:center;gap:24px">
+<a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;background:#D92B14;color:#fff;text-decoration:none;font-weight:800;font-size:20px;padding:16px 28px">create account <span style="font-size:24px">&#8594;</span></a>
+<a href="Home.dc.html" style="font-size:18px;font-weight:500;text-decoration:underline;text-underline-offset:5px">i already have one</a>
+</div>
+</form>
+<div style="font-size:14px;line-height:1.45;color:#6B6B66;max-width:420px">passwords are hashed on this computer. each account sees only its own tutorials.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1120,"height":760}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

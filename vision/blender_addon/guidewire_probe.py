@@ -26,6 +26,7 @@ INTERVAL = 0.5
 _state: dict = {"mode": None}
 _lock = threading.Lock()
 _server = None
+_seq = [0]
 _wanted: dict = {"properties": set(), "attributes": set()}      # guarded by _lock
 MAX_WANTED, MAX_PATH = 64, 200
 SAFE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.\[\]'\" ]*$")      # attribute/index access only: no calls, no dunder names
@@ -92,6 +93,10 @@ def gather(bpy, properties=(), attributes=()) -> dict:
     out["node_counts"] = counts
     out["nodes"] = sorted(counts)
     out["node_names"] = [o.name for o in bpy.data.objects] + [b.name for a in bpy.data.armatures for b in a.bones]
+    try:    # recent operators, oldest first: what the learner just did (read-only list kept by Blender)
+        out["history"] = [{"id": o.bl_idname, "name": o.name} for o in ctx.window_manager.operators]
+    except Exception:
+        pass
     props = {p: v for p in properties if (v := read_path(bpy, p)) is not None}
     if props:
         out["properties"] = props
@@ -150,11 +155,16 @@ def _refresh():
         with _lock:
             props, attrs = sorted(_wanted["properties"]), sorted(_wanted["attributes"])
         snap = gather(bpy, props, attrs)
+        _seq[0] += 1
+        snap["seq"] = _seq[0]               # counts refreshes: tells a caller the state is live
         with _lock:
             _state.clear()
             _state.update(snap)
-    except Exception:
-        pass
+    except Exception as e:                  # keep the last good state; say what went wrong
+        import traceback
+        traceback.print_exc()
+        with _lock:
+            _state["probe_error"] = f"{type(e).__name__}: {e}"[:200]
     return INTERVAL
 
 

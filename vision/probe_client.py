@@ -43,4 +43,5 @@ def merge_observed(screen: dict[str, Any], probe: dict[str, Any] | None) -> dict
     out = dict(screen)
     if probe:
         out.update({k: v for k, v in probe.items() if v not in (None, [], "")})
+        out["probe"] = True                                 # the evaluator may judge node_count / name_exists / attribute_exists
     return out

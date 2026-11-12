@@ -29,10 +29,12 @@ def _step(*preds):
 
 
 def test_evaluator_node_count_name_exists_attribute_exists():
-    counts = {"node_counts": {"BONE": 9, "ARMATURE": 1}, "node_names": ["Cube", "Armature"], "attributes": {"Cube.my_prop": True, "Cube.nope": False}}
+    counts = {"probe": True, "node_counts": {"BONE": 9, "ARMATURE": 1}, "node_names": ["Cube", "Armature"], "attributes": {"Cube.my_prop": True, "Cube.nope": False}}
     assert evaluate_step(_step(P(kind="node_count", target="bone", value=9)), counts).status == "met"
     assert evaluate_step(_step(P(kind="node_count", target="BONE", value=10)), counts).status == "unmet"
     assert evaluate_step(_step(P(kind="node_count", target="BONE", value=1)), {}).status == "unverifiable"
+    no_probe = {k: v for k, v in counts.items() if k != "probe"}                  # same data, probe not running
+    assert evaluate_step(_step(P(kind="name_exists", target="Cube")), no_probe).status == "unverifiable"
     assert evaluate_step(_step(P(kind="name_exists", target="Cube")), counts).status == "met"
     assert evaluate_step(_step(P(kind="name_exists", target="cube")), counts).status == "unmet"   # exact, as the Outliner shows
     assert evaluate_step(_step(P(kind="attribute_exists", target="Cube.my_prop")), counts).status == "met"

@@ -177,7 +177,7 @@ def register():
     path = info_path()
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump({"v": PROTOCOL_VERSION, "port": _server.server_address[1], "token": token,
+        json.dump({"v": PROTOCOL_VERSION, "app": "blender", "port": _server.server_address[1], "token": token,
                    "pid": os.getpid()}, f)
     bpy.app.timers.register(_refresh, first_interval=0.1, persistent=True)
 

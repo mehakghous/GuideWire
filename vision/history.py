@@ -14,7 +14,14 @@ from shared.step_record import Action
 
 
 def _tokens(text: str) -> list[str]:
-    return re.findall(r"[a-z0-9]+", text.lower())
+    """Lower-case words; camelCase is split ("polyCube" -> poly, cube)."""
+    return re.findall(r"[a-z0-9]+", re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", text).lower())
+
+
+def _in(token: str, path: list[str]) -> bool:
+    """A word of the operator name appears in the path, as a whole word or as the start of one
+    (poly -> polygon, once the word has at least 3 letters)."""
+    return any(token == p or (len(token) >= 3 and p.startswith(token)) for p in path)
 
 
 def new_events(prev: list[dict], now: list[dict]) -> list[dict]:
@@ -55,8 +62,8 @@ def action_matches(action: Action, event: dict) -> bool:
     if not name or not path:
         return False
     if len(name) == 1:
-        return name[0] == path[-1]
-    return all(t in path for t in name)
+        return name[0] == path[-1] or (len(name[0]) >= 3 and path[-1].startswith(name[0]))
+    return all(_in(t, path) for t in name)
 
 
 def verify_actions(actions: Iterable[Action], events: list[dict]) -> bool | None:

@@ -19,7 +19,7 @@ def _info_path() -> str:
 
 
 def read_probe(timeout: float = 0.5, info_path: str | None = None, properties: list[str] | None = None,
-               attributes: list[str] | None = None) -> dict[str, Any] | None:
+               attributes: list[str] | None = None, app: str | None = None) -> dict[str, Any] | None:
     """Current Blender state, or None. `properties` / `attributes` are paths to read; the probe reads
     them on Blender's main thread, so a value asked for the first time may only appear on the next call."""
     query = urllib.parse.urlencode({k: ",".join(v) for k, v in
@@ -27,8 +27,8 @@ def read_probe(timeout: float = 0.5, info_path: str | None = None, properties: l
     try:
         with open(info_path or _info_path(), encoding="utf-8") as f:
             info = json.load(f)
-        if info.get("v") != PROTOCOL_VERSION:
-            return None
+        if info.get("v") != PROTOCOL_VERSION or (app and info.get("app", "blender") != app):
+            return None                                   # another application's probe is running
         req = urllib.request.Request(f"http://127.0.0.1:{int(info['port'])}/state" + (f"?{query}" if query else ""),
                                      headers={"X-GuideWire-Token": str(info["token"])})
         with urllib.request.urlopen(req, timeout=timeout) as r:

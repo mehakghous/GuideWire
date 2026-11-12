@@ -28,8 +28,29 @@ input to the application.
   `properties` and `attributes`. Paths are attribute/index access only (no calls), the same rule as
   `verification/snapshot_blender.py`. Blender is only read on its main thread, so a path asked for the
   first time shows up on the next call. Probe values override OCR.
+- `apps.py` per-application profile (window title, pinned version, whether the toolbar logic and a real
+  capture check exist). `VisionService(app="maya")` selects it.
+- `history.py` history-based verification: `HistoryTracker` turns the probe's operator list into new
+  events; `verify_actions` matches them to a step's UI path (camelCase and prefixes handled, so
+  `polyCube` matches "Create > Polygon Primitives > Cube").
+- `probes/` the Maya and Houdini probes plus the shared loopback server (`probe_core.py`). **Prototypes:
+  tested against fake `maya.cmds` / `hou` objects only, never run inside Maya or Houdini.**
+- `verification/oracle.py` oracle scorer: compares a learner scene with a reference end state after
+  normalising units, up axis and frame rate (Blender Z-up metres, Maya Y-up centimetres, Houdini Y-up
+  metres), and drops parts that have no data instead of penalising them.
 - `service.py` the entry point above. `observe()` and `ground()` share one capture and one OCR pass while
   the screen is unchanged. `observe(properties=[...], attributes=[...])` passes the active step's paths to the probe.
+
+## Probes per application
+| App | Probe | How it reads | History source | Status |
+|---|---|---|---|---|
+| Blender | `blender_addon/guidewire_probe.py` | `bpy`, on a timer on the main thread | `window_manager.operators` | Run in the real Blender GUI: state, active tool, requested paths. History not checked live |
+| Maya | `probes/maya_probe.py` | `maya.cmds`, `executeInMainThreadWithResult` | Script Editor echo file | Prototype, not run in Maya |
+| Houdini | `probes/houdini_probe.py` | `hou`, `hdefereval.executeInMainThreadWithResult` | `hou.undos.undoLabels()` | Prototype, not run in Houdini |
+
+All three speak protocol v1 and write their connection details (with the app name) to
+`%LOCALAPPDATA%/GuideWire/probe.json`, so run one application at a time. An idle, unfocused Blender
+wakes its timers only about every 10 seconds; while someone is working in it they run every 0.5 s.
 
 ## Run the manual checks (Blender open and in front)
     python -m vision.demo                                  # detect areas and draw them
@@ -49,4 +70,5 @@ own marks are never read back).
 - `name_exists`, `attribute_exists`, `node_count`, `node_exists`, `property_equals` need the probe add-on
   (the screen cannot read them); `ingestion/evaluator.py` reads them from `node_counts`, `node_names`,
   `attributes`, `nodes` and `properties`. Without the add-on those steps stay unverifiable (manual).
-- Maya 2027 and Houdini 22 adapters are not started.
+- Maya 2027 and Houdini 22 are not installed on the development machine: their probes and screen
+  detection are untested on the real applications (text guidance is app-independent but unchecked there).

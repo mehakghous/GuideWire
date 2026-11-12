@@ -230,7 +230,7 @@ def test_probe_merge_and_roundtrip(tmp_path):
 
     from vision.probe_client import merge_observed, read_probe
     assert merge_observed({"mode": "OBJECT", "workspace": "Layout"}, {"mode": "EDIT_MESH", "active_tool": "builtin.select"}) \
-        == {"mode": "EDIT_MESH", "workspace": "Layout", "active_tool": "builtin.select"}
+        == {"mode": "EDIT_MESH", "workspace": "Layout", "active_tool": "builtin.select", "probe": True}
     assert merge_observed({"mode": "OBJECT"}, None) == {"mode": "OBJECT"}
     assert read_probe(info_path=str(tmp_path / "missing.json")) is None
 

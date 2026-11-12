@@ -22,8 +22,8 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None):
-        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline."""
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision` is the screen-guidance service (observe only); None means sessions run without it."""
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(1000, 680)
@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
         self.home = HomeScreen()
         self.review = StepReviewScreen()
         self.session = SessionScreen()
+        self.session.vision = vision                # None = sessions run without screen guidance
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
@@ -74,6 +75,10 @@ class MainWindow(QMainWindow):
         self.ask_screen.save_steps.connect(self.save_asked_steps)
         self.session.ask_about.connect(lambda tid: self.open_ask(tid))
         self.stack.setCurrentWidget(self.login)
+
+    def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
+        self.session.stop_guidance()                # never leave the highlight on screen after the app closes
+        super().closeEvent(event)
 
     def current_screen(self):
         return self.stack.currentWidget()
@@ -197,8 +202,16 @@ class MainWindow(QMainWindow):
         except EngineError:
             self.show_home()
             return
-        self.session.load(engine)
+        self.session.load(engine, guidance=bool(self.accounts.preferences(self.user.id).get("overlay", True)))
         self.stack.setCurrentWidget(self.session)
+
+
+def _make_vision():
+    """The real screen-vision service on Windows (observe only); nothing elsewhere, so sessions simply run by hand."""
+    if sys.platform != "win32":
+        return None
+    from vision.service import VisionService
+    return VisionService("Blender")
 
 
 def main() -> int:
@@ -207,7 +220,7 @@ def main() -> int:
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=find_tutorials)
+    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=find_tutorials, vision=_make_vision())
     window.show()
     return app.exec()
 

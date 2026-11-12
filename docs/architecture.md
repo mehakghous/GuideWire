@@ -45,10 +45,19 @@ GuideWire only **observes** the learner's application window; the learner perfor
 
 ## 4. App layers
 
-`app/ui/*` (PyQt6 screens: Login, Home, Step Review, Session) call plain Python modules that need no display and are tested directly: `app/accounts.py` (bcrypt registration and login), `app/step_editor.py` (edit, reorder, delete, add, save), `app/session_engine.py`, `app/db.py`, `app/step_loader.py`.
+`app/ui/*` (PyQt6 screens: Login, Home, New tutorial, Step Review, Session, History, Profile) call plain Python modules that need no display and are tested directly: `app/accounts.py` (bcrypt registration and login), `app/step_editor.py` and `app/step_validation.py` (edit, reorder, delete, add, save), `app/session_engine.py`, `app/db.py`, `app/step_loader.py`, `app/step_checks.py` (what can really be checked), `app/pipeline.py` (offline ingestion) and `app/guidance.py` (screen guidance).
 
-## 5. Open items
+## 5. Screen guidance in a session
 
-- The vision side is not yet wired in: nothing produces `observed` or the overlay rectangle in the app today.
-- Schema 0.11 predicate kinds are agreed in principle (Mehak), pending Umaima's answer on whether they can be read from a screenshot.
-- The exact Blender version and the 10 to 15 operation set are not yet written down.
+`app/guidance.py` connects the session engine to `vision.service.VisionService`. While a session is active (Blender only, Windows only, and only if the user has not turned the overlay off in their profile), the Session screen asks vision on a worker thread every 1.5 seconds:
+
+1. `observe()` gives the state dict. If it satisfies the active step's expected state, `SessionEngine.auto_check` completes the step (marked "observed"). Craft steps, steps with nothing to check and kinds the app cannot read are never completed this way.
+2. `ground(ui_element)` for the step's first named UI element gives the rectangle for a highlight; the overlay draws it. If the learner presses Done first, the late reading is dropped.
+
+Vision only observes. If it cannot work (not Windows, OCR missing, Blender not open) the session carries on by hand and says why; a missing component switches guidance off for that session. The SQLite engine is only touched on the UI thread; the worker thread only calls vision.
+
+## 6. Open items
+
+- Only Blender has vision; Maya and Houdini adapters are not started.
+- `name_exists`, `attribute_exists` and `node_count` (schema 0.11) are checked by the verification harness against saved scenes, but the app cannot read them live, so those steps are manual in the app.
+- Display groups (schema 0.12) are not handled by the step editor yet.

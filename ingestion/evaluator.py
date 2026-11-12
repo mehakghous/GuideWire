@@ -11,10 +11,14 @@ observed = {
     "selection_types": ["MESH"],
     "open_panels": ["Properties:Modifiers"],
     "properties": {"object.location.x": 2.0},
+    "node_counts": {"ARMATURE": 1, "BONE": 9},   # node_exists reads "nodes" (the types present); node_count reads this
+    "node_names": ["Cube", "Armature"],           # name_exists
+    "attributes": {"Cube.my_prop": True},         # attribute_exists, only for paths that were tested
 }
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -31,6 +35,10 @@ class Verdict:
     met: list[StatePredicate] = field(default_factory=list)
     unmet: list[StatePredicate] = field(default_factory=list)
     unobservable: list[StatePredicate] = field(default_factory=list)
+
+
+def _norm(s: object) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(s).lower()).strip()
 
 
 def _observe(p: StatePredicate, obs: dict[str, Any]) -> bool | object:
@@ -59,6 +67,20 @@ def _observe(p: StatePredicate, obs: dict[str, Any]) -> bool | object:
         if isinstance(p.value, (int, float)) and isinstance(actual, (int, float)):
             return abs(float(actual) - float(p.value)) <= _TOL
         return str(actual) == str(p.value)
+    if p.kind == "node_count":
+        counts = obs.get("node_counts", _MISSING)       # {"ARMATURE": 1, "BONE": 9}: how many of each node type
+        if counts is _MISSING or p.value is None:
+            return _MISSING
+        have = {_norm(k): v for k, v in counts.items()}
+        return float(have.get(_norm(p.target), 0)) >= float(p.value)
+    if p.kind == "name_exists":
+        names = obs.get("node_names", _MISSING)         # exact names, as the Outliner shows them
+        return _MISSING if names is _MISSING else p.target.strip() in set(names)
+    if p.kind == "attribute_exists":
+        attrs = obs.get("attributes", _MISSING)         # {"object.attribute": True/False}, only for paths that were tested
+        if attrs is _MISSING or p.target not in attrs:
+            return _MISSING
+        return bool(attrs[p.target])
     return _MISSING
 
 

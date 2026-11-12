@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.parse
 import urllib.request
 from typing import Any
 
@@ -17,13 +18,18 @@ def _info_path() -> str:
     return os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), "GuideWire", "probe.json")
 
 
-def read_probe(timeout: float = 0.5, info_path: str | None = None) -> dict[str, Any] | None:
+def read_probe(timeout: float = 0.5, info_path: str | None = None, properties: list[str] | None = None,
+               attributes: list[str] | None = None) -> dict[str, Any] | None:
+    """Current Blender state, or None. `properties` / `attributes` are paths to read; the probe reads
+    them on Blender's main thread, so a value asked for the first time may only appear on the next call."""
+    query = urllib.parse.urlencode({k: ",".join(v) for k, v in
+                                    (("properties", properties), ("attributes", attributes)) if v})
     try:
         with open(info_path or _info_path(), encoding="utf-8") as f:
             info = json.load(f)
         if info.get("v") != PROTOCOL_VERSION:
             return None
-        req = urllib.request.Request(f"http://127.0.0.1:{int(info['port'])}/state",
+        req = urllib.request.Request(f"http://127.0.0.1:{int(info['port'])}/state" + (f"?{query}" if query else ""),
                                      headers={"X-GuideWire-Token": str(info["token"])})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             body = json.load(r)

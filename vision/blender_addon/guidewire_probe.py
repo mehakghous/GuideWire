@@ -4,6 +4,10 @@ Publishes a small snapshot of Blender's state on 127.0.0.1 so GuideWire can veri
 reads: no operator is run and nothing is changed. Loopback only; every request needs the
 per-session token, which is written to %LOCALAPPDATA%/GuideWire/probe.json (current user only).
 Protocol version 1: GET /state with header `X-GuideWire-Token` -> JSON {"v": 1, "state": {...}}.
+Optional query `properties=a.b,c.d` and `attributes=obj.attr`: paths the caller wants read. The web
+thread only records them; Blender is read on its main thread by the timer, so the first answer
+after a new request may not hold the value yet (the caller treats that as "not observable").
+Paths are attribute and index access only (no calls), the same rule as verification/snapshot_blender.py.
 """
 bl_info = {"name": "GuideWire Probe", "author": "GuideWire", "version": (0, 1, 0),
            "blender": (5, 2, 0), "category": "System",
@@ -11,21 +15,89 @@ bl_info = {"name": "GuideWire Probe", "author": "GuideWire", "version": (0, 1, 0
 
 import json
 import os
+import re
 import secrets
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlparse
 
 PROTOCOL_VERSION = 1
 INTERVAL = 0.5
 _state: dict = {"mode": None}
 _lock = threading.Lock()
 _server = None
+_wanted: dict = {"properties": set(), "attributes": set()}      # guarded by _lock
+MAX_WANTED, MAX_PATH = 64, 200
+SAFE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.\[\]'\" ]*$")      # attribute/index access only: no calls, no dunder names
 
 
-def gather(bpy) -> dict:
+def node_types(bpy) -> dict:
+    """Count of each node type in the scene (same naming as verification/collect_blender.py)."""
+    out: dict = {}
+
+    def bump(k):
+        out[k] = out.get(k, 0) + 1
+
+    for ob in bpy.data.objects:
+        bump(ob.type)
+        if ob.type == "ARMATURE":
+            for _ in ob.data.bones:
+                bump("BONE")
+        for c in ob.constraints:
+            bump("CONSTRAINT_" + c.type)
+        if ob.pose:
+            for pb in ob.pose.bones:
+                for c in pb.constraints:
+                    bump("CONSTRAINT_" + c.type)
+        for m in ob.modifiers:
+            bump("MODIFIER_" + m.type)
+    return out
+
+
+def read_path(bpy, path: str):
+    """Value at an attribute path such as objects['Cube'].location[0], or None if unreadable."""
+    if len(path) > MAX_PATH or not SAFE.match(path) or "__" in path:
+        return None
+    try:
+        v = eval(path, {"__builtins__": {}}, {"objects": bpy.data.objects, "scene": bpy.context.scene,
+                                              "armatures": bpy.data.armatures})
+        if isinstance(v, (int, float, str)):
+            return v
+        return float(v) if hasattr(v, "__float__") else str(v)
+    except Exception:
+        return None
+
+
+def has_attr(bpy, path: str):
+    """True/False whether "Name.attr" exists on an object or pose bone called Name; None if unreadable."""
+    try:
+        name, _, attr = path.partition(".")
+        ob = bpy.data.objects.get(name)
+        if ob is not None:
+            return bool(attr and (attr in ob.keys() or hasattr(ob, attr)))
+        for o in bpy.data.objects:
+            pb = o.pose.bones.get(name) if o.pose else None
+            if pb is not None:
+                return bool(attr and (attr in pb.keys() or hasattr(pb, attr)))
+        return False
+    except Exception:
+        return None
+
+
+def gather(bpy, properties=(), attributes=()) -> dict:
     """Read the state the evaluator understands. Runs on Blender's main thread only."""
     ctx = bpy.context
     out: dict = {"mode": ctx.mode}
+    counts = node_types(bpy)
+    out["node_counts"] = counts
+    out["nodes"] = sorted(counts)
+    out["node_names"] = [o.name for o in bpy.data.objects] + [b.name for a in bpy.data.armatures for b in a.bones]
+    props = {p: v for p in properties if (v := read_path(bpy, p)) is not None}
+    if props:
+        out["properties"] = props
+    attrs = {a: v for a in attributes if (v := has_attr(bpy, a)) is not None}
+    if attrs:
+        out["attributes"] = attrs
     ws = getattr(ctx, "workspace", None)
     if ws is not None:
         out["workspace"] = ws.name
@@ -45,11 +117,18 @@ def gather(bpy) -> dict:
 def _make_handler(token: str):
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):  # noqa: N802
-            if self.path != "/state" or self.headers.get("X-GuideWire-Token") != token:
+            url = urlparse(self.path)
+            if url.path != "/state" or self.headers.get("X-GuideWire-Token") != token:
                 self.send_response(403)
                 self.end_headers()
                 return
+            query = parse_qs(url.query)
             with _lock:
+                for key in ("properties", "attributes"):
+                    for item in ",".join(query.get(key, [])).split(","):
+                        item = item.strip()
+                        if item and len(item) <= MAX_PATH and len(_wanted[key]) < MAX_WANTED:
+                            _wanted[key].add(item)
                 body = json.dumps({"v": PROTOCOL_VERSION, "state": _state}).encode()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -68,7 +147,9 @@ def info_path() -> str:
 def _refresh():
     import bpy
     try:
-        snap = gather(bpy)
+        with _lock:
+            props, attrs = sorted(_wanted["properties"]), sorted(_wanted["attributes"])
+        snap = gather(bpy, props, attrs)
         with _lock:
             _state.clear()
             _state.update(snap)

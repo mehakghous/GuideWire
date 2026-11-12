@@ -63,10 +63,18 @@ def find_target(words, pixels, ui_element: str, mode_hint: str | None = None) ->
     return found
 
 
+SAME_SCREEN_DIFF = 1.5     # mean grey-level change below which two captures count as the same screen
+CACHE_SECONDS = 5.0        # never reuse a reading older than this
+
+
 class VisionService:
+    """One capture and one OCR pass are shared by `ground` and `observe` while the screen is unchanged,
+    so the app can call both every tick without paying for the read twice."""
+
     def __init__(self, title: str = "Blender", use_probe: bool = True) -> None:
         self.title = title
         self.use_probe = use_probe
+        self._cache: dict[str, Any] = {}
 
     def _frame(self):
         from vision import winplatform
@@ -79,29 +87,48 @@ class VisionService:
         pixels = mask_occluders(frame.pixels, win.rect, winplatform.windows_above(win.hwnd))
         return win, (frame, pixels)
 
-    def ground(self, ui_element: str) -> Guidance:
-        from vision.ocr import read_text
-        win, grabbed = self._frame()
-        if win is None:
-            return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
-        frame, pixels = grabbed
-        from vision.probe_client import read_probe
-        probe = read_probe() if self.use_probe else None
-        found = find_target(read_text(pixels), pixels, ui_element, (probe or {}).get("mode"))
-        return ground_located(frame.geometry, win.rect, found)
+    def _scene(self):
+        """(window, frame, pixels, words, layout) for the screen as it is now, reusing the last read if
+        nothing changed. (None, ...) when the window is not visible."""
+        import time
 
-    def observe(self) -> dict[str, Any]:
-        from vision.observe import observe_blender
+        import cv2
+
         from vision.ocr import read_text
-        from vision.probe_client import merge_observed, read_probe
         from vision.regions import default_layout, detect_layout
         win, grabbed = self._frame()
         if win is None:
-            return {}
-        _, pixels = grabbed
+            return None, None, None, [], None
+        frame, pixels = grabbed
+        thumb = cv2.resize(cv2.cvtColor(pixels, cv2.COLOR_BGR2GRAY), (192, 108), interpolation=cv2.INTER_AREA)
+        c = self._cache
+        if (c and c["rect"] == win.rect and time.monotonic() - c["at"] < CACHE_SECONDS
+                and float(abs(c["thumb"].astype("int16") - thumb.astype("int16")).mean()) < SAME_SCREEN_DIFF):
+            return win, frame, pixels, c["words"], c["layout"]
         layout = detect_layout(pixels)
         if layout.confidence < 0.5:
             layout = default_layout(pixels.shape[1], pixels.shape[0])
+        words = read_text(pixels)
+        self._cache = {"rect": win.rect, "thumb": thumb, "at": time.monotonic(), "words": words, "layout": layout}
+        return win, frame, pixels, words, layout
+
+    def ground(self, ui_element: str) -> Guidance:
+        win, frame, pixels, words, _ = self._scene()
+        if win is None:
+            return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
+        from vision.probe_client import read_probe
         probe = read_probe() if self.use_probe else None
-        screen = observe_blender(read_text(pixels), pixels, layout, mode_hint=(probe or {}).get("mode"))
+        found = find_target(words, pixels, ui_element, (probe or {}).get("mode"))
+        return ground_located(frame.geometry, win.rect, found)
+
+    def observe(self, properties: list[str] | None = None, attributes: list[str] | None = None) -> dict[str, Any]:
+        """State for the evaluator. `properties` / `attributes` are the paths the active step needs read
+        by the Blender probe (ignored when the probe is not running)."""
+        from vision.observe import observe_blender
+        from vision.probe_client import merge_observed, read_probe
+        win, _, pixels, words, layout = self._scene()
+        probe = read_probe(properties=properties, attributes=attributes) if self.use_probe else None
+        if win is None:
+            return merge_observed({}, probe)          # Blender hidden: the probe can still answer
+        screen = observe_blender(words, pixels, layout, mode_hint=(probe or {}).get("mode"))
         return merge_observed(screen, probe)

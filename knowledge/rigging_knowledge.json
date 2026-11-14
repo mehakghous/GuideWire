@@ -1002,6 +1002,90 @@
       "url": "https://www.sidefx.com/docs/houdini/nodes/sop/capturemirror.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B51": {
+      "title": "Blender manual: Copy/Paste Pose",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/posing/editing/copy_paste.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B52": {
+      "title": "Blender manual: Pose Library",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/posing/editing/pose_library.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B53": {
+      "title": "Blender manual: Spline IK (setup)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/posing/bone_constraints/inverse_kinematics/spline_ik.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B54": {
+      "title": "Blender manual: Motion Paths",
+      "url": "https://docs.blender.org/manual/en/latest/animation/motion_paths.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "B55": {
+      "title": "Blender manual: Nonlinear Animation editor introduction",
+      "url": "https://docs.blender.org/manual/en/latest/editors/nla/introduction.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "M63": {
+      "title": "Maya: Playblast an animation",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Animation/files/GUID-1C6EDC8D-DA67-490E-81F1-1205336DEBD9.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M64": {
+      "title": "Maya: Create Editable Motion Trail Options",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Animation/files/GUID-2DFBE283-1A1E-4194-B6C5-B4E0F72D61CA.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M65": {
+      "title": "Maya: Graph Editor Curves menu (Pre/Post Infinity)",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Animation/files/GUID-619CAE9C-107D-4504-A769-227DDC847153.htm",
+      "tier": "official",
+      "version": "Maya 2025 help"
+    },
+    "M66": {
+      "title": "Maya: Copy smooth skin weights",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Skinning_Copy_smooth_skin_weights.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M67": {
+      "title": "Maya: Blend smooth skinning methods (Dual Quaternion, Weight Blended)",
+      "url": "https://download.autodesk.com/global/docs/maya2013/en_us/files/GUID-B292915D-EA18-43DA-A817-58DDC3DF879D.htm",
+      "tier": "official",
+      "version": "Maya 2013 help"
+    },
+    "M68": {
+      "title": "Maya: Animation Layer Editor",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Animation/files/GUID-46091038-7F23-467C-8FEC-844A26C11EDA.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M69": {
+      "title": "Maya: Create an animation layer",
+      "url": "https://help.autodesk.com/cloudhelp/2018/ENU/Maya-Animation/files/GUID-212B5A02-A3B4-4172-B1ED-A35961C6DBF8.htm",
+      "tier": "official",
+      "version": "Maya 2018 help"
+    },
+    "H46": {
+      "title": "SideFX Houdini docs: DeltaMush (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/deltamush.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H47": {
+      "title": "SideFX Houdini docs: Delta Mush 3.0 (rig component)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/rig_components/deltamush.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -11086,6 +11170,872 @@
           "tier": "official",
           "sources": [
             "H45"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.pose_copy_paste",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-06"
+      ],
+      "phrases": [
+        "copy a pose in blender",
+        "paste the pose mirrored",
+        "flip the pose to the other side",
+        "copy the pose between armatures",
+        "paste pose flipped on x axis"
+      ],
+      "ui": [
+        {
+          "path": "Pose Mode > Pose > Copy Pose (Ctrl-C) / Paste Pose (Ctrl-V)",
+          "tier": "official",
+          "source": "B51"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Pose Mode select the bones whose pose you want and choose Pose > Copy Pose (Ctrl-C).",
+          "tier": "official",
+          "sources": [
+            "B51"
+          ]
+        },
+        {
+          "text": "Go to the other frame or armature and choose Pose > Paste Pose (Ctrl-V); tick Flipped on X-Axis to paste it mirrored.",
+          "tier": "official",
+          "sources": [
+            "B51"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Blender copies poses between armatures through a temporary pose buffer; poses can be pasted normally or mirrored across the X axis.",
+          "tier": "official",
+          "sources": [
+            "B51"
+          ]
+        },
+        {
+          "text": "Copy Pose copies only the selected bones, so parts of a pose can be copied; Paste Pose matches bones by name, so only bones with corresponding names are affected.",
+          "tier": "official",
+          "sources": [
+            "B51"
+          ]
+        },
+        {
+          "text": "Flipped on X-Axis mirrors the pasted pose, useful for transferring poses between opposite sides such as the left arm to the right arm; On Selected Only applies it just to the selected bones.",
+          "tier": "official",
+          "sources": [
+            "B51"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The pasted bones take the copied (or mirrored) pose.",
+          "tier": "official",
+          "sources": [
+            "B51"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.pose_library",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-06"
+      ],
+      "phrases": [
+        "pose library in blender",
+        "save a pose",
+        "pose asset",
+        "create a pose asset",
+        "store poses to reuse"
+      ],
+      "ui": [
+        {
+          "path": "Pose Mode > Asset Browser > Pose Library (Create Pose Asset)",
+          "tier": "official",
+          "source": "B52"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Pose the armature in Pose Mode and use Create Pose Asset to store the pose in the library.",
+          "tier": "official",
+          "sources": [
+            "B52"
+          ]
+        },
+        {
+          "text": "Apply a stored pose later from the Asset Browser.",
+          "tier": "official",
+          "sources": [
+            "B52"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The pose library is based on the Asset Browser and only works in Pose Mode, when posing an armature.",
+          "tier": "official",
+          "sources": [
+            "B52"
+          ]
+        },
+        {
+          "text": "A pose asset is an action marked as an asset that contains exactly one frame of animation data; each pose is its own action with its own name and preview image.",
+          "tier": "official",
+          "sources": [
+            "B52"
+          ]
+        },
+        {
+          "text": "The pose library is implemented as an add-on that is enabled by default; disabling it removes the pose library from the interface.",
+          "tier": "official",
+          "sources": [
+            "B52"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The pose appears as an asset with a preview in the Asset Browser.",
+          "tier": "official",
+          "sources": [
+            "B52"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.spline_ik",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "IKFK-10"
+      ],
+      "phrases": [
+        "spline ik in blender",
+        "rig a tail or spine with a curve",
+        "spline ik constraint",
+        "bones follow a curve",
+        "tentacle rig"
+      ],
+      "ui": [
+        {
+          "path": "Bone Constraints > Spline IK (a chain of connected bones and a curve)",
+          "tier": "official",
+          "source": "B53"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Make a chain of connected bones and a curve for them to follow.",
+          "tier": "official",
+          "sources": [
+            "B53"
+          ]
+        },
+        {
+          "text": "Add the Spline IK constraint to the last bone of the chain and set the curve as its target.",
+          "tier": "official",
+          "sources": [
+            "B53"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Spline IK is a constraint that aligns a chain of bones along a curve; it suits flexible parts such as tails, tentacles and spines, and ropes.",
+          "tier": "official",
+          "sources": [
+            "B53"
+          ]
+        },
+        {
+          "text": "It is not strictly an inverse kinematics method but a forward kinematics one; it works on multiple bones, cannot be used for objects, and is evaluated after all other constraints.",
+          "tier": "official",
+          "sources": [
+            "B53"
+          ]
+        },
+        {
+          "text": "If a standard IK chain and a Spline IK chain both affect a bone, the standard IK chain takes priority.",
+          "tier": "official",
+          "sources": [
+            "B53"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Moving the curve's control points bends the bone chain along it.",
+          "tier": "official",
+          "sources": [
+            "B53"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.motion_paths",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "PATH-01"
+      ],
+      "phrases": [
+        "show the motion path",
+        "motion paths in blender",
+        "calculate path",
+        "see the trajectory of the animation",
+        "update the motion paths"
+      ],
+      "ui": [
+        {
+          "path": "Pose > Motion Paths > Calculate / Update Paths",
+          "tier": "official",
+          "source": "B54",
+          "note": "The page was read through a summary, so the wording is paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the bones (Pose Mode) or object and choose Calculate to show their motion paths.",
+          "tier": "official",
+          "sources": [
+            "B54"
+          ]
+        },
+        {
+          "text": "After changing the animation choose Update Paths so the path matches the current animation; Range is used when the path type is In Range.",
+          "tier": "official",
+          "sources": [
+            "B54"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Clicking Calculate Path shows the motion paths (or updates them); in Pose Mode the tools are under Pose > Motion Paths.",
+          "tier": "official",
+          "sources": [
+            "B54"
+          ]
+        },
+        {
+          "text": "If a path was already calculated, the update operator brings its shape to the current animation; Range sets the frames of the path and is only active when the Paths Type is In Range.",
+          "tier": "official",
+          "sources": [
+            "B54"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The path drawn in the viewport follows the animated point.",
+          "tier": "official",
+          "sources": [
+            "B54"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.nla_basics",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "LAYR-02"
+      ],
+      "phrases": [
+        "nla editor",
+        "nonlinear animation in blender",
+        "action strips",
+        "tweak mode",
+        "use actions as clips",
+        "stash an action"
+      ],
+      "ui": [
+        {
+          "path": "Nonlinear Animation editor (Action Track, strips, Tab for Tweak Mode)",
+          "tier": "official",
+          "source": "B55",
+          "note": "The page was read through a summary; Push Down was not confirmed and is not claimed."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Nonlinear Animation editor; the top track is the Action Track holding the object's active action.",
+          "tier": "official",
+          "sources": [
+            "B55"
+          ]
+        },
+        {
+          "text": "Use action strips on tracks to arrange reusable actions, and select an action then press Tab to edit it in Tweak Mode.",
+          "tier": "official",
+          "sources": [
+            "B55"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The top track, highlighted in orange, is the Action Track; it contains the object's active action, where new keyframes are added by default.",
+          "tier": "official",
+          "sources": [
+            "B55"
+          ]
+        },
+        {
+          "text": "Each track can contain any number of strips, typically Action Strips, which are instances of actions.",
+          "tier": "official",
+          "sources": [
+            "B55"
+          ]
+        },
+        {
+          "text": "To edit another action, select it in the NLA editor and press Tab to enter Tweak Mode.",
+          "tier": "official",
+          "sources": [
+            "B55"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The strips play in order on the timeline.",
+          "tier": "official",
+          "sources": [
+            "B55"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.playblast",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ANIM-08"
+      ],
+      "phrases": [
+        "playblast in maya",
+        "preview the animation",
+        "make a quick movie of the animation",
+        "playblast options",
+        "export a playblast"
+      ],
+      "ui": [
+        {
+          "path": "Animation menu set: Playback > Playblast (also Windows > Playblast)",
+          "tier": "official",
+          "source": "M63"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Click in a view to make it active, then choose Playback > Playblast.",
+          "tier": "official",
+          "sources": [
+            "M63"
+          ]
+        },
+        {
+          "text": "Choose the Format for the output (select image for an image sequence instead of a movie) and let it run.",
+          "tier": "official",
+          "sources": [
+            "M63"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "A playblast generates a movie or images using the active view and the current time range in the Time Slider.",
+          "tier": "official",
+          "sources": [
+            "M63"
+          ]
+        },
+        {
+          "text": "The default scale is 0.5, which makes the playblast image resolution one quarter the size of the active view.",
+          "tier": "official",
+          "sources": [
+            "M63"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The movie plays back at the scene frame rate once made.",
+          "tier": "official",
+          "sources": [
+            "M63"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.motion_trail",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "PATH-01"
+      ],
+      "phrases": [
+        "motion trail in maya",
+        "create a motion trail",
+        "editable motion trail",
+        "see the path of the animation",
+        "trail increment"
+      ],
+      "ui": [
+        {
+          "path": "Animation menu set: Visualize > Create Editable Motion Trail",
+          "tier": "official",
+          "source": "M64"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the animated object and choose Visualize > Create Editable Motion Trail (the option box has the settings).",
+          "tier": "official",
+          "sources": [
+            "M64"
+          ]
+        },
+        {
+          "text": "Set the Time Range and Increment, and Draw when selected if the trail should only show when the object is selected.",
+          "tier": "official",
+          "sources": [
+            "M64"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Time Range creates the trail for the frames between Start Time and End Time or for all the frames in the Time Slider.",
+          "tier": "official",
+          "sources": [
+            "M64"
+          ]
+        },
+        {
+          "text": "Increment defaults to 1, so the trail is sampled at every frame; a larger value draws fewer keys and can improve performance.",
+          "tier": "official",
+          "sources": [
+            "M64"
+          ]
+        },
+        {
+          "text": "Draw when selected draws the motion trail only when the object is selected.",
+          "tier": "official",
+          "sources": [
+            "M64"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "A curve showing the object's path appears in the viewport.",
+          "tier": "official",
+          "sources": [
+            "M64"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.curve_infinity",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CURV-06"
+      ],
+      "phrases": [
+        "loop the animation curve",
+        "cycle the animation",
+        "pre infinity post infinity",
+        "cycle with offset",
+        "oscillate the curve",
+        "make a walk cycle repeat"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor > Curves > Pre Infinity / Post Infinity",
+          "tier": "official",
+          "source": "M65",
+          "note": "The Euler Filter entry only points to a separate Euler angle filtering page that was not read, so it is not described."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Graph Editor select the curves and open the Curves menu.",
+          "tier": "official",
+          "sources": [
+            "M65"
+          ]
+        },
+        {
+          "text": "Set Pre Infinity and Post Infinity to Cycle (or Oscillate) so the curve repeats before and after its keys.",
+          "tier": "official",
+          "sources": [
+            "M65"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Pre and Post settings define the behaviour of an animation curve before and after its first and last key.",
+          "tier": "official",
+          "sources": [
+            "M65"
+          ]
+        },
+        {
+          "text": "Cycle repeats the animation curve as a copy infinitely; Oscillate repeats it by reversing its values; Constant maintains the value of the end keys and is the default.",
+          "tier": "official",
+          "sources": [
+            "M65"
+          ]
+        },
+        {
+          "text": "The Curves menu items process entire animation curves.",
+          "tier": "official",
+          "sources": [
+            "M65"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The curve in the Graph Editor shows the repeated copies beyond the keys.",
+          "tier": "official",
+          "sources": [
+            "M65"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.copy_skin_weights",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKIN-06"
+      ],
+      "phrases": [
+        "copy skin weights",
+        "transfer the weights to another mesh",
+        "copy weights from low res to high res",
+        "copy skin weights options",
+        "surface association"
+      ],
+      "ui": [
+        {
+          "path": "Skin > Edit Smooth Skin > Copy Skin Weights",
+          "tier": "official",
+          "source": "M66"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the source skinned mesh, then the destination mesh (or select source vertices then target vertices).",
+          "tier": "official",
+          "sources": [
+            "M66"
+          ]
+        },
+        {
+          "text": "Choose Skin > Edit Smooth Skin > Copy Skin Weights; the defaults Closest point on surface and Closest joint work best for most cases.",
+          "tier": "official",
+          "sources": [
+            "M66"
+          ]
+        },
+        {
+          "text": "Click Copy to copy the smooth skin weights.",
+          "tier": "official",
+          "sources": [
+            "M66"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Skin > Edit Smooth Skin > Copy Skin Weights copies smooth skin weights from the source skin to the destination skin.",
+          "tier": "official",
+          "sources": [
+            "M66"
+          ]
+        },
+        {
+          "text": "For most situations the default Surface Association Closest point on surface works best; UV space helps when characters differ widely in scale or proportion; One to one for Influence Association helps when the skeleton hierarchies are identical.",
+          "tier": "official",
+          "sources": [
+            "M66"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move a joint: the destination mesh deforms like the source.",
+          "tier": "official",
+          "sources": [
+            "M66"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.skinning_method",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKIN-08"
+      ],
+      "phrases": [
+        "dual quaternion skinning",
+        "classic linear skinning",
+        "weight blended skinning",
+        "candy wrapper twist fix",
+        "change the skinning method",
+        "dq blend weight"
+      ],
+      "ui": [
+        {
+          "path": "Smooth Bind Options / skinCluster > Skinning Method",
+          "tier": "official",
+          "source": "M67",
+          "note": "The pages use lower-case names for the methods, so the labels are as the Autodesk text writes them."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose the skinning method in the Smooth Bind Options, or select the skinCluster and set its Skinning Method.",
+          "tier": "official",
+          "sources": [
+            "M67"
+          ]
+        },
+        {
+          "text": "For a blend, set the Skinning Method to Weight Blended and paint the blend with Weight Type DQ Blend Weight in the Paint Skin Weights Tool.",
+          "tier": "official",
+          "sources": [
+            "M67"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Maya offers three smooth skinning methods: classic linear, dual quaternion and a blend of the two.",
+          "tier": "official",
+          "sources": [
+            "M67"
+          ]
+        },
+        {
+          "text": "Classic linear skinning is the traditional method; the dual quaternion method is designed to eliminate the undesirable deformation of linear skinning.",
+          "tier": "official",
+          "sources": [
+            "M67"
+          ]
+        },
+        {
+          "text": "Weight Blended is painted with Weight Type DQ Blend Weight in the Paint Skin Weights Tool (Skin > Edit Smooth Skin > Paint Skin Weights); vertices with weight 0 use full classic linear skinning.",
+          "tier": "official",
+          "sources": [
+            "M67"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Twist a joint: the mesh keeps its volume with dual quaternion skinning.",
+          "tier": "official",
+          "sources": [
+            "M67"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.animation_layers",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "LAYR-01"
+      ],
+      "phrases": [
+        "animation layers in maya",
+        "create an animation layer",
+        "additive or override layer",
+        "layer mode",
+        "anim layer editor",
+        "create layer from selected"
+      ],
+      "ui": [
+        {
+          "path": "Anim tab below the Channel Box > Animation Layer Editor > Layers > Create Layer from Selected",
+          "tier": "official",
+          "source": "M68"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the controls and choose Layers > Create Layer from Selected in the Animation Layer Editor (the Anim tab below the Channel Box).",
+          "tier": "official",
+          "sources": [
+            "M69",
+            "M68"
+          ]
+        },
+        {
+          "text": "Right-click the layer, choose Layer Mode and pick Additive, Override or Passthrough.",
+          "tier": "official",
+          "sources": [
+            "M68"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Animation Layer Editor lets you manipulate animation layers and change the way they blend together.",
+          "tier": "official",
+          "sources": [
+            "M68"
+          ]
+        },
+        {
+          "text": "Layers > Create Empty Layer makes an empty Additive layer, Layers > Create Override Layer an Override one, and Layers > Create Layer from Selected a layer for the selected objects; a new layer is Additive by default and takes all the object's attributes.",
+          "tier": "official",
+          "sources": [
+            "M69"
+          ]
+        },
+        {
+          "text": "Right-click a layer and choose Layer Mode to switch between Additive, Override and Passthrough.",
+          "tier": "official",
+          "sources": [
+            "M68"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Muting the layer returns the animation beneath it.",
+          "tier": "official",
+          "sources": [
+            "M68"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.delta_mush",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKIN-09"
+      ],
+      "phrases": [
+        "delta mush in houdini",
+        "smooth the deformation",
+        "smooth bone deform results",
+        "delta mush after bone deform",
+        "uniform or edge length"
+      ],
+      "ui": [
+        {
+          "path": "DeltaMush (SOP) after Bone Deform; Delta Mush 3.0 rig component (APEX)",
+          "tier": "official",
+          "source": "H46"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Append a DeltaMush SOP to the Bone Deform SOP and use the Bone Deform SOP's input as the second input.",
+          "tier": "official",
+          "sources": [
+            "H46"
+          ]
+        },
+        {
+          "text": "Choose the Method (Uniform or Edge Length) and raise Iterations or Step Size for smoother results.",
+          "tier": "official",
+          "sources": [
+            "H46"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "DeltaMush smooths out the effect of point deformations using a copy of the geometry from before it was deformed.",
+          "tier": "official",
+          "sources": [
+            "H46"
+          ]
+        },
+        {
+          "text": "To smooth bone deform geometry, append the node to a Bone Deform SOP and use the Bone Deform SOP's input as the second input; with no second input the SOP generates the smoothed geometry.",
+          "tier": "official",
+          "sources": [
+            "H46"
+          ]
+        },
+        {
+          "text": "Uniform is the fastest method but assumes edge lengths are roughly the same everywhere; Edge Length weights the smoothing by edge length so more detail is kept; more iterations and larger step sizes give smoother results.",
+          "tier": "official",
+          "sources": [
+            "H46"
+          ]
+        },
+        {
+          "text": "In an APEX rig the Delta Mush 3.0 component adds the deltamush node after the bonedeform node; the page marks it as still under development.",
+          "tier": "official",
+          "sources": [
+            "H47"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The skin looks smoother at the bent joints without losing the shape elsewhere.",
+          "tier": "official",
+          "sources": [
+            "H46"
           ]
         }
       ]

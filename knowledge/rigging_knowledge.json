@@ -414,6 +414,66 @@
       "url": "https://www.sidefx.com/docs/houdini/io/fbx.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "M21": {
+      "title": "Maya: Set preferred angles (Skeleton > Assume Preferred Angle)",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-CharacterAnimation/files/GUID-6A7F80D1-D3A5-486A-BDA1-E217A551A866.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "M22": {
+      "title": "Maya: Create a pole vector constraint",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-B1F66B14-147A-4490-879A-F2565AD331E0.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M23": {
+      "title": "Maya: Create a joint or joint chain (Joint Tool)",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/CSS_Create_a_joint_or_joint_chain.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M24": {
+      "title": "Maya Getting Started: Creating joints",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-GettingStarted/files/GUID-4B8101A2-9F48-4168-9A2B-B20D6EE2B595.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "M25": {
+      "title": "Maya: Quick Rig tool",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-DC29C982-D04F-4C20-9DBA-4BBB33E027EF.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "M26": {
+      "title": "Maya: Create an automatic character rig for a mesh",
+      "url": "https://help.autodesk.com/cloudhelp/2023/ENU/Maya-CharacterAnimation/files/GUID-6CAEA6C2-D4F9-422D-8E0F-522171B47C35.htm",
+      "tier": "official",
+      "version": "Maya 2023 help"
+    },
+    "M27": {
+      "title": "Maya: Blend IK and FK animation",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/CSS_Blend_IK_and_FK_animation.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M28": {
+      "title": "Maya: ikHandle attributes (Ik Blend, Ik Fk Control)",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-E71102E0-0BA4-4F9D-9402-E6830889D569.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "M29": {
+      "title": "Maya: Change the name of one or more objects",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Scene_management_Change_the_name_of_one_or_more_objects.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M30": {
+      "title": "Maya: Using the Outliner",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Basics/files/GUID-FF44B859-C447-4AD1-8E6D-C53B997EE9DD.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
     }
   },
   "entries": [
@@ -712,8 +772,9 @@
       "ui": [
         {
           "path": "Skeleton > Set Preferred Angle",
-          "tier": "tutorial",
-          "source": "T2"
+          "tier": "official",
+          "source": "M21",
+          "note": "Named on the Autodesk page as the opposite of Skeleton > Assume Preferred Angle, in the Rigging menu set (F3)."
         }
       ],
       "outline": [
@@ -741,6 +802,22 @@
             "C2"
           ]
         }
+      ],
+      "facts": [
+        {
+          "text": "Skeleton > Assume Preferred Angle makes the selected joint go back to its preferred angles; its options window is called Assume Preferred Angle Options.",
+          "tier": "official",
+          "sources": [
+            "M21"
+          ]
+        },
+        {
+          "text": "Set Preferred Angle (also in the Skeleton menu) is the opposite command: it records the joint's current angles as the preferred ones.",
+          "tier": "official",
+          "sources": [
+            "M21"
+          ]
+        }
       ]
     },
     {
@@ -766,8 +843,8 @@
       "ui": [
         {
           "path": "Constrain > Pole Vector",
-          "tier": "community",
-          "source": "C3"
+          "tier": "official",
+          "source": "M22"
         }
       ],
       "outline": [
@@ -779,11 +856,10 @@
           ]
         },
         {
-          "text": "Select the control and the IK handle, then Constrain > Pole Vector.",
-          "tier": "community",
+          "text": "Select the control (the target object), then the IK rotate plane handle, choose Constrain > Pole Vector and click Add or Apply in the options window.",
+          "tier": "official",
           "sources": [
-            "C2",
-            "C3"
+            "M22"
           ]
         }
       ],
@@ -825,7 +901,16 @@
             "ikHandle"
           ]
         }
-      }
+      },
+      "facts": [
+        {
+          "text": "A pole vector constraint makes the end of the IK handle's pole vector move to and follow the position of an object (or the average of several).",
+          "tier": "official",
+          "sources": [
+            "M22"
+          ]
+        }
+      ]
     },
     {
       "id": "maya.parent_constraint",
@@ -995,6 +1080,38 @@
           "tier": "community",
           "sources": [
             "C6"
+          ]
+        }
+      ],
+      "ui": [
+        {
+          "path": "Animate > IK/FK Keys > Set IK/FK Key",
+          "tier": "official",
+          "source": "M27",
+          "note": "From the Maya 2014 page; menu names differ between versions."
+        }
+      ],
+      "facts": [
+        {
+          "text": "The IK handle's Ik Blend attribute (IK Solver Attributes in the Attribute Editor) switches the animation mode: 0.000 is pure FK and 1.000 is pure IK; values between blend the two.",
+          "tier": "official",
+          "sources": [
+            "M27",
+            "M28"
+          ]
+        },
+        {
+          "text": "Between a pure FK key and a pure IK key the IK solver interpolates the Ik Blend value.",
+          "tier": "official",
+          "sources": [
+            "M27"
+          ]
+        },
+        {
+          "text": "Ik Fk Control lets you manipulate and key the joints of a joint chain that has an animated IK handle.",
+          "tier": "official",
+          "sources": [
+            "M28"
           ]
         }
       ]
@@ -1341,20 +1458,10 @@
       ],
       "ui": [
         {
-          "path": "Animate > Set Driven Key > Set (the Set Driven Key window)",
-          "tier": "author",
+          "path": "Key > Set Driven Key > Set (the Set Driven Key window, Animation menu set)",
+          "tier": "official",
           "source": "M6",
-          "options": [
-            "Load Driver",
-            "Load Driven",
-            "Key",
-            "Load > Selected as Driver",
-            "Load > Selected as Driven",
-            "Options > Clear On Load"
-          ],
-          "options_tier": "official",
-          "options_source": "M6",
-          "note": "The window and its buttons are on the Autodesk page; the menu that opens it is not stated there."
+          "note": "The path as written on the Maya 2017 page; some versions and tutorials say Animate > Set Driven Key."
         }
       ],
       "outline": [
@@ -1368,6 +1475,15 @@
         {
           "text": "Set the driver attribute and the driven attribute to the first state and press Key; change both to the second state and press Key again.",
           "tier": "author",
+          "sources": [
+            "M6"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Set Driven Key window has Load Driver and Load Driven buttons that take the selected objects as the driver and the driven; the Key > Set Driven Key menu has matching Selected as Driver and Selected as Driven items.",
+          "tier": "official",
           "sources": [
             "M6"
           ]
@@ -1783,6 +1899,12 @@
           "path": "Skeleton > Create Joints",
           "tier": "tutorial",
           "source": "T3"
+        },
+        {
+          "path": "Skeleton > Joint Tool (older Maya, Animation menu set F2)",
+          "tier": "official",
+          "source": "M23",
+          "note": "The older name of the same tool."
         }
       ],
       "outline": [
@@ -1838,7 +1960,30 @@
             "joint"
           ]
         }
-      }
+      },
+      "facts": [
+        {
+          "text": "With the Joint Tool you click in a view where each joint goes, clicking again for each next joint in the chain.",
+          "tier": "official",
+          "sources": [
+            "M23"
+          ]
+        },
+        {
+          "text": "Press Enter (Windows and Linux) or Return (Mac) after the last joint to finish the chain.",
+          "tier": "official",
+          "sources": [
+            "M24"
+          ]
+        },
+        {
+          "text": "Switching on Snap to Projected Center in the Status Line makes each new joint centre itself in the model.",
+          "tier": "official",
+          "sources": [
+            "M23"
+          ]
+        }
+      ]
     },
     {
       "id": "maya.name_joints",
@@ -1859,8 +2004,9 @@
       "ui": [
         {
           "path": "Outliner (double-click a name to rename)",
-          "tier": "author",
-          "source": "T4"
+          "tier": "official",
+          "source": "M30",
+          "note": "The page also says you can select the node and press Enter."
         }
       ],
       "outline": [
@@ -1880,6 +2026,24 @@
           "tier": "tutorial",
           "sources": [
             "T4"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "To rename a node in the Outliner, double-click its name, or select it and press Enter.",
+          "tier": "official",
+          "sources": [
+            "M30",
+            "M29"
+          ]
+        },
+        {
+          "text": "In node names all punctuation except the underscore and the pound sign (#) is illegal.",
+          "tier": "official",
+          "sources": [
+            "M30",
+            "M29"
           ]
         }
       ]
@@ -2078,9 +2242,10 @@
       ],
       "ui": [
         {
-          "path": "Skeleton > Quick Rig (as described in the tutorial; the exact path varies by Maya version)",
-          "tier": "author",
-          "source": "T3"
+          "path": "Skeleton > Quick Rig (Rigging menu set)",
+          "tier": "official",
+          "source": "M25",
+          "note": "Also on the Rigging shelf."
         }
       ],
       "outline": [
@@ -2097,6 +2262,31 @@
           "text": "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand.",
           "tier": "author",
           "sources": []
+        }
+      ],
+      "facts": [
+        {
+          "text": "Quick Rig rigs an empty biped character mesh; choose Skeleton > Quick Rig in the Rigging menu set.",
+          "tier": "official",
+          "sources": [
+            "M25",
+            "M26"
+          ]
+        },
+        {
+          "text": "The One-Click option (Auto-Rig!) creates a skeleton, then a HumanIK control rig; Step-By-Step walks you through the process so you can adjust the defaults.",
+          "tier": "official",
+          "sources": [
+            "M25",
+            "M26"
+          ]
+        },
+        {
+          "text": "The character mesh must be in a Y-up world space, facing the Z axis.",
+          "tier": "official",
+          "sources": [
+            "M25"
+          ]
         }
       ]
     },

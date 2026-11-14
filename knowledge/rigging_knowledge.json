@@ -894,6 +894,60 @@
       "url": "https://www.sidefx.com/docs/houdini/character/kinefx/rig_components/blendshape.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B45": {
+      "title": "Blender manual: FBX (Legacy) exporter",
+      "url": "https://docs.blender.org/manual/en/latest/files/import_export/fbx_legacy.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; the new FBX page only says to use the FBX add-on for export"
+    },
+    "B46": {
+      "title": "Blender Python API: export_scene operators (FBX options)",
+      "url": "https://docs.blender.org/api/main/bpy.ops.export_scene.html",
+      "tier": "official",
+      "version": "Python API docs main (selector showing 5.4), read 2026-11-15"
+    },
+    "M57": {
+      "title": "Maya FBX plug-in: Animation (Include options)",
+      "url": "https://download.autodesk.com/us/fbx/2013/Maya_FBX_Plug-in_Help/files/GUID-94D618A7-AAFD-442D-A7F2-C26BCB43DE19.htm",
+      "tier": "official",
+      "version": "Maya FBX plug-in help 2013 (version taken from the address)"
+    },
+    "M58": {
+      "title": "Maya FBX plug-in guide: Deformed Models",
+      "url": "https://download.autodesk.com/us/fbx/2012/maya/files/GUID-4EAF4811-B9E9-471B-BA26-7C88A22E0F0-73.htm",
+      "tier": "official",
+      "version": "Maya FBX plug-in guide 2012 (version taken from the address)"
+    },
+    "M59": {
+      "title": "Maya FBX plug-in guide: Bake animation",
+      "url": "https://download.autodesk.com/us/fbx/2012/maya/files/GUID-0FA07ACC-2BAF-4597-A52C-DAD2908A95D-72.htm",
+      "tier": "official",
+      "version": "Maya FBX plug-in guide 2012 (version taken from the address)"
+    },
+    "M60": {
+      "title": "Maya: FBX Export MEL commands",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-6CCE943A-2ED4-4CEE-96D4-9CB19C28F4E0.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "H40": {
+      "title": "SideFX Houdini docs: Exporting animation and character data (KineFX)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/exportcharacters.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H41": {
+      "title": "SideFX Houdini docs: ROP FBX Character Output (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--rop_fbxcharacteroutput.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15; first part of a long page read verbatim"
+    },
+    "H42": {
+      "title": "SideFX Houdini docs: Filmbox FBX Animation (ROP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/out/kinefx--filmboxfbxanimation.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -9971,6 +10025,472 @@
           "tier": "official",
           "sources": [
             "H38"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.fbx_export_character",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "EXPT-01"
+      ],
+      "phrases": [
+        "export my character to fbx",
+        "export the rig as fbx",
+        "fbx export from blender",
+        "export for a game engine",
+        "only deform bones",
+        "add leaf bones"
+      ],
+      "ui": [
+        {
+          "path": "File > Export > FBX (.fbx)",
+          "tier": "official",
+          "source": "B45",
+          "note": "The manual's armature options are listed by name only; their descriptions come from the Python API page, so they follow the API wording."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose File > Export > FBX (.fbx) (the FBX add-on) with the mesh and armature selected.",
+          "tier": "official",
+          "sources": [
+            "B45"
+          ]
+        },
+        {
+          "text": "Turn on Selected Objects to export only the selection, and Only Deform Bones to leave out control bones.",
+          "tier": "official",
+          "sources": [
+            "B46"
+          ]
+        },
+        {
+          "text": "Check Add Leaf Bones against what the target application expects, and import the file back to check the rig.",
+          "tier": "official",
+          "sources": [
+            "B46"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The FBX exporter is under File > Export > FBX (.fbx); the manual says to use the FBX add-on for export.",
+          "tier": "official",
+          "sources": [
+            "B45"
+          ]
+        },
+        {
+          "text": "Only Deform Bones writes only deforming bones, plus non-deforming ones that have deforming children; Add Leaf Bones appends a final bone to the end of each chain to specify the last bone's length.",
+          "tier": "official",
+          "sources": [
+            "B46"
+          ]
+        },
+        {
+          "text": "Selected Objects exports the selected and visible objects only.",
+          "tier": "official",
+          "sources": [
+            "B46"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Import the exported FBX into the target application and check the skeleton and skin.",
+          "tier": "official",
+          "sources": [
+            "B45"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.fbx_export_animation",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "EXPT-02"
+      ],
+      "phrases": [
+        "export the animation as fbx",
+        "export only the animation from blender",
+        "bake animation on fbx export",
+        "export all actions",
+        "key all bones"
+      ],
+      "ui": [
+        {
+          "path": "File > Export > FBX (.fbx) > Bake Animation",
+          "tier": "official",
+          "source": "B45"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the FBX export settings turn on Bake Animation.",
+          "tier": "official",
+          "sources": [
+            "B45",
+            "B46"
+          ]
+        },
+        {
+          "text": "Turn on All Actions to export every action compatible with the selected armatures, or leave it off to export only the currently assigned action.",
+          "tier": "official",
+          "sources": [
+            "B45"
+          ]
+        },
+        {
+          "text": "Use Key All Bones if the target needs at least one key on every bone.",
+          "tier": "official",
+          "sources": [
+            "B46"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The animation that will be exported is the currently selected action in the Action editor; with All Actions on, all actions compatible with the selected armatures are exported, and with it off only the currently assigned action.",
+          "tier": "official",
+          "sources": [
+            "B45"
+          ]
+        },
+        {
+          "text": "Key All Bones forces exporting at least one key of animation for all bones; Baked Animation exports baked keyframe animation.",
+          "tier": "official",
+          "sources": [
+            "B46"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Import the file and check the action plays with the same motion.",
+          "tier": "official",
+          "sources": [
+            "B45"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.fbx_export_character",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "EXPT-01"
+      ],
+      "phrases": [
+        "export my character to fbx from maya",
+        "fbx export skin and blend shapes",
+        "export the rig as fbx",
+        "export for a game engine from maya",
+        "fbx export selected only"
+      ],
+      "ui": [
+        {
+          "path": "FBX Export options: Include > Deformed Models (Skins, Blend Shapes); FBXExport -f file -s",
+          "tier": "official",
+          "source": "M58",
+          "note": "The pages read do not spell out the File menu path to the FBX options, so it is not given."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the FBX export options turn on Deformed Models so Skins and Blend Shapes are exported, and Constraints if the target supports them.",
+          "tier": "official",
+          "sources": [
+            "M57",
+            "M58"
+          ]
+        },
+        {
+          "text": "To export only the selection from a script use FBXExport -f myfile.fbx -s.",
+          "tier": "official",
+          "sources": [
+            "M60"
+          ]
+        },
+        {
+          "text": "Import the file in the target application and check the skeleton and skin.",
+          "tier": "official",
+          "sources": [
+            "M58"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Deformed Models exports Skin and Blend Shape deformations; its Skins and Blend Shapes sub-options can be switched individually.",
+          "tier": "official",
+          "sources": [
+            "M57",
+            "M58"
+          ]
+        },
+        {
+          "text": "Constraints exports certain supported constraints to FBX: Point, Aim, Orient, Parent and IK handle.",
+          "tier": "official",
+          "sources": [
+            "M57"
+          ]
+        },
+        {
+          "text": "The MEL command FBXExport -f [filename] with the -s flag exports the selected objects instead of an export-all operation; FBXExportSkins and FBXExportShapes are on by default.",
+          "tier": "official",
+          "sources": [
+            "M60"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Skin and blend shape deformations survive the round trip in the target application.",
+          "tier": "official",
+          "sources": [
+            "M58"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.fbx_export_animation",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "EXPT-02"
+      ],
+      "phrases": [
+        "export only the animation as fbx",
+        "bake the animation on fbx export",
+        "fbx bake animation",
+        "resample all",
+        "export animation only from maya"
+      ],
+      "ui": [
+        {
+          "path": "FBX Export options: Include > Animation > Bake animation, Resample All; FBXExportAnimationOnly",
+          "tier": "official",
+          "source": "M59"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the FBX export options turn on Animation, and Bake animation to bake unsupported constraints into animation curves.",
+          "tier": "official",
+          "sources": [
+            "M57",
+            "M59"
+          ]
+        },
+        {
+          "text": "Set the Start, End and Step of the baked range, or leave the defaults from the Timeline settings.",
+          "tier": "official",
+          "sources": [
+            "M59"
+          ]
+        },
+        {
+          "text": "For a script use FBXExportAnimationOnly -v true to export only animation.",
+          "tier": "official",
+          "sources": [
+            "M60"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bake animation lets you bake (plot) animation at export time and bakes all unsupported constraints into animation curves.",
+          "tier": "official",
+          "sources": [
+            "M59"
+          ]
+        },
+        {
+          "text": "By default the plug-in takes Start and End from the current Timeline settings, and the Step value, 1 by default, defines how many keys are created per frame.",
+          "tier": "official",
+          "sources": [
+            "M59"
+          ]
+        },
+        {
+          "text": "Resample All bakes even the supported animated elements and reacts to the state of Bake animation.",
+          "tier": "official",
+          "sources": [
+            "M57",
+            "M59"
+          ]
+        },
+        {
+          "text": "FBXExportAnimationOnly is the script switch to export only animation; FBXExportBakeComplexAnimation is the script equivalent of Bake animation.",
+          "tier": "official",
+          "sources": [
+            "M60"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Import the animation and check it plays the same, including constraint-driven joints.",
+          "tier": "official",
+          "sources": [
+            "M59"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.fbx_export_character",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "EXPT-01"
+      ],
+      "phrases": [
+        "export my character to fbx from houdini",
+        "rop fbx character output",
+        "export a skinned character from kinefx",
+        "fbx export for a game engine from houdini",
+        "output fbx file"
+      ],
+      "ui": [
+        {
+          "path": "ROP FBX Character Output (SOP): Output FBX File, Save to Disk",
+          "tier": "official",
+          "source": "H41",
+          "note": "A blend shape export caveat was not found on the part of the page that could be read."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a ROP FBX Character Output SOP and connect the skinned character.",
+          "tier": "official",
+          "sources": [
+            "H40",
+            "H41"
+          ]
+        },
+        {
+          "text": "Set Output FBX File to the path to export to and click Save to Disk.",
+          "tier": "official",
+          "sources": [
+            "H41"
+          ]
+        },
+        {
+          "text": "Import the file in the target application to check the character.",
+          "tier": "official",
+          "sources": [
+            "H40"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Use the ROP FBX Character Output SOP to export a character as an .fbx file; it exports a skinned character with a geometry-based skeleton.",
+          "tier": "official",
+          "sources": [
+            "H40",
+            "H41"
+          ]
+        },
+        {
+          "text": "Output FBX File is the path to export to, and should be different from Input FBX File; Save to Disk exports the character with the current settings.",
+          "tier": "official",
+          "sources": [
+            "H41"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The FBX opens in the target application with the skeleton and skinning.",
+          "tier": "official",
+          "sources": [
+            "H40"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.fbx_export_animation",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "EXPT-02"
+      ],
+      "phrases": [
+        "export only the animation from houdini",
+        "rop fbx animation output",
+        "export the animation skeleton as fbx",
+        "filmbox fbx animation",
+        "export kinefx animation"
+      ],
+      "ui": [
+        {
+          "path": "ROP FBX Animation Output (SOP) / Filmbox FBX Animation (ROP)",
+          "tier": "official",
+          "source": "H40",
+          "note": "The output file parameter name is documented on the character node's page, not on the animation node's page that was read."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a ROP FBX Animation Output SOP (or the Filmbox FBX Animation ROP) and point it at the animated skeleton.",
+          "tier": "official",
+          "sources": [
+            "H40",
+            "H42"
+          ]
+        },
+        {
+          "text": "Set its SOP Path to the node to export from and export the .fbx.",
+          "tier": "official",
+          "sources": [
+            "H42"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Use the ROP FBX Animation Output SOP to export an animation skeleton as an .fbx file.",
+          "tier": "official",
+          "sources": [
+            "H40"
+          ]
+        },
+        {
+          "text": "The Filmbox FBX Animation ROP exports animation from a geometry-based skeleton to an FBX file; its SOP Path is the SOP node to export from, and it is the same node as the SOP version in the geometry context.",
+          "tier": "official",
+          "sources": [
+            "H42"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The FBX contains the animation on the skeleton and no mesh.",
+          "tier": "official",
+          "sources": [
+            "H40"
           ]
         }
       ]

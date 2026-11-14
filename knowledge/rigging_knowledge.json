@@ -474,6 +474,36 @@
       "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Basics/files/GUID-FF44B859-C447-4AD1-8E6D-C53B997EE9DD.htm",
       "tier": "official",
       "version": "Maya 2022 help"
+    },
+    "M31": {
+      "title": "Maya: Skeleton menu (Rigging menu set)",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-5A485049-D0BD-4BBB-BE08-C3D502F17483.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M32": {
+      "title": "Maya: Group objects together (Edit > Group)",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Basics/files/GUID-ED0D4A44-E77A-4872-B051-6F9B31D827EB.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M33": {
+      "title": "Maya: Create NURBS primitives (Create > NURBS Primitives)",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Creating_NURBS_surfaces_Create_NURBS_primitives.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M34": {
+      "title": "Maya: Create > NURBS Primitives (Circle)",
+      "url": "https://download.autodesk.com/us/maya/2009help/files/Create__NURBS_Primitives.htm",
+      "tier": "official",
+      "version": "Maya 2009 help"
+    },
+    "M35": {
+      "title": "Maya: Constraints (the Constrain menu)",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-7665A291-FAA7-44C0-BDEB-A6C83482116C.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
     }
   },
   "entries": [
@@ -497,8 +527,8 @@
       "ui": [
         {
           "path": "Skeleton > Orient Joint (options box)",
-          "tier": "tutorial",
-          "source": "T1",
+          "tier": "official",
+          "source": "M31",
           "options": [
             "Orient Joint to World",
             "Primary Axis",
@@ -510,7 +540,7 @@
           ],
           "options_tier": "official",
           "options_source": "M1",
-          "note": "The Autodesk page lists the options but gives no menu path; the path 'Skeleton > Orient Joint' is as spoken in tutorials."
+          "note": "The Skeleton menu page says: click Skeleton > Orient Joint to open the options (Rigging menu set). The Orient Joint Options page (M1) lists the options but not the path."
         }
       ],
       "prerequisites": [
@@ -617,9 +647,9 @@
       ],
       "ui": [
         {
-          "path": "Skeleton > Create IK Handle",
-          "tier": "tutorial",
-          "source": "T2",
+          "path": "Skeleton > Create IK Handle (Rigging menu set)",
+          "tier": "official",
+          "source": "M31",
           "options": [
             "Current Solver",
             "Solver Enable",
@@ -630,7 +660,7 @@
           ],
           "options_tier": "official",
           "options_source": "M3",
-          "note": "Options named on the Autodesk IK Handle Tool page (2009-2011). The two usual solvers are ikRPsolver (rotate plane) and ikSCsolver (single chain)."
+          "note": "The Skeleton menu page lists Create IK Handle under the IK section as the command that opens the IK Handle Tool; it does not write the path out as a sentence. Options named on the IK Handle Tool page (Maya 2009-2011 help). The two usual solvers are ikRPsolver and ikSCsolver."
         }
       ],
       "prerequisites": [
@@ -1148,7 +1178,8 @@
             "Preserve normals"
           ],
           "options_tier": "official",
-          "options_source": "M5"
+          "options_source": "M5",
+          "note": "The Autodesk Reset and Freeze Transformations Options page (M5) lists its parent as the Modify menu but does not write out Modify > Freeze Transformations; the full path is as shown in tutorials."
         }
       ],
       "facts": [
@@ -1321,8 +1352,8 @@
       "ui": [
         {
           "path": "Skin > Paint Skin Weights Tool",
-          "tier": "tutorial",
-          "source": "T1",
+          "tier": "official",
+          "source": "M8",
           "options": [
             "Influence",
             "Paint Operation",
@@ -1331,7 +1362,8 @@
             "Move Weights"
           ],
           "options_tier": "official",
-          "options_source": "M8"
+          "options_source": "M8",
+          "note": "Maya 2022 help puts it in the Animation menu set; the path ends in 'Tool'."
         }
       ],
       "facts": [
@@ -1382,9 +1414,9 @@
       ],
       "ui": [
         {
-          "path": "Edit > Add Attribute (Channel Box) / Modify > Add Attribute (older help)",
-          "tier": "tutorial",
-          "source": "T1",
+          "path": "Modify > Add Attribute...",
+          "tier": "official",
+          "source": "M7",
           "options": [
             "Long name",
             "Override nice name",
@@ -1398,7 +1430,7 @@
           ],
           "options_tier": "official",
           "options_source": "M7",
-          "note": "Autodesk's 2013 help puts the command in the Modify menu; tutorials show it under the Channel Box Edit menu. Look for it in both."
+          "note": "Maya 2024 help: select Modify > Add Attribute... from the main menu. Some tutorials add the attribute from the Channel Box's Edit menu instead; the official pages read here give only the Modify path."
         }
       ],
       "conflicts": [
@@ -1896,9 +1928,9 @@
       ],
       "ui": [
         {
-          "path": "Skeleton > Create Joints",
-          "tier": "tutorial",
-          "source": "T3"
+          "path": "Skeleton > Create Joints (Rigging menu set)",
+          "tier": "official",
+          "source": "M31"
         },
         {
           "path": "Skeleton > Joint Tool (older Maya, Animation menu set F2)",
@@ -2070,9 +2102,9 @@
       "ui": [
         {
           "path": "Create > NURBS Primitives > Circle (a common control shape)",
-          "tier": "author",
-          "source": "T1",
-          "note": "Tutorials use curve shapes such as circles, or a controller-creation tool or script; the exact tool varies."
+          "tier": "official",
+          "source": "M33",
+          "note": "Tutorials use curve shapes such as circles, or a controller-creation tool or script; the exact tool varies. The help lists Circle among the NURBS primitives made with Create > NURBS Primitives."
         }
       ],
       "outline": [
@@ -2101,6 +2133,22 @@
             "T1"
           ]
         }
+      ],
+      "facts": [
+        {
+          "text": "Create > NURBS Primitives lists the primitives, including Circle; Interactive Creation lets you click-drag in the scene view to create one.",
+          "tier": "official",
+          "sources": [
+            "M33"
+          ]
+        },
+        {
+          "text": "A NURBS circle is a curve, not a surface.",
+          "tier": "official",
+          "sources": [
+            "M34"
+          ]
+        }
       ]
     },
     {
@@ -2123,7 +2171,8 @@
         {
           "path": "Constrain > Orient / Point / Scale (shown in tutorials as separate menu items)",
           "tier": "tutorial",
-          "source": "T1"
+          "source": "T1",
+          "note": "Autodesk's Constraints page names the Constrain menu but not each item's path; the item names Point, Orient and Scale are as shown in tutorials."
         }
       ],
       "outline": [
@@ -2141,6 +2190,13 @@
           "tier": "official",
           "sources": [
             "M2"
+          ]
+        },
+        {
+          "text": "A constraint is created by selecting the appropriate constraint from the Constrain menu.",
+          "tier": "official",
+          "sources": [
+            "M35"
           ]
         }
       ],
@@ -2174,9 +2230,9 @@
       ],
       "ui": [
         {
-          "path": "Edit > Group (Ctrl-G)",
-          "tier": "author",
-          "source": "T1"
+          "path": "Edit > Group (Ctrl+G)",
+          "tier": "official",
+          "source": "M32"
         }
       ],
       "outline": [
@@ -2209,6 +2265,13 @@
           "tier": "official",
           "sources": [
             "M5"
+          ]
+        },
+        {
+          "text": "Select Edit > Group, or press Ctrl+G, to group the selected objects so they move, rotate and scale as one.",
+          "tier": "official",
+          "sources": [
+            "M32"
           ]
         }
       ],

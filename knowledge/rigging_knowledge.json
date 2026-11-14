@@ -1,5 +1,5 @@
 {
-  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini animation, retargeting, Motion Clips and mocap (Houdini has eight entries: skeleton, orient, mirror, IK Chains, Rig Doctor, capture weights, AutoRig, KineFX workflow), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16.",
+  "_about": "Reusable domain knowledge for character rigging and animation in Maya and Blender, researched 2026-10-16. Every statement carries a trust tier and a source id. Tiers: official = the application vendor's own documentation; community = forum or Q&A advice (practical, not guaranteed, often for older versions); tutorial = what a tutorial narrator said or showed (menu names as spoken); author = the assistant's reading, NOT verified. Statements are paraphrased, not copied. NOT covered: Houdini animation, retargeting, Motion Clips and mocap (Houdini has eight entries: skeleton, orient, mirror, IK Chains, Rig Doctor, capture weights, AutoRig, KineFX workflow), Reddit threads and Blender Stack Exchange (the search tool never returned them), anything checked inside a running Maya or Blender. Menu names differ between versions: Autodesk pages cited here are for Maya 2009 to 2026 as stated per source, the Blender manual is the 'latest' manual of 2026-10-16. Added 2026-11-14: scene units (PREP-01) and bringing the mesh in (PREP-02) for Blender, Maya and Houdini, from official pages read that day; the Blender manual wording was read from long pages and paraphrased, and the Maya File > Import menu path was not confirmed on an official page.",
   "retrieved": "2026-10-16",
   "tiers": {
     "official": "vendor documentation",
@@ -342,6 +342,138 @@
       "url": "https://help.autodesk.com/cloudhelp/2017/ENU/MayaLT/files/GUID-23250CAD-50E7-482F-9BC0-157833597B8F.htm",
       "tier": "official",
       "version": "Maya help page, version not stated, fetched 2026-10-22"
+    },
+    "B19": {
+      "title": "Blender manual: Scene Properties (Units panel)",
+      "url": "https://docs.blender.org/manual/en/latest/scene_layout/scene/properties.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14"
+    },
+    "B20": {
+      "title": "Blender manual: Importing and Exporting Files",
+      "url": "https://docs.blender.org/manual/en/latest/files/import_export/index.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14"
+    },
+    "B21": {
+      "title": "Blender manual: Wavefront OBJ (import options)",
+      "url": "https://docs.blender.org/manual/en/latest/files/import_export/obj.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14"
+    },
+    "M17": {
+      "title": "Maya: Settings preferences (Working Units, Up axis)",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-4D653DC9-57AA-4D8B-987A-5B7A9735CAF0.htm",
+      "tier": "official",
+      "version": "Maya 2016 help (the same text is in the Maya 2013 help)"
+    },
+    "M18": {
+      "title": "Maya FBX plug-in: Advanced options (Units, Automatic)",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-3EDA2660-DB47-4DEE-A726-12EF26B11EB7.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "M19": {
+      "title": "Maya FBX plug-in guide: File Units converted to",
+      "url": "https://download.autodesk.com/us/fbx/2012/maya/files/GUID-721FC5E5-0DF6-40ED-BF32-CEB9018D5F0-129.htm",
+      "tier": "official",
+      "version": "FBX plug-in guide 2012"
+    },
+    "M20": {
+      "title": "Maya: New Scene Options (Default Working Units)",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Basics/files/GUID-8F961875-1D41-4C52-9CD5-B90DE75C546C.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "H14": {
+      "title": "SideFX Houdini docs: Main preferences (Unit Length, Orientation)",
+      "url": "https://www.sidefx.com/docs/houdini/ref/windows/mainprefs.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H15": {
+      "title": "SideFX Houdini docs: FBX Import window",
+      "url": "https://www.sidefx.com/docs/houdini/ref/windows/import_fbx.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H16": {
+      "title": "SideFX Houdini docs: FBX Character Import (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--fbxcharacterimport.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H17": {
+      "title": "SideFX Houdini docs: File (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/file.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H18": {
+      "title": "SideFX Houdini docs: FBX import and export",
+      "url": "https://www.sidefx.com/docs/houdini/io/fbx.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "M21": {
+      "title": "Maya: Set preferred angles (Skeleton > Assume Preferred Angle)",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-CharacterAnimation/files/GUID-6A7F80D1-D3A5-486A-BDA1-E217A551A866.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "M22": {
+      "title": "Maya: Create a pole vector constraint",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-B1F66B14-147A-4490-879A-F2565AD331E0.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M23": {
+      "title": "Maya: Create a joint or joint chain (Joint Tool)",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/CSS_Create_a_joint_or_joint_chain.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M24": {
+      "title": "Maya Getting Started: Creating joints",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-GettingStarted/files/GUID-4B8101A2-9F48-4168-9A2B-B20D6EE2B595.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "M25": {
+      "title": "Maya: Quick Rig tool",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-DC29C982-D04F-4C20-9DBA-4BBB33E027EF.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "M26": {
+      "title": "Maya: Create an automatic character rig for a mesh",
+      "url": "https://help.autodesk.com/cloudhelp/2023/ENU/Maya-CharacterAnimation/files/GUID-6CAEA6C2-D4F9-422D-8E0F-522171B47C35.htm",
+      "tier": "official",
+      "version": "Maya 2023 help"
+    },
+    "M27": {
+      "title": "Maya: Blend IK and FK animation",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/CSS_Blend_IK_and_FK_animation.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M28": {
+      "title": "Maya: ikHandle attributes (Ik Blend, Ik Fk Control)",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-E71102E0-0BA4-4F9D-9402-E6830889D569.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "M29": {
+      "title": "Maya: Change the name of one or more objects",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Scene_management_Change_the_name_of_one_or_more_objects.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M30": {
+      "title": "Maya: Using the Outliner",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Basics/files/GUID-FF44B859-C447-4AD1-8E6D-C53B997EE9DD.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
     }
   },
   "entries": [
@@ -640,8 +772,9 @@
       "ui": [
         {
           "path": "Skeleton > Set Preferred Angle",
-          "tier": "tutorial",
-          "source": "T2"
+          "tier": "official",
+          "source": "M21",
+          "note": "Named on the Autodesk page as the opposite of Skeleton > Assume Preferred Angle, in the Rigging menu set (F3)."
         }
       ],
       "outline": [
@@ -669,6 +802,22 @@
             "C2"
           ]
         }
+      ],
+      "facts": [
+        {
+          "text": "Skeleton > Assume Preferred Angle makes the selected joint go back to its preferred angles; its options window is called Assume Preferred Angle Options.",
+          "tier": "official",
+          "sources": [
+            "M21"
+          ]
+        },
+        {
+          "text": "Set Preferred Angle (also in the Skeleton menu) is the opposite command: it records the joint's current angles as the preferred ones.",
+          "tier": "official",
+          "sources": [
+            "M21"
+          ]
+        }
       ]
     },
     {
@@ -694,8 +843,8 @@
       "ui": [
         {
           "path": "Constrain > Pole Vector",
-          "tier": "community",
-          "source": "C3"
+          "tier": "official",
+          "source": "M22"
         }
       ],
       "outline": [
@@ -707,11 +856,10 @@
           ]
         },
         {
-          "text": "Select the control and the IK handle, then Constrain > Pole Vector.",
-          "tier": "community",
+          "text": "Select the control (the target object), then the IK rotate plane handle, choose Constrain > Pole Vector and click Add or Apply in the options window.",
+          "tier": "official",
           "sources": [
-            "C2",
-            "C3"
+            "M22"
           ]
         }
       ],
@@ -753,7 +901,16 @@
             "ikHandle"
           ]
         }
-      }
+      },
+      "facts": [
+        {
+          "text": "A pole vector constraint makes the end of the IK handle's pole vector move to and follow the position of an object (or the average of several).",
+          "tier": "official",
+          "sources": [
+            "M22"
+          ]
+        }
+      ]
     },
     {
       "id": "maya.parent_constraint",
@@ -923,6 +1080,38 @@
           "tier": "community",
           "sources": [
             "C6"
+          ]
+        }
+      ],
+      "ui": [
+        {
+          "path": "Animate > IK/FK Keys > Set IK/FK Key",
+          "tier": "official",
+          "source": "M27",
+          "note": "From the Maya 2014 page; menu names differ between versions."
+        }
+      ],
+      "facts": [
+        {
+          "text": "The IK handle's Ik Blend attribute (IK Solver Attributes in the Attribute Editor) switches the animation mode: 0.000 is pure FK and 1.000 is pure IK; values between blend the two.",
+          "tier": "official",
+          "sources": [
+            "M27",
+            "M28"
+          ]
+        },
+        {
+          "text": "Between a pure FK key and a pure IK key the IK solver interpolates the Ik Blend value.",
+          "tier": "official",
+          "sources": [
+            "M27"
+          ]
+        },
+        {
+          "text": "Ik Fk Control lets you manipulate and key the joints of a joint chain that has an animated IK handle.",
+          "tier": "official",
+          "sources": [
+            "M28"
           ]
         }
       ]
@@ -1269,20 +1458,10 @@
       ],
       "ui": [
         {
-          "path": "Animate > Set Driven Key > Set (the Set Driven Key window)",
-          "tier": "author",
+          "path": "Key > Set Driven Key > Set (the Set Driven Key window, Animation menu set)",
+          "tier": "official",
           "source": "M6",
-          "options": [
-            "Load Driver",
-            "Load Driven",
-            "Key",
-            "Load > Selected as Driver",
-            "Load > Selected as Driven",
-            "Options > Clear On Load"
-          ],
-          "options_tier": "official",
-          "options_source": "M6",
-          "note": "The window and its buttons are on the Autodesk page; the menu that opens it is not stated there."
+          "note": "The path as written on the Maya 2017 page; some versions and tutorials say Animate > Set Driven Key."
         }
       ],
       "outline": [
@@ -1296,6 +1475,15 @@
         {
           "text": "Set the driver attribute and the driven attribute to the first state and press Key; change both to the second state and press Key again.",
           "tier": "author",
+          "sources": [
+            "M6"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Set Driven Key window has Load Driver and Load Driven buttons that take the selected objects as the driver and the driven; the Key > Set Driven Key menu has matching Selected as Driver and Selected as Driven items.",
+          "tier": "official",
           "sources": [
             "M6"
           ]
@@ -1711,6 +1899,12 @@
           "path": "Skeleton > Create Joints",
           "tier": "tutorial",
           "source": "T3"
+        },
+        {
+          "path": "Skeleton > Joint Tool (older Maya, Animation menu set F2)",
+          "tier": "official",
+          "source": "M23",
+          "note": "The older name of the same tool."
         }
       ],
       "outline": [
@@ -1766,7 +1960,30 @@
             "joint"
           ]
         }
-      }
+      },
+      "facts": [
+        {
+          "text": "With the Joint Tool you click in a view where each joint goes, clicking again for each next joint in the chain.",
+          "tier": "official",
+          "sources": [
+            "M23"
+          ]
+        },
+        {
+          "text": "Press Enter (Windows and Linux) or Return (Mac) after the last joint to finish the chain.",
+          "tier": "official",
+          "sources": [
+            "M24"
+          ]
+        },
+        {
+          "text": "Switching on Snap to Projected Center in the Status Line makes each new joint centre itself in the model.",
+          "tier": "official",
+          "sources": [
+            "M23"
+          ]
+        }
+      ]
     },
     {
       "id": "maya.name_joints",
@@ -1787,8 +2004,9 @@
       "ui": [
         {
           "path": "Outliner (double-click a name to rename)",
-          "tier": "author",
-          "source": "T4"
+          "tier": "official",
+          "source": "M30",
+          "note": "The page also says you can select the node and press Enter."
         }
       ],
       "outline": [
@@ -1808,6 +2026,24 @@
           "tier": "tutorial",
           "sources": [
             "T4"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "To rename a node in the Outliner, double-click its name, or select it and press Enter.",
+          "tier": "official",
+          "sources": [
+            "M30",
+            "M29"
+          ]
+        },
+        {
+          "text": "In node names all punctuation except the underscore and the pound sign (#) is illegal.",
+          "tier": "official",
+          "sources": [
+            "M30",
+            "M29"
           ]
         }
       ]
@@ -2006,9 +2242,10 @@
       ],
       "ui": [
         {
-          "path": "Skeleton > Quick Rig (as described in the tutorial; the exact path varies by Maya version)",
-          "tier": "author",
-          "source": "T3"
+          "path": "Skeleton > Quick Rig (Rigging menu set)",
+          "tier": "official",
+          "source": "M25",
+          "note": "Also on the Rigging shelf."
         }
       ],
       "outline": [
@@ -2025,6 +2262,31 @@
           "text": "An automatic rig gives few manual steps to learn from; it is a different lesson from building a rig by hand.",
           "tier": "author",
           "sources": []
+        }
+      ],
+      "facts": [
+        {
+          "text": "Quick Rig rigs an empty biped character mesh; choose Skeleton > Quick Rig in the Rigging menu set.",
+          "tier": "official",
+          "sources": [
+            "M25",
+            "M26"
+          ]
+        },
+        {
+          "text": "The One-Click option (Auto-Rig!) creates a skeleton, then a HumanIK control rig; Step-By-Step walks you through the process so you can adjust the defaults.",
+          "tier": "official",
+          "sources": [
+            "M25",
+            "M26"
+          ]
+        },
+        {
+          "text": "The character mesh must be in a Y-up world space, facing the Z axis.",
+          "tier": "official",
+          "sources": [
+            "M25"
+          ]
         }
       ]
     },
@@ -4478,6 +4740,786 @@
           "tier": "official",
           "sources": [
             "M16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.scene_units",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "PREP-01"
+      ],
+      "phrases": [
+        "set the scene units in blender",
+        "what units should i use in blender",
+        "change blender to metric",
+        "my character is the wrong size in blender",
+        "set the unit scale",
+        "units and scale before rigging",
+        "what scale should my character be",
+        "blender unit system"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Scene tab > Units",
+          "tier": "official",
+          "source": "B19",
+          "options": [
+            "Unit System",
+            "Unit Scale",
+            "Length",
+            "Rotation"
+          ],
+          "options_tier": "official",
+          "options_source": "B19",
+          "note": "The manual page lists the settings but not their default values."
+        }
+      ],
+      "prerequisites": [
+        "The scene is open and the character mesh is in it (or you are about to bring it in)."
+      ],
+      "outline": [
+        {
+          "text": "Open the Properties editor, choose the Scene tab and find the Units panel.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Choose the Unit System (None, Metric or Imperial) and, if you want a fixed display unit, set Length instead of Adaptive.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Leave Unit Scale alone unless the scene is very small or very large; set it before you build the rig.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Units panel is in the Properties editor under the Scene tab.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Unit System sets the units used by the interface controls; the choices are None, Metric and Imperial.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Unit Scale is a factor for converting between Blender's internal units and the values shown in the interface; it changes what is displayed, not how things behave internally.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Length chooses the unit used to display lengths: Adaptive picks a unit from the size of each value, or you can fix it to, for example, meters, centimeters or feet.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Rotation is shown in degrees or radians.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        },
+        {
+          "text": "Blender's own convention is Y forward, Z up.",
+          "tier": "official",
+          "sources": [
+            "B21"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Look at the character's height in the sidebar's Dimensions field (N panel > Item); it should read as the real size you expect.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Changing Unit Scale after the rig is built can make values in the interface look wrong; set units first.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.working_units",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "PREP-01"
+      ],
+      "phrases": [
+        "set the scene units in maya",
+        "what units should i use in maya",
+        "change maya working units",
+        "maya y up or z up",
+        "change the up axis in maya",
+        "my character is the wrong size in maya",
+        "units and scale before rigging",
+        "what scale should my character be",
+        "maya linear units centimeters"
+      ],
+      "ui": [
+        {
+          "path": "Windows > Settings/Preferences > Preferences > Settings > Working Units",
+          "tier": "official",
+          "source": "M17",
+          "options": [
+            "Linear",
+            "Angular",
+            "Time"
+          ],
+          "options_tier": "official",
+          "options_source": "M17",
+          "note": "The Up axis (Y or Z) is a separate group on the same Settings page, headed World Coordinate System."
+        }
+      ],
+      "prerequisites": [
+        "Do this at the start of the scene, before joints and controls exist."
+      ],
+      "outline": [
+        {
+          "text": "Open Windows > Settings/Preferences > Preferences and choose the Settings category.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        },
+        {
+          "text": "Under Working Units check Linear, Angular and Time; under World Coordinate System check that the Up axis is the one you want (Y or Z).",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        },
+        {
+          "text": "To change what a new scene starts with, use the Default Working Units in New Scene Options (File > New Scene options).",
+          "tier": "official",
+          "sources": [
+            "M20"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Working Units > Linear sets the unit for operations that use linear values such as moving and scaling; the default is centimeters.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        },
+        {
+          "text": "Working Units > Angular sets the unit for rotation; the default is degrees.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        },
+        {
+          "text": "Working Units > Time sets the working time unit for animation.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        },
+        {
+          "text": "The Up axis is set to Y or Z under the World Coordinate System heading; the default is Y.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        },
+        {
+          "text": "New Scene Options has its own Default Working Units (linear, angular, time) that apply when you choose File > New Scene; the default linear unit there is centimeters.",
+          "tier": "official",
+          "sources": [
+            "M20"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Create a primitive and check that its size in the Channel Box reads in the unit you chose.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Changing the Up axis or linear unit after the rig is built does not rebuild it; settle both before you create joints.",
+          "tier": "official",
+          "sources": [
+            "M17"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.scene_units",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "PREP-01"
+      ],
+      "phrases": [
+        "set the scene units in houdini",
+        "what units does houdini use",
+        "houdini y up or z up",
+        "houdini unit length",
+        "my character is the wrong size in houdini",
+        "units and scale before rigging",
+        "what scale should my character be",
+        "houdini meters per unit"
+      ],
+      "ui": [
+        {
+          "path": "Edit > Preferences (General page, Units: Unit Length)",
+          "tier": "official",
+          "source": "H14",
+          "options": [
+            "Unit Length",
+            "Unit Mass",
+            "Orientation"
+          ],
+          "options_tier": "official",
+          "options_source": "H14",
+          "note": "The import pages call this setting 'Hip File Options (default meters)'; the preferences page itself lists it under General > Units.",
+          "options_in": "the Preferences window (Edit > Preferences), not a node"
+        }
+      ],
+      "prerequisites": [
+        "Decide the scale before importing or building the character."
+      ],
+      "outline": [
+        {
+          "text": "Open Edit > Preferences and, on the General page, check Unit Length (the length in meters of one Houdini scene unit).",
+          "tier": "official",
+          "sources": [
+            "H14"
+          ]
+        },
+        {
+          "text": "On the 3D Viewers page check Orientation: the traditional Houdini viewer is Y-Up or Z-Up, and the default is Y-Up.",
+          "tier": "official",
+          "sources": [
+            "H14"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Unit Length is the length, in meters, of one Houdini scene unit; the docs describe the usual setting as one unit equals one meter.",
+          "tier": "official",
+          "sources": [
+            "H14"
+          ]
+        },
+        {
+          "text": "Some unit-specific simulation nodes (DOPs) use the unit preferences.",
+          "tier": "official",
+          "sources": [
+            "H14"
+          ]
+        },
+        {
+          "text": "The viewer Orientation preference is Y-Up or Z-Up, and the default is Y-Up; Solaris has its own up-axis preference based on USD.",
+          "tier": "official",
+          "sources": [
+            "H14"
+          ]
+        },
+        {
+          "text": "FBX import converts from the FBX file's unit (centimeters by default) to the Houdini scene unit, whose default is meters.",
+          "tier": "official",
+          "sources": [
+            "H15"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Import or create a known-size object and check its size reads as expected in the Geometry Spreadsheet or Info.",
+          "tier": "official",
+          "sources": [
+            "H14"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "The docs name the unit setting in two ways (General > Units and 'Hip File Options'); they are the same preference, so do not hunt for a second scale setting.",
+          "tier": "official",
+          "sources": [
+            "H14",
+            "H15"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.import_mesh",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "PREP-02"
+      ],
+      "phrases": [
+        "import my character into blender",
+        "bring a model into blender",
+        "import an obj file in blender",
+        "import an fbx in blender",
+        "how do i load my character mesh",
+        "my imported model is too big",
+        "my imported model is tiny",
+        "model is the wrong way up after import",
+        "get the character into the scene"
+      ],
+      "ui": [
+        {
+          "path": "File > Import (Topbar > File > Import/Export)",
+          "tier": "official",
+          "source": "B20",
+          "options": [
+            "Import Wavefront OBJ",
+            "Import FBX",
+            "Import Alembic",
+            "Import PLY",
+            "Import STL"
+          ],
+          "options_tier": "official",
+          "options_source": "B20"
+        }
+      ],
+      "prerequisites": [
+        "The mesh file is on your computer, and you know which unit and up axis the program that made it used."
+      ],
+      "outline": [
+        {
+          "text": "Choose File > Import and pick the format of your mesh file.",
+          "tier": "official",
+          "sources": [
+            "B20"
+          ]
+        },
+        {
+          "text": "For OBJ, set Scale if the model arrives too big or too small, and Forward Axis and Up Axis to match the program that exported it.",
+          "tier": "official",
+          "sources": [
+            "B21"
+          ]
+        },
+        {
+          "text": "After importing, check the size and the facing, then apply the object's scale before you add bones (Object > Apply > Scale).",
+          "tier": "official",
+          "sources": [
+            "B21",
+            "B15"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "File > Import lists the importers; the manual's list includes Alembic, Motion Capture (BVH), Universal Scene Description, Wavefront OBJ, Stanford PLY, STL and FBX.",
+          "tier": "official",
+          "sources": [
+            "B20"
+          ]
+        },
+        {
+          "text": "Popular formats are enabled by default; other supported formats are enabled as add-ons in the Preferences.",
+          "tier": "official",
+          "sources": [
+            "B20"
+          ]
+        },
+        {
+          "text": "The OBJ importer has a Scale option (it scales the imported objects relative to the world origin) and Forward Axis and Up Axis options that convert between applications that use a different up axis.",
+          "tier": "official",
+          "sources": [
+            "B21"
+          ]
+        },
+        {
+          "text": "Blender's own convention is Y forward, Z up.",
+          "tier": "official",
+          "sources": [
+            "B21"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Check the object's Dimensions (N panel > Item) against the real size you expect, and that the model stands upright.",
+          "tier": "official",
+          "sources": [
+            "B19"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Importing a model made with a different up axis without setting Forward and Up can leave it lying on its side.",
+          "tier": "official",
+          "sources": [
+            "B21"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "imported model is huge",
+            "imported model is tiny",
+            "my imported mesh is the wrong size",
+            "model is rotated after import",
+            "model is lying on its side after import"
+          ],
+          "cause": "The file came from a program with a different unit or up axis, and the importer's Scale, Forward Axis and Up Axis did not match it.",
+          "fix": [
+            "Undo the import and import again with the OBJ importer's Scale, Forward Axis and Up Axis set for the source program.",
+            "Or fix it afterwards: set the object's scale, then apply it (Object > Apply > Scale)."
+          ],
+          "tier": "official",
+          "sources": [
+            "B21",
+            "B15"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.import_mesh",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "PREP-02"
+      ],
+      "phrases": [
+        "import my character into maya",
+        "bring a model into maya",
+        "import an fbx in maya",
+        "how do i load my character mesh",
+        "my imported model is too big",
+        "my imported model is tiny",
+        "fbx scale is wrong in maya",
+        "get the character into the scene",
+        "fbx units automatic"
+      ],
+      "ui": [
+        {
+          "path": "FBX import options > Advanced options > Units",
+          "tier": "official",
+          "source": "M18",
+          "options": [
+            "Automatic",
+            "Scene units converted to"
+          ],
+          "options_tier": "official",
+          "options_source": "M18",
+          "note": "The pages read do not spell out the File > Import menu path, so only the FBX option names are given here."
+        }
+      ],
+      "prerequisites": [
+        "The mesh file is on your computer; settle Maya's working units first (see the working-units entry)."
+      ],
+      "outline": [
+        {
+          "text": "Import the FBX file and open its Advanced options, then the Units section.",
+          "tier": "official",
+          "sources": [
+            "M18"
+          ]
+        },
+        {
+          "text": "Leave Automatic on if you want the plug-in to identify the file's units and convert them to the scene's units.",
+          "tier": "official",
+          "sources": [
+            "M18"
+          ]
+        },
+        {
+          "text": "Check the Scale Factor the plug-in shows: 1.0 means the file and the scene already use the same units.",
+          "tier": "official",
+          "sources": [
+            "M19"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "With Automatic on, the FBX plug-in identifies the incoming file's units, sets them and converts them to match the host application's units.",
+          "tier": "official",
+          "sources": [
+            "M18"
+          ]
+        },
+        {
+          "text": "When Automatic is on, the menu for choosing the units to convert to is disabled.",
+          "tier": "official",
+          "sources": [
+            "M18"
+          ]
+        },
+        {
+          "text": "The plug-in looks at Maya's Working Units in the Preferences window when it works out the conversion.",
+          "tier": "official",
+          "sources": [
+            "M19"
+          ]
+        },
+        {
+          "text": "When the file's units match the scene's working units the plug-in shows a Scale Factor of 1.0.",
+          "tier": "official",
+          "sources": [
+            "M19"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Compare the imported mesh's size with what you expect; with matching units the shown Scale Factor is 1.0.",
+          "tier": "official",
+          "sources": [
+            "M19"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Importing with different units on both sides and turning Automatic off leaves the model scaled wrongly, because nothing converts it.",
+          "tier": "official",
+          "sources": [
+            "M18"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "imported model is huge in maya",
+            "imported model is tiny in maya",
+            "fbx scale is wrong in maya",
+            "my imported mesh is the wrong size"
+          ],
+          "cause": "The file's units and Maya's working units differ and the FBX plug-in did not convert between them.",
+          "fix": [
+            "Import again with Automatic turned on in the FBX Advanced options (Units).",
+            "Or choose the units to convert to by hand; the shown Scale Factor reads 1.0 when file and scene units match."
+          ],
+          "tier": "official",
+          "sources": [
+            "M18",
+            "M19"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.import_mesh",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "PREP-02"
+      ],
+      "phrases": [
+        "import my character into houdini",
+        "bring a model into houdini",
+        "import an fbx in houdini",
+        "load a character fbx for kinefx",
+        "how do i load my character mesh",
+        "my imported model is too big",
+        "my imported model is tiny",
+        "get the character into the scene",
+        "fbx character import",
+        "read a geometry file in houdini"
+      ],
+      "ui": [
+        {
+          "path": "File > Import > Filmbox (FBX)",
+          "tier": "official",
+          "source": "H18",
+          "options": [
+            "Import Directly Into /obj Network",
+            "Convert to Y-up Coordinate System",
+            "Convert Units"
+          ],
+          "options_tier": "official",
+          "options_source": "H15",
+          "options_in": "the FBX Import window, not a node"
+        },
+        {
+          "path": "FBX Character Import (SOP)",
+          "tier": "official",
+          "source": "H16",
+          "options": [
+            "FBX File",
+            "Axis System",
+            "Convert to Specified Axis System",
+            "Convert Units",
+            "Normalize Joint Scales"
+          ],
+          "options_tier": "official",
+          "options_source": "H16"
+        },
+        {
+          "path": "File (SOP)",
+          "tier": "official",
+          "source": "H17",
+          "options": [
+            "Geometry File"
+          ],
+          "options_tier": "official",
+          "options_source": "H17",
+          "options_in": "the File node's own parameter, which the install dump does not list by that label"
+        }
+      ],
+      "prerequisites": [
+        "The mesh file is on your computer; check Unit Length first (see the scene-units entry)."
+      ],
+      "outline": [
+        {
+          "text": "To bring a whole FBX scene in, use File > Import > Filmbox (FBX); it creates geometry objects containing File nodes.",
+          "tier": "official",
+          "sources": [
+            "H18"
+          ]
+        },
+        {
+          "text": "To bring a skinned character into KinefX, use the FBX Character Import SOP and set its FBX File.",
+          "tier": "official",
+          "sources": [
+            "H16"
+          ]
+        },
+        {
+          "text": "To read a plain geometry file, make a File SOP with no input and set Geometry File.",
+          "tier": "official",
+          "sources": [
+            "H17"
+          ]
+        },
+        {
+          "text": "Check Convert Units and the axis options so the character arrives at the right size and facing.",
+          "tier": "official",
+          "sources": [
+            "H15",
+            "H16"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "File > Import > Filmbox (FBX) imports an FBX file into the current scene and can create light, camera and geometry objects containing File nodes.",
+          "tier": "official",
+          "sources": [
+            "H18"
+          ]
+        },
+        {
+          "text": "The File SOP reads, writes or caches geometry on disk; with no input connected it reads the file named in Geometry File and sends it to its output.",
+          "tier": "official",
+          "sources": [
+            "H17"
+          ]
+        },
+        {
+          "text": "FBX Character Import imports a skinned character with animation from an FBX file.",
+          "tier": "official",
+          "sources": [
+            "H16"
+          ]
+        },
+        {
+          "text": "Convert Units scales the import from the FBX file's unit (centimeters by default) to the Houdini scene unit (meters by default).",
+          "tier": "official",
+          "sources": [
+            "H15",
+            "H16"
+          ]
+        },
+        {
+          "text": "FBX Character Import has an Axis System menu (Y Up or Z Up, right- or left-handed, or the viewport's setting) and Convert to Specified Axis System; the Y Up (Right-handed) choice is described as the default.",
+          "tier": "official",
+          "sources": [
+            "H16"
+          ]
+        },
+        {
+          "text": "The FBX Import window has Convert to Y-up Coordinate System, which converts the whole FBX scene to Y-up when checked.",
+          "tier": "official",
+          "sources": [
+            "H15"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Check the imported character's size and that it stands upright in the viewport.",
+          "tier": "official",
+          "sources": [
+            "H15"
+          ]
+        }
+      ],
+      "mistakes": [
+        {
+          "text": "Normalize Joint Scales changes the joint transforms so scales become 1; the docs warn that it breaks round-trip workflows, so leave it off unless you need it.",
+          "tier": "official",
+          "sources": [
+            "H16"
+          ]
+        }
+      ],
+      "troubleshooting": [
+        {
+          "symptom_phrases": [
+            "imported model is huge in houdini",
+            "imported model is tiny in houdini",
+            "fbx character is the wrong size",
+            "character is lying on its side in houdini"
+          ],
+          "cause": "The FBX file's unit or up axis differs from the Houdini scene's, and Convert Units or the axis conversion was not applied.",
+          "fix": [
+            "Turn on Convert Units (FBX centimeters to Houdini meters) in the FBX import window or the FBX Character Import node.",
+            "Set the axis conversion: Convert to Y-up Coordinate System in the window, or Axis System with Convert to Specified Axis System on the node."
+          ],
+          "tier": "official",
+          "sources": [
+            "H15",
+            "H16"
           ]
         }
       ]

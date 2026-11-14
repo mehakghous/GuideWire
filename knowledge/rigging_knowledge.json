@@ -504,6 +504,96 @@
       "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-7665A291-FAA7-44C0-BDEB-A6C83482116C.htm",
       "tier": "official",
       "version": "Maya 2016 help"
+    },
+    "B22": {
+      "title": "Blender manual: Editing Keyframes (Insert Keyframe)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/keyframes/editing.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B23": {
+      "title": "Blender manual: Keyframes introduction",
+      "url": "https://docs.blender.org/manual/en/latest/animation/keyframes/introduction.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B24": {
+      "title": "Blender manual: Timeline",
+      "url": "https://docs.blender.org/manual/en/latest/editors/timeline.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14; wording read from a long page and paraphrased"
+    },
+    "B25": {
+      "title": "Blender manual: Output Properties, Format (Frame Rate)",
+      "url": "https://docs.blender.org/manual/en/latest/render/output/properties/format.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14; wording read from a long page and paraphrased"
+    },
+    "B26": {
+      "title": "Blender manual: Output Properties, Frame Range",
+      "url": "https://docs.blender.org/manual/en/latest/render/output/properties/frame_range.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14; wording read from a long page and paraphrased"
+    },
+    "M36": {
+      "title": "Maya: Set keys",
+      "url": "https://help.autodesk.com/cloudhelp/2023/ENU/Maya-Animation/files/GUID-7DE56A30-EEB4-4FDE-B4C4-6E53F4755822.htm",
+      "tier": "official",
+      "version": "Maya 2023 help"
+    },
+    "M37": {
+      "title": "Maya: Time Slider preferences",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Animation/files/GUID-51A80586-9EEA-43A4-AA1F-BF1370C24A64.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M38": {
+      "title": "Maya: Range Slider",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-Basics/files/GUID-E9E054A1-A5D0-412C-976A-F57C0F6960B1.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "M39": {
+      "title": "Maya Getting Started: Setting keyframes",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-GettingStarted/files/GUID-83CFEAEB-7E5D-41D1-8892-C72A03ED8F48.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "M40": {
+      "title": "Maya: Animation controls (Time Slider, Range Slider, Go To Start/End)",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Animation_Tools_Animation_controls.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M41": {
+      "title": "Maya: Time Slider",
+      "url": "https://help.autodesk.com/cloudhelp/2020/ENU/Maya-Customizing/files/GUID-827ED8CD-C6AA-4495-8B5E-2FC98C8D49EE.htm",
+      "tier": "official",
+      "version": "Maya 2020 help"
+    },
+    "H19": {
+      "title": "SideFX Houdini docs: Animation basics (how to set keyframes)",
+      "url": "https://www.sidefx.com/docs/houdini/anim/basics.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H20": {
+      "title": "SideFX Houdini docs: Playbar",
+      "url": "https://www.sidefx.com/docs/houdini/anim/playbar.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H21": {
+      "title": "SideFX Houdini docs: Global Animation Options",
+      "url": "https://www.sidefx.com/docs/houdini/ref/windows/global_anim_opts",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H22": {
+      "title": "SideFX Houdini docs: Auto-key",
+      "url": "https://www.sidefx.com/docs/houdini/anim/autokey.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
     }
   },
   "entries": [
@@ -5583,6 +5673,821 @@
           "sources": [
             "H15",
             "H16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.insert_keyframe",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-01"
+      ],
+      "phrases": [
+        "set a keyframe in blender",
+        "how do i keyframe in blender",
+        "insert a keyframe",
+        "animate the object",
+        "press i to key",
+        "record the pose over time",
+        "auto keyframe in blender"
+      ],
+      "ui": [
+        {
+          "path": "Object / Pose > Animation > Insert Keyframe (shortcut I)",
+          "tier": "official",
+          "source": "B22"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Object Mode or Pose Mode, set the pose or value you want at the current frame.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "With the mouse in the 3D Viewport press I (or use Object / Pose > Animation > Insert Keyframe) to key the properties set in the Default Key Channels preference.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Move the current frame, change the pose, and press I again; repeat for each pose.",
+          "tier": "official",
+          "sources": [
+            "B22",
+            "B23"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "A keyframe is a marker of time that stores the value of a property, and Blender works out the frames between two keyframes by interpolation.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Pressing I in the 3D Viewport keys the properties chosen in the Default Key Channels user preference; with a Keying Set active, that set is used instead.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Hovering over a single property and pressing I, or right-clicking it and choosing Insert Keyframe, keys just that property.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Auto Keyframe is the record button in the Timeline header: while it is on, changing a transform value adds a keyframe at the current frame.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Alt-I in the 3D Viewport removes the keys of the selected objects or bones at the current frame.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "The Dope Sheet gives an overview of the existing keyframes.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "When the current frame is a keyframe for the active object, the object's name in the upper left of the 3D Viewport turns yellow.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.frame_rate_range",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-02"
+      ],
+      "phrases": [
+        "set the frame rate in blender",
+        "change fps in blender",
+        "set the start and end frame",
+        "set the animation length",
+        "frame range in blender",
+        "output properties frame rate",
+        "24 fps or 30 fps"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Output Properties > Format > Frame Rate; Output Properties > Frame Range",
+          "tier": "official",
+          "source": "B25",
+          "note": "The manual pages read give the menu and fields but do not name the preset values."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Properties editor open the Output Properties tab and, in the Format panel, choose a Frame Rate (or Custom to type FPS and Base).",
+          "tier": "official",
+          "sources": [
+            "B25"
+          ]
+        },
+        {
+          "text": "In the Frame Range panel set Frame Start and Frame End for the animation.",
+          "tier": "official",
+          "sources": [
+            "B26"
+          ]
+        },
+        {
+          "text": "Check the Timeline's Start and End fields show the same range.",
+          "tier": "official",
+          "sources": [
+            "B24",
+            "B26"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Frame Rate menu offers several common frame rates; choosing Custom shows the FPS and Base fields, and the rate is FPS divided by Base.",
+          "tier": "official",
+          "sources": [
+            "B25"
+          ]
+        },
+        {
+          "text": "Frame Start and Frame End in the Output Properties Frame Range panel set the start and end frames used when rendering an animation; Frame Step above 1 skips frames.",
+          "tier": "official",
+          "sources": [
+            "B26"
+          ]
+        },
+        {
+          "text": "The Timeline header also has Start and End fields for the frame range, and the default range runs from frame 1 to frame 250.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the Timeline: it should start and stop on the Start and End frames you set.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.timeline",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CURV-01"
+      ],
+      "phrases": [
+        "use the timeline in blender",
+        "scrub the timeline",
+        "play the animation in blender",
+        "jump to a frame",
+        "move the playhead",
+        "loop the animation",
+        "where is the timeline"
+      ],
+      "ui": [
+        {
+          "path": "Timeline editor (header: playback controls, Start/End, current frame)",
+          "tier": "official",
+          "source": "B24",
+          "note": "Scrubbing and looping are not described on the page text that could be read, so they are not claimed here."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Use the playback buttons in the Timeline header to play, pause and step through the animation.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        },
+        {
+          "text": "Use the current-frame field in the header, or the blue playhead in the main view, to move to a frame.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        },
+        {
+          "text": "Set the Start and End fields in the header to the range you want to work in.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Timeline is an editor next to the Dope Sheet and Graph Editor; its header has the transport (playback) controls, the frame controls and the Start and End fields.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        },
+        {
+          "text": "The blue playhead marks the current frame in the Timeline's main view.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        },
+        {
+          "text": "Playback settings are in a Playback popover in the Timeline header.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        },
+        {
+          "text": "View > Go to Current Frame recentres the Timeline on the playhead.",
+          "tier": "official",
+          "sources": [
+            "B24"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After you change the current frame, the object's pose in the 3D Viewport updates to the animated pose of that frame.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.set_key",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ANIM-01"
+      ],
+      "phrases": [
+        "set a keyframe in maya",
+        "how do i keyframe in maya",
+        "press s to set a key",
+        "set key",
+        "animate the control",
+        "record the pose over time",
+        "key the channels"
+      ],
+      "ui": [
+        {
+          "path": "Key > Set Key (shortcut S)",
+          "tier": "official",
+          "source": "M36"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the control or object, and move to the frame where the pose should be keyed.",
+          "tier": "official",
+          "sources": [
+            "M36",
+            "M39"
+          ]
+        },
+        {
+          "text": "Choose Key > Set Key or press S to key the object at the current frame.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        },
+        {
+          "text": "Move to another frame, change the pose, and set a key again; repeat for each pose.",
+          "tier": "official",
+          "sources": [
+            "M39"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Choose Key > Set Key or press S to set a key; the key shows on the Time Slider.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        },
+        {
+          "text": "The option box next to Key > Set Key opens the Set Key Options window.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        },
+        {
+          "text": "In Maya's tutorial lesson on keyframes, the ball is selected and Key > Set Key (keyboard shortcut S) is used, then the current time is moved and the ball is keyed again.",
+          "tier": "official",
+          "sources": [
+            "M39"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After keying, drag the Time Slider back and forth: the object should move between the keyed poses.",
+          "tier": "official",
+          "sources": [
+            "M39",
+            "M41"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.frame_rate_range",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ANIM-02"
+      ],
+      "phrases": [
+        "set the frame rate in maya",
+        "change fps in maya",
+        "maya 24 fps",
+        "set the playback range",
+        "set start and end frame in maya",
+        "time slider range",
+        "maya animation length"
+      ],
+      "ui": [
+        {
+          "path": "Windows > Settings/Preferences > Preferences > Settings > Working Units > Time; Range Slider (playback start and end)",
+          "tier": "official",
+          "source": "M37"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open Preferences > Settings and under Working Units choose the Time unit; that sets the playback rate (Maya defaults to 24 frames per second).",
+          "tier": "official",
+          "sources": [
+            "M37",
+            "M40"
+          ]
+        },
+        {
+          "text": "Type the playback start and end times in the Range Slider fields below the Time Slider.",
+          "tier": "official",
+          "sources": [
+            "M38"
+          ]
+        },
+        {
+          "text": "Play the animation and check it starts and ends where you set it.",
+          "tier": "official",
+          "sources": [
+            "M37",
+            "M38"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Maya defaults to measuring time as 24 frames per second, the standard frame rate for film; the playback rate is the Time unit chosen in the Settings preferences.",
+          "tier": "official",
+          "sources": [
+            "M40",
+            "M41"
+          ]
+        },
+        {
+          "text": "Time Slider preferences has a Framerate setting for the current scene and Playback start and end times; playback speed uses the frame rate set in Working Units.",
+          "tier": "official",
+          "sources": [
+            "M37"
+          ]
+        },
+        {
+          "text": "The Range Slider, below the Time Slider, controls the playback range; its two fields show the playback start and end times.",
+          "tier": "official",
+          "sources": [
+            "M38"
+          ]
+        },
+        {
+          "text": "New Scene Options sets the defaults for a new scene, including the default animation start time (1.00) and end time (48.00).",
+          "tier": "official",
+          "sources": [
+            "M20"
+          ]
+        },
+        {
+          "text": "Snap to whole frames, when on, makes Maya step through animation times by whole numbers.",
+          "tier": "official",
+          "sources": [
+            "M37"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The playback range shown in the Range Slider fields matches the start and end you intended.",
+          "tier": "official",
+          "sources": [
+            "M38"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.time_slider",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CURV-01"
+      ],
+      "phrases": [
+        "scrub the time slider",
+        "use the time slider in maya",
+        "play the animation in maya",
+        "go to the first frame",
+        "loop the animation in maya",
+        "move to a frame",
+        "where is the time slider"
+      ],
+      "ui": [
+        {
+          "path": "Time Slider (with the Range Slider and playback buttons)",
+          "tier": "official",
+          "source": "M41"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Drag in the Time Slider to move forward and backward through the animation.",
+          "tier": "official",
+          "sources": [
+            "M41",
+            "M40"
+          ]
+        },
+        {
+          "text": "Use Go To Start and Go To End to jump to the ends of the playback range.",
+          "tier": "official",
+          "sources": [
+            "M40",
+            "M39"
+          ]
+        },
+        {
+          "text": "Set what happens at the end of playback with the Looping setting in the Time Slider preferences.",
+          "tier": "official",
+          "sources": [
+            "M37"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "You can drag the Time Slider to move forward and backward in your animation; the field to its right shows the current time in the current Time unit.",
+          "tier": "official",
+          "sources": [
+            "M41",
+            "M40"
+          ]
+        },
+        {
+          "text": "The Time Slider controls the playback range, keys and breakdowns within that range.",
+          "tier": "official",
+          "sources": [
+            "M41"
+          ]
+        },
+        {
+          "text": "Go To Start and Go To End move to the start and end of the playback range.",
+          "tier": "official",
+          "sources": [
+            "M40"
+          ]
+        },
+        {
+          "text": "Looping in the Time Slider preferences sets what happens when playback reaches the end of the playback range; the default is Continuous.",
+          "tier": "official",
+          "sources": [
+            "M37"
+          ]
+        },
+        {
+          "text": "By default, in the Maya getting-started scene the animation plays in a loop from frame 1 to 72.",
+          "tier": "official",
+          "sources": [
+            "M39"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Dragging the Time Slider updates the pose of the object in the viewport.",
+          "tier": "official",
+          "sources": [
+            "M39"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.set_keyframe",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "ANIM-01"
+      ],
+      "phrases": [
+        "set a keyframe in houdini",
+        "how do i keyframe in houdini",
+        "press k to set a key",
+        "alt click to key a parameter",
+        "auto key in houdini",
+        "animate a parameter",
+        "key the controls"
+      ],
+      "ui": [
+        {
+          "path": "Parameter: Alt+click, or right-click > Keyframes > Set Keyframe; K key; Edit > Set Keyframe",
+          "tier": "official",
+          "source": "H19",
+          "note": "Houdini rigs often pose with the Rig Pose SOP instead; this entry is about keyframing parameters."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Go to the frame where the value should be keyed and set the parameter value.",
+          "tier": "official",
+          "sources": [
+            "H19"
+          ]
+        },
+        {
+          "text": "Alt+click the parameter (or right-click it and choose Keyframes > Set Keyframe) to set a keyframe on it.",
+          "tier": "official",
+          "sources": [
+            "H19"
+          ]
+        },
+        {
+          "text": "Move to another frame, change the value, and key it again; or turn on auto-key so changes are keyed for you.",
+          "tier": "official",
+          "sources": [
+            "H19",
+            "H22"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "As a shortcut, clicking a parameter with Alt+LMB sets a keyframe on it; right-clicking a parameter and choosing Keyframes > Set Keyframe does the same.",
+          "tier": "official",
+          "sources": [
+            "H19"
+          ]
+        },
+        {
+          "text": "Pressing K sets keyframes for the parameters in the channel list.",
+          "tier": "official",
+          "sources": [
+            "H19"
+          ]
+        },
+        {
+          "text": "Auto-key adds keyframes automatically for any parameter you change; turn it on from the down arrow menu next to the keyframe button on the playbar, or in Edit > Preferences > Animation.",
+          "tier": "official",
+          "sources": [
+            "H19",
+            "H22"
+          ]
+        },
+        {
+          "text": "With auto-key on, the playbar keyframe button is drawn with the word AUTO.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "A keyed parameter shows its keyframe state in the parameter editor, and the animation editor can show its curve.",
+          "tier": "official",
+          "sources": [
+            "H19"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.frame_rate_range",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "ANIM-02"
+      ],
+      "phrases": [
+        "set the frame rate in houdini",
+        "change fps in houdini",
+        "houdini global animation options",
+        "set the start and end frame in houdini",
+        "set the frame range",
+        "houdini animation length"
+      ],
+      "ui": [
+        {
+          "path": "Playbar > Global Animation Options (FPS, Start, End, Apply)",
+          "tier": "official",
+          "source": "H21"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Click the Global Animation Options button at the left of the playbar to open the window.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        },
+        {
+          "text": "Set FPS for the frame rate and Start and End for the global frame range, then click Apply.",
+          "tier": "official",
+          "sources": [
+            "H20",
+            "H21"
+          ]
+        },
+        {
+          "text": "Check the playbar's range now shows the new start and end.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Houdini has two frame ranges: the global frame range and the current (playback) frame range, shown in the playbar.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        },
+        {
+          "text": "To set the global range, open Global Animation Options, change the Start and End fields and click Apply.",
+          "tier": "official",
+          "sources": [
+            "H20",
+            "H21"
+          ]
+        },
+        {
+          "text": "FPS sets the rate of animation playback when realtime playback is on.",
+          "tier": "official",
+          "sources": [
+            "H21"
+          ]
+        },
+        {
+          "text": "When Keep Keys on Current Frames is on and you change FPS, the frame each key is attached to is preserved.",
+          "tier": "official",
+          "sources": [
+            "H21"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The playbar's global range shows the Start and End you applied.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.playbar",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CURV-01"
+      ],
+      "phrases": [
+        "use the playbar in houdini",
+        "scrub the timeline in houdini",
+        "play the animation in houdini",
+        "loop the animation in houdini",
+        "go to a frame",
+        "move the playhead",
+        "where is the playbar"
+      ],
+      "ui": [
+        {
+          "path": "Playbar (timeline, current frame, play controls, range slider)",
+          "tier": "official",
+          "source": "H20"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Type a frame number in the current-frame field, or MMB drag it, to move to a frame.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        },
+        {
+          "text": "Use the play buttons to play forward or backward in the current frame range.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        },
+        {
+          "text": "Set the loop behaviour from the Play Looping menu (Loop, Play Once, Zig-Zag, Forever).",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The playbar controls playback and the frame ranges; the current-frame field shows the current frame number and accepts a typed number or an MMB drag.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        },
+        {
+          "text": "Play Forward starts the animation in the current frame range; Play Backward plays it backward.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        },
+        {
+          "text": "The Play Looping menu offers Loop, Play Once, Zig-Zag and Forever, plus a Loop Backward option.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After moving the current frame, the scene in the viewport shows the animation at that frame.",
+          "tier": "official",
+          "sources": [
+            "H20"
           ]
         }
       ]

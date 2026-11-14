@@ -118,7 +118,7 @@ def test_prompt_v6_lists_the_documented_names_for_the_app_and_nothing_else_chang
     p6, p5 = build_system_prompt(get_profile("maya"), "v6"), build_system_prompt(get_profile("maya"), "v5")
     assert p6.startswith(p5) and "Primary Axis" in p6[len(p5):] and "Maintain Offset" in p6[len(p5):] and "Never write a name that the video does not show" in p6
     assert "Bone Heat" not in p6 and "flips" not in p6                              # community advice is never put in a prompt, only names
-    assert len(p6) - len(p5) < 3000                                                  # about 500 tokens: negligible next to a video's 100,000
+    assert len(p6) - len(p5) < 3500                                                  # about 600 tokens: negligible next to a video's 100,000 (the limit was 3000 before the units and import entries added their names)
     b6 = build_system_prompt(get_profile("blender"), "v6")
     assert "Armature Deform" in b6 and "Primary Axis" not in b6                     # each application gets its own names
     assert build_system_prompt(get_profile("blender"), "v2") == build_system_prompt(get_profile("blender"), "v2").replace("Menu locations", "Menu locations")   # v2 untouched

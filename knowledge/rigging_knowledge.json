@@ -594,6 +594,90 @@
       "url": "https://www.sidefx.com/docs/houdini/anim/autokey.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "B27": {
+      "title": "Blender manual: Opening and Saving",
+      "url": "https://docs.blender.org/manual/en/latest/files/blend/open_save.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-14; wording read from a long page and paraphrased"
+    },
+    "B28": {
+      "title": "Blender Python API: Quickstart",
+      "url": "https://docs.blender.org/api/current/info_quickstart.html",
+      "tier": "official",
+      "version": "Python API docs, current, read 2026-11-14; wording read from a long page and paraphrased"
+    },
+    "B29": {
+      "title": "Blender manual: Bone Relations (Parent, Connected)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/properties/relations.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "M42": {
+      "title": "Maya: File menu (Save Scene, Save Scene As, Open Scene, Increment & Save)",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Basics/files/GUID-9D1021A8-60A4-4B72-9A90-7C5070A9E037.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M43": {
+      "title": "Maya: Save versions of a file",
+      "url": "https://help.autodesk.com/cloudhelp/2018/ENU/Maya-ManagingScenes/files/GUID-62B28906-C01A-4A48-8AB7-F8A7FE4D3510.htm",
+      "tier": "official",
+      "version": "Maya 2018 help"
+    },
+    "M44": {
+      "title": "Maya: Using Python (Script Editor, maya.cmds)",
+      "url": "https://help.autodesk.com/cloudhelp/ENU/MayaCRE-Scripting/files/GUID-55B63946-CDC9-42E5-9B6E-45EE45CFC7FC.htm",
+      "tier": "official",
+      "version": "Maya cloud help (current, no year in the address)"
+    },
+    "M45": {
+      "title": "Maya: Edit the hierarchy of nodes (parenting)",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Basics/files/GUID-2F03F58A-DC9B-4A6E-9BA4-8CA5FDE7BC34.htm",
+      "tier": "official",
+      "version": "Maya 2025 help"
+    },
+    "M46": {
+      "title": "Maya: Edit > Parent",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Edit__Parent.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M47": {
+      "title": "Maya Getting Started: Parenting a model into a skeleton hierarchy (FK)",
+      "url": "https://download.autodesk.com/us/maya/maya2013_getting_started/files/Inverse_kinematics_Parenting_a_model_into_a_skeleton_hierarchy.htm",
+      "tier": "official",
+      "version": "Maya 2013 Getting Started"
+    },
+    "H23": {
+      "title": "SideFX Houdini docs: hou.hipFile (save, load, increment)",
+      "url": "https://www.sidefx.com/docs/houdini/hom/hou/hipFile.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H24": {
+      "title": "SideFX Houdini docs: Working with files and assets as text",
+      "url": "https://www.sidefx.com/docs/houdini/assets/textfiles.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H25": {
+      "title": "SideFX Houdini docs: Python scripting (the hou module)",
+      "url": "https://www.sidefx.com/docs/houdini/hom/index.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H26": {
+      "title": "SideFX Houdini docs: Transform geometry node (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/xform.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "H27": {
+      "title": "SideFX Houdini docs: Object Merge geometry node (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/object_merge.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-14"
     }
   },
   "entries": [
@@ -6488,6 +6572,797 @@
           "tier": "official",
           "sources": [
             "H20"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.save_file",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "EXPT-07"
+      ],
+      "phrases": [
+        "save my blender file",
+        "how do i save in blender",
+        "save as in blender",
+        "save a copy of the blend file",
+        "open a blend file",
+        "keep a backup of my rig",
+        "save my work"
+      ],
+      "ui": [
+        {
+          "path": "File > Save (Ctrl-S); File > Save As (Shift-Ctrl-S); File > Save Copy",
+          "tier": "official",
+          "source": "B27",
+          "note": "The manual page was read through a summary, so the wording is paraphrased; a Save Versions (.blend1) setting was not confirmed on this page and is not claimed."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Press Ctrl-S (File > Save) to save the blend-file; if it has never been saved Blender opens the Save As file browser.",
+          "tier": "official",
+          "sources": [
+            "B27"
+          ]
+        },
+        {
+          "text": "Use File > Save As (Shift-Ctrl-S) to save under a new name, or File > Save Copy to keep editing the original while writing a backup copy.",
+          "tier": "official",
+          "sources": [
+            "B27"
+          ]
+        },
+        {
+          "text": "Open a saved file again with File > Open and check the rig and animation are as you left them.",
+          "tier": "official",
+          "sources": [
+            "B27"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Save writes the current blend-file; Save As asks for a new file path; Save Copy saves to a chosen path but returns you to editing the original file.",
+          "tier": "official",
+          "sources": [
+            "B27"
+          ]
+        },
+        {
+          "text": "Opening and saving blend-files is done through the File Browser.",
+          "tier": "official",
+          "sources": [
+            "B27"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Close and reopen the file: the armature, its pose and the animation keys should be unchanged.",
+          "tier": "official",
+          "sources": [
+            "B27"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.save_scene",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "EXPT-07"
+      ],
+      "phrases": [
+        "save my maya scene",
+        "how do i save in maya",
+        "save scene as",
+        "incremental save in maya",
+        "keep versions of my rig",
+        "open a maya scene",
+        "save my work"
+      ],
+      "ui": [
+        {
+          "path": "File > Save Scene; File > Save Scene As; File > Increment & Save",
+          "tier": "official",
+          "source": "M42",
+          "note": "The help pages read name the .ma and .mb scene file types only in passing, so the entry does not define them."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose File > Save Scene to save under the current name, or File > Save Scene As to give a new name and location.",
+          "tier": "official",
+          "sources": [
+            "M42"
+          ]
+        },
+        {
+          "text": "Use File > Increment & Save to keep a numbered version before a risky change (for example binding).",
+          "tier": "official",
+          "sources": [
+            "M43"
+          ]
+        },
+        {
+          "text": "Reopen with File > Open Scene and check the rig is as you left it.",
+          "tier": "official",
+          "sources": [
+            "M42"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Save Scene saves the scene under its current name; Save Scene As lets you specify a new name and location; Open Scene opens a saved scene from disk.",
+          "tier": "official",
+          "sources": [
+            "M42"
+          ]
+        },
+        {
+          "text": "Increment & Save saves a version of the current file with a new, incremented name in the same directory; by default the name is <filename>.0001.mb and the number goes up by 1 each time.",
+          "tier": "official",
+          "sources": [
+            "M42",
+            "M43"
+          ]
+        },
+        {
+          "text": "If the file has never been saved, Increment & Save opens the Save As window instead.",
+          "tier": "official",
+          "sources": [
+            "M43"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After reopening, the joints, controls and keys are unchanged.",
+          "tier": "official",
+          "sources": [
+            "M42"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.save_hip",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "EXPT-07"
+      ],
+      "phrases": [
+        "save my houdini file",
+        "how do i save in houdini",
+        "save hip file",
+        "increment the file name",
+        "keep versions of my scene",
+        "save as text",
+        "open a hip file"
+      ],
+      "ui": [
+        {
+          "path": "File > Save; File > Save As; File > Open; File > Save as text",
+          "tier": "official",
+          "source": "H23",
+          "note": "The .hiplc file type is not described on the pages read, so it is not claimed here."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Save with File > Save (or File > Save As for a new name); the scene is a .hip file.",
+          "tier": "official",
+          "sources": [
+            "H23"
+          ]
+        },
+        {
+          "text": "To keep numbered versions, save with an incremented file name (hou.hipFile.saveAndIncrementFileName in Python).",
+          "tier": "official",
+          "sources": [
+            "H23"
+          ]
+        },
+        {
+          "text": "Reopen with File > Open and check the network is as you left it.",
+          "tier": "official",
+          "sources": [
+            "H23"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "In Python, hou.hipFile.save() with no argument saves to the current path like File > Save, with a path it acts like File > Save As, and hou.hipFile.load() acts like File > Open.",
+          "tier": "official",
+          "sources": [
+            "H23"
+          ]
+        },
+        {
+          "text": "saveAndIncrementFileName saves the scene to its current path like File > Save but increments a number at the end of the file name.",
+          "tier": "official",
+          "sources": [
+            "H23"
+          ]
+        },
+        {
+          "text": "Scene (.hip) files are normally a single binary file; File > Save as text saves a .hip as plain text, and later saves stay text until you choose Save as binary.",
+          "tier": "official",
+          "sources": [
+            "H24"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Reopen the .hip: the skeleton, rig and animation nodes are as you left them.",
+          "tier": "official",
+          "sources": [
+            "H23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.python_scripting",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "AUTO-01"
+      ],
+      "phrases": [
+        "script blender with python",
+        "use python in blender",
+        "bpy",
+        "run a python script in blender",
+        "python console in blender",
+        "read the armature from python",
+        "automate rigging with a script"
+      ],
+      "ui": [
+        {
+          "path": "Scripting workspace (Topbar tabs): Text Editor, Python Console",
+          "tier": "official",
+          "source": "B28",
+          "note": "The Python API page was read through a summary, so the wording is paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Scripting workspace from the Topbar tabs; it holds a Text Editor and a Python Console.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        },
+        {
+          "text": "Paste or open a .py file in the Text Editor and test it with Run Script, or type short snippets in the Python Console.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        },
+        {
+          "text": "Read or change the loaded file's data through bpy.data, and the user's current selection and state through bpy.context.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Scripting workspace, available from the Topbar tabs, gives you the Text Editor and the Python Console without setting spaces up by hand.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        },
+        {
+          "text": "In the Text Editor you can open .py files or paste from the clipboard and test with Run Script; the Python Console is typically used for snippets and for immediate feedback.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        },
+        {
+          "text": "Data of the currently loaded blend-file is accessed with the module bpy.data; the context is always available from bpy.context; operators are run through bpy.ops.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "A line such as printing bpy.data.objects in the Python Console lists the objects in the open file.",
+          "tier": "official",
+          "sources": [
+            "B28"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.python_scripting",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "AUTO-01"
+      ],
+      "phrases": [
+        "script maya with python",
+        "use python in maya",
+        "maya.cmds",
+        "script editor in maya",
+        "run a mel or python command",
+        "automate rigging with a script",
+        "query the scene from python"
+      ],
+      "ui": [
+        {
+          "path": "Script Editor > Python tab (import maya.cmds)",
+          "tier": "official",
+          "source": "M44"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Script Editor and use its Python tab for Python statements (the MEL tab is for MEL).",
+          "tier": "official",
+          "sources": [
+            "M44"
+          ]
+        },
+        {
+          "text": "In the Python tab enter import maya.cmds in each session to use the Python bindings of Maya's commands.",
+          "tier": "official",
+          "sources": [
+            "M44"
+          ]
+        },
+        {
+          "text": "Run a command and read its result in the Script Editor's history.",
+          "tier": "official",
+          "sources": [
+            "M44"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Script Editor has separate tabs for each language: statements entered in the MEL tab are processed by MEL and statements entered in the Python tab are processed by Python.",
+          "tier": "official",
+          "sources": [
+            "M44"
+          ]
+        },
+        {
+          "text": "The Python bindings for all of the native Maya commands are in the maya.cmds module, and you must enter import maya.cmds in the Python tab in each session to use them.",
+          "tier": "official",
+          "sources": [
+            "M44"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "A command such as a query run from the Python tab prints its result in the Script Editor.",
+          "tier": "official",
+          "sources": [
+            "M44"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.python_hou",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "AUTO-01"
+      ],
+      "phrases": [
+        "script houdini with python",
+        "use python in houdini",
+        "the hou module",
+        "hython",
+        "automate rigging with a script",
+        "read a node from python",
+        "houdini object model"
+      ],
+      "ui": [
+        {
+          "path": "Python scripting with the hou module (parameter expressions, hython)",
+          "tier": "official",
+          "source": "H25",
+          "note": "A graphical Python shell window is not described on the page read, so only expressions and hython are named."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Use the hou Python module to read and change the scene: it is the top of the Houdini Object Model hierarchy of modules, functions and classes.",
+          "tier": "official",
+          "sources": [
+            "H25"
+          ]
+        },
+        {
+          "text": "Inside parameter expressions and in the hython command-line shell the hou module is already imported.",
+          "tier": "official",
+          "sources": [
+            "H25"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Houdini Object Model (HOM) is an application programming interface for scripting Houdini with Python, and it replaces the functionality of the earlier command language HScript.",
+          "tier": "official",
+          "sources": [
+            "H25"
+          ]
+        },
+        {
+          "text": "In Python the hou package is the top of a hierarchy of modules, functions and classes that define the HOM.",
+          "tier": "official",
+          "sources": [
+            "H25"
+          ]
+        },
+        {
+          "text": "The hou module is automatically imported when you write expressions in the parameter editor and in the hython command-line shell.",
+          "tier": "official",
+          "sources": [
+            "H25"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "In a script, hou calls can be checked against the scene, for example by reading a node back after changing it.",
+          "tier": "official",
+          "sources": [
+            "H25"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.bone_parent_root",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ORNT-01"
+      ],
+      "phrases": [
+        "parent a bone",
+        "set the bone parent",
+        "connect bones",
+        "make a bone the child of another",
+        "bone hierarchy and root bone",
+        "the bone is not following its parent",
+        "connected bones"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Bone tab > Relations > Parent / Connected",
+          "tier": "official",
+          "source": "B29"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the bone and open Bone > Relations in the Properties editor.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        },
+        {
+          "text": "Choose the parent bone in the Parent field; tick Connected if the bone's head should sit on its parent's tail.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        },
+        {
+          "text": "Check the chain by transforming the root bone: every child should follow.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Relations panel manages the relationship of the bone with its parent bone.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        },
+        {
+          "text": "The Parent field selects the bone to set as the parent; Connected sets the head of the bone to be connected to its parent's tail.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        },
+        {
+          "text": "By default child bones inherit their parent's position, rotation and scale, each with their own offset.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Rotating a root bone in Pose Mode carries the whole chain of its children with it.",
+          "tier": "official",
+          "sources": [
+            "B29"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.parent_joints",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ORNT-01"
+      ],
+      "phrases": [
+        "joint hierarchy and root",
+        "fix the joint hierarchy in the outliner",
+        "move a joint under another",
+        "unparent a joint"
+      ],
+      "ui": [
+        {
+          "path": "Edit > Parent (select the child first, the parent last); Outliner middle-drag",
+          "tier": "official",
+          "source": "M46"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the node that should become the child, then shift-select the node that should be its parent.",
+          "tier": "official",
+          "sources": [
+            "M45",
+            "M46"
+          ]
+        },
+        {
+          "text": "Choose Edit > Parent, or middle-drag the child onto its parent in the Outliner or Hypergraph.",
+          "tier": "official",
+          "sources": [
+            "M45",
+            "M46"
+          ]
+        },
+        {
+          "text": "Check the hierarchy in the Outliner: one root joint at the top with the whole chain beneath it.",
+          "tier": "official",
+          "sources": [
+            "M45",
+            "M47"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Edit > Parent makes the selected nodes children of the last node you selected.",
+          "tier": "official",
+          "sources": [
+            "M46"
+          ]
+        },
+        {
+          "text": "In the Outliner or Hypergraph you can instead middle-drag the selected node onto the parent node, and middle-drag it away from its parent to unparent it.",
+          "tier": "official",
+          "sources": [
+            "M45"
+          ]
+        },
+        {
+          "text": "The top node of a hierarchy is the parent or root node: rotating it rotates everything below it.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        },
+        {
+          "text": "In the Maya Getting Started lesson the menu item is listed as Edit > Parent with the hotkey P.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Rotate the root joint and check that the entire chain below it rotates with it.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.pose_fk_chain",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-01"
+      ],
+      "phrases": [
+        "pose the fk chain",
+        "forward kinematics pose"
+      ],
+      "ui": [
+        {
+          "path": "Rotate tool on the joints, parent joint first",
+          "tier": "official",
+          "source": "M47"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the top joint of the chain and rotate it; everything below follows.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        },
+        {
+          "text": "Select the next joint down and rotate it; repeat joint by joint until the pose is right.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        },
+        {
+          "text": "Key the pose with Key > Set Key (S) if it is part of an animation.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Posing a character using joint rotations is referred to as Forward Kinematics (FK).",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        },
+        {
+          "text": "If you rotate the parent (root) node, everything below that node rotates with it.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After rotating a joint, its child joints move with it and the mesh bound to them follows.",
+          "tier": "official",
+          "sources": [
+            "M47"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.transform_sop",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "PREP-04"
+      ],
+      "phrases": [
+        "apply the transform in houdini",
+        "freeze transforms in houdini",
+        "bake the transform into the geometry",
+        "reset the transform of my mesh",
+        "clean up the transform before rigging",
+        "object merge transform",
+        "the geometry is not at the origin"
+      ],
+      "ui": [
+        {
+          "path": "Transform (SOP); Object Merge (SOP) > Transform",
+          "tier": "official",
+          "source": "H26",
+          "note": "The pages read describe the SOPs above and say nothing about clearing history, so no history step is given."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a Transform SOP after the geometry and set the transform you want; the node applies it to the geometry itself.",
+          "tier": "official",
+          "sources": [
+            "H26"
+          ]
+        },
+        {
+          "text": "Or bring geometry into another object with an Object Merge SOP and set its Transform menu to Into This Object so it lands in that object's space.",
+          "tier": "official",
+          "sources": [
+            "H27"
+          ]
+        },
+        {
+          "text": "Check the geometry's position and scale in the Geometry Spreadsheet or viewport before building the skeleton.",
+          "tier": "official",
+          "sources": [
+            "H26"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Transform SOP transforms the source geometry in object space using a transformation matrix, and all primitives selected receive the same transform.",
+          "tier": "official",
+          "sources": [
+            "H26"
+          ]
+        },
+        {
+          "text": "Invert Transformation applies the inverse of the transform.",
+          "tier": "official",
+          "sources": [
+            "H26"
+          ]
+        },
+        {
+          "text": "Object Merge has a Transform parameter with the choices None, Into This Object and Into Specified Object, so the source geometry can account for differences between the source object's orientation and the destination's.",
+          "tier": "official",
+          "sources": [
+            "H27"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After the Transform SOP the geometry sits where you expect, and the object itself carries no extra transform.",
+          "tier": "official",
+          "sources": [
+            "H26"
           ]
         }
       ]

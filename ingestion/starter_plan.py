@@ -50,8 +50,11 @@ LABELS = {
     "houdini.skeleton_sop": "Draw the skeleton (Skeleton SOP)", "houdini.rig_doctor": "Check the skeleton (Rig Doctor)", "houdini.orient_joints": "Orient the joints (Orient Joints)",
     "houdini.skeleton_mirror": "Mirror the skeleton (Skeleton Mirror)", "houdini.capture_weights": "Bind the geometry (Joint Capture, then Joint Deform)", "houdini.ik_chains": "Add IK (IK Chains)",
     "houdini.apex_autorig": "Build the rig and its controls (APEX AutoRig)", "houdini.rig_pose": "Pose the rig (Rig Pose)",
+    "blender.scene_units": "Set the scene units (Scene > Units)", "blender.import_mesh": "Bring the character mesh in (File > Import)",
+    "maya.working_units": "Set the working units and up axis (Preferences > Settings)", "maya.import_mesh": "Bring the character mesh in (FBX import, Units)",
+    "houdini.scene_units": "Check the scene units (Preferences > Unit Length)", "houdini.import_mesh": "Bring the character mesh in (FBX or File SOP)",
 }
-PREP = {"blender": ["blender.apply_transforms"], "maya": ["maya.freeze_transformations"], "houdini": []}        # what to do BEFORE rigging, where the knowledge base has it
+PREP = {"blender": ["blender.scene_units", "blender.import_mesh", "blender.apply_transforms"], "maya": ["maya.working_units", "maya.import_mesh", "maya.freeze_transformations"], "houdini": ["houdini.scene_units", "houdini.import_mesh"]}        # what to do BEFORE rigging, where the knowledge base has it
 DONE_AFTER_SKELETON = {"blender": {"blender.apply_transforms", "blender.add_bones"}, "maya": {"maya.freeze_transformations", "maya.create_joints"},       # topics a learner who "made the skeleton" is past:
                        "houdini": {"houdini.skeleton_sop"}}                                                                                          # preparing the mesh and making the joints (naming, orienting, mirroring still come next)
 

@@ -176,7 +176,7 @@ def test_houdini_entries_cite_the_official_docs_and_say_the_forum_advice_is_comm
     k = load()
     ids = {e.id: e for e in k.entries if "houdini" in e.apps}
     assert set(ids) == {"houdini.apex_autorig", "houdini.capture_weights", "houdini.skeleton_sop", "houdini.orient_joints", "houdini.skeleton_mirror",
-                        "houdini.ik_chains", "houdini.rig_doctor", "houdini.kinefx_workflow", "houdini.rig_pose", "houdini.rig_stash_pose"}
+                        "houdini.ik_chains", "houdini.rig_doctor", "houdini.kinefx_workflow", "houdini.rig_pose", "houdini.rig_stash_pose", "houdini.scene_units", "houdini.import_mesh"}
     assert all(s.tier == "official" for e in ids.values() for s in e.facts)
     ts = ids["houdini.capture_weights"].troubleshooting
     assert {t["tier"] for t in ts} == {"community"} and all(k.sources[s]["url"].startswith("https://www.sidefx.com/forum") for t in ts for s in t["sources"])

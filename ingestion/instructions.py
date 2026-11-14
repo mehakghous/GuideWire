@@ -126,6 +126,8 @@ def compose_instructions(sl: StepList) -> int:
             st.check = _checks(st, sl.app)
         _from_knowledge(st, sl.app)
         changed += (st.result, len(st.how_to), len(st.check), len(st.actions)) != before and (len(st.how_to) + len(st.check) > before[1] + before[2])
+    from .menu_steps import add_menu_paths
+    add_menu_paths(sl)                             # exact dropdown path from the application's own menus, when there is one clear match
     return changed
 
 

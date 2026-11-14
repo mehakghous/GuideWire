@@ -38,6 +38,8 @@ input to the application.
 - `verification/oracle.py` oracle scorer: compares a learner scene with a reference end state after
   normalising units, up axis and frame rate (Blender Z-up metres, Maya Y-up centimetres, Houdini Y-up
   metres), and drops parts that have no data instead of penalising them.
+- `menus/` real menu trees dumped from each application (`dump_blender.py`, `dump_maya.py`, `dump_houdini.py`) and the
+  resolver in `shared/menu_paths.py`: see `docs/menu-paths.md`. Gives the exact dropdown path for a question.
 - `service.py` the entry point above. `observe()` and `ground()` share one capture and one OCR pass while
   the screen is unchanged. `observe(properties=[...], attributes=[...])` passes the active step's paths to the probe.
 

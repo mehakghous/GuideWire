@@ -41,7 +41,9 @@ def region_marks(window: Rect, layout) -> list:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--title", default="Blender")
+    ap.add_argument("--title", default=None, help="window title text (default: from --app)")
+    ap.add_argument("--app", default="blender", choices=["blender", "maya", "houdini"])
+    ap.add_argument("--ask", help='plain request to guide, e.g. "add a cube": resolved to the exact menu path first')
     ap.add_argument("--save", help="write the captured frame to this PNG")
     ap.add_argument("--delay", type=float, default=0, help="seconds to wait before capturing, to switch to Blender")
     ap.add_argument("--follow", action="store_true", help="keep the boxes on Blender as it is moved or resized")
@@ -50,6 +52,17 @@ def main() -> int:
     ap.add_argument("--guide", help='live guidance through a menu path, e.g. "File > Save As"')
     ap.add_argument("--recordable", action="store_true", help="with --guide: let screen recorders see the overlay")
     args = ap.parse_args()
+    from vision.apps import profile
+    args.title = args.title or profile(args.app).title
+    if args.ask:
+        from ingestion.menu_steps import menu_lines
+        from shared.menu_paths import best_menu_path
+        for line in menu_lines(args.app, args.ask) or [f"No menu path found for {args.ask!r} in the {args.app} menus."]:
+            print(line)
+        hit = best_menu_path(args.app, args.ask)
+        if hit is None:
+            return 1                                   # nothing clear to guide: the printed lines list the choices
+        args.guide = hit.text
 
     if args.delay > 0:
         print(f"capturing in {args.delay:g}s: switch to Blender now")

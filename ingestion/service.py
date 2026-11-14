@@ -65,6 +65,7 @@ def render(b: AnswerBundle) -> str:
         for st in b.steps.steps:
             flag = f"  [{st.flags[0][:70]}]" if st.flags else ""
             out.append(f"  {st.order}. {st.goal}{flag}")
+            out += [f"       {h.text}" for h in st.how_to if h.text.startswith("Menu: ")]
     for r in b.recommendations:
         bits = [x for x in [f"{r.duration_s / 60:.0f} min" if r.duration_s else None, f"Blender {r.blender_version_hint}" if r.blender_version_hint else None,
                             f"captions: {r.caption_kind}" if r.caption_kind else None] if x]
@@ -116,12 +117,25 @@ class Service:
                 "observed": s.observed, "has_pending_answer": bool(self.last_bundle and self.last_bundle.steps)}
 
     def _result(self, intent: str, route_: str, bundle: AnswerBundle | None, text: str | None = None) -> dict:
+        if bundle is not None and bundle.steps is not None:
+            from .menu_steps import add_menu_paths
+            add_menu_paths(bundle.steps)                      # exact menu items for steps that have one clear match
         self.save()
         return {"intent": intent, "route": route_, "kind": bundle.kind if bundle else "command", "text": text if text is not None else render(bundle),
                 "bundle": bundle.model_dump(mode="json") if bundle else None, "session": self.state()}
 
     # ------------------------------------------------------------------ operations
     def message(self, text: str) -> dict:
+        out = self._message(text)
+        if out.get("intent") not in ("empty", "command") and not text.strip().startswith("/"):
+            from .menu_steps import menu_lines
+            mode = (self.session.observed or {}).get("mode")
+            lines = [ln for ln in menu_lines(self.session.app, text, mode) if ln not in out["text"]]
+            if lines:
+                out["text"] += "\n" + "\n".join(lines)               # the exact dropdown path, for every question that has one
+        return out
+
+    def _message(self, text: str) -> dict:
         text = text.strip()
         if not text:
             return self._result("empty", "clarify", None, "Say something, or /help.")

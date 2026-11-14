@@ -948,6 +948,60 @@
       "url": "https://www.sidefx.com/docs/houdini/nodes/out/kinefx--filmboxfbxanimation.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B47": {
+      "title": "Blender manual: Limit Rotation constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/transform/limit_rotation.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B48": {
+      "title": "Blender manual: Limit Location constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/transform/limit_location.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B49": {
+      "title": "Blender manual: Vertex Weights panel (Normalize, Copy, locking)",
+      "url": "https://docs.blender.org/manual/en/latest/modeling/meshes/properties/vertex_groups/vertex_weights.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B50": {
+      "title": "Blender manual: Editing Strips (Bake Action)",
+      "url": "https://docs.blender.org/manual/en/latest/editors/nla/editing/strip.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "M61": {
+      "title": "Maya: Edit keys using the Dope Sheet",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Animation/files/GUID-4F522818-67E8-4844-81C8-B6F113CDAF76.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M62": {
+      "title": "Maya: Dope Sheet Edit menu (Move Keys, Scale, Snap)",
+      "url": "https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Animation/files/GUID-7461A3E5-F181-4A85-9AAA-D537E1FC9399.htm",
+      "tier": "official",
+      "version": "Maya 2026 help"
+    },
+    "H43": {
+      "title": "SideFX Houdini docs: Joint Capture Paint (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--jointcapturepaint.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H44": {
+      "title": "SideFX Houdini docs: Capture Layer Paint (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/capturelayerpaint.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H45": {
+      "title": "SideFX Houdini docs: Capture Mirror (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/capturemirror.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -10491,6 +10545,547 @@
           "tier": "official",
           "sources": [
             "H40"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.limit_constraints",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CTRL-05"
+      ],
+      "phrases": [
+        "limit the rotation of a bone",
+        "limit location constraint",
+        "limit rotation constraint",
+        "stop the control going past a range",
+        "limit the controller movement",
+        "affect transform"
+      ],
+      "ui": [
+        {
+          "path": "Bone Constraints tab > Add Bone Constraint > Limit Rotation / Limit Location",
+          "tier": "official",
+          "source": "B47"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the control bone in Pose Mode and add a Limit Rotation or Limit Location bone constraint.",
+          "tier": "official",
+          "sources": [
+            "B47",
+            "B48"
+          ]
+        },
+        {
+          "text": "Set the range for each axis with the number fields and tick the checkbox of each axis the range should apply to.",
+          "tier": "official",
+          "sources": [
+            "B47"
+          ]
+        },
+        {
+          "text": "Turn on Affect Transform if the Transform panel's values should be restricted too.",
+          "tier": "official",
+          "sources": [
+            "B47"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Limit Rotation constraint limits the Euler rotation angle for each axis to a certain range; angles outside a range are clamped to the closer boundary on a circle.",
+          "tier": "official",
+          "sources": [
+            "B47"
+          ]
+        },
+        {
+          "text": "Limit Rotation does not work for bones affected by Inverse Kinematics; use the Limit settings in the bone's IK panel instead.",
+          "tier": "official",
+          "sources": [
+            "B47"
+          ]
+        },
+        {
+          "text": "Affect Transform restricts not just the owner's visual rotation but also its Rotation values in the Transform panel when it is rotated by hand.",
+          "tier": "official",
+          "sources": [
+            "B47"
+          ]
+        },
+        {
+          "text": "The Limit Location constraint forces an object or bone to stay above a coordinate, below a coordinate or between two coordinates along one or more axes; it has no effect on connected bones, as their position is determined by their parent bone.",
+          "tier": "official",
+          "sources": [
+            "B48"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Rotate or move the control past the limit: it stops at the range you set.",
+          "tier": "official",
+          "sources": [
+            "B47"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.normalize_weights",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKIN-04"
+      ],
+      "phrases": [
+        "normalize the weights",
+        "weights do not add up to one",
+        "normalize vertex weights",
+        "vertex weights panel",
+        "copy the weights from a vertex",
+        "locked vertex group stops normalize"
+      ],
+      "ui": [
+        {
+          "path": "Edit / Weight Paint Mode > Sidebar > Vertex Weights > Normalize",
+          "tier": "official",
+          "source": "B49"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Edit or Weight Paint Mode select the vertex and open the sidebar's Vertex Weights panel.",
+          "tier": "official",
+          "sources": [
+            "B49"
+          ]
+        },
+        {
+          "text": "Click Normalize to recalculate the active vertex's weights so they add up to 1.0, keeping their relative sizes.",
+          "tier": "official",
+          "sources": [
+            "B49"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Normalize recalculates the weights of the active vertex so that they add up to 1.0 while retaining their relative magnitude.",
+          "tier": "official",
+          "sources": [
+            "B49"
+          ]
+        },
+        {
+          "text": "Copy copies all the weights from the active vertex to the other selected vertices; both tools only work on the vertex groups that match the current filter.",
+          "tier": "official",
+          "sources": [
+            "B49"
+          ]
+        },
+        {
+          "text": "If a vertex group is locked its weights are uneditable and the Copy and Normalize buttons are disabled; switching to the Deform filter lets you normalize the other groups.",
+          "tier": "official",
+          "sources": [
+            "B49"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The weights of the vertex now sum to 1.0.",
+          "tier": "official",
+          "sources": [
+            "B49"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.bake_action",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "LAYR-04"
+      ],
+      "phrases": [
+        "bake the animation in blender",
+        "bake action",
+        "bake constraints to keys",
+        "visual keying",
+        "clear constraints when baking",
+        "put a key on every frame in blender"
+      ],
+      "ui": [
+        {
+          "path": "3D Viewport > Object > Animation > Bake Action (also NLA Strip > Bake Action)",
+          "tier": "official",
+          "source": "B50",
+          "note": "The page was read through a summary, so the wording is paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose Object > Animation > Bake Action with the objects or bones selected.",
+          "tier": "official",
+          "sources": [
+            "B50"
+          ]
+        },
+        {
+          "text": "Set the Start Frame and End Frame to bake, and turn on Visual Keying to key the result with constraints applied.",
+          "tier": "official",
+          "sources": [
+            "B50"
+          ]
+        },
+        {
+          "text": "Turn on Clear Constraints to remove the constraints after baking, then check the baked keys.",
+          "tier": "official",
+          "sources": [
+            "B50"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bake Action is in the 3D Viewport's Object > Animation menu, and the NLA editor has its own Strip > Bake Action entry.",
+          "tier": "official",
+          "sources": [
+            "B50"
+          ]
+        },
+        {
+          "text": "Start Frame and End Frame set the frames to bake; Visual Keying keyframes from the final transformations (with constraints applied); Clear Constraints removes all constraints from the keyed objects or bones and does visual keying.",
+          "tier": "official",
+          "sources": [
+            "B50"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The baked action has keys on the frames you set and the constraint effect is in the keys.",
+          "tier": "official",
+          "sources": [
+            "B50"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.dope_sheet",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CURV-02"
+      ],
+      "phrases": [
+        "open the dope sheet in maya",
+        "dope sheet in maya",
+        "select keys in the dope sheet",
+        "dope sheet manipulator",
+        "mute keys",
+        "copy and paste keys in the dope sheet"
+      ],
+      "ui": [
+        {
+          "path": "Windows > Animation Editors > Dope Sheet",
+          "tier": "official",
+          "source": "M61"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose Windows > Animation Editors > Dope Sheet.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        },
+        {
+          "text": "In the Dope Sheet toolbar select the Select Keyframe Tool and drag around the keys and time to select them.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        },
+        {
+          "text": "Shift-drag the middle of the Dope Sheet Manipulator to move the region, or its left or right edge to scale it.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "You can use the Dope Sheet editor to manipulate a range of time and keys.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        },
+        {
+          "text": "The Dope Sheet Manipulator moves the region of time and keys when you drag its middle and scales it when you drag its left or right edge; it does not support the Delete key.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        },
+        {
+          "text": "Keys > Mute Key in the Dope Sheet menu bar mutes the selected region.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The selected keys show highlighted in the Dope Sheet.",
+          "tier": "official",
+          "sources": [
+            "M61"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.retime_keys",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ANIM-07"
+      ],
+      "phrases": [
+        "retime the keys in maya",
+        "move keys in time",
+        "scale the keys",
+        "ripple the keys",
+        "time snap for keys",
+        "move keys tool",
+        "stretch the animation timing"
+      ],
+      "ui": [
+        {
+          "path": "Dope Sheet > Move Keys Tool (W); Edit > Scale; Time Snap",
+          "tier": "official",
+          "source": "M62"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Dope Sheet select the keys and use the Move Keys Tool, choosing Move Only, Move Over or Ripple.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        },
+        {
+          "text": "Use Ripple so keys after the selection are pushed by the same amount; turn on Time Snap to land on whole frames.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        },
+        {
+          "text": "Use Edit > Scale to expand or compress the selected range of keys to a new time range.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Move Keys Tool (hotkey W) has Move Only, Move Over and Ripple; Ripple lets you drag keys anywhere in the view area but pushes keys after the selection by the same amount.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        },
+        {
+          "text": "Scale operates on a selected range of keys, expanding or compressing the animation to correspond to a new time range.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        },
+        {
+          "text": "Time Snap forces keys moved in the view to the nearest whole time unit value.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation: the motion happens at the new frames.",
+          "tier": "official",
+          "sources": [
+            "M62"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.normalize_capture_weights",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKIN-04"
+      ],
+      "phrases": [
+        "normalize the capture weights",
+        "capture weights not normalized",
+        "interactive normalize",
+        "post normalize",
+        "keep the weights normalized while painting"
+      ],
+      "ui": [
+        {
+          "path": "Joint Capture Paint (SOP) / Capture Layer Paint (SOP) > Normalization",
+          "tier": "official",
+          "source": "H43"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Joint Capture Paint choose the Interactive normalization mode to keep the weights normalized while you paint, or Post to leave them alone while painting.",
+          "tier": "official",
+          "sources": [
+            "H43"
+          ]
+        },
+        {
+          "text": "In Capture Layer Paint choose Interactive Normalize (always normalized) or Post Normalize (the layer is blended with the input weights).",
+          "tier": "official",
+          "sources": [
+            "H44"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Joint Capture Paint lets you paint capture weights directly onto geometry; its Interactive mode keeps the weights normalized while painting and its Post mode does not normalize while painting.",
+          "tier": "official",
+          "sources": [
+            "H43"
+          ]
+        },
+        {
+          "text": "Capture Layer Paint: Post Normalize mode blends the weights on the layer with the input geometry, and Interactive Normalize keeps the weights normalized.",
+          "tier": "official",
+          "sources": [
+            "H44"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After painting, each point's weights sum to one in Interactive mode.",
+          "tier": "official",
+          "sources": [
+            "H43"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.mirror_capture_weights",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SKIN-05"
+      ],
+      "phrases": [
+        "mirror the capture weights",
+        "copy the weights to the other side",
+        "capture mirror",
+        "mirror weights in houdini",
+        "paint one half and mirror"
+      ],
+      "ui": [
+        {
+          "path": "Capture Mirror (SOP); Joint Capture Paint > Mirror Weights",
+          "tier": "official",
+          "source": "H45"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Capture the skin to bones first, and paint the weights on one half of the character.",
+          "tier": "official",
+          "sources": [
+            "H45",
+            "H44"
+          ]
+        },
+        {
+          "text": "Add a Capture Mirror SOP to copy the capture attributes from one half of the symmetric model to the other.",
+          "tier": "official",
+          "sources": [
+            "H45"
+          ]
+        },
+        {
+          "text": "Or turn on Mirror Weights in Joint Capture Paint to copy the weights from one side of the mesh to the opposite side.",
+          "tier": "official",
+          "sources": [
+            "H43"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Capture Mirror copies capture attributes from one half of a symmetric model to the other; before mirroring, the skin geometry must be captured to bones or metaballs.",
+          "tier": "official",
+          "sources": [
+            "H45"
+          ]
+        },
+        {
+          "text": "With Average Weights, each point's weights are added to the weights of its mirror point and then normalized.",
+          "tier": "official",
+          "sources": [
+            "H45"
+          ]
+        },
+        {
+          "text": "Joint Capture Paint's Mirror Weights copies the weights from one side of the mesh to the opposite side.",
+          "tier": "official",
+          "sources": [
+            "H43"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Both halves of the character deform alike when a joint on either side moves.",
+          "tier": "official",
+          "sources": [
+            "H45"
           ]
         }
       ]

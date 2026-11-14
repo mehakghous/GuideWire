@@ -1086,6 +1086,78 @@
       "url": "https://www.sidefx.com/docs/houdini/character/kinefx/rig_components/deltamush.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B56": {
+      "title": "Blender Python API: import_anim operators (BVH)",
+      "url": "https://docs.blender.org/api/current/bpy.ops.import_anim.html",
+      "tier": "official",
+      "version": "Python API docs 5.3, read 2026-11-15 (signature and parameter text read verbatim)"
+    },
+    "B57": {
+      "title": "Blender manual: Editing F-Curves (Decimate, Clean Keyframes)",
+      "url": "https://docs.blender.org/manual/en/latest/editors/graph_editor/fcurves/editing.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased; the Decimate and Clean text came from a summary of the long page"
+    },
+    "M70": {
+      "title": "Maya: Retargeting character animation (HumanIK)",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-CharacterAnimation/files/GUID-B2E9F8B9-F188-4E27-8820-BB0C8541701F.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M71": {
+      "title": "Maya: Retarget animation from one character to another",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/GUID-FB339D36-C8C0-42E4-B210-AC52E51BB173.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "M72": {
+      "title": "Maya: Bake retargeted animation to the target character",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-CharacterAnimation/files/GUID-73463B4A-7B88-43F5-BA41-7908FD38E58A.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M73": {
+      "title": "Maya: Simplify curves",
+      "url": "https://help.autodesk.com/cloudhelp/2018/ENU/Maya-Animation/files/GUID-4CF93211-0E3B-4B0D-9C1D-1E164C9DFFEE.htm",
+      "tier": "official",
+      "version": "Maya 2018 help"
+    },
+    "M74": {
+      "title": "Maya: Define a HumanIK skeleton (Characterize)",
+      "url": "https://download.autodesk.com/us/maya/2011help//files/ws73099cc142f48755-575eab4c124f5234aa8-1e23.htm",
+      "tier": "official",
+      "version": "Maya 2011 help (old; menu names may differ)"
+    },
+    "H48": {
+      "title": "SideFX Houdini docs: Transferring animation (retargeting)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/retargeting.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H49": {
+      "title": "SideFX Houdini docs: Working with motion capture",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/motioncapture.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H50": {
+      "title": "SideFX Houdini docs: Refining the retarget results",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/retargetcleanup.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H51": {
+      "title": "SideFX Houdini docs: Rig Match Pose (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--rigmatchpose.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15; first part of a long page read verbatim"
+    },
+    "H52": {
+      "title": "SideFX Houdini docs: FBX Animation Import (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--fbxanimimport.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15; first part of a long page read verbatim"
     }
   },
   "entries": [
@@ -12036,6 +12108,683 @@
           "tier": "official",
           "sources": [
             "H46"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.import_bvh",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "MOCP-01"
+      ],
+      "phrases": [
+        "import a bvh file",
+        "import motion capture in blender",
+        "bvh import",
+        "load mocap into blender",
+        "import the mocap onto an armature"
+      ],
+      "ui": [
+        {
+          "path": "File > Import > Motion Capture (.bvh)",
+          "tier": "official",
+          "source": "B56",
+          "note": "The menu path is as the Topbar import list names it (BVH is among the importers); the options come from the Python API page."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose the BVH importer and pick the .bvh file.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        },
+        {
+          "text": "Set the target (Armature or Object), the Start Frame and, if the frame rates differ, Scale FPS or Update Scene FPS.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        },
+        {
+          "text": "Check the imported armature plays the motion.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The BVH importer's options are: Target (Armature or Object), Scale, Start Frame, Scale FPS, Update Scene FPS, Update Scene Duration, Loop, Rotation and the Forward and Up axes.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        },
+        {
+          "text": "Start Frame is the starting frame for the animation; without Scale FPS each BVH frame maps directly to a Blender frame, and Update Scene FPS sets the scene frame rate to the BVH file's.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The armature moves with the captured motion over the frames you set.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.bvh_scale_axes",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "MOCP-02"
+      ],
+      "phrases": [
+        "bvh is the wrong size",
+        "bvh is rotated wrong",
+        "fix the axes on a bvh import",
+        "rotation order of the mocap",
+        "convert the bvh rotations to quaternions"
+      ],
+      "ui": [
+        {
+          "path": "BVH importer options: Scale, Rotation, Forward, Up",
+          "tier": "official",
+          "source": "B56"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "If the imported mocap is the wrong size, change Scale; if it faces the wrong way set Forward and Up.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        },
+        {
+          "text": "Choose Rotation: keep the file's Native rotation order, convert to Quaternion, or pick an Euler order.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Scale scales the BVH by this value; the default is 1.0.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        },
+        {
+          "text": "Rotation conversion defaults to Native, which uses the rotation order defined in the BVH file; Quaternion converts rotations to quaternions, and the Euler orders XYZ, XZY, YXZ, YZX, ZXY and ZYX are also offered.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        },
+        {
+          "text": "Forward defaults to -Z and Up to Y; each can be X, Y, Z, -X, -Y or -Z.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The character stands upright and at the right size after import.",
+          "tier": "official",
+          "sources": [
+            "B56"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.clean_decimate_keys",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "MOCP-03"
+      ],
+      "phrases": [
+        "clean up the mocap keys",
+        "reduce the keyframes of the mocap",
+        "decimate the curve",
+        "clean keyframes",
+        "remove redundant keys",
+        "too many keys from motion capture"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor > Key > Density > Decimate; Key > Clean Keyframes",
+          "tier": "official",
+          "source": "B57",
+          "note": "The page was read through a summary, so the wording and the Key > Density menu path are paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Graph Editor select the curves and run Clean Keyframes to delete redundant keys.",
+          "tier": "official",
+          "sources": [
+            "B57"
+          ]
+        },
+        {
+          "text": "Then run Decimate to remove the keys that influence the curve's shape the least, and check the motion against the original.",
+          "tier": "official",
+          "sources": [
+            "B57"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Decimate simplifies an F-Curve by removing the keyframes that influence its shape the least.",
+          "tier": "official",
+          "sources": [
+            "B57"
+          ]
+        },
+        {
+          "text": "Clean Keyframes finds redundant keyframes among the selected ones and deletes them; its Channels option cleans all keyframes in the selected F-Curves.",
+          "tier": "official",
+          "sources": [
+            "B57"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The curves have far fewer keys and the motion looks the same.",
+          "tier": "official",
+          "sources": [
+            "B57"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.characterize_skeleton",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "LAYR-05",
+        "MOCP-02"
+      ],
+      "phrases": [
+        "characterize a skeleton",
+        "humanik characterize",
+        "map the joints to humanik",
+        "define a humanik skeleton",
+        "t-stance for humanik",
+        "humanik mapping list"
+      ],
+      "ui": [
+        {
+          "path": "Skeleton > HumanIK > Characterize tab > Mapping List",
+          "tier": "official",
+          "source": "M74",
+          "note": "The page is from the Maya 2011 help; the HumanIK window is reached by other menu names in newer versions."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Start with the character in a standard T-stance, facing the positive Z axis, Y up, arms along the X axis.",
+          "tier": "official",
+          "sources": [
+            "M74"
+          ]
+        },
+        {
+          "text": "Open Skeleton > HumanIK, go to the Characterize tab, click New and map the joints to the Mapping List until the Base (required) joints are defined.",
+          "tier": "official",
+          "sources": [
+            "M74"
+          ]
+        },
+        {
+          "text": "Click Characterize.",
+          "tier": "official",
+          "sources": [
+            "M74"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Retargeting in Maya is based on the Autodesk HumanIK character solver.",
+          "tier": "official",
+          "sources": [
+            "M70"
+          ]
+        },
+        {
+          "text": "When creating the skeleton, start with the character in a standard T-stance, facing the positive Z axis, Y up, with the arms aligned with the X axis.",
+          "tier": "official",
+          "sources": [
+            "M74"
+          ]
+        },
+        {
+          "text": "Skeleton > HumanIK opens the HumanIK window; in its Characterize tab you click New, map joints with Set next to each slot of the Mapping List, and click Characterize; Auto Set All From Selection fills the list when joints follow the naming conventions.",
+          "tier": "official",
+          "sources": [
+            "M74"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The skeleton is characterized and ready for a control rig or retargeting.",
+          "tier": "official",
+          "sources": [
+            "M74"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.retarget_animation",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "LAYR-06"
+      ],
+      "phrases": [
+        "retarget animation in maya",
+        "humanik retarget",
+        "transfer animation between characters",
+        "source and target character",
+        "bake retargeted animation"
+      ],
+      "ui": [
+        {
+          "path": "Character Controls: Character menu (target) and Source menu",
+          "tier": "official",
+          "source": "M71"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Create a HumanIK skeleton definition for each character.",
+          "tier": "official",
+          "sources": [
+            "M71"
+          ]
+        },
+        {
+          "text": "Open the Character Controls, select the target character from the Character menu, and the source character from the Source menu.",
+          "tier": "official",
+          "sources": [
+            "M71"
+          ]
+        },
+        {
+          "text": "When you are happy, bake the retargeted animation to the target skeleton or control rig.",
+          "tier": "official",
+          "sources": [
+            "M72"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "You can retarget animation data from the joints of one skeleton (source) to the joints of another (target).",
+          "tier": "official",
+          "sources": [
+            "M70"
+          ]
+        },
+        {
+          "text": "The target character must have a control rig; if the selected character has none, Maya creates one.",
+          "tier": "official",
+          "sources": [
+            "M71"
+          ]
+        },
+        {
+          "text": "The retargeted animation can be put on an animation layer so more layers can modify it.",
+          "tier": "official",
+          "sources": [
+            "M70",
+            "M71"
+          ]
+        },
+        {
+          "text": "Baking sets one key on each effector or joint for every frame of the retargeted animation, using the Bake Simulation Options; layered animation overrides the baked animation.",
+          "tier": "official",
+          "sources": [
+            "M72"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The target character moves like the source.",
+          "tier": "official",
+          "sources": [
+            "M71"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.simplify_curve",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "MOCP-03"
+      ],
+      "phrases": [
+        "simplify the curve",
+        "reduce the keys on the mocap",
+        "simplify curve in the graph editor",
+        "value tolerance time tolerance",
+        "clean up dense keyed animation"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor > Curves > Simplify Curve (option box)",
+          "tier": "official",
+          "source": "M73",
+          "note": "The Classic and Dense Data methods were not found on the page read, so they are not claimed."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Graph Editor select the curve and choose Curves > Simplify Curve with its options window.",
+          "tier": "official",
+          "sources": [
+            "M73"
+          ]
+        },
+        {
+          "text": "Set Value Tolerance and Time Tolerance (experiment to get the result you want), then click Simplify.",
+          "tier": "official",
+          "sources": [
+            "M73"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Simplify Curve averages the keys on the current curve within the specified time range; you may have to experiment with the Value Tolerance and Time Tolerance values to get the result you want.",
+          "tier": "official",
+          "sources": [
+            "M73"
+          ]
+        },
+        {
+          "text": "Simplify applies the options to the current curve.",
+          "tier": "official",
+          "sources": [
+            "M73"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The curve has fewer keys and keeps its shape.",
+          "tier": "official",
+          "sources": [
+            "M73"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.retarget_animation",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "LAYR-06",
+        "LAYR-05"
+      ],
+      "phrases": [
+        "retarget animation in houdini",
+        "kinefx retarget",
+        "transfer animation between characters in houdini",
+        "map points between skeletons",
+        "rig match pose",
+        "full body ik retarget"
+      ],
+      "ui": [
+        {
+          "path": "Rig Match Pose, Map Points, Full Body IK and Joint Deform (SOPs)",
+          "tier": "official",
+          "source": "H48"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Bring in the source and target characters and conform their poses with a Rig Match Pose SOP.",
+          "tier": "official",
+          "sources": [
+            "H48",
+            "H51"
+          ]
+        },
+        {
+          "text": "Pair the joints with a Map Points SOP, then drive the target with a Full Body IK SOP.",
+          "tier": "official",
+          "sources": [
+            "H48"
+          ]
+        },
+        {
+          "text": "Show the result on the skinned character with a Joint Deform SOP, and refine it (for example limit the clavicles with Configure Joints).",
+          "tier": "official",
+          "sources": [
+            "H48",
+            "H50"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Retargeting takes the animation from one character (the source) and transfers it to another (the target); the core workflow uses the Rig Match Pose, Map Points, Full Body IK and Joint Deform SOPs.",
+          "tier": "official",
+          "sources": [
+            "H48"
+          ]
+        },
+        {
+          "text": "A basic retarget uses the rest poses of the source and target characters, and the full-body IK solver uses them as one of the data points.",
+          "tier": "official",
+          "sources": [
+            "H48"
+          ]
+        },
+        {
+          "text": "Rig Match Pose creates a pose on both input skeletons, typically as part of retargeting where offsets are computed between two skeletons.",
+          "tier": "official",
+          "sources": [
+            "H51"
+          ]
+        },
+        {
+          "text": "To refine the result, a Configure Joints SOP can add limits to the clavicle joints of the target skeleton, so they try to keep their rest pose rotations.",
+          "tier": "official",
+          "sources": [
+            "H50"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The target character follows the source's motion.",
+          "tier": "official",
+          "sources": [
+            "H48"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.mocap_import",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "MOCP-01"
+      ],
+      "phrases": [
+        "import motion capture in houdini",
+        "mocap import sop",
+        "bvh in houdini",
+        "load an amc or trc file",
+        "stream live mocap",
+        "use mocap as the retarget source"
+      ],
+      "ui": [
+        {
+          "path": "Mocap Import (SOP) / Mocap Stream (SOP)",
+          "tier": "official",
+          "source": "H49"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Set up a retarget network and use a Mocap Import SOP as the animation source.",
+          "tier": "official",
+          "sources": [
+            "H49"
+          ]
+        },
+        {
+          "text": "For live data use a Mocap Stream SOP instead.",
+          "tier": "official",
+          "sources": [
+            "H49"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Mocap Import SOP reads motion capture files (Acclaim .amc and .asf, BioVision .bvh and Motion Analysis .trc), and the Mocap Stream SOP streams live data.",
+          "tier": "official",
+          "sources": [
+            "H49"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The imported skeleton plays the captured motion.",
+          "tier": "official",
+          "sources": [
+            "H49"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.mocap_rest_pose",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "MOCP-02"
+      ],
+      "phrases": [
+        "mocap has no rest pose",
+        "create a rest pose for the mocap",
+        "rig stash pose",
+        "t pose for the mocap skeleton",
+        "rest transform attribute",
+        "fbx axis system on import"
+      ],
+      "ui": [
+        {
+          "path": "Rig Stash Pose (SOP) storing rest_transform; FBX Animation Import > Axis System",
+          "tier": "official",
+          "source": "H49"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Most motion capture has no rest pose, so add a Rig Stash Pose SOP and pose the skeleton into a T-pose with the transform handles.",
+          "tier": "official",
+          "sources": [
+            "H49"
+          ]
+        },
+        {
+          "text": "Make sure rest_transform is in the Attribute Name field (Mode: Store) so it passes downstream to the retarget network.",
+          "tier": "official",
+          "sources": [
+            "H49"
+          ]
+        },
+        {
+          "text": "For FBX animation, check the Axis System and Convert Units options on import.",
+          "tier": "official",
+          "sources": [
+            "H52"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Most motion capture data does not come with a rest pose (the rest_transform attribute); the Rig Stash Pose SOP replaces the rest pose in the source with a new one, and only static transforms can be used for it.",
+          "tier": "official",
+          "sources": [
+            "H48",
+            "H49"
+          ]
+        },
+        {
+          "text": "The FBX Animation Import SOP can output the rest pose as a 4x4 matrix point attribute (rest_transform) and converts the FBX scene to a chosen Axis System on import; the default is the right-handed Y Up convention.",
+          "tier": "official",
+          "sources": [
+            "H52"
+          ]
+        },
+        {
+          "text": "Convert Units scales from the FBX file's unit (centimeters by default) to the Houdini unit (meters by default).",
+          "tier": "official",
+          "sources": [
+            "H52"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The source and target skeletons now match in the same rest pose before retargeting.",
+          "tier": "official",
+          "sources": [
+            "H49"
           ]
         }
       ]

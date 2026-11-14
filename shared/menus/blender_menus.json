@@ -1,0 +1,3638 @@
+{
+ "app": "blender",
+ "version": "5.2.3 LTS",
+ "topbar": [
+  {
+   "label": "Blender",
+   "children": [
+    {
+     "label": "Splash Screen",
+     "op": "wm.splash"
+    },
+    {
+     "label": "About Blender",
+     "op": "wm.splash_about"
+    },
+    {
+     "label": "Install Application Template...",
+     "op": "preferences.app_template_install"
+    },
+    {
+     "label": "System",
+     "children": [
+      {
+       "label": "Reload Scripts",
+       "op": "script.reload"
+      },
+      {
+       "label": "Memory Statistics",
+       "op": "wm.memory_statistics"
+      },
+      {
+       "label": "Debug Menu",
+       "op": "wm.debug_menu"
+      },
+      {
+       "label": "Redraw Timer",
+       "op": "wm.redraw_timer",
+       "enum": "type"
+      },
+      {
+       "label": "Clean Up Space Data",
+       "op": "screen.spacedata_cleanup"
+      },
+      {
+       "label": "Clean Up Operator Presets",
+       "op": "wm.operator_presets_cleanup"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "label": "File",
+   "children": [
+    {
+     "label": "New",
+     "children": [
+      {
+       "label": "General",
+       "op": "wm.read_homefile"
+      },
+      {
+       "label": "2D Animation",
+       "op": "wm.read_homefile"
+      },
+      {
+       "label": "Sculpting",
+       "op": "wm.read_homefile"
+      },
+      {
+       "label": "Storyboarding",
+       "op": "wm.read_homefile"
+      },
+      {
+       "label": "VFX",
+       "op": "wm.read_homefile"
+      },
+      {
+       "label": "Video Editing",
+       "op": "wm.read_homefile"
+      }
+     ]
+    },
+    {
+     "label": "Open...",
+     "op": "wm.open_mainfile",
+     "keys": "Ctrl+O"
+    },
+    {
+     "label": "TOPBAR_MT_file_open_recent",
+     "children": []
+    },
+    {
+     "label": "Revert",
+     "op": "wm.revert_mainfile"
+    },
+    {
+     "label": "Recover",
+     "children": [
+      {
+       "label": "Last Session",
+       "op": "wm.recover_last_session"
+      },
+      {
+       "label": "Auto Save...",
+       "op": "wm.recover_auto_save"
+      }
+     ]
+    },
+    {
+     "label": "Save",
+     "op": "wm.save_mainfile",
+     "keys": "Ctrl+S"
+    },
+    {
+     "label": "Save As...",
+     "op": "wm.save_as_mainfile",
+     "keys": "Ctrl+Shift+S"
+    },
+    {
+     "label": "Save Copy...",
+     "op": "wm.save_as_mainfile",
+     "keys": "Ctrl+Shift+S"
+    },
+    {
+     "label": "Save Incremental",
+     "op": "wm.save_mainfile",
+     "keys": "Ctrl+S"
+    },
+    {
+     "label": "Link...",
+     "op": "wm.link"
+    },
+    {
+     "label": "Append...",
+     "op": "wm.append"
+    },
+    {
+     "label": "Data Previews",
+     "children": [
+      {
+       "label": "Refresh Data-Block Previews",
+       "op": "wm.previews_ensure"
+      },
+      {
+       "label": "Batch-Generate Previews...",
+       "op": "wm.previews_batch_generate"
+      },
+      {
+       "label": "Clear Data-Block Previews...",
+       "op": "wm.previews_clear"
+      },
+      {
+       "label": "Batch-Clear Previews...",
+       "op": "wm.previews_batch_clear"
+      }
+     ]
+    },
+    {
+     "label": "Import",
+     "children": [
+      {
+       "label": "Alembic (.abc)",
+       "op": "wm.alembic_import"
+      },
+      {
+       "label": "Universal Scene Description (.usd*)",
+       "op": "wm.usd_import"
+      },
+      {
+       "label": "SVG as Grease Pencil",
+       "op": "wm.grease_pencil_import_svg"
+      },
+      {
+       "label": "Wavefront (.obj)",
+       "op": "wm.obj_import"
+      },
+      {
+       "label": "Stanford PLY (.ply)",
+       "op": "wm.ply_import"
+      },
+      {
+       "label": "STL (.stl)",
+       "op": "wm.stl_import"
+      },
+      {
+       "label": "FBX (.fbx)",
+       "op": "wm.fbx_import"
+      },
+      {
+       "label": "Motion Capture (.bvh)",
+       "op": "import_anim.bvh"
+      },
+      {
+       "label": "SVG as Curves (.svg)",
+       "op": "import_curve.svg"
+      },
+      {
+       "label": "FBX (.fbx) (Legacy)",
+       "op": "import_scene.fbx"
+      },
+      {
+       "label": "glTF 2.0 (.glb/.gltf)",
+       "op": "import_scene.gltf"
+      }
+     ]
+    },
+    {
+     "label": "Export",
+     "children": [
+      {
+       "label": "Alembic (.abc)",
+       "op": "wm.alembic_export"
+      },
+      {
+       "label": "Universal Scene Description (.usd*)",
+       "op": "wm.usd_export"
+      },
+      {
+       "label": "Grease Pencil as SVG",
+       "op": "wm.grease_pencil_export_svg"
+      },
+      {
+       "label": "Grease Pencil as PDF",
+       "op": "wm.grease_pencil_export_pdf"
+      },
+      {
+       "label": "Wavefront (.obj)",
+       "op": "wm.obj_export"
+      },
+      {
+       "label": "Stanford PLY (.ply)",
+       "op": "wm.ply_export"
+      },
+      {
+       "label": "STL (.stl)",
+       "op": "wm.stl_export"
+      },
+      {
+       "label": "Motion Capture (.bvh)",
+       "op": "export_anim.bvh"
+      },
+      {
+       "label": "FBX (.fbx)",
+       "op": "export_scene.fbx"
+      },
+      {
+       "label": "glTF 2.0 (.glb/.gltf)",
+       "op": "export_scene.gltf"
+      }
+     ]
+    },
+    {
+     "label": "Export All Collections",
+     "op": "wm.collection_export_all"
+    },
+    {
+     "label": "External Data",
+     "children": [
+      {
+       "label": "Automatically Pack Resources",
+       "op": "file.autopack_toggle"
+      },
+      {
+       "label": "Pack Resources",
+       "op": "file.pack_all"
+      },
+      {
+       "label": "Unpack Resources",
+       "op": "file.unpack_all"
+      },
+      {
+       "label": "Pack Linked Libraries",
+       "op": "file.pack_libraries"
+      },
+      {
+       "label": "Unpack Linked Libraries",
+       "op": "file.unpack_libraries"
+      },
+      {
+       "label": "Make Paths Relative",
+       "op": "file.make_paths_relative"
+      },
+      {
+       "label": "Make Paths Absolute",
+       "op": "file.make_paths_absolute"
+      },
+      {
+       "label": "Report Missing Files",
+       "op": "file.report_missing_files"
+      },
+      {
+       "label": "Find Missing Files...",
+       "op": "file.find_missing_files"
+      }
+     ]
+    },
+    {
+     "label": "Clean Up",
+     "children": [
+      {
+       "label": "Purge Unused Data...",
+       "op": "outliner.orphans_purge"
+      },
+      {
+       "label": "Manage Unused Data...",
+       "op": "outliner.orphans_manage"
+      }
+     ]
+    },
+    {
+     "label": "Defaults",
+     "children": [
+      {
+       "label": "Save Startup File",
+       "op": "wm.save_homefile"
+      },
+      {
+       "label": "Load Factory Settings",
+       "op": "wm.read_factory_settings"
+      }
+     ]
+    },
+    {
+     "label": "Quit",
+     "op": "wm.quit_blender",
+     "keys": "Ctrl+Q"
+    }
+   ]
+  },
+  {
+   "label": "Edit",
+   "children": [
+    {
+     "label": "Undo",
+     "op": "ed.undo",
+     "keys": "Ctrl+Z"
+    },
+    {
+     "label": "Redo",
+     "op": "ed.redo",
+     "keys": "Ctrl+Shift+Z"
+    },
+    {
+     "label": "TOPBAR_MT_undo_history",
+     "children": []
+    },
+    {
+     "label": "Adjust Last Operation...",
+     "op": "screen.redo_last",
+     "keys": "F9"
+    },
+    {
+     "label": "Repeat Last",
+     "op": "screen.repeat_last",
+     "keys": "Shift+R"
+    },
+    {
+     "label": "Repeat History...",
+     "op": "screen.repeat_history"
+    },
+    {
+     "label": "Menu Search...",
+     "op": "wm.search_menu",
+     "keys": "F3"
+    },
+    {
+     "label": "Rename Active Item...",
+     "op": "wm.call_panel",
+     "keys": "Ctrl+Shift+Tab"
+    },
+    {
+     "label": "Batch Rename...",
+     "op": "wm.batch_rename",
+     "keys": "Ctrl+F2"
+    },
+    {
+     "label": "Lock Object Modes",
+     "prop": "lock_object_mode"
+    },
+    {
+     "label": "Preferences...",
+     "op": "screen.userpref_show",
+     "keys": "Ctrl+Comma"
+    }
+   ]
+  },
+  {
+   "label": "Render",
+   "children": [
+    {
+     "label": "Render Image",
+     "op": "render.render",
+     "keys": "F12"
+    },
+    {
+     "label": "Render Animation",
+     "op": "render.render",
+     "keys": "F12"
+    },
+    {
+     "label": "Render Audio...",
+     "op": "sound.mixdown"
+    },
+    {
+     "label": "View Render",
+     "op": "render.view_show",
+     "keys": "F11"
+    },
+    {
+     "label": "View Animation",
+     "op": "render.play_rendered_anim",
+     "keys": "Ctrl+F11"
+    },
+    {
+     "label": "Lock Interface",
+     "prop": "use_lock_interface"
+    }
+   ]
+  },
+  {
+   "label": "Window",
+   "children": [
+    {
+     "label": "New Window",
+     "op": "wm.window_new"
+    },
+    {
+     "label": "New Main Window",
+     "op": "wm.window_new_main"
+    },
+    {
+     "label": "Toggle Window Fullscreen",
+     "op": "wm.window_fullscreen_toggle"
+    },
+    {
+     "label": "Next Workspace",
+     "op": "screen.workspace_cycle",
+     "keys": "Ctrl+PageDown"
+    },
+    {
+     "label": "Previous Workspace",
+     "op": "screen.workspace_cycle",
+     "keys": "Ctrl+PageDown"
+    },
+    {
+     "label": "Show Status Bar",
+     "prop": "show_statusbar"
+    },
+    {
+     "label": "Save Screenshot...",
+     "op": "screen.screenshot"
+    },
+    {
+     "label": "Save Screenshot (Editor)...",
+     "op": "screen.screenshot_area"
+    },
+    {
+     "label": "Toggle System Console",
+     "op": "wm.console_toggle"
+    }
+   ]
+  },
+  {
+   "label": "Help",
+   "children": [
+    {
+     "label": "Manual",
+     "op": "wm.url_open_preset"
+    },
+    {
+     "label": "Support",
+     "op": "wm.url_open"
+    },
+    {
+     "label": "User Communities",
+     "op": "wm.url_open"
+    },
+    {
+     "label": "Get Involved",
+     "op": "wm.url_open"
+    },
+    {
+     "label": "Release Notes",
+     "op": "wm.url_open_preset"
+    },
+    {
+     "label": "Report a Bug",
+     "op": "wm.url_open_preset"
+    },
+    {
+     "label": "Save System Info...",
+     "op": "wm.sysinfo"
+    }
+   ]
+  }
+ ],
+ "viewport": {
+  "OBJECT": [
+   {
+    "label": "View",
+    "children": [
+     {
+      "label": "show_region_toolbar",
+      "prop": "show_region_toolbar"
+     },
+     {
+      "label": "show_region_ui",
+      "prop": "show_region_ui"
+     },
+     {
+      "label": "show_region_tool_header",
+      "prop": "show_region_tool_header"
+     },
+     {
+      "label": "show_region_asset_shelf",
+      "prop": "show_region_asset_shelf"
+     },
+     {
+      "label": "show_region_hud",
+      "prop": "show_region_hud"
+     },
+     {
+      "label": "Frame Selected",
+      "op": "view3d.view_selected",
+      "keys": "Ctrl+NumpadPeriod"
+     }
+    ]
+   },
+   {
+    "label": "Select",
+    "children": [
+     {
+      "label": "All",
+      "op": "object.select_all",
+      "keys": "A"
+     },
+     {
+      "label": "None",
+      "op": "object.select_all",
+      "keys": "A"
+     },
+     {
+      "label": "Invert",
+      "op": "object.select_all",
+      "keys": "A"
+     },
+     {
+      "label": "Box Select",
+      "op": "view3d.select_box",
+      "keys": "B"
+     },
+     {
+      "label": "Circle Select",
+      "op": "view3d.select_circle",
+      "keys": "C"
+     },
+     {
+      "label": "Lasso Select",
+      "op": "view3d.select_lasso",
+      "enum": "mode"
+     },
+     {
+      "label": "Select Active Camera",
+      "op": "object.select_camera"
+     },
+     {
+      "label": "Select Mirror",
+      "op": "object.select_mirror"
+     },
+     {
+      "label": "Select Random",
+      "op": "object.select_random"
+     },
+     {
+      "label": "More/Less",
+      "children": [
+       {
+        "label": "More",
+        "op": "object.select_more",
+        "keys": "Ctrl+NumpadPlus"
+       },
+       {
+        "label": "Less",
+        "op": "object.select_less",
+        "keys": "Ctrl+NumpadMinus"
+       },
+       {
+        "label": "Parent",
+        "op": "object.select_hierarchy",
+        "keys": "LeftBracket"
+       },
+       {
+        "label": "Child",
+        "op": "object.select_hierarchy",
+        "keys": "LeftBracket"
+       },
+       {
+        "label": "Extend Parent",
+        "op": "object.select_hierarchy",
+        "keys": "LeftBracket"
+       },
+       {
+        "label": "Extend Child",
+        "op": "object.select_hierarchy",
+        "keys": "LeftBracket"
+       }
+      ]
+     },
+     {
+      "label": "Select All by Type",
+      "op": "object.select_by_type",
+      "enum": "type"
+     },
+     {
+      "label": "Select Grouped",
+      "op": "object.select_grouped",
+      "enum": "type",
+      "keys": "Shift+G"
+     },
+     {
+      "label": "Select Linked",
+      "op": "object.select_linked",
+      "enum": "type",
+      "keys": "Shift+L"
+     },
+     {
+      "label": "Select Pattern...",
+      "op": "object.select_pattern"
+     }
+    ]
+   },
+   {
+    "label": "Add",
+    "children": [
+     {
+      "label": "Mesh",
+      "children": [
+       {
+        "label": "Plane",
+        "op": "mesh.primitive_plane_add"
+       },
+       {
+        "label": "Cube",
+        "op": "mesh.primitive_cube_add"
+       },
+       {
+        "label": "Circle",
+        "op": "mesh.primitive_circle_add"
+       },
+       {
+        "label": "UV Sphere",
+        "op": "mesh.primitive_uv_sphere_add"
+       },
+       {
+        "label": "Ico Sphere",
+        "op": "mesh.primitive_ico_sphere_add"
+       },
+       {
+        "label": "Cylinder",
+        "op": "mesh.primitive_cylinder_add"
+       },
+       {
+        "label": "Cone",
+        "op": "mesh.primitive_cone_add"
+       },
+       {
+        "label": "Torus",
+        "op": "mesh.primitive_torus_add"
+       },
+       {
+        "label": "Grid",
+        "op": "mesh.primitive_grid_add"
+       },
+       {
+        "label": "Monkey",
+        "op": "mesh.primitive_monkey_add"
+       }
+      ]
+     },
+     {
+      "label": "Curve",
+      "children": [
+       {
+        "label": "B\u00e9zier",
+        "op": "curve.primitive_bezier_curve_add"
+       },
+       {
+        "label": "Circle",
+        "op": "curve.primitive_bezier_circle_add"
+       },
+       {
+        "label": "Nurbs Curve",
+        "op": "curve.primitive_nurbs_curve_add"
+       },
+       {
+        "label": "Nurbs Circle",
+        "op": "curve.primitive_nurbs_circle_add"
+       },
+       {
+        "label": "Path",
+        "op": "curve.primitive_nurbs_path_add"
+       },
+       {
+        "label": "Empty Hair",
+        "op": "object.curves_empty_hair_add"
+       },
+       {
+        "label": "Fur",
+        "op": "object.quick_fur"
+       }
+      ]
+     },
+     {
+      "label": "Surface",
+      "children": [
+       {
+        "label": "Nurbs Curve",
+        "op": "surface.primitive_nurbs_surface_curve_add"
+       },
+       {
+        "label": "Nurbs Circle",
+        "op": "surface.primitive_nurbs_surface_circle_add"
+       },
+       {
+        "label": "Nurbs Surface",
+        "op": "surface.primitive_nurbs_surface_surface_add"
+       },
+       {
+        "label": "Nurbs Cylinder",
+        "op": "surface.primitive_nurbs_surface_cylinder_add"
+       },
+       {
+        "label": "Nurbs Sphere",
+        "op": "surface.primitive_nurbs_surface_sphere_add"
+       },
+       {
+        "label": "Nurbs Torus",
+        "op": "surface.primitive_nurbs_surface_torus_add"
+       }
+      ]
+     },
+     {
+      "label": "Metaball",
+      "children": [
+       {
+        "label": "Ball",
+        "op": "object.metaball_add",
+        "enum": "type=BALL"
+       },
+       {
+        "label": "Capsule",
+        "op": "object.metaball_add",
+        "enum": "type=CAPSULE"
+       },
+       {
+        "label": "Plane",
+        "op": "object.metaball_add",
+        "enum": "type=PLANE"
+       },
+       {
+        "label": "Ellipsoid",
+        "op": "object.metaball_add",
+        "enum": "type=ELLIPSOID"
+       },
+       {
+        "label": "Cube",
+        "op": "object.metaball_add",
+        "enum": "type=CUBE"
+       }
+      ]
+     },
+     {
+      "label": "Text",
+      "op": "object.text_add"
+     },
+     {
+      "label": "Point Cloud",
+      "op": "object.pointcloud_random_add"
+     },
+     {
+      "label": "Volume",
+      "children": [
+       {
+        "label": "Import OpenVDB...",
+        "op": "object.volume_import"
+       },
+       {
+        "label": "Empty",
+        "op": "object.volume_add"
+       }
+      ]
+     },
+     {
+      "label": "Grease Pencil",
+      "children": [
+       {
+        "label": "Blank",
+        "op": "object.grease_pencil_add"
+       },
+       {
+        "label": "Stroke",
+        "op": "object.grease_pencil_add"
+       },
+       {
+        "label": "Monkey",
+        "op": "object.grease_pencil_add"
+       },
+       {
+        "label": "Scene Line Art",
+        "op": "object.grease_pencil_add"
+       },
+       {
+        "label": "Collection Line Art",
+        "op": "object.grease_pencil_add"
+       },
+       {
+        "label": "Object Line Art",
+        "op": "object.grease_pencil_add"
+       }
+      ]
+     },
+     {
+      "label": "Armature",
+      "op": "object.armature_add"
+     },
+     {
+      "label": "Lattice",
+      "children": [
+       {
+        "label": "Lattice",
+        "op": "object.add"
+       },
+       {
+        "label": "Lattice Deform Selected",
+        "op": "object.lattice_add_to_selected"
+       }
+      ]
+     },
+     {
+      "label": "Empty",
+      "children": [
+       {
+        "label": "Plain Axes",
+        "op": "object.empty_add"
+       },
+       {
+        "label": "Arrows",
+        "op": "object.empty_add"
+       },
+       {
+        "label": "Single Arrow",
+        "op": "object.empty_add"
+       },
+       {
+        "label": "Circle",
+        "op": "object.empty_add"
+       },
+       {
+        "label": "Cube",
+        "op": "object.empty_add"
+       },
+       {
+        "label": "Sphere",
+        "op": "object.empty_add"
+       },
+       {
+        "label": "Cone",
+        "op": "object.empty_add"
+       }
+      ]
+     },
+     {
+      "label": "Image",
+      "children": [
+       {
+        "label": "Reference...",
+        "op": "object.empty_image_add"
+       },
+       {
+        "label": "Background...",
+        "op": "object.empty_image_add"
+       },
+       {
+        "label": "Mesh Plane...",
+        "op": "image.import_as_mesh_planes"
+       },
+       {
+        "label": "Empty Image",
+        "op": "object.empty_add"
+       }
+      ]
+     },
+     {
+      "label": "Light",
+      "children": [
+       {
+        "label": "Point",
+        "op": "object.light_add",
+        "enum": "type=POINT"
+       },
+       {
+        "label": "Sun",
+        "op": "object.light_add",
+        "enum": "type=SUN"
+       },
+       {
+        "label": "Spot",
+        "op": "object.light_add",
+        "enum": "type=SPOT"
+       },
+       {
+        "label": "Area",
+        "op": "object.light_add",
+        "enum": "type=AREA"
+       }
+      ]
+     },
+     {
+      "label": "Light Probe",
+      "children": [
+       {
+        "label": "Sphere",
+        "op": "object.lightprobe_add",
+        "enum": "type=SPHERE"
+       },
+       {
+        "label": "Plane",
+        "op": "object.lightprobe_add",
+        "enum": "type=PLANE"
+       },
+       {
+        "label": "Volume",
+        "op": "object.lightprobe_add",
+        "enum": "type=VOLUME"
+       }
+      ]
+     },
+     {
+      "label": "Camera",
+      "op": "object.camera_add"
+     },
+     {
+      "label": "Speaker",
+      "op": "object.speaker_add"
+     },
+     {
+      "label": "Force Field",
+      "op": "object.effector_add",
+      "enum": "type"
+     },
+     {
+      "label": "Collection Instance",
+      "op": "object.collection_instance_add",
+      "enum": "collection"
+     }
+    ]
+   },
+   {
+    "label": "Object",
+    "children": [
+     {
+      "label": "Transform",
+      "children": [
+       {
+        "label": "Move",
+        "op": "transform.translate",
+        "keys": "G"
+       },
+       {
+        "label": "Rotate",
+        "op": "transform.rotate",
+        "keys": "R"
+       },
+       {
+        "label": "Scale",
+        "op": "transform.resize",
+        "keys": "S"
+       },
+       {
+        "label": "To Sphere",
+        "op": "transform.tosphere"
+       },
+       {
+        "label": "Shear",
+        "op": "transform.shear"
+       },
+       {
+        "label": "Bend",
+        "op": "transform.bend"
+       },
+       {
+        "label": "Push/Pull",
+        "op": "transform.push_pull"
+       },
+       {
+        "label": "Move Texture Space",
+        "op": "transform.translate",
+        "keys": "G"
+       },
+       {
+        "label": "Scale Texture Space",
+        "op": "transform.resize",
+        "keys": "S"
+       },
+       {
+        "label": "Align to Transform Orientation",
+        "op": "transform.transform"
+       },
+       {
+        "label": "Randomize Transform",
+        "op": "object.randomize_transform"
+       },
+       {
+        "label": "Align Objects",
+        "op": "object.align"
+       }
+      ]
+     },
+     {
+      "label": "Set Origin",
+      "op": "object.origin_set",
+      "enum": "type"
+     },
+     {
+      "label": "Mirror",
+      "children": [
+       {
+        "label": "Interactive Mirror",
+        "op": "transform.mirror",
+        "keys": "Ctrl+M"
+       },
+       {
+        "label": "X Global",
+        "op": "transform.mirror",
+        "keys": "Ctrl+M"
+       }
+      ]
+     },
+     {
+      "label": "Clear",
+      "children": [
+       {
+        "label": "Location",
+        "op": "object.location_clear",
+        "keys": "Alt+G"
+       },
+       {
+        "label": "Rotation",
+        "op": "object.rotation_clear",
+        "keys": "Alt+R"
+       },
+       {
+        "label": "Scale",
+        "op": "object.scale_clear",
+        "keys": "Alt+S"
+       },
+       {
+        "label": "Origin",
+        "op": "object.origin_clear"
+       }
+      ]
+     },
+     {
+      "label": "Apply",
+      "children": [
+       {
+        "label": "Location",
+        "op": "object.transform_apply"
+       },
+       {
+        "label": "Rotation",
+        "op": "object.transform_apply"
+       },
+       {
+        "label": "Scale",
+        "op": "object.transform_apply"
+       },
+       {
+        "label": "All Transforms",
+        "op": "object.transform_apply"
+       },
+       {
+        "label": "Rotation & Scale",
+        "op": "object.transform_apply"
+       },
+       {
+        "label": "Location to Deltas",
+        "op": "object.transforms_to_deltas"
+       },
+       {
+        "label": "Rotation to Deltas",
+        "op": "object.transforms_to_deltas"
+       },
+       {
+        "label": "Scale to Deltas",
+        "op": "object.transforms_to_deltas"
+       },
+       {
+        "label": "All Transforms to Deltas",
+        "op": "object.transforms_to_deltas"
+       },
+       {
+        "label": "Animated Transforms to Deltas",
+        "op": "object.anim_transforms_to_deltas"
+       },
+       {
+        "label": "Visual Transform",
+        "op": "object.visual_transform_apply"
+       },
+       {
+        "label": "Visual Geometry to Mesh",
+        "op": "object.convert"
+       },
+       {
+        "label": "Visual Geometry to Objects",
+        "op": "object.visual_geometry_to_objects"
+       },
+       {
+        "label": "Make Instances Real",
+        "op": "object.duplicates_make_real"
+       },
+       {
+        "label": "Parent Inverse",
+        "op": "object.parent_inverse_apply"
+       }
+      ]
+     },
+     {
+      "label": "Snap",
+      "children": [
+       {
+        "label": "Selection to Grid",
+        "op": "view3d.snap_selected_to_grid"
+       },
+       {
+        "label": "Selection to Cursor",
+        "op": "view3d.snap_selected_to_cursor"
+       },
+       {
+        "label": "Selection to Cursor (Keep Offset)",
+        "op": "view3d.snap_selected_to_cursor"
+       },
+       {
+        "label": "Selection to Active",
+        "op": "view3d.snap_selected_to_active"
+       },
+       {
+        "label": "Cursor to Selected",
+        "op": "view3d.snap_cursor_to_selected"
+       },
+       {
+        "label": "Cursor to World Origin",
+        "op": "view3d.snap_cursor_to_center"
+       },
+       {
+        "label": "Cursor to Grid",
+        "op": "view3d.snap_cursor_to_grid"
+       },
+       {
+        "label": "Cursor to Active",
+        "op": "view3d.snap_cursor_to_active"
+       }
+      ]
+     },
+     {
+      "label": "Duplicate Objects",
+      "op": "object.duplicate_move",
+      "keys": "Shift+D"
+     },
+     {
+      "label": "Duplicate Linked",
+      "op": "object.duplicate_move_linked",
+      "keys": "Alt+D"
+     },
+     {
+      "label": "Join",
+      "op": "object.join",
+      "keys": "Ctrl+J"
+     },
+     {
+      "label": "Copy Objects",
+      "op": "view3d.copybuffer",
+      "keys": "Ctrl+C"
+     },
+     {
+      "label": "Paste Objects",
+      "op": "view3d.pastebuffer",
+      "keys": "Ctrl+V"
+     },
+     {
+      "label": "Asset",
+      "children": [
+       {
+        "label": "Mark as Asset",
+        "op": "asset.mark"
+       },
+       {
+        "label": "Clear Asset",
+        "op": "asset.clear"
+       },
+       {
+        "label": "Clear Asset (Set Fake User)",
+        "op": "asset.clear"
+       }
+      ]
+     },
+     {
+      "label": "Collection",
+      "children": [
+       {
+        "label": "OBJECT_MT_move_to_collection",
+        "children": []
+       },
+       {
+        "label": "OBJECT_MT_link_to_collection",
+        "children": []
+       },
+       {
+        "label": "Create New Collection",
+        "op": "collection.create",
+        "keys": "Ctrl+G"
+       },
+       {
+        "label": "Remove from Collection",
+        "op": "collection.objects_remove",
+        "keys": "Ctrl+Alt+G"
+       },
+       {
+        "label": "Remove from All Collections",
+        "op": "collection.objects_remove_all",
+        "keys": "Ctrl+Shift+Alt+G"
+       },
+       {
+        "label": "Add Selected to Active Object's Collection",
+        "op": "collection.objects_add_active",
+        "keys": "Ctrl+Shift+G"
+       },
+       {
+        "label": "Remove Selected from Active Collection",
+        "op": "collection.objects_remove_active",
+        "keys": "Shift+Alt+G"
+       }
+      ]
+     },
+     {
+      "label": "Library Override",
+      "children": [
+       {
+        "label": "Make",
+        "op": "object.make_override_library"
+       },
+       {
+        "label": "Reset",
+        "op": "object.reset_override_library"
+       },
+       {
+        "label": "Clear",
+        "op": "object.clear_override_library"
+       }
+      ]
+     },
+     {
+      "label": "Relations",
+      "children": [
+       {
+        "label": "Make Instance Face",
+        "op": "object.make_dupli_face"
+       },
+       {
+        "label": "Make Local",
+        "op": "object.make_local",
+        "enum": "type"
+       },
+       {
+        "label": "Make Single User",
+        "children": [
+         {
+          "label": "Object",
+          "op": "object.make_single_user"
+         },
+         {
+          "label": "Object & Data",
+          "op": "object.make_single_user"
+         },
+         {
+          "label": "Object & Data & Materials",
+          "op": "object.make_single_user"
+         },
+         {
+          "label": "Materials",
+          "op": "object.make_single_user"
+         },
+         {
+          "label": "Object Animation",
+          "op": "object.make_single_user"
+         },
+         {
+          "label": "Object Data Animation",
+          "op": "object.make_single_user"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Parent",
+      "children": [
+       {
+        "label": "Object",
+        "op": "object.parent_set",
+        "enum": "type=OBJECT",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Armature Deform",
+        "op": "object.parent_set",
+        "enum": "type=ARMATURE",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "   With Empty Groups",
+        "op": "object.parent_set",
+        "enum": "type=ARMATURE_NAME",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "   With Automatic Weights",
+        "op": "object.parent_set",
+        "enum": "type=ARMATURE_AUTO",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "   With Envelope Weights",
+        "op": "object.parent_set",
+        "enum": "type=ARMATURE_ENVELOPE",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Bone",
+        "op": "object.parent_set",
+        "enum": "type=BONE",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Bone Relative",
+        "op": "object.parent_set",
+        "enum": "type=BONE_RELATIVE",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Curve Deform",
+        "op": "object.parent_set",
+        "enum": "type=CURVE",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Follow Path",
+        "op": "object.parent_set",
+        "enum": "type=FOLLOW",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Path Constraint",
+        "op": "object.parent_set",
+        "enum": "type=PATH_CONST",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Lattice Deform",
+        "op": "object.parent_set",
+        "enum": "type=LATTICE",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Vertex",
+        "op": "object.parent_set",
+        "enum": "type=VERTEX",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Vertex (Triangle)",
+        "op": "object.parent_set",
+        "enum": "type=VERTEX_TRI",
+        "keys": "Ctrl+P"
+       },
+       {
+        "label": "Make Parent without Inverse",
+        "op": "object.parent_no_inverse_set"
+       },
+       {
+        "label": "Make Parent without Inverse (Keep Transform)",
+        "op": "object.parent_no_inverse_set"
+       },
+       {
+        "label": "Clear Parent",
+        "op": "object.parent_clear",
+        "enum": "type=CLEAR",
+        "keys": "Alt+P"
+       },
+       {
+        "label": "Clear and Keep Transformation",
+        "op": "object.parent_clear",
+        "enum": "type=CLEAR_KEEP_TRANSFORM",
+        "keys": "Alt+P"
+       },
+       {
+        "label": "Clear Parent Inverse",
+        "op": "object.parent_clear",
+        "enum": "type=CLEAR_INVERSE",
+        "keys": "Alt+P"
+       }
+      ]
+     },
+     {
+      "label": "Modifiers",
+      "children": [
+       {
+        "label": "Add Modifier",
+        "children": [
+         {
+          "label": "Edit",
+          "children": []
+         },
+         {
+          "label": "Generate",
+          "children": []
+         },
+         {
+          "label": "Deform",
+          "children": []
+         },
+         {
+          "label": "Normals",
+          "children": []
+         },
+         {
+          "label": "Physics",
+          "children": []
+         }
+        ]
+       },
+       {
+        "label": "Copy Modifiers to Selected Objects",
+        "op": "object.modifiers_copy_to_selected"
+       },
+       {
+        "label": "Clear Object Modifiers",
+        "op": "object.modifiers_clear"
+       }
+      ]
+     },
+     {
+      "label": "Constraints",
+      "children": [
+       {
+        "label": "Add Constraint (with Targets)",
+        "op": "object.constraint_add_with_targets"
+       },
+       {
+        "label": "Copy Constraints to Selected Objects",
+        "op": "object.constraints_copy"
+       },
+       {
+        "label": "Clear Object Constraints",
+        "op": "object.constraints_clear"
+       }
+      ]
+     },
+     {
+      "label": "Track",
+      "children": [
+       {
+        "label": "Damped Track Constraint",
+        "op": "object.track_set",
+        "enum": "type=DAMPTRACK"
+       },
+       {
+        "label": "Track to Constraint",
+        "op": "object.track_set",
+        "enum": "type=TRACKTO"
+       },
+       {
+        "label": "Lock Track Constraint",
+        "op": "object.track_set",
+        "enum": "type=LOCKTRACK"
+       },
+       {
+        "label": "Clear Track",
+        "op": "object.track_clear",
+        "enum": "type=CLEAR"
+       },
+       {
+        "label": "Clear and Keep Transformation (Clear Track)",
+        "op": "object.track_clear",
+        "enum": "type=CLEAR_KEEP_TRANSFORM"
+       }
+      ]
+     },
+     {
+      "label": "Link/Transfer Data",
+      "children": [
+       {
+        "label": "Link Objects to Scene",
+        "op": "object.make_links_scene",
+        "enum": "scene"
+       },
+       {
+        "label": "Link Object Data",
+        "op": "object.make_links_data",
+        "enum": "type=OBDATA"
+       },
+       {
+        "label": "Link Materials",
+        "op": "object.make_links_data",
+        "enum": "type=MATERIAL"
+       },
+       {
+        "label": "Link Animation Data",
+        "op": "object.make_links_data",
+        "enum": "type=ANIMATION"
+       },
+       {
+        "label": "Link Collections",
+        "op": "object.make_links_data",
+        "enum": "type=GROUPS"
+       },
+       {
+        "label": "Link Instance Collection",
+        "op": "object.make_links_data",
+        "enum": "type=DUPLICOLLECTION"
+       },
+       {
+        "label": "Link Fonts to Text",
+        "op": "object.make_links_data",
+        "enum": "type=FONTS"
+       },
+       {
+        "label": "Copy Modifiers",
+        "op": "object.make_links_data",
+        "enum": "type=MODIFIERS"
+       },
+       {
+        "label": "Copy Constraints",
+        "op": "object.make_links_data",
+        "enum": "type=CONSTRAINTS"
+       },
+       {
+        "label": "Copy Grease Pencil Effects",
+        "op": "object.make_links_data",
+        "enum": "type=EFFECTS"
+       },
+       {
+        "label": "Copy Light Linking",
+        "op": "object.make_links_data",
+        "enum": "type=LIGHT_LINKING"
+       },
+       {
+        "label": "Copy Shadow Linking",
+        "op": "object.make_links_data",
+        "enum": "type=SHADOW_LINKING"
+       },
+       {
+        "label": "Copy UV Maps",
+        "op": "object.join_uvs"
+       },
+       {
+        "label": "Transfer Mesh Data",
+        "op": "object.data_transfer"
+       },
+       {
+        "label": "Transfer Mesh Data Layout",
+        "op": "object.datalayout_transfer"
+       },
+       {
+        "label": "Link Receivers to Emitter",
+        "op": "object.light_linking_receivers_link",
+        "enum": "link_state"
+       },
+       {
+        "label": "Link Blockers to Emitter",
+        "op": "object.light_linking_blockers_link",
+        "enum": "link_state"
+       }
+      ]
+     },
+     {
+      "label": "Shade Smooth",
+      "op": "object.shade_smooth"
+     },
+     {
+      "label": "Shade Auto Smooth",
+      "op": "object.shade_auto_smooth"
+     },
+     {
+      "label": "Shade Flat",
+      "op": "object.shade_flat"
+     },
+     {
+      "label": "Animation",
+      "children": [
+       {
+        "label": "In-Betweens",
+        "children": [
+         {
+          "label": "Blend Pose with Rest Pose",
+          "op": "pose.blend_with_rest"
+         },
+         {
+          "label": "Push Pose from Breakdown",
+          "op": "pose.push"
+         },
+         {
+          "label": "Relax Pose to Breakdown",
+          "op": "pose.relax"
+         },
+         {
+          "label": "Pose Breakdowner",
+          "op": "pose.breakdown"
+         },
+         {
+          "label": "Blend to Neighbor",
+          "op": "pose.blend_to_neighbor"
+         }
+        ]
+       },
+       {
+        "label": "Insert Keyframe",
+        "op": "anim.keyframe_insert",
+        "keys": "I"
+       },
+       {
+        "label": "Insert Keyframe with Keying Set...",
+        "op": "anim.keyframe_insert_menu",
+        "keys": "K"
+       },
+       {
+        "label": "Delete Keyframes...",
+        "op": "anim.keyframe_delete_v3d",
+        "keys": "Alt+I"
+       },
+       {
+        "label": "Clear Keyframes...",
+        "op": "anim.keyframe_clear_v3d"
+       },
+       {
+        "label": "Change Keying Set...",
+        "op": "anim.keying_set_active_set",
+        "keys": "Shift+K"
+       },
+       {
+        "label": "Bake Action...",
+        "op": "nla.bake"
+       },
+       {
+        "label": "Bake Object Transform to Grease Pencil...",
+        "op": "grease_pencil.bake_grease_pencil_animation"
+       },
+       {
+        "label": "Replace Action",
+        "op": "anim.replace_action"
+       },
+       {
+        "label": "Replace with New Action",
+        "op": "anim.replace_action_new"
+       }
+      ]
+     },
+     {
+      "label": "Rigid Body",
+      "children": [
+       {
+        "label": "Add Active",
+        "op": "rigidbody.objects_add"
+       },
+       {
+        "label": "Add Passive",
+        "op": "rigidbody.objects_add"
+       },
+       {
+        "label": "Remove",
+        "op": "rigidbody.objects_remove"
+       },
+       {
+        "label": "Change Shape",
+        "op": "rigidbody.shape_change"
+       },
+       {
+        "label": "Calculate Mass",
+        "op": "rigidbody.mass_calculate"
+       },
+       {
+        "label": "Copy from Active",
+        "op": "rigidbody.object_settings_copy"
+       },
+       {
+        "label": "Apply Transformation",
+        "op": "object.visual_transform_apply"
+       },
+       {
+        "label": "Bake to Keyframes",
+        "op": "rigidbody.bake_to_keyframes"
+       },
+       {
+        "label": "Connect",
+        "op": "rigidbody.connect"
+       }
+      ]
+     },
+     {
+      "label": "Quick Effects",
+      "children": [
+       {
+        "label": "Quick Fur",
+        "op": "object.quick_fur"
+       },
+       {
+        "label": "Quick Explode",
+        "op": "object.quick_explode"
+       },
+       {
+        "label": "Quick Smoke",
+        "op": "object.quick_smoke"
+       },
+       {
+        "label": "Quick Liquid",
+        "op": "object.quick_liquid"
+       }
+      ]
+     },
+     {
+      "label": "Convert",
+      "children": [
+       {
+        "label": "Curve",
+        "op": "object.convert",
+        "enum": "target=CURVE"
+       },
+       {
+        "label": "Mesh",
+        "op": "object.convert",
+        "enum": "target=MESH"
+       },
+       {
+        "label": "Point Cloud",
+        "op": "object.convert",
+        "enum": "target=POINTCLOUD"
+       },
+       {
+        "label": "Curves",
+        "op": "object.convert",
+        "enum": "target=CURVES"
+       },
+       {
+        "label": "Grease Pencil",
+        "op": "object.convert",
+        "enum": "target=GREASEPENCIL"
+       }
+      ]
+     },
+     {
+      "label": "Show/Hide",
+      "children": [
+       {
+        "label": "Show Hidden Objects",
+        "op": "object.hide_view_clear",
+        "keys": "Alt+H"
+       },
+       {
+        "label": "Hide Selected",
+        "op": "object.hide_view_set",
+        "keys": "H"
+       },
+       {
+        "label": "Hide Unselected",
+        "op": "object.hide_view_set",
+        "keys": "H"
+       }
+      ]
+     },
+     {
+      "label": "Clean Up",
+      "children": [
+       {
+        "label": "Clean Vertex Group Weights",
+        "op": "object.vertex_group_clean"
+       },
+       {
+        "label": "Limit Total Vertex Groups",
+        "op": "object.vertex_group_limit_total"
+       },
+       {
+        "label": "Remove Unused Material Slots",
+        "op": "object.material_slot_remove_unused"
+       },
+       {
+        "label": "Remove All Materials",
+        "op": "object.material_slot_remove_all"
+       }
+      ]
+     },
+     {
+      "label": "Delete",
+      "op": "object.delete",
+      "keys": "X"
+     },
+     {
+      "label": "Delete Global",
+      "op": "object.delete",
+      "keys": "X"
+     }
+    ]
+   }
+  ],
+  "EDIT_MESH": [
+   {
+    "label": "View",
+    "children": [
+     {
+      "label": "show_region_toolbar",
+      "prop": "show_region_toolbar"
+     },
+     {
+      "label": "show_region_ui",
+      "prop": "show_region_ui"
+     },
+     {
+      "label": "show_region_tool_header",
+      "prop": "show_region_tool_header"
+     },
+     {
+      "label": "show_region_asset_shelf",
+      "prop": "show_region_asset_shelf"
+     },
+     {
+      "label": "show_region_hud",
+      "prop": "show_region_hud"
+     },
+     {
+      "label": "Frame Selected",
+      "op": "view3d.view_selected",
+      "keys": "Ctrl+NumpadPeriod"
+     }
+    ]
+   },
+   {
+    "label": "Select",
+    "children": [
+     {
+      "label": "All",
+      "op": "mesh.select_all",
+      "keys": "A"
+     },
+     {
+      "label": "None",
+      "op": "mesh.select_all",
+      "keys": "A"
+     },
+     {
+      "label": "Invert",
+      "op": "mesh.select_all",
+      "keys": "A"
+     },
+     {
+      "label": "Box Select",
+      "op": "view3d.select_box",
+      "keys": "B"
+     },
+     {
+      "label": "Circle Select",
+      "op": "view3d.select_circle",
+      "keys": "C"
+     },
+     {
+      "label": "Lasso Select",
+      "op": "view3d.select_lasso",
+      "enum": "mode"
+     },
+     {
+      "label": "Select Mirror",
+      "op": "mesh.select_mirror",
+      "keys": "Ctrl+Shift+M"
+     },
+     {
+      "label": "Select Random",
+      "op": "mesh.select_random"
+     },
+     {
+      "label": "Checker Deselect",
+      "op": "mesh.select_nth"
+     },
+     {
+      "label": "More/Less",
+      "children": [
+       {
+        "label": "More",
+        "op": "mesh.select_more",
+        "keys": "Ctrl+NumpadPlus"
+       },
+       {
+        "label": "Less",
+        "op": "mesh.select_less",
+        "keys": "Ctrl+NumpadMinus"
+       },
+       {
+        "label": "Next Active",
+        "op": "mesh.select_next_item",
+        "keys": "Ctrl+Shift+NumpadPlus"
+       },
+       {
+        "label": "Previous Active",
+        "op": "mesh.select_prev_item",
+        "keys": "Ctrl+Shift+NumpadMinus"
+       }
+      ]
+     },
+     {
+      "label": "Select Similar",
+      "children": [
+       {
+        "label": "Normal",
+        "op": "mesh.select_similar",
+        "enum": "type=VERT_NORMAL"
+       },
+       {
+        "label": "Amount of Adjacent Faces",
+        "op": "mesh.select_similar",
+        "enum": "type=VERT_FACES"
+       },
+       {
+        "label": "Vertex Groups",
+        "op": "mesh.select_similar",
+        "enum": "type=VERT_GROUPS"
+       },
+       {
+        "label": "Amount of Connecting Edges",
+        "op": "mesh.select_similar",
+        "enum": "type=VERT_EDGES"
+       },
+       {
+        "label": "Vertex Crease",
+        "op": "mesh.select_similar",
+        "enum": "type=VERT_CREASE"
+       },
+       {
+        "label": "Length",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_LENGTH"
+       },
+       {
+        "label": "Direction",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_DIR"
+       },
+       {
+        "label": "Amount of Faces Around an Edge",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_FACES"
+       },
+       {
+        "label": "Face Angles",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_FACE_ANGLE"
+       },
+       {
+        "label": "Crease",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_CREASE"
+       },
+       {
+        "label": "Bevel",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_BEVEL"
+       },
+       {
+        "label": "Seam",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_SEAM"
+       },
+       {
+        "label": "Sharpness",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_SHARP"
+       },
+       {
+        "label": "Freestyle Edge Marks",
+        "op": "mesh.select_similar",
+        "enum": "type=EDGE_FREESTYLE"
+       },
+       {
+        "label": "Material",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_MATERIAL"
+       },
+       {
+        "label": "Area",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_AREA"
+       },
+       {
+        "label": "Polygon Sides",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_SIDES"
+       },
+       {
+        "label": "Perimeter",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_PERIMETER"
+       },
+       {
+        "label": "Normal",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_NORMAL"
+       },
+       {
+        "label": "Coplanar",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_COPLANAR"
+       },
+       {
+        "label": "Flat/Smooth",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_SMOOTH"
+       },
+       {
+        "label": "Freestyle Face Marks",
+        "op": "mesh.select_similar",
+        "enum": "type=FACE_FREESTYLE"
+       },
+       {
+        "label": "Face Regions",
+        "op": "mesh.select_similar_region"
+       }
+      ]
+     },
+     {
+      "label": "Select All by Trait",
+      "children": [
+       {
+        "label": "Non Manifold",
+        "op": "mesh.select_non_manifold"
+       },
+       {
+        "label": "Loose Geometry",
+        "op": "mesh.select_loose"
+       },
+       {
+        "label": "Interior Faces",
+        "op": "mesh.select_interior_faces"
+       },
+       {
+        "label": "Faces by Sides",
+        "op": "mesh.select_face_by_sides"
+       },
+       {
+        "label": "Poles by Count",
+        "op": "mesh.select_by_pole_count"
+       },
+       {
+        "label": "Ungrouped Vertices",
+        "op": "mesh.select_ungrouped"
+       }
+      ]
+     },
+     {
+      "label": "Select Linked",
+      "children": [
+       {
+        "label": "Linked",
+        "op": "mesh.select_linked",
+        "keys": "Ctrl+L"
+       },
+       {
+        "label": "Shortest Path",
+        "op": "mesh.shortest_path_select"
+       },
+       {
+        "label": "Linked Flat Faces",
+        "op": "mesh.faces_select_linked_flat"
+       }
+      ]
+     },
+     {
+      "label": "Select Loops",
+      "children": [
+       {
+        "label": "Edge Loops",
+        "op": "mesh.select_edge_loop_multi"
+       },
+       {
+        "label": "Edge Rings",
+        "op": "mesh.select_edge_ring_multi"
+       },
+       {
+        "label": "Boundary Loops",
+        "op": "mesh.select_boundary_loop_multi"
+       },
+       {
+        "label": "Loop Inner-Region",
+        "op": "mesh.loop_to_region"
+       },
+       {
+        "label": "Boundary of Selected",
+        "op": "mesh.region_to_loop"
+       }
+      ]
+     },
+     {
+      "label": "Sharp Edges",
+      "op": "mesh.edges_select_sharp"
+     },
+     {
+      "label": "Side of Active",
+      "op": "mesh.select_axis"
+     },
+     {
+      "label": "By Attribute",
+      "op": "mesh.select_by_attribute"
+     }
+    ]
+   },
+   {
+    "label": "Add",
+    "children": [
+     {
+      "label": "Plane",
+      "op": "mesh.primitive_plane_add"
+     },
+     {
+      "label": "Cube",
+      "op": "mesh.primitive_cube_add"
+     },
+     {
+      "label": "Circle",
+      "op": "mesh.primitive_circle_add"
+     },
+     {
+      "label": "UV Sphere",
+      "op": "mesh.primitive_uv_sphere_add"
+     },
+     {
+      "label": "Ico Sphere",
+      "op": "mesh.primitive_ico_sphere_add"
+     },
+     {
+      "label": "Cylinder",
+      "op": "mesh.primitive_cylinder_add"
+     },
+     {
+      "label": "Cone",
+      "op": "mesh.primitive_cone_add"
+     },
+     {
+      "label": "Torus",
+      "op": "mesh.primitive_torus_add"
+     },
+     {
+      "label": "Grid",
+      "op": "mesh.primitive_grid_add"
+     },
+     {
+      "label": "Monkey",
+      "op": "mesh.primitive_monkey_add"
+     }
+    ]
+   },
+   {
+    "label": "Mesh",
+    "children": [
+     {
+      "label": "Transform",
+      "children": [
+       {
+        "label": "Move",
+        "op": "transform.translate",
+        "keys": "G"
+       },
+       {
+        "label": "Rotate",
+        "op": "transform.rotate",
+        "keys": "R"
+       },
+       {
+        "label": "Scale",
+        "op": "transform.resize",
+        "keys": "S"
+       },
+       {
+        "label": "To Sphere",
+        "op": "transform.tosphere",
+        "keys": "Shift+Alt+S"
+       },
+       {
+        "label": "Shear",
+        "op": "transform.shear",
+        "keys": "Ctrl+Shift+Alt+S"
+       },
+       {
+        "label": "Bend",
+        "op": "transform.bend",
+        "keys": "Shift+W"
+       },
+       {
+        "label": "Push/Pull",
+        "op": "transform.push_pull"
+       },
+       {
+        "label": "To Circle",
+        "op": "mesh.circularize"
+       },
+       {
+        "label": "Flatten",
+        "op": "mesh.flatten"
+       },
+       {
+        "label": "Shrink/Fatten",
+        "op": "transform.shrink_fatten",
+        "keys": "Alt+S"
+       },
+       {
+        "label": "Space Edge Loops Evenly",
+        "op": "mesh.space_edge_loops_evenly"
+       },
+       {
+        "label": "Skin Resize",
+        "op": "transform.skin_resize",
+        "keys": "Ctrl+A"
+       },
+       {
+        "label": "Warp",
+        "op": "transform.vertex_warp"
+       },
+       {
+        "label": "Randomize",
+        "op": "transform.vertex_random"
+       }
+      ]
+     },
+     {
+      "label": "Mirror",
+      "children": [
+       {
+        "label": "Interactive Mirror",
+        "op": "transform.mirror",
+        "keys": "Ctrl+M"
+       },
+       {
+        "label": "X Global",
+        "op": "transform.mirror",
+        "keys": "Ctrl+M"
+       }
+      ]
+     },
+     {
+      "label": "Snap",
+      "children": [
+       {
+        "label": "Selection to Grid",
+        "op": "view3d.snap_selected_to_grid"
+       },
+       {
+        "label": "Selection to Cursor",
+        "op": "view3d.snap_selected_to_cursor"
+       },
+       {
+        "label": "Selection to Cursor (Keep Offset)",
+        "op": "view3d.snap_selected_to_cursor"
+       },
+       {
+        "label": "Selection to Active",
+        "op": "view3d.snap_selected_to_active"
+       },
+       {
+        "label": "Cursor to Selected",
+        "op": "view3d.snap_cursor_to_selected"
+       },
+       {
+        "label": "Cursor to World Origin",
+        "op": "view3d.snap_cursor_to_center"
+       },
+       {
+        "label": "Cursor to Grid",
+        "op": "view3d.snap_cursor_to_grid"
+       },
+       {
+        "label": "Cursor to Active",
+        "op": "view3d.snap_cursor_to_active"
+       }
+      ]
+     },
+     {
+      "label": "Duplicate",
+      "op": "mesh.duplicate_move",
+      "keys": "Shift+D"
+     },
+     {
+      "label": "Extrude",
+      "children": [
+       {
+        "label": "Extrude Faces",
+        "op": "view3d.edit_mesh_extrude_move_normal",
+        "keys": "E"
+       },
+       {
+        "label": "Extrude Faces Along Normals",
+        "op": "view3d.edit_mesh_extrude_move_shrink_fatten"
+       },
+       {
+        "label": "Extrude Individual Faces",
+        "op": "mesh.extrude_faces_move"
+       },
+       {
+        "label": "Extrude Manifold",
+        "op": "view3d.edit_mesh_extrude_manifold_normal"
+       },
+       {
+        "label": "Extrude Edges",
+        "op": "mesh.extrude_edges_move"
+       },
+       {
+        "label": "Extrude Vertices",
+        "op": "mesh.extrude_vertices_move"
+       },
+       {
+        "label": "Extrude Repeat",
+        "op": "mesh.extrude_repeat"
+       },
+       {
+        "label": "Spin",
+        "op": "mesh.spin"
+       }
+      ]
+     },
+     {
+      "label": "Merge",
+      "children": [
+       {
+        "label": "At Center",
+        "op": "mesh.merge",
+        "enum": "type=CENTER"
+       },
+       {
+        "label": "At Cursor",
+        "op": "mesh.merge",
+        "enum": "type=CURSOR"
+       },
+       {
+        "label": "Collapse",
+        "op": "mesh.merge",
+        "enum": "type=COLLAPSE"
+       },
+       {
+        "label": "At First",
+        "op": "mesh.merge",
+        "enum": "type=FIRST"
+       },
+       {
+        "label": "At Last",
+        "op": "mesh.merge",
+        "enum": "type=LAST"
+       },
+       {
+        "label": "By Distance",
+        "op": "mesh.remove_doubles"
+       }
+      ]
+     },
+     {
+      "label": "Split",
+      "children": [
+       {
+        "label": "Selection",
+        "op": "mesh.split",
+        "keys": "Y"
+       },
+       {
+        "label": "Faces by Edges",
+        "op": "mesh.edge_split",
+        "enum": "type=EDGE"
+       },
+       {
+        "label": "Faces & Edges by Vertices",
+        "op": "mesh.edge_split",
+        "enum": "type=VERT"
+       }
+      ]
+     },
+     {
+      "label": "Separate",
+      "op": "mesh.separate",
+      "enum": "type",
+      "keys": "P"
+     },
+     {
+      "label": "Bisect",
+      "op": "mesh.bisect"
+     },
+     {
+      "label": "Knife Project",
+      "op": "mesh.knife_project"
+     },
+     {
+      "label": "Knife Topology Tool",
+      "op": "mesh.knife_tool",
+      "keys": "K"
+     },
+     {
+      "label": "Convex Hull",
+      "op": "mesh.convex_hull"
+     },
+     {
+      "label": "Symmetrize",
+      "op": "mesh.symmetrize"
+     },
+     {
+      "label": "Snap to Symmetry",
+      "op": "mesh.symmetry_snap"
+     },
+     {
+      "label": "Normals",
+      "children": [
+       {
+        "label": "Flip",
+        "op": "mesh.flip_normals"
+       },
+       {
+        "label": "Recalculate Outside",
+        "op": "mesh.normals_make_consistent",
+        "keys": "Shift+N"
+       },
+       {
+        "label": "Recalculate Inside",
+        "op": "mesh.normals_make_consistent",
+        "keys": "Shift+N"
+       },
+       {
+        "label": "Set from Faces",
+        "op": "mesh.set_normals_from_faces"
+       },
+       {
+        "label": "Rotate...",
+        "op": "transform.rotate_normal"
+       },
+       {
+        "label": "Point to Target...",
+        "op": "mesh.point_normals",
+        "keys": "Alt+L"
+       },
+       {
+        "label": "Merge",
+        "op": "mesh.merge_normals"
+       },
+       {
+        "label": "Split",
+        "op": "mesh.split_normals"
+       },
+       {
+        "label": "Average",
+        "children": [
+         {
+          "label": "Custom Normal",
+          "op": "mesh.average_normals"
+         },
+         {
+          "label": "Face Area",
+          "op": "mesh.average_normals"
+         },
+         {
+          "label": "Corner Angle",
+          "op": "mesh.average_normals"
+         }
+        ]
+       },
+       {
+        "label": "Copy Vector",
+        "op": "mesh.normals_tools"
+       },
+       {
+        "label": "Paste Vector",
+        "op": "mesh.normals_tools"
+       },
+       {
+        "label": "Smooth Vectors",
+        "op": "mesh.smooth_normals"
+       },
+       {
+        "label": "Reset Vectors",
+        "op": "mesh.normals_tools"
+       },
+       {
+        "label": "Select by Face Strength",
+        "children": [
+         {
+          "label": "Weak",
+          "op": "mesh.mod_weighted_strength"
+         },
+         {
+          "label": "Medium",
+          "op": "mesh.mod_weighted_strength"
+         },
+         {
+          "label": "Strong",
+          "op": "mesh.mod_weighted_strength"
+         }
+        ]
+       },
+       {
+        "label": "Set Face Strength",
+        "children": [
+         {
+          "label": "Weak",
+          "op": "mesh.mod_weighted_strength"
+         },
+         {
+          "label": "Medium",
+          "op": "mesh.mod_weighted_strength"
+         },
+         {
+          "label": "Strong",
+          "op": "mesh.mod_weighted_strength"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Shading",
+      "children": [
+       {
+        "label": "Smooth Faces",
+        "op": "mesh.faces_shade_smooth"
+       },
+       {
+        "label": "Flat Faces",
+        "op": "mesh.faces_shade_flat"
+       },
+       {
+        "label": "Smooth Edges",
+        "op": "mesh.mark_sharp"
+       },
+       {
+        "label": "Sharp Edges",
+        "op": "mesh.mark_sharp"
+       },
+       {
+        "label": "Smooth Vertices",
+        "op": "mesh.mark_sharp"
+       },
+       {
+        "label": "Sharp Vertices",
+        "op": "mesh.mark_sharp"
+       }
+      ]
+     },
+     {
+      "label": "Weights",
+      "children": [
+       {
+        "label": "Normalize All",
+        "op": "object.vertex_group_normalize_all"
+       },
+       {
+        "label": "Normalize",
+        "op": "object.vertex_group_normalize"
+       },
+       {
+        "label": "Mirror",
+        "op": "object.vertex_group_mirror"
+       },
+       {
+        "label": "Invert",
+        "op": "object.vertex_group_invert"
+       },
+       {
+        "label": "Clean",
+        "op": "object.vertex_group_clean"
+       },
+       {
+        "label": "Quantize",
+        "op": "object.vertex_group_quantize"
+       },
+       {
+        "label": "Levels",
+        "op": "object.vertex_group_levels"
+       },
+       {
+        "label": "Smooth",
+        "op": "object.vertex_group_smooth"
+       },
+       {
+        "label": "Limit Total",
+        "op": "object.vertex_group_limit_total"
+       },
+       {
+        "label": "Locks",
+        "children": [
+         {
+          "label": "Lock All",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Lock Selected",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Lock Unselected",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Lock Only Selected",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Lock Only Unselected",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Unlock All",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Unlock Selected",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Unlock Unselected",
+          "op": "object.vertex_group_lock"
+         },
+         {
+          "label": "Invert Locks",
+          "op": "object.vertex_group_lock"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Set Attribute",
+      "op": "mesh.attribute_set"
+     },
+     {
+      "label": "Sort Elements",
+      "op": "mesh.sort_elements",
+      "enum": "type"
+     },
+     {
+      "label": "Show/Hide",
+      "children": [
+       {
+        "label": "Reveal Hidden",
+        "op": "mesh.reveal",
+        "keys": "Alt+H"
+       },
+       {
+        "label": "Hide Selected",
+        "op": "mesh.hide",
+        "keys": "H"
+       },
+       {
+        "label": "Hide Unselected",
+        "op": "mesh.hide",
+        "keys": "H"
+       }
+      ]
+     },
+     {
+      "label": "Clean Up",
+      "children": [
+       {
+        "label": "Delete Loose",
+        "op": "mesh.delete_loose"
+       },
+       {
+        "label": "Decimate Geometry",
+        "op": "mesh.decimate"
+       },
+       {
+        "label": "Degenerate Dissolve",
+        "op": "mesh.dissolve_degenerate"
+       },
+       {
+        "label": "Limited Dissolve",
+        "op": "mesh.dissolve_limited"
+       },
+       {
+        "label": "Make Planar Faces",
+        "op": "mesh.face_make_planar"
+       },
+       {
+        "label": "Split Non-Planar Faces",
+        "op": "mesh.vert_connect_nonplanar"
+       },
+       {
+        "label": "Split Concave Faces",
+        "op": "mesh.vert_connect_concave"
+       },
+       {
+        "label": "Merge by Distance",
+        "op": "mesh.remove_doubles"
+       },
+       {
+        "label": "Fill Holes",
+        "op": "mesh.fill_holes"
+       }
+      ]
+     },
+     {
+      "label": "Delete",
+      "children": [
+       {
+        "label": "Vertices",
+        "op": "mesh.delete",
+        "enum": "type=VERT"
+       },
+       {
+        "label": "Edges",
+        "op": "mesh.delete",
+        "enum": "type=EDGE"
+       },
+       {
+        "label": "Faces",
+        "op": "mesh.delete",
+        "enum": "type=FACE"
+       },
+       {
+        "label": "Only Edges & Faces",
+        "op": "mesh.delete",
+        "enum": "type=EDGE_FACE"
+       },
+       {
+        "label": "Only Faces",
+        "op": "mesh.delete",
+        "enum": "type=ONLY_FACE"
+       },
+       {
+        "label": "Dissolve Vertices",
+        "op": "mesh.dissolve_verts"
+       },
+       {
+        "label": "Dissolve Edges",
+        "op": "mesh.dissolve_edges"
+       },
+       {
+        "label": "Dissolve Faces",
+        "op": "mesh.dissolve_faces"
+       },
+       {
+        "label": "Limited Dissolve",
+        "op": "mesh.dissolve_limited"
+       },
+       {
+        "label": "Collapse Edges & Faces",
+        "op": "mesh.edge_collapse"
+       },
+       {
+        "label": "Edge Loops",
+        "op": "mesh.delete_edgeloop"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "label": "Vertex",
+    "children": [
+     {
+      "label": "Extrude Vertices",
+      "op": "mesh.extrude_vertices_move"
+     },
+     {
+      "label": "Extrude to Cursor or Add",
+      "op": "mesh.dupli_extrude_cursor",
+      "keys": "Ctrl+Rightmouse"
+     },
+     {
+      "label": "Bevel Vertices",
+      "op": "mesh.bevel",
+      "keys": "Ctrl+B"
+     },
+     {
+      "label": "New Edge/Face from Vertices",
+      "op": "mesh.edge_face_add",
+      "keys": "F"
+     },
+     {
+      "label": "Connect Vertex Path",
+      "op": "mesh.vert_connect_path",
+      "keys": "J"
+     },
+     {
+      "label": "Connect Vertex Pairs",
+      "op": "mesh.vert_connect"
+     },
+     {
+      "label": "Rip Vertices",
+      "op": "mesh.rip_move",
+      "keys": "V"
+     },
+     {
+      "label": "Rip Vertices and Fill",
+      "op": "mesh.rip_move",
+      "keys": "V"
+     },
+     {
+      "label": "Rip Vertices and Extend",
+      "op": "mesh.rip_edge_move",
+      "keys": "Alt+D"
+     },
+     {
+      "label": "Slide Vertices",
+      "op": "transform.vert_slide",
+      "keys": "Shift+V"
+     },
+     {
+      "label": "Smooth Vertices",
+      "op": "mesh.vertices_smooth"
+     },
+     {
+      "label": "Smooth Vertices (Laplacian)",
+      "op": "mesh.vertices_smooth_laplacian"
+     },
+     {
+      "label": "Vertex Crease",
+      "op": "transform.vert_crease"
+     },
+     {
+      "label": "Blend from Shape",
+      "op": "mesh.blend_from_shape"
+     },
+     {
+      "label": "Propagate to Shapes",
+      "op": "mesh.shape_propagate_to_all"
+     },
+     {
+      "label": "Vertex Groups",
+      "children": [
+       {
+        "label": "Assign to New Group",
+        "op": "object.vertex_group_assign_new"
+       }
+      ]
+     },
+     {
+      "label": "Hooks",
+      "children": [
+       {
+        "label": "Hook to New Object",
+        "op": "object.hook_add_newob"
+       },
+       {
+        "label": "Hook to Selected Object",
+        "op": "object.hook_add_selob"
+       },
+       {
+        "label": "Hook to Selected Object Bone",
+        "op": "object.hook_add_selob"
+       }
+      ]
+     },
+     {
+      "label": "Make Vertex Parent",
+      "op": "object.vertex_parent_set",
+      "keys": "Ctrl+P"
+     }
+    ]
+   },
+   {
+    "label": "Edge",
+    "children": [
+     {
+      "label": "Extrude Edges",
+      "op": "mesh.extrude_edges_move"
+     },
+     {
+      "label": "Bevel Edges",
+      "op": "mesh.bevel",
+      "keys": "Ctrl+B"
+     },
+     {
+      "label": "Bridge Edge Loops",
+      "op": "mesh.bridge_edge_loops"
+     },
+     {
+      "label": "Screw",
+      "op": "mesh.screw"
+     },
+     {
+      "label": "Subdivide",
+      "op": "mesh.subdivide"
+     },
+     {
+      "label": "Subdivide Edge-Ring",
+      "op": "mesh.subdivide_edgering"
+     },
+     {
+      "label": "Un-Subdivide",
+      "op": "mesh.unsubdivide"
+     },
+     {
+      "label": "Rotate Edge CW",
+      "op": "mesh.edge_rotate"
+     },
+     {
+      "label": "Rotate Edge CCW",
+      "op": "mesh.edge_rotate"
+     },
+     {
+      "label": "Edge Slide",
+      "op": "transform.edge_slide"
+     },
+     {
+      "label": "Loop Cut and Slide",
+      "op": "mesh.loopcut_slide",
+      "keys": "Ctrl+R"
+     },
+     {
+      "label": "Offset Edge Slide",
+      "op": "mesh.offset_edge_loops_slide",
+      "keys": "Ctrl+Shift+R"
+     },
+     {
+      "label": "Edge Bevel Weight",
+      "op": "transform.edge_bevelweight"
+     },
+     {
+      "label": "Edge Crease",
+      "op": "transform.edge_crease",
+      "keys": "Shift+E"
+     },
+     {
+      "label": "Mark Seam",
+      "op": "mesh.mark_seam"
+     },
+     {
+      "label": "Clear Seam",
+      "op": "mesh.mark_seam"
+     },
+     {
+      "label": "Mark Sharp",
+      "op": "mesh.mark_sharp"
+     },
+     {
+      "label": "Clear Sharp",
+      "op": "mesh.mark_sharp"
+     },
+     {
+      "label": "Mark Sharp from Vertices",
+      "op": "mesh.mark_sharp"
+     },
+     {
+      "label": "Clear Sharp from Vertices",
+      "op": "mesh.mark_sharp"
+     },
+     {
+      "label": "Set Sharpness by Angle",
+      "op": "mesh.set_sharpness_by_angle"
+     },
+     {
+      "label": "Mark Freestyle Edge",
+      "op": "mesh.mark_freestyle_edge"
+     },
+     {
+      "label": "Clear Freestyle Edge",
+      "op": "mesh.mark_freestyle_edge"
+     }
+    ]
+   },
+   {
+    "label": "Face",
+    "children": [
+     {
+      "label": "Extrude Faces",
+      "op": "view3d.edit_mesh_extrude_move_normal",
+      "keys": "E"
+     },
+     {
+      "label": "Extrude Faces Along Normals",
+      "op": "view3d.edit_mesh_extrude_move_shrink_fatten"
+     },
+     {
+      "label": "Extrude Individual Faces",
+      "op": "mesh.extrude_faces_move"
+     },
+     {
+      "label": "Inset Faces",
+      "op": "mesh.inset",
+      "keys": "I"
+     },
+     {
+      "label": "Poke Faces",
+      "op": "mesh.poke"
+     },
+     {
+      "label": "Triangulate Faces",
+      "op": "mesh.quads_convert_to_tris",
+      "keys": "Ctrl+T"
+     },
+     {
+      "label": "Triangles to Quads",
+      "op": "mesh.tris_convert_to_quads",
+      "keys": "Alt+J"
+     },
+     {
+      "label": "Solidify Faces",
+      "op": "mesh.solidify"
+     },
+     {
+      "label": "Wireframe",
+      "op": "mesh.wireframe"
+     },
+     {
+      "label": "Fill",
+      "op": "mesh.fill",
+      "keys": "Alt+F"
+     },
+     {
+      "label": "Grid Fill",
+      "op": "mesh.fill_grid"
+     },
+     {
+      "label": "Beautify Faces",
+      "op": "mesh.beautify_fill"
+     },
+     {
+      "label": "Intersect (Knife)",
+      "op": "mesh.intersect"
+     },
+     {
+      "label": "Intersect (Boolean)",
+      "op": "mesh.intersect_boolean"
+     },
+     {
+      "label": "Weld Edges into Faces",
+      "op": "mesh.face_split_by_edges"
+     },
+     {
+      "label": "Shade Smooth",
+      "op": "mesh.faces_shade_smooth"
+     },
+     {
+      "label": "Shade Flat",
+      "op": "mesh.faces_shade_flat"
+     },
+     {
+      "label": "Face Data",
+      "children": [
+       {
+        "label": "Rotate Colors",
+        "op": "mesh.colors_rotate"
+       },
+       {
+        "label": "Reverse Colors",
+        "op": "mesh.colors_reverse"
+       },
+       {
+        "label": "Rotate UVs",
+        "op": "mesh.uvs_rotate"
+       },
+       {
+        "label": "Reverse UVs",
+        "op": "mesh.uvs_reverse"
+       },
+       {
+        "label": "Flip Quad Tessellation",
+        "op": "mesh.flip_quad_tessellation"
+       },
+       {
+        "label": "Mark Freestyle Face",
+        "op": "mesh.mark_freestyle_face"
+       },
+       {
+        "label": "Clear Freestyle Face",
+        "op": "mesh.mark_freestyle_face"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "label": "UV",
+    "children": [
+     {
+      "label": "Unwrap Angle Based",
+      "op": "uv.unwrap"
+     },
+     {
+      "label": "Unwrap Conformal",
+      "op": "uv.unwrap"
+     },
+     {
+      "label": "Unwrap Minimum Stretch",
+      "op": "uv.unwrap"
+     },
+     {
+      "label": "Smart UV Project...",
+      "op": "uv.smart_project"
+     },
+     {
+      "label": "Lightmap Pack...",
+      "op": "uv.lightmap_pack"
+     },
+     {
+      "label": "Follow Active Quads...",
+      "op": "uv.follow_active_quads"
+     },
+     {
+      "label": "Cube Projection",
+      "op": "uv.cube_project"
+     },
+     {
+      "label": "Cylinder Projection",
+      "op": "uv.cylinder_project"
+     },
+     {
+      "label": "Sphere Projection",
+      "op": "uv.sphere_project"
+     },
+     {
+      "label": "Project from View",
+      "op": "uv.project_from_view"
+     },
+     {
+      "label": "Project from View (Bounds)",
+      "op": "uv.project_from_view"
+     },
+     {
+      "label": "Mark Seam",
+      "op": "mesh.mark_seam"
+     },
+     {
+      "label": "Clear Seam",
+      "op": "mesh.mark_seam"
+     },
+     {
+      "label": "Reset",
+      "op": "uv.reset"
+     }
+    ]
+   }
+  ],
+  "SCULPT": [
+   {
+    "label": "View",
+    "children": [
+     {
+      "label": "show_region_toolbar",
+      "prop": "show_region_toolbar"
+     },
+     {
+      "label": "show_region_ui",
+      "prop": "show_region_ui"
+     },
+     {
+      "label": "show_region_tool_header",
+      "prop": "show_region_tool_header"
+     },
+     {
+      "label": "show_region_asset_shelf",
+      "prop": "show_region_asset_shelf"
+     },
+     {
+      "label": "show_region_hud",
+      "prop": "show_region_hud"
+     },
+     {
+      "label": "Center Last Stroke",
+      "op": "view3d.view_selected",
+      "keys": "Ctrl+NumpadPeriod"
+     }
+    ]
+   },
+   {
+    "label": "Sculpt",
+    "children": [
+     {
+      "label": "Transform",
+      "children": [
+       {
+        "label": "Move",
+        "op": "transform.translate"
+       },
+       {
+        "label": "Rotate",
+        "op": "transform.rotate"
+       },
+       {
+        "label": "Scale",
+        "op": "transform.resize"
+       },
+       {
+        "label": "To Sphere",
+        "op": "sculpt.mesh_filter"
+       }
+      ]
+     },
+     {
+      "label": "Toggle Visibility",
+      "op": "sculpt.face_set_change_visibility",
+      "keys": "Shift+H"
+     },
+     {
+      "label": "Hide Active Face Set",
+      "op": "sculpt.face_set_change_visibility",
+      "keys": "Shift+H"
+     },
+     {
+      "label": "Show All",
+      "op": "paint.hide_show_all",
+      "keys": "Alt+H"
+     },
+     {
+      "label": "Invert Visible",
+      "op": "paint.visibility_invert"
+     },
+     {
+      "label": "Hide Masked",
+      "op": "paint.hide_show_masked"
+     },
+     {
+      "label": "Grow Visibility",
+      "op": "paint.visibility_filter",
+      "keys": "PageUp"
+     },
+     {
+      "label": "Shrink Visibility",
+      "op": "paint.visibility_filter",
+      "keys": "PageUp"
+     },
+     {
+      "label": "Show/Hide",
+      "children": [
+       {
+        "label": "Box Hide",
+        "op": "paint.hide_show"
+       },
+       {
+        "label": "Lasso Hide",
+        "op": "paint.hide_show_lasso_gesture"
+       },
+       {
+        "label": "Line Hide",
+        "op": "paint.hide_show_line_gesture"
+       },
+       {
+        "label": "Polyline Hide",
+        "op": "paint.hide_show_polyline_gesture"
+       },
+       {
+        "label": "Box Show",
+        "op": "paint.hide_show"
+       },
+       {
+        "label": "Lasso Show",
+        "op": "paint.hide_show_lasso_gesture"
+       },
+       {
+        "label": "Line Show",
+        "op": "paint.hide_show_line_gesture"
+       },
+       {
+        "label": "Polyline Show",
+        "op": "paint.hide_show_polyline_gesture"
+       }
+      ]
+     },
+     {
+      "label": "Fair Positions",
+      "op": "sculpt.face_set_edit",
+      "keys": "Ctrl+W"
+     },
+     {
+      "label": "Fair Tangency",
+      "op": "sculpt.face_set_edit",
+      "keys": "Ctrl+W"
+     },
+     {
+      "label": "Line Project",
+      "op": "sculpt.project_line_gesture"
+     },
+     {
+      "label": "Trim/Add",
+      "children": [
+       {
+        "label": "Box Trim",
+        "op": "sculpt.trim_box_gesture"
+       },
+       {
+        "label": "Lasso Trim",
+        "op": "sculpt.trim_lasso_gesture"
+       },
+       {
+        "label": "Line Trim",
+        "op": "sculpt.trim_line_gesture"
+       },
+       {
+        "label": "Polyline Trim",
+        "op": "sculpt.trim_polyline_gesture"
+       },
+       {
+        "label": "Box Add",
+        "op": "sculpt.trim_box_gesture"
+       },
+       {
+        "label": "Lasso Add",
+        "op": "sculpt.trim_lasso_gesture"
+       },
+       {
+        "label": "Polyline Add",
+        "op": "sculpt.trim_polyline_gesture"
+       }
+      ]
+     },
+     {
+      "label": "Add Primitive",
+      "children": [
+       {
+        "label": "Add Cube",
+        "op": "wm.tool_set_by_id",
+        "keys": "W"
+       },
+       {
+        "label": "Add Cylinder",
+        "op": "wm.tool_set_by_id",
+        "keys": "W"
+       },
+       {
+        "label": "Add Cone",
+        "op": "wm.tool_set_by_id",
+        "keys": "W"
+       },
+       {
+        "label": "Add UV Sphere",
+        "op": "wm.tool_set_by_id",
+        "keys": "W"
+       },
+       {
+        "label": "Add Ico Sphere",
+        "op": "wm.tool_set_by_id",
+        "keys": "W"
+       }
+      ]
+     },
+     {
+      "label": "Smooth",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Surface Smooth",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Inflate",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Relax Topology",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Relax Face Sets",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Sharpen",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Enhance Details",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Erase Multires Displacement",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Randomize",
+      "op": "sculpt.mesh_filter"
+     },
+     {
+      "label": "Set Vertex Color",
+      "op": "sculpt.color_filter",
+      "keys": "Ctrl+X"
+     },
+     {
+      "label": "Sample Color",
+      "op": "paint.sample_color",
+      "keys": "Shift+X"
+     },
+     {
+      "label": "Set Pivot",
+      "children": [
+       {
+        "label": "Pivot to Origin",
+        "op": "sculpt.set_pivot_position",
+        "keys": "Shift+Rightmouse"
+       },
+       {
+        "label": "Pivot to Unmasked",
+        "op": "sculpt.set_pivot_position",
+        "keys": "Shift+Rightmouse"
+       },
+       {
+        "label": "Pivot to Mask Border",
+        "op": "sculpt.set_pivot_position",
+        "keys": "Shift+Rightmouse"
+       },
+       {
+        "label": "Pivot to Active Vertex",
+        "op": "sculpt.set_pivot_position",
+        "keys": "Shift+Rightmouse"
+       },
+       {
+        "label": "Pivot to Surface Under Cursor",
+        "op": "sculpt.set_pivot_position",
+        "keys": "Shift+Rightmouse"
+       }
+      ]
+     },
+     {
+      "label": "Rebuild BVH",
+      "op": "sculpt.optimize"
+     },
+     {
+      "label": "Dynamic Topology",
+      "op": "sculpt.dynamic_topology_toggle"
+     },
+     {
+      "label": "Transfer Sculpt Mode",
+      "op": "object.transfer_mode"
+     }
+    ]
+   },
+   {
+    "label": "Mask",
+    "children": [
+     {
+      "label": "Fill Mask",
+      "op": "paint.mask_flood_fill",
+      "keys": "Alt+M"
+     },
+     {
+      "label": "Clear Mask",
+      "op": "paint.mask_flood_fill",
+      "keys": "Alt+M"
+     },
+     {
+      "label": "Invert Mask",
+      "op": "paint.mask_flood_fill",
+      "keys": "Alt+M"
+     },
+     {
+      "label": "Box Mask",
+      "op": "paint.mask_box_gesture",
+      "keys": "B"
+     },
+     {
+      "label": "Lasso Mask",
+      "op": "paint.mask_lasso_gesture",
+      "keys": "Ctrl+Shift+Rightmouse"
+     },
+     {
+      "label": "Line Mask",
+      "op": "paint.mask_line_gesture"
+     },
+     {
+      "label": "Polyline Mask",
+      "op": "paint.mask_polyline_gesture"
+     },
+     {
+      "label": "Smooth Mask",
+      "op": "sculpt.mask_filter"
+     },
+     {
+      "label": "Sharpen Mask",
+      "op": "sculpt.mask_filter"
+     },
+     {
+      "label": "Grow Mask",
+      "op": "sculpt.mask_filter"
+     },
+     {
+      "label": "Shrink Mask",
+      "op": "sculpt.mask_filter"
+     },
+     {
+      "label": "Increase Contrast",
+      "op": "sculpt.mask_filter"
+     },
+     {
+      "label": "Decrease Contrast",
+      "op": "sculpt.mask_filter"
+     },
+     {
+      "label": "Expand Mask by Topology",
+      "op": "sculpt.expand",
+      "keys": "Shift+A"
+     },
+     {
+      "label": "Expand Mask by Normals",
+      "op": "sculpt.expand",
+      "keys": "Shift+A"
+     },
+     {
+      "label": "Mask Extract",
+      "op": "sculpt.paint_mask_extract"
+     },
+     {
+      "label": "Mask Slice",
+      "op": "sculpt.paint_mask_slice"
+     },
+     {
+      "label": "Mask Slice and Fill Holes",
+      "op": "sculpt.paint_mask_slice"
+     },
+     {
+      "label": "Mask Slice to New Object",
+      "op": "sculpt.paint_mask_slice"
+     },
+     {
+      "label": "Mask from Cavity",
+      "op": "sculpt.mask_from_cavity"
+     },
+     {
+      "label": "Mask from Mesh Boundary",
+      "op": "sculpt.mask_from_boundary"
+     },
+     {
+      "label": "Mask from Face Sets Boundary",
+      "op": "sculpt.mask_from_boundary"
+     },
+     {
+      "label": "Mask by Color",
+      "op": "sculpt.mask_by_color"
+     },
+     {
+      "label": "Random Mask",
+      "children": [
+       {
+        "label": "Per Vertex",
+        "op": "sculpt.mask_init"
+       },
+       {
+        "label": "Per Face Set",
+        "op": "sculpt.mask_init"
+       },
+       {
+        "label": "Per Loose Part",
+        "op": "sculpt.mask_init"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "label": "Face Sets",
+    "children": [
+     {
+      "label": "Face Set from Masked",
+      "op": "sculpt.face_sets_create"
+     },
+     {
+      "label": "Face Set from Visible",
+      "op": "sculpt.face_sets_create"
+     },
+     {
+      "label": "Face Set from Edit Mode Selection",
+      "op": "sculpt.face_sets_create"
+     },
+     {
+      "label": "Initialize Face Sets",
+      "children": [
+       {
+        "label": "By Loose Parts",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By Face Set Boundaries",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By Materials",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By Normals",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By UV Seams",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By Edge Creases",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By Edge Bevel Weight",
+        "op": "sculpt.face_sets_init"
+       },
+       {
+        "label": "By Sharp Edges",
+        "op": "sculpt.face_sets_init"
+       }
+      ]
+     },
+     {
+      "label": "Grow Face Set",
+      "op": "sculpt.face_set_edit",
+      "keys": "Ctrl+W"
+     },
+     {
+      "label": "Shrink Face Set",
+      "op": "sculpt.face_set_edit",
+      "keys": "Ctrl+W"
+     },
+     {
+      "label": "Expand Face Set by Topology",
+      "op": "sculpt.expand",
+      "keys": "Shift+A"
+     },
+     {
+      "label": "Expand Active Face Set",
+      "op": "sculpt.expand",
+      "keys": "Shift+A"
+     },
+     {
+      "label": "Extract Face Set",
+      "op": "sculpt.face_set_extract"
+     },
+     {
+      "label": "Randomize Colors",
+      "op": "sculpt.face_sets_randomize_colors"
+     }
+    ]
+   }
+  ]
+ }
+}

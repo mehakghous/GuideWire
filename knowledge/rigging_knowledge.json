@@ -1158,6 +1158,36 @@
       "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--fbxanimimport.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15; first part of a long page read verbatim"
+    },
+    "B58": {
+      "title": "Blender manual: Selection Sets (armature)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/properties/selection_sets.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B59": {
+      "title": "Blender manual: Data Transfer modifier",
+      "url": "https://docs.blender.org/manual/en/latest/modeling/modifiers/modify/data_transfer.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15"
+    },
+    "M75": {
+      "title": "Maya: Animate > IK/FK Keys > Move IK to FK",
+      "url": "https://download.autodesk.com/us/maya/2009help/files/Animate__IK_FK_Keys__Move_IK_to_FK.htm",
+      "tier": "official",
+      "version": "Maya 2009 help (version from the address; newer help names the menu Key > IK/FK Keys)"
+    },
+    "M76": {
+      "title": "Maya: Save and reuse a selection (quick select sets)",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Selecting_Save_and_reuse_a_selection.htm",
+      "tier": "official",
+      "version": "Maya 2014 help"
+    },
+    "H53": {
+      "title": "SideFX Houdini docs: Configure Rig Vis (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--configurerigvis.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -12785,6 +12815,369 @@
           "tier": "official",
           "sources": [
             "H49"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.selection_sets",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CTRL-06"
+      ],
+      "phrases": [
+        "selection sets in blender",
+        "select a group of bones quickly",
+        "assign bones to a set",
+        "make a selection set for the arm",
+        "copy selection sets"
+      ],
+      "ui": [
+        {
+          "path": "Pose Mode > Armature properties > Selection Sets",
+          "tier": "official",
+          "source": "B58"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Pose Mode open Armature > Selection Sets and add a set.",
+          "tier": "official",
+          "sources": [
+            "B58"
+          ]
+        },
+        {
+          "text": "Select the bones and click Assign to put them in the active set; use Select later to pick the whole group.",
+          "tier": "official",
+          "sources": [
+            "B58"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Selection Sets define sets of bones for easy selection while animating; they can be created in local and linked armature overrides.",
+          "tier": "official",
+          "sources": [
+            "B58"
+          ]
+        },
+        {
+          "text": "Assign puts the selected bones in the active set and Remove takes them out; sets can be renamed by double-clicking, and copied to and pasted from Blender's clipboard.",
+          "tier": "official",
+          "sources": [
+            "B58"
+          ]
+        },
+        {
+          "text": "Delete All Sets removes every set and Remove Selected Bones from All Sets takes the selected bones out of all sets.",
+          "tier": "official",
+          "sources": [
+            "B58"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Selecting the set selects exactly its bones.",
+          "tier": "official",
+          "sources": [
+            "B58"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.transfer_weights",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKIN-06"
+      ],
+      "phrases": [
+        "copy weights to another mesh in blender",
+        "transfer vertex groups",
+        "data transfer modifier",
+        "transfer the weights from the low poly mesh",
+        "generate data layers",
+        "layer selection"
+      ],
+      "ui": [
+        {
+          "path": "Modifiers > Data Transfer (Vertex Data > Vertex Groups)",
+          "tier": "official",
+          "source": "B59",
+          "note": "The menu path to add the modifier is not stated on the page read; the options are."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a Data Transfer modifier to the target mesh and pick the Source mesh to copy from; uncheck Object Transform if the meshes do not overlap in world space.",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        },
+        {
+          "text": "Choose the type of data to copy (vertex groups), and in Layer Selection one group or all groups.",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        },
+        {
+          "text": "If the groups do not exist on the target yet, click Generate Data Layers, then check the mapping.",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Data Transfer modifier copies data such as vertex groups or UV maps from a source mesh to the modified mesh; Layer Selection says which source layers are copied (all vertex groups or a specific one).",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        },
+        {
+          "text": "Mapping says how to find the matching source element for each destination element; Topology matches elements by index and requires both meshes to have the same number of elements.",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        },
+        {
+          "text": "Generate Data Layers creates missing layers on the target, and layers added this way stay behind when the modifier is removed; Invert flips the weights to 1 - weight.",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Weight paint the target: it shows the transferred weights.",
+          "tier": "official",
+          "sources": [
+            "B59"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.move_ik_to_fk",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "IKFK-07"
+      ],
+      "phrases": [
+        "snap ik to fk",
+        "move ik to fk",
+        "match the ik handle to the fk pose",
+        "avoid a jump when switching from fk to ik",
+        "connect to ik fk"
+      ],
+      "ui": [
+        {
+          "path": "Animate > IK/FK Keys > Move IK to FK (Key > IK/FK Keys in newer Maya)",
+          "tier": "official",
+          "source": "M75"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Pose the chain with FK, then select the IK handle.",
+          "tier": "official",
+          "sources": [
+            "M75"
+          ]
+        },
+        {
+          "text": "Choose Move IK to FK to move the IK handle to the last joint of its chain before switching to IK.",
+          "tier": "official",
+          "sources": [
+            "M75"
+          ]
+        },
+        {
+          "text": "If the handle is inside a control hierarchy, use Connect to IK/FK together with Move IK to FK to move the whole hierarchy.",
+          "tier": "official",
+          "sources": [
+            "M75"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Move IK to FK moves the current IK handle to the last joint in its joint chain, synchronizing the handle's position with the end effector's position.",
+          "tier": "official",
+          "sources": [
+            "M75"
+          ]
+        },
+        {
+          "text": "Before switching from FK to IK in an animation, the IK handle has to be moved to the FK bone's position so the animation does not jump.",
+          "tier": "official",
+          "sources": [
+            "M75"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Switch to IK: the limb keeps its pose and does not pop.",
+          "tier": "official",
+          "sources": [
+            "M75"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.quick_select_sets",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CTRL-06"
+      ],
+      "phrases": [
+        "quick select set in maya",
+        "save a selection of controls",
+        "select all the controls with one click",
+        "selection sets in maya",
+        "relationship editor sets"
+      ],
+      "ui": [
+        {
+          "path": "Create > Sets > Quick Select Set; Edit > Quick Select Sets",
+          "tier": "official",
+          "source": "M76"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the controls, choose Create > Sets > Quick Select Set and type a name.",
+          "tier": "official",
+          "sources": [
+            "M76"
+          ]
+        },
+        {
+          "text": "Reselect them later from Edit > Quick Select Sets; edit membership in Window > Relationship Editors > Sets.",
+          "tier": "official",
+          "sources": [
+            "M76"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "A quick select set saves a complex selection so you can reuse it later without reselecting each object.",
+          "tier": "official",
+          "sources": [
+            "M76"
+          ]
+        },
+        {
+          "text": "Select a set in the Edit > Quick Select Sets submenu; use the Relationship Editor (Window > Relationship Editors > Sets) to control which objects are in the set or to delete it.",
+          "tier": "official",
+          "sources": [
+            "M76"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Choosing the set selects all the controls at once.",
+          "tier": "official",
+          "sources": [
+            "M76"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.configure_rig_vis",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CTRL-06"
+      ],
+      "phrases": [
+        "configure rig vis",
+        "show only some joints",
+        "control the visibility of the rig",
+        "rig visualisation in houdini",
+        "hide the joints and show the controls",
+        "group joints for display"
+      ],
+      "ui": [
+        {
+          "path": "Configure Rig Vis (SOP)",
+          "tier": "official",
+          "source": "H53"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a Configure Rig Vis SOP after the skeleton and make a configuration for a group of joints (for example @name=rFoot).",
+          "tier": "official",
+          "sources": [
+            "H53"
+          ]
+        },
+        {
+          "text": "Turn on Show Joint, Show Polygon Lines or Show Packed Geometry (the control objects) for that group.",
+          "tier": "official",
+          "sources": [
+            "H53"
+          ]
+        },
+        {
+          "text": "Add more configurations for other joint groups, and use the Link Scaling length and width values to size the links.",
+          "tier": "official",
+          "sources": [
+            "H53"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Configure Rig Vis determines the input skeleton components that are visible for a KineFX character; each configuration applies to a single joint or a group of joints.",
+          "tier": "official",
+          "sources": [
+            "H53"
+          ]
+        },
+        {
+          "text": "Group is a space-separated list of joints that use the settings of that configuration; Show Joint shows joints and links, Show Polygon Lines shows poly lines, and Show Packed Geometry shows the control objects linked to the joints.",
+          "tier": "official",
+          "sources": [
+            "H53"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Only the chosen joints and controls show in the viewport.",
+          "tier": "official",
+          "sources": [
+            "H53"
           ]
         }
       ]

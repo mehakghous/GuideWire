@@ -732,6 +732,102 @@
       "url": "https://www.sidefx.com/docs/houdini/ref/panes/chantable.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B32": {
+      "title": "Blender manual: Bone parenting (Armature > Parent)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/editing/parenting.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B33": {
+      "title": "Blender manual: Delete bones",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/editing/delete.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B34": {
+      "title": "Blender manual: Bone display (Custom Shape)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/properties/display.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B35": {
+      "title": "Blender manual: Armature viewport display (Axes)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/properties/display.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B36": {
+      "title": "Blender manual: Damped Track constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/tracking/damped_track.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B37": {
+      "title": "Blender manual: Track To constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/tracking/track_to.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B38": {
+      "title": "Blender manual: Locked Track constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/tracking/locked_track.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B39": {
+      "title": "Blender manual: Constraint common settings (Influence)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/interface/common.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B40": {
+      "title": "Blender manual: Bone custom properties",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/properties/custom_properties.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "M52": {
+      "title": "Maya: Channel Box menus (Lock, Unlock, Hide)",
+      "url": "https://help.autodesk.com/cloudhelp/2018/ENU/Maya-Basics/files/GUID-19CD9DD8-0119-448F-A1B8-93C82A74B633.htm",
+      "tier": "official",
+      "version": "Maya 2018 help"
+    },
+    "M53": {
+      "title": "Maya: Lock the value of a Channel Box attribute",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Basics/files/GUID-015DADAC-332D-4D16-A4E0-87A5CE30D727.htm",
+      "tier": "official",
+      "version": "Maya 2025 help"
+    },
+    "H31": {
+      "title": "SideFX Houdini docs: KineFX Constraints (Parent constraint VOP)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/constraints.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H32": {
+      "title": "SideFX Houdini docs: KineFX animate-state Constraints (Offset, Lookat, Pin)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/animatestateconstraints.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H33": {
+      "title": "SideFX Houdini docs: Look At (rig component)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/rig_components/lookat.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H34": {
+      "title": "SideFX Houdini docs: Edit Parameter Interface window",
+      "url": "https://www.sidefx.com/docs/houdini/ref/windows/edit_parameter_interface.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H35": {
+      "title": "SideFX Houdini docs: Parameter editor (Lock Parameter)",
+      "url": "https://www.sidefx.com/docs/houdini/network/parms.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -8589,6 +8685,814 @@
           "tier": "official",
           "sources": [
             "H29"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.reparent_bones",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKEL-05"
+      ],
+      "phrases": [
+        "reparent a bone",
+        "make a bone the child of another bone",
+        "ctrl p in edit mode for bones",
+        "clear the bone parent",
+        "delete a bone from the chain",
+        "connect the bones",
+        "keep offset or connected"
+      ],
+      "ui": [
+        {
+          "path": "Edit Mode > Armature > Parent > Make Parent (Ctrl-P); Armature > Delete > Bones (X)",
+          "tier": "official",
+          "source": "B32"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Edit Mode select the bone, then select its future parent, and press Ctrl-P (Armature > Parent > Make Parent).",
+          "tier": "official",
+          "sources": [
+            "B32"
+          ]
+        },
+        {
+          "text": "In the Make Parent menu choose Connected for a connected child, or Keep Offset.",
+          "tier": "official",
+          "sources": [
+            "B32"
+          ]
+        },
+        {
+          "text": "To delete a bone press X (Armature > Delete > Bones); its children are re-parented to its parent but not connected.",
+          "tier": "official",
+          "sources": [
+            "B33"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bone parenting is edited with Armature > Parent (Ctrl-P to make a parent, Alt-P to clear), or with the Parent field in Properties > Bone > Relations.",
+          "tier": "official",
+          "sources": [
+            "B32"
+          ]
+        },
+        {
+          "text": "With more than two bones selected, they are all parented to the last selected one.",
+          "tier": "official",
+          "sources": [
+            "B32"
+          ]
+        },
+        {
+          "text": "Parenting from the Properties Relations panel never moves the child bone's tip, so with Connected on the child bone is completely transformed by the operation.",
+          "tier": "official",
+          "sources": [
+            "B32"
+          ]
+        },
+        {
+          "text": "Deleting a bone in a chain re-parents its children to its own parent, but does not connect them, to avoid deforming the whole armature.",
+          "tier": "official",
+          "sources": [
+            "B33"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "In Pose Mode, rotating the parent bone moves the re-parented child.",
+          "tier": "official",
+          "sources": [
+            "B32"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.custom_bone_shape",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CTRL-01"
+      ],
+      "phrases": [
+        "custom bone shape",
+        "make a control shape from a bone",
+        "use an object as a bone shape",
+        "bone display custom shape",
+        "controller shape in blender",
+        "turn off the custom shapes"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Bone tab > Viewport Display > Custom Shape",
+          "tier": "official",
+          "source": "B34"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Make the object you want as the control shape (for example a circle or a cone).",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        },
+        {
+          "text": "Select the bone, open Bone > Viewport Display > Custom Shape and set Custom Object to that object.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        },
+        {
+          "text": "Adjust the shape's translation, rotation and scale there if it sits wrongly on the bone.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bones can have custom shapes (in Object Mode and Pose Mode), using another object as a template.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        },
+        {
+          "text": "Custom Object is the object that defines the custom shape of the selected bone; extra translation, rotation and scale can be applied to the shape.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        },
+        {
+          "text": "The shapes can be switched off temporarily by unchecking Shapes in the armature's Viewport Display panel.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        },
+        {
+          "text": "The Wireframe option shows the bone in wireframe regardless of the viewport shading mode.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "In Pose Mode the bone is drawn as the template object and can be grabbed and moved.",
+          "tier": "official",
+          "sources": [
+            "B34"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.bone_custom_properties",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CTRL-04"
+      ],
+      "phrases": [
+        "add a custom property to a control",
+        "custom properties on a bone",
+        "add an attribute to the control bone",
+        "ik fk switch property",
+        "bone custom properties panel"
+      ],
+      "ui": [
+        {
+          "path": "Pose Mode > Properties editor > Bone tab > Custom Properties",
+          "tier": "official",
+          "source": "B40",
+          "note": "The page points to the general Custom Properties page for how properties are added; only where the panel is was read."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In Pose Mode select the control bone and open Bone > Custom Properties in the Properties editor.",
+          "tier": "official",
+          "sources": [
+            "B40"
+          ]
+        },
+        {
+          "text": "Add the property (for example a switch value) there, so animators can set and key it on the control.",
+          "tier": "official",
+          "sources": [
+            "B40"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Bone Custom Properties panel is available in Pose Mode under the Bone tab.",
+          "tier": "official",
+          "sources": [
+            "B40"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The new property shows on the bone's Custom Properties panel and can be keyed.",
+          "tier": "official",
+          "sources": [
+            "B40"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.aim_constraints",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CNST-03"
+      ],
+      "phrases": [
+        "look at constraint in blender",
+        "aim constraint in blender",
+        "make the eyes look at a target",
+        "damped track",
+        "track to constraint",
+        "locked track"
+      ],
+      "ui": [
+        {
+          "path": "Add Bone Constraint > Tracking > Damped Track / Track To / Locked Track",
+          "tier": "official",
+          "source": "B36"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a Tracking constraint to the object or bone and set its Target.",
+          "tier": "official",
+          "sources": [
+            "B36",
+            "B37"
+          ]
+        },
+        {
+          "text": "Use Damped Track for a plain look-at; use Track To when an up axis is needed; use Locked Track to rotate around one axis only.",
+          "tier": "official",
+          "sources": [
+            "B36",
+            "B37",
+            "B38"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Damped Track constraint makes an object or bone point towards a target; it is typically called Look At or Aim in other 3D software.",
+          "tier": "official",
+          "sources": [
+            "B36"
+          ]
+        },
+        {
+          "text": "Damped Track uses a pure swing rotation to minimise rolling around the tracking axis, unlike Track To which applies an Up axis as well.",
+          "tier": "official",
+          "sources": [
+            "B36"
+          ]
+        },
+        {
+          "text": "Track To points towards the target then rolls so a chosen local axis points upwards; if the owner is almost directly above the target the roll becomes unstable and Damped Track is recommended instead.",
+          "tier": "official",
+          "sources": [
+            "B37"
+          ]
+        },
+        {
+          "text": "Locked Track lets the object or bone rotate around only one axis; the other two axes stay in their original plane.",
+          "tier": "official",
+          "sources": [
+            "B38"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the target: the object or bone keeps pointing at it.",
+          "tier": "official",
+          "sources": [
+            "B36"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.show_bone_axes",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ORNT-03"
+      ],
+      "phrases": [
+        "show the bone axes",
+        "see the local axes of the bones",
+        "check the bone orientation",
+        "display axes in blender",
+        "which way does the bone roll"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Armature tab > Viewport Display > Axes",
+          "tier": "official",
+          "source": "B35"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the armature and open Armature > Viewport Display, then enable Axes.",
+          "tier": "official",
+          "sources": [
+            "B35"
+          ]
+        },
+        {
+          "text": "Check the axes of each bone in Edit Mode or Pose Mode; fix the roll if they point the wrong way.",
+          "tier": "official",
+          "sources": [
+            "B35",
+            "B3"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "When Axes is enabled, the local axes of each bone are displayed (relevant for Edit Mode and Pose Mode only).",
+          "tier": "official",
+          "sources": [
+            "B35"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Each bone shows its local axes in the viewport.",
+          "tier": "official",
+          "sources": [
+            "B35"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.ik_fk_influence",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "IKFK-06"
+      ],
+      "phrases": [
+        "switch between ik and fk in blender",
+        "turn the ik on and off",
+        "ik fk switch in blender",
+        "ik constraint influence",
+        "blend ik and fk"
+      ],
+      "ui": [
+        {
+          "path": "Bone Constraints > IK constraint > Influence (keyframable)",
+          "tier": "official",
+          "source": "B39",
+          "note": "The manual describes Influence generally; using it as the IK/FK switch is the entry's reading."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add the IK constraint to the end bone and leave the FK controls on the chain.",
+          "tier": "official",
+          "sources": [
+            "B2"
+          ]
+        },
+        {
+          "text": "Use the constraint's Influence as the switch: 1 for IK, 0 for FK, and values between to blend.",
+          "tier": "official",
+          "sources": [
+            "B39"
+          ]
+        },
+        {
+          "text": "Key the Influence (or drive it from a custom property) to switch during the animation.",
+          "tier": "official",
+          "sources": [
+            "B39",
+            "B40"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Influence is a strength multiplier for the constraint: 1 means fully applied, setting it to 0 is the same as disabling the constraint, and values between give an interpolated result.",
+          "tier": "official",
+          "sources": [
+            "B39"
+          ]
+        },
+        {
+          "text": "The Influence can be keyframed, so constraints can be turned on and off over the course of an animation.",
+          "tier": "official",
+          "sources": [
+            "B39"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "At Influence 0 the FK pose rules; at 1 the IK target moves the chain.",
+          "tier": "official",
+          "sources": [
+            "B39"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.lock_hide_channels",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CTRL-05"
+      ],
+      "phrases": [
+        "lock and hide channels",
+        "lock the attribute in the channel box",
+        "hide the channels on the control",
+        "lock the translate and scale",
+        "unlock a channel",
+        "keep the animator from moving a channel"
+      ],
+      "ui": [
+        {
+          "path": "Channel Box > Lock Selected / Unlock Selected / Hide Selected / Lock and Hide Selected",
+          "tier": "official",
+          "source": "M52",
+          "note": "The pages read do not say how to bring back a channel that was hidden, so no unhide step is given."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Highlight the channels in the Channel Box and choose Lock and Hide Selected to lock them and remove them from the box.",
+          "tier": "official",
+          "sources": [
+            "M52"
+          ]
+        },
+        {
+          "text": "Or right-click an attribute and choose Lock Attribute; right-click and choose Unlock Attribute to undo it.",
+          "tier": "official",
+          "sources": [
+            "M53"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Lock Selected locks the highlighted attributes to their values at the current frame so they can no longer be manipulated at any frame until unlocked; Unlock Selected allows modification again.",
+          "tier": "official",
+          "sources": [
+            "M52"
+          ]
+        },
+        {
+          "text": "Hide Selected removes the selected attributes from the Channel Box; Lock and Hide Selected does both, and the locked attributes cannot be manipulated.",
+          "tier": "official",
+          "sources": [
+            "M52"
+          ]
+        },
+        {
+          "text": "Maya displays locked attributes with a gray background.",
+          "tier": "official",
+          "sources": [
+            "M53"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Locked fields are dimmed and cannot be dragged.",
+          "tier": "official",
+          "sources": [
+            "M53"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.parent_constraint",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CNST-01"
+      ],
+      "phrases": [
+        "parent constraint in houdini",
+        "constrain one object to another",
+        "make an object follow another in houdini",
+        "driver and driven",
+        "update offset on the constraint"
+      ],
+      "ui": [
+        {
+          "path": "KineFX Parent Constraint (VOP); Offset constraint (animate state)",
+          "tier": "official",
+          "source": "H31",
+          "note": "The Parent constraint page is filed under the older VOP-based constraints; the newer animate-state constraints are on a separate page."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Set the driver object and the driven object on the Parent Constraint and use Blend for how strongly the driver acts.",
+          "tier": "official",
+          "sources": [
+            "H31"
+          ]
+        },
+        {
+          "text": "Use Update Offset to stash the current transforms of the driver and parent so the driven object keeps its place.",
+          "tier": "official",
+          "sources": [
+            "H31"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Constraints constrain the transforms (translation, rotation and scale) of one object, the driven, to another, the driver.",
+          "tier": "official",
+          "sources": [
+            "H31"
+          ]
+        },
+        {
+          "text": "The Parent constraint makes the driven object behave like the child of the driver object; Blend sets the strength of the driver's influence, and Update Offset stashes the current transforms.",
+          "tier": "official",
+          "sources": [
+            "H31"
+          ]
+        },
+        {
+          "text": "In animate state, an Offset constraint keeps an offset between the driver and driven controls (None, Static or Parent offset), with a Blend between the constraint and the original animation.",
+          "tier": "official",
+          "sources": [
+            "H32"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the driver: the driven object follows it.",
+          "tier": "official",
+          "sources": [
+            "H31"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.lookat_constraint",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CNST-03"
+      ],
+      "phrases": [
+        "look at constraint in houdini",
+        "aim constraint in houdini",
+        "make the eyes look at a target in houdini",
+        "lookat constraint",
+        "look at component"
+      ],
+      "ui": [
+        {
+          "path": "Look At (rig component); animate-state Lookat constraint",
+          "tier": "official",
+          "source": "H33"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add the Look At rig component and set the Driven node and the Target.",
+          "tier": "official",
+          "sources": [
+            "H33"
+          ]
+        },
+        {
+          "text": "Set Look At Axis to the local axis of the driven node that should point at the target; turn on Keep Offset to keep its original orientation.",
+          "tier": "official",
+          "sources": [
+            "H33"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Look At component creates a look at constraint for a driven TransformObject node, and can set up several at once.",
+          "tier": "official",
+          "sources": [
+            "H33"
+          ]
+        },
+        {
+          "text": "Look At Axis is the local vector on the driven node to align with the target position; Keep Offset applies an offset to keep the original orientation after the constraint is made.",
+          "tier": "official",
+          "sources": [
+            "H33"
+          ]
+        },
+        {
+          "text": "In animate state, a lookat constraint lets an object follow another; a control named Target is created for the driven object to look at.",
+          "tier": "official",
+          "sources": [
+            "H32"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the target control: the driven node keeps facing it.",
+          "tier": "official",
+          "sources": [
+            "H33"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.spare_parameters",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CTRL-04"
+      ],
+      "phrases": [
+        "add a custom parameter to a control in houdini",
+        "spare parameter",
+        "edit parameter interface",
+        "add an attribute to the control",
+        "extra parameter on a node",
+        "add a switch parameter"
+      ],
+      "ui": [
+        {
+          "path": "Parameter editor > Gear menu > Edit Parameter Interface",
+          "tier": "official",
+          "source": "H34"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the parameter editor click the gear icon and choose Edit Parameter Interface.",
+          "tier": "official",
+          "sources": [
+            "H34"
+          ]
+        },
+        {
+          "text": "On the By type tab pick the kind of parameter to add and set its name and label.",
+          "tier": "official",
+          "sources": [
+            "H34"
+          ]
+        },
+        {
+          "text": "Keyframe or reference the new parameter like any other.",
+          "tier": "official",
+          "sources": [
+            "H34"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Spare parameters are extra parameters on a node that can be used by expressions or scripts; the window creates, imports or edits parameters on a node.",
+          "tier": "official",
+          "sources": [
+            "H34"
+          ]
+        },
+        {
+          "text": "You can keyframe spare parameters, reference them and add them to takes; the window affects only that node, not all nodes of the same type.",
+          "tier": "official",
+          "sources": [
+            "H34"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The new parameter shows in the node's parameter editor.",
+          "tier": "official",
+          "sources": [
+            "H34"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.lock_parameter",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CTRL-05"
+      ],
+      "phrases": [
+        "lock a parameter in houdini",
+        "stop the animator changing a parameter",
+        "unlock parameter",
+        "locked parameter gray",
+        "lock the transform channels"
+      ],
+      "ui": [
+        {
+          "path": "Parameter editor > right-click a parameter > Lock Parameter",
+          "tier": "official",
+          "source": "H35",
+          "note": "The page does not document a menu command to hide a parameter, so none is given."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Right-click the parameter in the parameter editor and choose Lock Parameter.",
+          "tier": "official",
+          "sources": [
+            "H35"
+          ]
+        },
+        {
+          "text": "Choose Unlock Parameter from the same menu to allow editing again.",
+          "tier": "official",
+          "sources": [
+            "H35"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Lock Parameter prevents the parameter from being edited or animated; locked parameters have a gray background in the edit fields.",
+          "tier": "official",
+          "sources": [
+            "H35"
+          ]
+        },
+        {
+          "text": "The parameter context menu also has Unlock Parameter, Revert to Defaults, Include in Take and, for spare parameters, Delete and Bypass Spare Parameter.",
+          "tier": "official",
+          "sources": [
+            "H35"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "A locked parameter cannot be typed into or keyed.",
+          "tier": "official",
+          "sources": [
+            "H35"
           ]
         }
       ]

@@ -28,13 +28,17 @@ class Cell:
 _TOOLS: dict | None = None
 
 
-def tool_groups(mode: str) -> list[list[dict]]:
-    """Groups of tools (each `{"id", "label"}`) in toolbar order for a mode such as OBJECT."""
+def _tools() -> dict:
     global _TOOLS
     if _TOOLS is None:
         with open(os.path.join(os.path.dirname(__file__), "toolbars.json"), encoding="utf-8") as f:
             _TOOLS = json.load(f)
-    return _TOOLS.get(mode, [])
+    return _TOOLS
+
+
+def tool_groups(mode: str) -> list[list[dict]]:
+    """Groups of tools (each `{"id", "label"}`) in toolbar order for a mode such as OBJECT."""
+    return _tools().get(mode, [])
 
 
 def _runs(flags) -> list[tuple[int, int]]:
@@ -120,9 +124,9 @@ def modes_matching(cells: list[Cell], mode_hint: str | None = None) -> list[str]
     """Modes whose toolbar could be what is on screen, best first: the hinted mode, then modes with
     exactly as many tools as cells, then modes with more (a tall toolbar is cut off by the window
     and shows only its first tools)."""
-    tool_groups("OBJECT")
-    modes = [m for m in (_TOOLS or {}) if not m.startswith("_") and len(_TOOLS[m]) >= len(cells) > 0]
-    return sorted(modes, key=lambda m: (m != mode_hint, len(_TOOLS[m]) != len(cells)))
+    tools = _tools()
+    modes = [m for m in tools if not m.startswith("_") and len(tools[m]) >= len(cells) > 0]
+    return sorted(modes, key=lambda m: (m != mode_hint, len(tools[m]) != len(cells)))
 
 
 def locate_tool(cells: list[Cell], mode: str, name: str) -> Rect | None:

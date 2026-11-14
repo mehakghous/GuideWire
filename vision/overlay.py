@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 from shared.grounding import GroundingResult, Rect
 from vision.tracker import classify
@@ -84,7 +84,7 @@ def make_overlay_window():
             self._origin = Rect(0, 0, 1, 1)
             self._screen_marks: list[Mark] = []   # screen coordinates, kept so a move can shift them
             self._marks: list[Mark] = []          # the same, local to the overlay, for painting
-            self._timer = None
+            self._timer: Any = None
 
         def _scale(self) -> float:
             screen = QApplication.primaryScreen()
@@ -109,14 +109,16 @@ def make_overlay_window():
             because their positions no longer mean anything, and calls `on_resized` so the caller
             can capture and ground again. A hidden or minimized window hides the overlay."""
             from PyQt6.QtCore import QTimer
-            state = {"rect": self._origin if self.isVisible() else None}
+            state: dict[str, Rect | None] = {"rect": self._origin if self.isVisible() else None}
 
             def tick() -> None:
                 change = classify(state["rect"], find_rect())
                 state["rect"] = change.rect
-                if change.kind == "lost":
-                    self.hide()
-                elif change.kind in ("found", "resized"):
+                if change.rect is None:
+                    if change.kind == "lost":
+                        self.hide()
+                    return
+                if change.kind in ("found", "resized"):
                     self._screen_marks = []
                     self.cover(change.rect)
                     self.set_marks([])
@@ -127,9 +129,10 @@ def make_overlay_window():
                     self.cover(change.rect)
                     self.set_marks([shift_mark(m, change.dx, change.dy) for m in self._screen_marks])
 
-            self._timer = QTimer(self)
-            self._timer.timeout.connect(tick)
-            self._timer.start(interval_ms)
+            timer = QTimer(self)
+            timer.timeout.connect(tick)
+            timer.start(interval_ms)
+            self._timer = timer
 
         hide_from_capture = True   # set False to let screen recorders see the overlay
 

@@ -828,6 +828,72 @@
       "url": "https://www.sidefx.com/docs/houdini/network/parms.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B41": {
+      "title": "Blender manual: Shape keys introduction",
+      "url": "https://docs.blender.org/manual/en/latest/animation/shape_keys/introduction.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B42": {
+      "title": "Blender manual: Shape Keys panel",
+      "url": "https://docs.blender.org/manual/en/latest/animation/shape_keys/shape_keys_panel.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B43": {
+      "title": "Blender manual: Drivers introduction",
+      "url": "https://docs.blender.org/manual/en/latest/animation/drivers/introduction.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B44": {
+      "title": "Blender manual: Drivers usage (Add Driver)",
+      "url": "https://docs.blender.org/manual/en/latest/animation/drivers/usage.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "M54": {
+      "title": "Maya Getting Started: Creating a blend shape",
+      "url": "https://download.autodesk.com/us/maya/Maya_2014_GettingStarted/files/Cluster_and_blend_shape_deformers_Creating_a_blend_shape.htm",
+      "tier": "official",
+      "version": "Maya 2014 Getting Started (version taken from the address)"
+    },
+    "M55": {
+      "title": "Maya: Add Blend Shape Target Options (Shape Editor)",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-CharacterAnimation/files/GUID-3F747E43-29D1-409D-8F40-C97311C894E6.htm",
+      "tier": "official",
+      "version": "Maya 2025 help (version taken from the address)"
+    },
+    "M56": {
+      "title": "Maya: Create a new target shape from the blend shape",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-5DD7B40A-B13E-4362-9048-C940991CC9E5.htm",
+      "tier": "official",
+      "version": "Maya 2016 help (version taken from the address)"
+    },
+    "H36": {
+      "title": "SideFX Houdini docs: Blend shapes (KineFX)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/blendshapes.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H37": {
+      "title": "SideFX Houdini docs: Character Blend Shapes (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--characterblendshapes.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H38": {
+      "title": "SideFX Houdini docs: Working with blend shapes (sliders, APEX AutoRig)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/animatestateblendshapes.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H39": {
+      "title": "SideFX Houdini docs: Blend Shape 2.0 (rig component)",
+      "url": "https://www.sidefx.com/docs/houdini/character/kinefx/rig_components/blendshape.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -9493,6 +9559,418 @@
           "tier": "official",
           "sources": [
             "H35"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.shape_keys",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "BSHP-01"
+      ],
+      "phrases": [
+        "make a shape key",
+        "create a blend shape in blender",
+        "shape keys for facial expressions",
+        "morph target in blender",
+        "add a shape key",
+        "relative or absolute shape keys"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Object Data tab > Shape Keys panel",
+          "tier": "official",
+          "source": "B42"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the mesh and open Object Data > Shape Keys in the Properties editor.",
+          "tier": "official",
+          "sources": [
+            "B42"
+          ]
+        },
+        {
+          "text": "Add the basis key first, then add a new shape key for each expression or corrective shape.",
+          "tier": "official",
+          "sources": [
+            "B42",
+            "B41"
+          ]
+        },
+        {
+          "text": "Edit the new shape key's vertices to make the target shape, and set its value to blend it in.",
+          "tier": "official",
+          "sources": [
+            "B41",
+            "B42"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Shape keys deform objects into new shapes for animation; in other software they are called morph targets or blend shapes.",
+          "tier": "official",
+          "sources": [
+            "B41"
+          ]
+        },
+        {
+          "text": "They are most used for character facial animation (mouth positions, expressions, phonemes) and for refining a skeletal rig, including soft body parts and muscles.",
+          "tier": "official",
+          "sources": [
+            "B41"
+          ]
+        },
+        {
+          "text": "Use Relative Shape Keys when shapes need to be blended together, such as facial expressions or corrective poses; use Absolute Shape Keys for shape changes that progress in a sequence over time.",
+          "tier": "official",
+          "sources": [
+            "B41"
+          ]
+        },
+        {
+          "text": "The Shape Keys panel (Object Data tab, all modes) is used to create, organise and manage shape keys, and the keys can be reordered by dragging.",
+          "tier": "official",
+          "sources": [
+            "B42"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Changing a shape key's value in the panel visibly blends the mesh toward that shape.",
+          "tier": "official",
+          "sources": [
+            "B41"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.drivers",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "BSHP-04"
+      ],
+      "phrases": [
+        "drive a shape key with a bone",
+        "add a driver in blender",
+        "drive shape key from control",
+        "driver for a property",
+        "ctrl d add driver",
+        "use a custom property to drive"
+      ],
+      "ui": [
+        {
+          "path": "Right-click a property > Add Driver (Ctrl-D)",
+          "tier": "official",
+          "source": "B44"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Right-click the property to drive (for example a shape key value) and choose Add Driver, or press Ctrl-D over it.",
+          "tier": "official",
+          "sources": [
+            "B44"
+          ]
+        },
+        {
+          "text": "Set the driver's input (another property, such as a bone rotation or a custom property) and, if needed, a mapping curve.",
+          "tier": "official",
+          "sources": [
+            "B43"
+          ]
+        },
+        {
+          "text": "Use Edit Driver or Open Drivers Editor from the same menu to adjust it.",
+          "tier": "official",
+          "sources": [
+            "B44"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Drivers control the values of properties by means of a function or a mathematical expression.",
+          "tier": "official",
+          "sources": [
+            "B43"
+          ]
+        },
+        {
+          "text": "A driver is a driver configuration (zero or more input values combined by a function or Python expression) plus an F-Curve that maps its output to the value applied to the driven property.",
+          "tier": "official",
+          "sources": [
+            "B43"
+          ]
+        },
+        {
+          "text": "Drivers are typically used to drive bone transforms and the influence of shape keys, action constraints and modifiers, often using custom properties as inputs.",
+          "tier": "official",
+          "sources": [
+            "B43"
+          ]
+        },
+        {
+          "text": "The context menu has Add Driver (Ctrl-D), Edit Driver, Open Drivers Editor, Copy Driver and Paste Driver.",
+          "tier": "official",
+          "sources": [
+            "B44"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Move the control: the shape key value or other driven property changes with it.",
+          "tier": "official",
+          "sources": [
+            "B43"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.blend_shape",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "BSHP-01"
+      ],
+      "phrases": [
+        "create a blend shape in maya",
+        "make a blend shape deformer",
+        "morph the base shape to the target",
+        "add a blend shape target",
+        "shape editor in maya",
+        "facial blend shapes in maya"
+      ],
+      "ui": [
+        {
+          "path": "Create Deformers > Blend Shape; Shape Editor > Create > Add Target / Add Selection as Target",
+          "tier": "official",
+          "source": "M54",
+          "note": "The version of the Getting Started page is taken from its address; the pages read do not give the full 'Deform' menu path for newer versions."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the target shape first, then Ctrl-select the base shape (in that order).",
+          "tier": "official",
+          "sources": [
+            "M54"
+          ]
+        },
+        {
+          "text": "Choose Create Deformers > Blend Shape and click Create (the options box lets you name the node).",
+          "tier": "official",
+          "sources": [
+            "M54"
+          ]
+        },
+        {
+          "text": "Drag the blend shape's slider from 0 to 1 to morph the base into the target, and key it with the Key button.",
+          "tier": "official",
+          "sources": [
+            "M54"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The objective of a blend shape operation is to morph the base shape into the target shape; the node gets a slider that changes the base into the target.",
+          "tier": "official",
+          "sources": [
+            "M54"
+          ]
+        },
+        {
+          "text": "In the Shape Editor, Create > Add Target adds a target shape to the base object's selected blend shape deformer according to the Add Blend Shape Target Options (Object Space, Tangent Space or Transform Space).",
+          "tier": "official",
+          "sources": [
+            "M55"
+          ]
+        },
+        {
+          "text": "Create > Add Selection as Target in the Shape Editor bakes the base object's current blend shape state (set with the weight sliders) into a new target shape.",
+          "tier": "official",
+          "sources": [
+            "M56"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Dragging the target's slider morphs the base shape.",
+          "tier": "official",
+          "sources": [
+            "M54"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.blend_shapes",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "BSHP-01"
+      ],
+      "phrases": [
+        "create a blend shape in houdini",
+        "character blend shapes add",
+        "add blend shapes to a character in houdini",
+        "kinefx blend shapes",
+        "sculpt a blend shape in houdini"
+      ],
+      "ui": [
+        {
+          "path": "Character Blend Shapes Add (SOP); Character Blend Shapes (SOP)",
+          "tier": "official",
+          "source": "H36"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Make each blend shape from the character's mesh with a geometry edit node such as Sculpt or Edit, and name the shapes.",
+          "tier": "official",
+          "sources": [
+            "H36"
+          ]
+        },
+        {
+          "text": "Add them to the character with a Character Blend Shapes Add SOP.",
+          "tier": "official",
+          "sources": [
+            "H36"
+          ]
+        },
+        {
+          "text": "View them in the viewport with the Character Blend Shapes SOP; the weights are driven by attributes on the animated skeleton.",
+          "tier": "official",
+          "sources": [
+            "H36",
+            "H37"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Blend shapes are created using blend shape SOP nodes; the Character Blend Shapes Add SOP lets you add single or multiple new blend shapes to your character.",
+          "tier": "official",
+          "sources": [
+            "H36"
+          ]
+        },
+        {
+          "text": "The blend weight values of a character's blend shapes are driven by detail attributes on its animated skeleton.",
+          "tier": "official",
+          "sources": [
+            "H36"
+          ]
+        },
+        {
+          "text": "The Character Blend Shapes SOP applies blend shapes to a KineFX character's geometry using the weight attributes on its skeleton; the blend weights come from the Animated Pose input.",
+          "tier": "official",
+          "sources": [
+            "H37"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The shapes appear on the character in the viewport and their weights change with the skeleton's attributes.",
+          "tier": "official",
+          "sources": [
+            "H37"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.blend_shape_controls",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "BSHP-04"
+      ],
+      "phrases": [
+        "control the blend shapes with sliders",
+        "blend shape sliders in houdini",
+        "apex blend shape component",
+        "drive blend shapes from controls in houdini",
+        "blend shape rig component"
+      ],
+      "ui": [
+        {
+          "path": "APEX AutoRig Component (SOP) > Component Source: Blendshape (Blend Shape 2.0)",
+          "tier": "official",
+          "source": "H39",
+          "note": "The pages read do not say how to reach the component by menu, only by the APEX AutoRig Component node."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add the blend shapes to the capture mesh with the Character Blend Shapes Add SOP.",
+          "tier": "official",
+          "sources": [
+            "H39",
+            "H38"
+          ]
+        },
+        {
+          "text": "Add an APEX AutoRig Component and set Component Source to Blendshape; it extracts the shapes and sets up a control for each.",
+          "tier": "official",
+          "sources": [
+            "H39",
+            "H38"
+          ]
+        },
+        {
+          "text": "Adjust how each slider blends by setting properties on the slider.",
+          "tier": "official",
+          "sources": [
+            "H38"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Blend Shape 2.0 component adds blend shapes with controls to an APEX rig: it extracts the blend shapes and sets up a control for each blend shape in the mesh.",
+          "tier": "official",
+          "sources": [
+            "H39"
+          ]
+        },
+        {
+          "text": "In the working-with-blend-shapes example the blend shape rig component is added with the APEX AutoRig Component SOP by setting Component Source to Blendshape, and each slider is a coloured line with a round peg you can drag.",
+          "tier": "official",
+          "sources": [
+            "H38"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Dragging a slider in the viewport changes the matching blend shape on the character.",
+          "tier": "official",
+          "sources": [
+            "H38"
           ]
         }
       ]

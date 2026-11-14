@@ -180,7 +180,8 @@ def test_houdini_entries_cite_the_official_docs_and_say_the_forum_advice_is_comm
                         "houdini.set_keyframe", "houdini.frame_rate_range", "houdini.playbar",
                         "houdini.save_hip", "houdini.python_hou", "houdini.transform_sop",
                         "houdini.auto_key", "houdini.edit_keys", "houdini.dopesheet", "houdini.graph_view", "houdini.interpolation_slopes", "houdini.bake_keyframes",
-                        "houdini.parent_constraint", "houdini.lookat_constraint", "houdini.spare_parameters", "houdini.lock_parameter"}
+                        "houdini.parent_constraint", "houdini.lookat_constraint", "houdini.spare_parameters", "houdini.lock_parameter",
+                        "houdini.blend_shapes", "houdini.blend_shape_controls"}
     assert all(s.tier == "official" for e in ids.values() for s in e.facts)
     ts = ids["houdini.capture_weights"].troubleshooting
     assert {t["tier"] for t in ts} == {"community"} and all(k.sources[s]["url"].startswith("https://www.sidefx.com/forum") for t in ts for s in t["sources"])

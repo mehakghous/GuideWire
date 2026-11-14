@@ -678,6 +678,60 @@
       "url": "https://www.sidefx.com/docs/houdini/nodes/sop/object_merge.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-14"
+    },
+    "B30": {
+      "title": "Blender manual: Keying Sets",
+      "url": "https://docs.blender.org/manual/en/latest/animation/keyframes/keying_sets.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B31": {
+      "title": "Blender manual: Dope Sheet introduction",
+      "url": "https://docs.blender.org/manual/en/latest/editors/dope_sheet/introduction.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "M48": {
+      "title": "Maya: Graph Editor Tangents menu",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Animation/files/GUID-43A4FE2C-4863-4EA6-B6AE-6D2B6757F6C7.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "M49": {
+      "title": "Maya: Edit tangents",
+      "url": "https://help.autodesk.com/cloudhelp/2017/ENU/Maya/files/GUID-B8DF6369-404C-4B10-95EA-81CCFE6DF988.htm",
+      "tier": "official",
+      "version": "Maya 2017 help"
+    },
+    "M50": {
+      "title": "Maya: Bake Simulation Options",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Animation/files/GUID-A11424B4-8384-4832-B18D-01264E1A19D1.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M51": {
+      "title": "Maya: Bake keys (Key > Bake Animation)",
+      "url": "https://help.autodesk.com/cloudhelp/2022/ENU/Maya-Animation/files/GUID-32C08972-C125-46EE-B82B-5352E00E520B.htm",
+      "tier": "official",
+      "version": "Maya 2022 help"
+    },
+    "H28": {
+      "title": "SideFX Houdini docs: Animation editor",
+      "url": "https://www.sidefx.com/docs/houdini/ref/panes/animeditor.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H29": {
+      "title": "SideFX Houdini docs: Graph view",
+      "url": "https://www.sidefx.com/docs/houdini/ref/panes/changraph.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15; the first 40,000 characters verbatim, the rest summarised"
+    },
+    "H30": {
+      "title": "SideFX Houdini docs: Table view",
+      "url": "https://www.sidefx.com/docs/houdini/ref/panes/chantable.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -7363,6 +7417,1178 @@
           "tier": "official",
           "sources": [
             "H26"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.keying_sets",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-03"
+      ],
+      "phrases": [
+        "use a keying set",
+        "keying sets in blender",
+        "key several properties at once",
+        "turn on auto keyframe",
+        "record button in the timeline",
+        "auto key in blender"
+      ],
+      "ui": [
+        {
+          "path": "Timeline > Auto Keyframe (record button); K in the 3D Viewport for Keying Sets; Properties > Scene > Keying Set",
+          "tier": "official",
+          "source": "B30"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "To key many properties at once, press K in the 3D Viewport and choose a Keying Set from the list.",
+          "tier": "official",
+          "sources": [
+            "B30"
+          ]
+        },
+        {
+          "text": "To key automatically, turn on the Auto Keyframe record button in the Timeline header and change values.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "To make your own set of properties, use Properties > Scene > Keying Set to add and manage Absolute Keying Sets.",
+          "tier": "official",
+          "sources": [
+            "B30"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Keying Sets are collections of animated properties used to keyframe several properties at the same time.",
+          "tier": "official",
+          "sources": [
+            "B30"
+          ]
+        },
+        {
+          "text": "Pressing K in the 3D Viewport brings up the available Keying Sets and Blender adds keyframes for the chosen one; there are built-in sets and custom Absolute Keying Sets.",
+          "tier": "official",
+          "sources": [
+            "B30"
+          ]
+        },
+        {
+          "text": "Auto Keyframe is the record button in the Timeline header: it adds keyframes automatically at the set frame when a transform value changes.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After keying with a set, every property in it shows a keyframe at the current frame.",
+          "tier": "official",
+          "sources": [
+            "B30"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.stepped_keys",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-04"
+      ],
+      "phrases": [
+        "block out the animation in blender",
+        "stepped animation in blender",
+        "pose to pose animation in blender",
+        "constant interpolation for blocking"
+      ],
+      "ui": [
+        {
+          "path": "Dope Sheet / Graph Editor > Key > Interpolation Mode",
+          "tier": "official",
+          "source": "B23",
+          "note": "The manual pages read describe the modes but do not call blocking a workflow; the Constant choice for stepped blocking is the entry's reading."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Key the main poses first, on the frames where the poses happen.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Set the interpolation of those keys to a fixed-shape mode such as Constant so the pose holds until the next key.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Interpolation Mode is set for each keyframe and says how the curve goes from that key to the next one.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Constant is one of the fixed-shape interpolation modes, beside Linear and Quadratic; Bézier is the free-form mode.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Scrub the Timeline: the object should jump from pose to pose without in-between motion.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.edit_keys",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "ANIM-07"
+      ],
+      "phrases": [
+        "move the keyframes",
+        "retime the animation in blender",
+        "delete a keyframe in blender",
+        "clear the keyframes",
+        "edit keyframes in blender",
+        "change the timing of keys"
+      ],
+      "ui": [
+        {
+          "path": "Dope Sheet or Graph Editor; Object / Pose > Animation > Delete Keyframes (Alt-I) / Clear Keyframes",
+          "tier": "official",
+          "source": "B22",
+          "note": "The Dope Sheet page was read through a summary, so its wording is paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Dope Sheet or the Graph Editor, where keyframes can be edited.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Select keys by clicking and move them by dragging to change their timing.",
+          "tier": "official",
+          "sources": [
+            "B31"
+          ]
+        },
+        {
+          "text": "To remove keys press Alt-I over the 3D Viewport (current frame) or use Clear Keyframes to remove all of them.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Keyframes can be edited in two editors: the Graph Editor and the Dope Sheet.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "Alt-I in the 3D Viewport removes the keys of the selected objects or bones on the current frame; Clear Keyframes (Shift-Alt-I) removes all keyframes from the selected object, bone or strip.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        },
+        {
+          "text": "In the Dope Sheet a keyframe is selected by clicking it and moved by dragging it.",
+          "tier": "official",
+          "sources": [
+            "B31"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After moving keys, play the Timeline and check the motion happens at the new frames.",
+          "tier": "official",
+          "sources": [
+            "B22"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.dope_sheet",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CURV-02"
+      ],
+      "phrases": [
+        "use the dope sheet",
+        "what is the dope sheet",
+        "see all my keyframes",
+        "dope sheet in blender",
+        "change interpolation in the dope sheet"
+      ],
+      "ui": [
+        {
+          "path": "Dope Sheet editor",
+          "tier": "official",
+          "source": "B31",
+          "note": "The Dope Sheet introduction was read through a summary, so its wording is paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Dope Sheet editor to see an overview of the existing keyframes.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Select and drag keys there; the Key menu also holds the interpolation mode, and the Select menu has more selection options.",
+          "tier": "official",
+          "sources": [
+            "B31"
+          ]
+        },
+        {
+          "text": "Use the display of the keyframe type and handle type to read the keys at a glance.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "An overview of existing keyframes can be seen in the Dope Sheet editor.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Interpolation, extrapolation and handle type can also be changed from the Dope Sheet.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Keyframes have types shown by colour and shape (Keyframe, Breakdown, Moving Hold, Extreme, Jitter, Generated).",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Selected keys show highlighted in the Dope Sheet.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.graph_editor",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CURV-03"
+      ],
+      "phrases": [
+        "use the graph editor",
+        "edit the animation curves",
+        "fcurves in blender",
+        "see the curve of the animation",
+        "graph editor in blender"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor",
+          "tier": "official",
+          "source": "B23"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Graph Editor to see the animation curves (F-Curves) of the animated properties.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Read the curve: time runs along the X axis and the property's value up the Y axis.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Move keys or their handles to change the motion between keys.",
+          "tier": "official",
+          "sources": [
+            "B23",
+            "B22"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Keyframe interpolation is represented and controlled by animation curves, also called F-Curves, which are viewed and modified in the Graph Editor.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "The X axis of a curve corresponds to time and the Y axis to the value of the property; the keyframes define points of the curve.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After editing a curve, play the animation: the property follows the new curve.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.interpolation_handles",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CURV-04"
+      ],
+      "phrases": [
+        "interpolation mode",
+        "bezier handles",
+        "handle type in blender",
+        "make the motion smoother",
+        "linear or bezier interpolation",
+        "auto clamped handles",
+        "extrapolation"
+      ],
+      "ui": [
+        {
+          "path": "Dope Sheet / Graph Editor > Key > Interpolation Mode and Handle Type",
+          "tier": "official",
+          "source": "B23"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the keys and set the Interpolation Mode: a fixed shape (Constant, Linear, Quadratic) or free-form Bézier.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "For Bézier keys choose the handle type; Vector, Automatic and Auto Clamped are computed for you, Free and Aligned are set by hand in the Graph Editor.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Set Extrapolation for how the curve continues before the first and after the last key (Constant, Linear, or loop).",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Interpolation Mode specifies for each keyframe how the curve goes from that key to the next; the fixed-shape modes include Constant, Linear and Quadratic, and Bézier is free-form with handles.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "The position of Free and Aligned handles must be set manually in the Graph Editor, while Vector, Automatic and Auto Clamped handles are computed from the keyframe values.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        },
+        {
+          "text": "Extrapolation says how the curve extends before the first and after the last keyframe; the main choices are Constant and Linear, and a curve can be set to loop.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation and check the motion eases or holds as the interpolation says.",
+          "tier": "official",
+          "sources": [
+            "B23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.auto_key",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ANIM-03"
+      ],
+      "phrases": [
+        "turn on auto key in maya",
+        "auto keyframe in maya",
+        "auto key button",
+        "key automatically when i move"
+      ],
+      "ui": [
+        {
+          "path": "Auto Key icon beside the Range Slider",
+          "tier": "official",
+          "source": "M38",
+          "note": "The pages read name the Auto Key icon but do not describe its behaviour in detail, and Maya has no keying-set equivalent claimed here."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Find the Auto Key icon beside the Range Slider and switch it on.",
+          "tier": "official",
+          "sources": [
+            "M38"
+          ]
+        },
+        {
+          "text": "Move or rotate the object at another frame: a key is set for you (use Key > Set Key / S for manual keys).",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Framerate, Loop, Auto Key and Animation icons appear beside the Range Slider.",
+          "tier": "official",
+          "sources": [
+            "M38"
+          ]
+        },
+        {
+          "text": "Key > Set Key (S) sets keys by hand.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "With Auto Key on, changing a keyed attribute at a new frame puts a key on the Time Slider.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.stepped_tangents",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "ANIM-04"
+      ],
+      "phrases": [
+        "stepped keys in maya",
+        "block the animation in maya",
+        "stepped tangents",
+        "pose to pose in maya",
+        "blocking pass"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor > Tangents > Stepped",
+          "tier": "official",
+          "source": "M48",
+          "note": "The Autodesk pages read give the tangent type; calling it a blocking workflow is the entry's reading."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Key the main poses first on the frames where the poses happen.",
+          "tier": "official",
+          "sources": [
+            "M36"
+          ]
+        },
+        {
+          "text": "In the Graph Editor choose Tangents > Stepped for those keys so each pose holds until the next key.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Specifying a stepped tangent creates an animation curve whose out tangent is a flat curve.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        },
+        {
+          "text": "The Tangents menu settings affect only existing animation curve segments' tangents.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation: the object snaps from pose to pose.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.graph_editor_tangents",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CURV-03",
+        "CURV-04"
+      ],
+      "phrases": [
+        "edit the curves in the graph editor",
+        "tangent types in maya",
+        "spline or clamped tangents",
+        "smooth the animation curve",
+        "graph editor in maya",
+        "fix the overshoot in the curve"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor > Tangents menu",
+          "tier": "official",
+          "source": "M49",
+          "note": "Page versions disagree on the old name of Lock Tangent Length, so the 2022 and 2017 pages were used and the 2014 wording was not."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the Graph Editor and select the curve or the keys you want to change.",
+          "tier": "official",
+          "sources": [
+            "M49"
+          ]
+        },
+        {
+          "text": "Choose a type from the Tangents menu in the menu bar: Auto, Spline, Linear, Clamped, Plateau, Stepped, Flat or Fixed.",
+          "tier": "official",
+          "sources": [
+            "M48",
+            "M49"
+          ]
+        },
+        {
+          "text": "To move handles without changing their length use Tangents > Lock Tangent Length.",
+          "tier": "official",
+          "sources": [
+            "M49"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Auto Span is the default setting for new keys.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        },
+        {
+          "text": "A linear tangent creates an animation curve as a straight line joining two keys; a clamped tangent has the characteristics of linear and spline curves.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        },
+        {
+          "text": "A fixed tangent allows a key's tangents to remain unchanged as the key is edited.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        },
+        {
+          "text": "Select an option from the Tangents menu in the menu bar; non-weighted tangents have short handles that only control the angle of the tangent.",
+          "tier": "official",
+          "sources": [
+            "M49"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation after the change and check the curve no longer overshoots or flips.",
+          "tier": "official",
+          "sources": [
+            "M48"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.bake_animation",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "LAYR-04"
+      ],
+      "phrases": [
+        "bake the animation in maya",
+        "bake simulation",
+        "bake the ik to keys",
+        "put a key on every frame",
+        "bake keys",
+        "bake the constraint animation"
+      ],
+      "ui": [
+        {
+          "path": "Key > Bake Simulation (options); Key > Bake Animation; Graph Editor / Dope Sheet > Curves > Bake Channel",
+          "tier": "official",
+          "source": "M50",
+          "note": "The menu name differs by version: Bake Simulation in the 2024 options page, Bake Animation in the 2022 Bake keys page."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose Key > Bake Simulation, open its options and set the Time Range (Time Slider or Start/End) and Sample By.",
+          "tier": "official",
+          "sources": [
+            "M50"
+          ]
+        },
+        {
+          "text": "Use Smart Bake to place keys only where the source curves have keys, instead of one on every frame.",
+          "tier": "official",
+          "sources": [
+            "M50"
+          ]
+        },
+        {
+          "text": "Bake, then check the baked keys on the Time Slider.",
+          "tier": "official",
+          "sources": [
+            "M51"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bake Simulation Options is under Key > Bake Simulation in the Animation menu set; Sample By is how often Maya evaluates the animation and generates keys (1 gives a key at each time unit).",
+          "tier": "official",
+          "sources": [
+            "M50"
+          ]
+        },
+        {
+          "text": "Smart Bake limits the keyframes generated by placing them only at times the source animation has keys.",
+          "tier": "official",
+          "sources": [
+            "M50"
+          ]
+        },
+        {
+          "text": "Bake Channel sets a key on every frame of the curve but only works on animation that can be evaluated explicitly; to edit an IK joint's animation, bake the animation instead.",
+          "tier": "official",
+          "sources": [
+            "M51"
+          ]
+        },
+        {
+          "text": "The 2022 help names the command Key > Bake Animation.",
+          "tier": "official",
+          "sources": [
+            "M51"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The animated channels now show keys on the baked frames.",
+          "tier": "official",
+          "sources": [
+            "M51"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.auto_key",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "ANIM-03"
+      ],
+      "phrases": [
+        "turn on auto key in houdini",
+        "auto key preference",
+        "auto commit in houdini",
+        "key automatically when i change a parameter"
+      ],
+      "ui": [
+        {
+          "path": "Edit > Preferences > Animation > Auto-Key; playbar keyframe button menu",
+          "tier": "official",
+          "source": "H22"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Go to Edit > Preferences > Animation and turn on Auto-Key: Add Keyframes on Parameter Change.",
+          "tier": "official",
+          "sources": [
+            "H22"
+          ]
+        },
+        {
+          "text": "Change a parameter at another frame; it is keyed immediately.",
+          "tier": "official",
+          "sources": [
+            "H22"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Auto-key automatically adds keyframes for any parameters you change, like pressing K when you change a parameter in the channel list.",
+          "tier": "official",
+          "sources": [
+            "H22"
+          ]
+        },
+        {
+          "text": "With auto-key on, any parameter change is keyed, whether or not the parameter was keyed before.",
+          "tier": "official",
+          "sources": [
+            "H22"
+          ]
+        },
+        {
+          "text": "Auto-commit (Save Parameter Change at Keyframes) is similar but only saves a change when a key already exists for that parameter at the current frame.",
+          "tier": "official",
+          "sources": [
+            "H22"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "With auto-key on the playbar's keyframe button shows AUTO.",
+          "tier": "official",
+          "sources": [
+            "H20"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.edit_keys",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "ANIM-07"
+      ],
+      "phrases": [
+        "move the keys in houdini",
+        "retime the animation in houdini",
+        "edit keyframes in houdini",
+        "change the timing of keys",
+        "key selection in the table view"
+      ],
+      "ui": [
+        {
+          "path": "Animation editor (graph, dopesheet and table views)",
+          "tier": "official",
+          "source": "H28"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the animation editor and choose a view: 1 graph, 2 dopesheet, 3 table.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        },
+        {
+          "text": "Move keys backward or forward in time, or edit keyed values.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        },
+        {
+          "text": "In the table view, select the cells for the parameters and frames you want and choose Edit > Key Selection to add keys.",
+          "tier": "official",
+          "sources": [
+            "H30"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The animation editor lets you view and edit animated parameters and their transitions between keyframes: edit curve shapes, move keys backward or forward in time, and edit keyed values.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        },
+        {
+          "text": "The table view shows channel values at keyframes: each column is a keyframe and each row a parameter, and cells with a key are editable.",
+          "tier": "official",
+          "sources": [
+            "H30"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation after moving keys and check the motion happens at the new frames.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.dopesheet",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CURV-02"
+      ],
+      "phrases": [
+        "use the dopesheet in houdini",
+        "dopesheet view",
+        "see my keys on a grid",
+        "animation editor dopesheet"
+      ],
+      "ui": [
+        {
+          "path": "Animation editor > Dopesheet view (hotkey 2)",
+          "tier": "official",
+          "source": "H28"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the animation editor and switch to the dopesheet view with the buttons at its top left or the key 2.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        },
+        {
+          "text": "Read keys as coloured squares on a grid of channels and frames.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The dopesheet shows keys as coloured squares on a grid of channels and frames.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        },
+        {
+          "text": "The animation editor's views are Graph (hotkey 1), Dopesheet (2) and Table (3).",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The keys you set appear as squares at the right frames.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.graph_view",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CURV-03"
+      ],
+      "phrases": [
+        "use the graph view in houdini",
+        "edit the animation curves in houdini",
+        "channel graph",
+        "graph view in the animation editor"
+      ],
+      "ui": [
+        {
+          "path": "Animation editor > Graph view (hotkey 1)",
+          "tier": "official",
+          "source": "H29"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Open the animation editor's graph view (key 1) to see the animated parameters as graphs of their values over time.",
+          "tier": "official",
+          "sources": [
+            "H28",
+            "H29"
+          ]
+        },
+        {
+          "text": "Edit the curve shapes between keys.",
+          "tier": "official",
+          "sources": [
+            "H28"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The graph view lets you view and edit animated parameters (channels) as graphs of their values over time.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        },
+        {
+          "text": "Each segment has a function that determines the curve's behaviour between keyframes.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The curve in the graph view matches the motion you see when playing the animation.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.interpolation_slopes",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CURV-04"
+      ],
+      "phrases": [
+        "interpolation in houdini",
+        "set the slope of a key",
+        "flatten the slope",
+        "automatic slope",
+        "bezier or linear segment in houdini"
+      ],
+      "ui": [
+        {
+          "path": "Graph view > segment function and slopes (0 flat, 9 automatic)",
+          "tier": "official",
+          "source": "H29",
+          "note": "The default interpolation (Bezier) came from a summary of the page and is not claimed."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the graph view select the keys and set their slope: press 0 for a flat slope or 9 for an automatic one.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        },
+        {
+          "text": "Choose the segment's function (for example constant or bezier) to change how the curve behaves between keys.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Each segment has a function that determines the curve's behaviour between keyframes, including constant and bezier.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        },
+        {
+          "text": "Set Selected Slopes to Zero is the key 0 and Set Selected Slopes to Automatic is the key 9; if a key is at a local minimum or maximum its slope is set to 0.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "After changing a slope, the curve through that key is flat or smooth as set.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.bake_keyframes",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "LAYR-04"
+      ],
+      "phrases": [
+        "bake the animation in houdini",
+        "bake keyframes",
+        "resample the curve",
+        "reduce the keyframes",
+        "turn an expression into keys"
+      ],
+      "ui": [
+        {
+          "path": "Graph view > Edit > Bake Keyframes of Selected Segments / Reduce Keyframes of Selected Segments",
+          "tier": "official",
+          "source": "H29"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the segments in the graph view and choose Bake Keyframes of Selected Segments to resample them into keyframes.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        },
+        {
+          "text": "Use Reduce Keyframes of Selected Segments to refit the curve with fewer keys afterwards.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bake Keyframes of Selected Segments opens a window with options to perform a cubic curve resampling on the selected segments; resampling adds keyframes without changing the curve's shape.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        },
+        {
+          "text": "Reduce Keyframes opens a window with options to perform a cubic curve refitting on the selected segments after a default resampling.",
+          "tier": "official",
+          "sources": [
+            "H29"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The baked segment has keys at the sampled frames and the same shape as before.",
+          "tier": "official",
+          "sources": [
+            "H29"
           ]
         }
       ]

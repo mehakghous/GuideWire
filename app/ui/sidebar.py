@@ -7,6 +7,8 @@ from __future__ import annotations
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
+from .bento import soft_shadow
+
 ITEMS = (("home", "Home"), ("find", "Find a Tutorial"), ("ask", "Ask GuideWire"), ("import", "New Tutorial"), ("history", "History"), ("settings", "Settings"))
 
 
@@ -18,7 +20,8 @@ class Sidebar(QFrame):
         super().__init__()
         self.setObjectName("sidebar")
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setFixedWidth(210)
+        self.setFixedWidth(220)
+        soft_shadow(self, 34, 10)
         box = QVBoxLayout(self)
         box.setContentsMargins(14, 24, 14, 14)
         box.setSpacing(4)
@@ -38,6 +41,7 @@ class Sidebar(QFrame):
         box.addStretch()
         card = QFrame()
         card.setObjectName("sideCard")
+        soft_shadow(card, 18, 6, 3)
         cbox = QVBoxLayout(card)
         cbox.setContentsMargins(14, 12, 14, 12)
         cbox.setSpacing(3)

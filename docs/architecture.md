@@ -47,7 +47,7 @@ GuideWire only **observes** the learner's application window; the learner perfor
 
 `app/ui/*` (PyQt6 screens: Login, Home, New tutorial, Step Review, Session, History, Profile) call plain Python modules that need no display and are tested directly: `app/accounts.py` (bcrypt registration and login), `app/step_editor.py` and `app/step_validation.py` (edit, reorder, delete, add, save), `app/session_engine.py`, `app/db.py`, `app/step_loader.py`, `app/step_checks.py` (what can really be checked), `app/pipeline.py` (offline ingestion) and `app/guidance.py` (screen guidance).
 
-The look is a bento grid: every screen is a grid of rounded tiles of different sizes on a soft canvas, with one accent colour for the main action. `app/ui/style.py` holds the light and dark palettes (the Profile "Theme" setting switches them) and `app/ui/bento.py` the tile building blocks (`Tile`, `ActionTile`, `header`, `page_grid`). Screens only arrange widgets in tiles; their logic is unchanged.
+The look is claymorphism (docs/design.md): every screen is a grid of soft clay slabs on a warm canvas, with pill buttons, round clay icons, one amber hero slab and a clay navigation sidebar. `app/ui/style.py` holds the light and dark palettes (the Settings Theme choice switches them), `app/ui/bento.py` the building blocks (`Tile`, `HeroTile`, `ActionTile`, `IconTile`, soft shadows, hover lift), `app/ui/sidebar.py` the navigation and `app/ui/backdrop.py` the floor with slowly drifting balls. Screens only arrange widgets in tiles; their logic is unchanged.
 
 ## 5. Screen guidance in a session
 

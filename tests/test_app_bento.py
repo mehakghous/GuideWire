@@ -184,6 +184,9 @@ READABLE = [
     ("accent_text", "accent", 4.5), ("accent_text", "accent_hover", 4.5),
     ("accent", "tile", 4.5), ("accent", "accent_soft", 4.5), ("ok", "tile", 4.5), ("warn", "tile", 4.5),
     ("danger", "field", 4.5), ("danger", "tile", 4.5), ("text", "selected", 7.0), ("text", "field", 7.0),
+    # clay: text on the amber hero slab (the whole gradient), on the teal tile and the teal companion card, and the small section label
+    ("hero_text", "hero", 4.5), ("hero_text", "hero_hi", 4.5), ("hero_text", "hero_lo", 4.5), ("teal_text", "teal", 4.5), ("teal_text", "teal_hi", 4.5),
+    ("kicker", "canvas", 4.5), ("text", "tile_hi", 7.0), ("text", "mint_hi", 4.5), ("text", "selected_hi", 4.5), ("accent", "tile_hi", 4.5),
 ]
 
 
@@ -200,20 +203,13 @@ def _hue(hex_colour):
     return colorsys.rgb_to_hsv(r, g, b)[0] * 360
 
 
-@pytest.mark.parametrize("theme", THEMES)
-def test_the_accent_is_not_a_colour_the_dcc_applications_use(theme):
-    """Blender and Houdini use orange (about 25 degrees), Maya highlights in green (about 140) and has a blue UI (about 215). The accent keeps clear of all of them."""
-    hue = _hue(PALETTES[theme]["accent"])
-    for taken in (25, 50, 140, 215):
-        assert min(abs(hue - taken), 360 - abs(hue - taken)) >= 25, f"{theme} accent hue {hue:.0f} is too close to {taken}"
-
-
-def test_the_on_screen_highlight_is_the_signature_colour_and_clear_of_the_applications():
+def test_the_on_screen_highlight_is_one_shared_colour_clear_of_the_applications():
+    """The app itself uses warm clay colours, but the highlight drawn over Blender, Maya or Houdini must not be mistaken for their own selection:
+    Blender and Houdini use orange (about 25 degrees), Maya green (about 140) and blue (about 215)."""
     assert HIGHLIGHT_RGB == OVERLAY_RGB
     hue = _hue("#%02x%02x%02x" % HIGHLIGHT_RGB)
     for taken in (25, 50, 140, 215):
         assert min(abs(hue - taken), 360 - abs(hue - taken)) >= 25
-    assert abs(hue - _hue(PALETTES["light"]["accent"])) < 25            # same family as the app's accent: one colour means GuideWire
 
 
 def test_the_highlight_is_visible_on_a_grey_application_window():
@@ -266,3 +262,78 @@ def test_the_sidebar_shows_after_sign_in_marks_the_screen_and_navigates(win):
     assert win.current_screen() is win.profile
     win.sidebar.logout_button.click()
     assert win.current_screen() is win.login and not win.sidebar.isVisibleTo(win)
+
+
+# ---------------------------------------------------------------- claymorphism
+def test_tiles_and_action_tiles_have_a_soft_shadow_that_follows_the_theme(win, qapp):
+    from PyQt6.QtWidgets import QGraphicsDropShadowEffect
+    _login(win)
+    t = Tile("x")
+    assert isinstance(t.graphicsEffect(), QGraphicsDropShadowEffect)
+    assert isinstance(ActionTile("a", "b").graphicsEffect(), QGraphicsDropShadowEffect)
+    win.accounts.set_preferences(win.user.id, theme="dark")
+    win.apply_theme()
+    shadows = [w.graphicsEffect() for w in win.findChildren(Tile) if isinstance(w.graphicsEffect(), QGraphicsDropShadowEffect)]
+    assert shadows and all(fx.color().name(fx.color().NameFormat.HexArgb) == PALETTES["dark"]["shadow"] for fx in shadows)
+
+
+def test_the_hero_tile_can_show_a_watermark_and_pauses_when_hidden(qapp):
+    from app.ui.bento import HeroTile
+    h = HeroTile()
+    h.set_watermark("7")
+    assert h.watermark == "7" and h.property("variant") == "hero"
+    h.show()
+    assert h._anim.state() == h._anim.State.Running
+    h.hide()
+    assert h._anim.state() != h._anim.State.Running
+    h.grab()                                                    # paints without error
+
+
+def test_icon_tiles_are_buttons_with_a_round_icon(qapp):
+    from app.ui.bento import ClayBall, IconTile
+    for kind in ("search", "chat", "plus", "clock", "star"):
+        t = IconTile("Find a tutorial", "hint", kind)
+        assert isinstance(t, QPushButton) and isinstance(t.ball, ClayBall) and t.text() == "Find a tutorial"
+        t.ball.grab()                                           # every symbol paints
+
+
+def test_home_shows_the_selected_tutorial_in_the_hero(win):
+    _login(win)
+    assert "Nothing here yet" in win.home.hero_title.text()
+    win.add_demo_tutorials()
+    first = win.home.tutorials.item(0).text()
+    assert win.home.hero_title.text() == first
+    win.home.tutorials.setCurrentRow(1)
+    assert win.home.hero_title.text() == win.home.tutorials.item(1).text()
+
+
+def test_the_session_hero_shows_the_step_number_as_a_watermark(win):
+    _login(win)
+    win.add_demo_tutorials()
+    win.open_session(win.db.list_tutorials(win.user.id)[0]["id"])
+    assert win.session.step_tile.watermark == ""
+    win.session.start_button.click()
+    assert win.session.step_tile.watermark == "1"
+
+
+def test_a_screen_fades_in_and_the_effect_is_removed_afterwards(win, qapp):
+    import time
+    _login(win)
+    win.show()
+    win.sidebar.buttons["history"].click()
+    screen = win.current_screen()
+    for _ in range(40):
+        qapp.processEvents()
+        time.sleep(0.02)
+    assert screen.graphicsEffect() is None
+
+
+def test_the_backdrop_paints_and_stops_when_hidden(qapp):
+    from app.ui.backdrop import Backdrop
+    b = Backdrop()
+    b.resize(400, 300)
+    b.show()
+    assert b._anim.state() == b._anim.State.Running
+    b.grab()
+    b.hide()
+    assert b._anim.state() != b._anim.State.Running

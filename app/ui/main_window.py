@@ -4,7 +4,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PyQt6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
+from PyQt6.QtCore import QEasingCurve, QPropertyAnimation
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QApplication, QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
 
 from .. import demo_content
 from ..accounts import Accounts, User
@@ -14,8 +16,9 @@ from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
+from .backdrop import Backdrop
 from .sidebar import Sidebar
-from .style import THEMES, build_style, set_theme
+from .style import THEMES, build_style, current_palette, set_theme
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
 
@@ -56,8 +59,7 @@ class MainWindow(QMainWindow):
         self.sidebar.chosen.connect(self.on_nav)
         self.sidebar.logout.connect(self.on_logout)
         self.sidebar.hide()                       # only once someone is signed in
-        shell = QWidget()
-        shell.setObjectName("page")
+        shell = Backdrop()
         row = QHBoxLayout(shell)
         row.setContentsMargins(14, 14, 0, 14)
         row.setSpacing(0)
@@ -65,6 +67,7 @@ class MainWindow(QMainWindow):
         row.addWidget(self.stack, 1)
         self.setCentralWidget(shell)
         self.stack.currentChanged.connect(self._sync_sidebar)
+        self.stack.currentChanged.connect(self._fade_in)
         self.login.logged_in.connect(self.on_logged_in)
         self.home.logout.connect(self.on_logout)
         self.home.open_review.connect(self.open_review)
@@ -107,6 +110,21 @@ class MainWindow(QMainWindow):
         self.sidebar.set_user(self.user.display_name if self.user else "")
         keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings"}
         self.sidebar.set_active(keys.get(screen))
+
+    def _fade_in(self, _index: int = 0) -> None:
+        """Each screen eases in. The effect is removed when it ends, so it never costs anything while the screen is in use."""
+        screen = self.stack.currentWidget()
+        if screen is None or not screen.isVisibleTo(self):
+            return
+        fx = QGraphicsOpacityEffect(screen)
+        screen.setGraphicsEffect(fx)
+        anim = QPropertyAnimation(fx, b"opacity", screen)
+        anim.setDuration(260)
+        anim.setStartValue(0.0)
+        anim.setEndValue(1.0)
+        anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        anim.finished.connect(lambda: screen.setGraphicsEffect(None))
+        anim.start()
 
     def current_screen(self):
         return self.stack.currentWidget()
@@ -165,6 +183,11 @@ class MainWindow(QMainWindow):
         theme = self.accounts.preferences(self.user.id).get("theme") if self.user else "light"
         theme = set_theme(theme if theme in THEMES else "light")
         app.setStyleSheet(build_style(theme))
+        for w in self.findChildren(QWidget):                       # the soft shadows are not in the style sheet: recolour them for the theme
+            fx = w.graphicsEffect()
+            if isinstance(fx, QGraphicsDropShadowEffect):
+                fx.setColor(QColor(current_palette()["shadow"]))
+        self.centralWidget().update()
 
     def on_logged_in(self, user: User) -> None:
         self.user = user

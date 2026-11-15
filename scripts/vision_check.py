@@ -69,12 +69,14 @@ def main(argv=None) -> int:
     step = engine.current_step()
     print(f"Tutorial {a.file.name}, app {a.app}. Step {step.id}: {step.goal}")
     print(f"Pointing at: {target_of(step) or '(this step names no UI path)'}.  Open {a.app.title()} in front, default layout. Ctrl-C stops.\n")
+    from concurrent.futures import ThreadPoolExecutor
+    pool = ThreadPoolExecutor(1)           # the Windows OCR must not run on a Qt main thread (it hangs there); the app reads the screen on a worker thread too
     t0 = time.monotonic()
     last = None
     try:
         while time.monotonic() - t0 < a.seconds and engine.current_step() is not None:
             step = engine.current_step()
-            look = bridge.look(step, a.app)
+            look = pool.submit(bridge.look, step, a.app).result()
             t = bridge.apply(engine, look)
             line = format_tick(t0, t)
             if line.split("s ", 1)[1] != (last or ""):                # print only when something changed
@@ -89,6 +91,7 @@ def main(argv=None) -> int:
     except KeyboardInterrupt:
         pass
     finally:
+        pool.shutdown(wait=False)
         if guide is not None:
             guide.close()
         db.close()

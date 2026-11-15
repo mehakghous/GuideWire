@@ -58,7 +58,7 @@ What to write down if something fails: the line from `vision_check.py`, whether 
 ## Not covered, and why
 - **Maya and Houdini**: their probes are prototypes never run inside those applications, so M2 to M6 are for Blender only. The bridge itself is application-neutral (`VisionBridge(...).tick(engine, "maya")`).
 - **A second monitor or a different scaling**: not tested.
-- **The OCR on a worker thread**: the Windows OCR is called from a thread other than the window's; Umaima's own guide does the same, but check M7 for freezes or errors.
+- **The OCR must run on a worker thread**: found on 2026-11-17 against a real Blender: calling `VisionService.ground` on the main thread of a process that has a Qt application HANGS (the Windows OCR needs a different COM apartment from Qt's). The session screen reads the screen in a worker thread, and `scripts/vision_check.py` does the same; anything new that calls vision must too. Check M7 for freezes.
 
 ## What is still to do
 1. **Run the manual tests above** on the real Blender and fix what they find.

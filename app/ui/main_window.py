@@ -203,11 +203,11 @@ class MainWindow(QMainWindow):
 
 def main() -> int:
     from ..ask import default_model_factory
-    from ..discovery import find_tutorials
+    from ..discovery import default_fit_provider, find_tutorials
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=find_tutorials)
+    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider))
     window.show()
     return app.exec()
 

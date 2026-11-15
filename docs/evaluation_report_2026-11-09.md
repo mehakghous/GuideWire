@@ -385,6 +385,31 @@ Reading: **with a time the recheck is accurate (89 % fully correct, 96 % correct
 
 **Knowledge-base gap not filled.** The step that creates the Blender armature object (Add > Armature) could not be sourced: the manual page the knowledge base cites (Adding Bones) covers adding bones in Edit Mode only, the Structure and Introduction pages could not be read through their navigation, and the manual's raw source files returned HTTP 404. Nothing unsourced was added; the plan says an armature object must exist first.
 
+### 3.12 Tutorial discovery: a fit check on the top three suggestions (plan item D2; `ingestion/fit_check.py`, `scripts/fit_check_eval.py`, tests `tests/test_fit_check.py`; run 2026-11-14)
+
+**Problem.** Discovery ranks videos from their title, channel, length and chapters only. A title cannot show that a "Maya leg rig" is really about another application, or that a video is aimed at a different level.
+
+**What was built.** After the title ranking, a model watches the first 120 seconds of each of the top three suggestions and answers four things: which application the clip shows (blender, maya, houdini, other, unclear), whether the clip is about what the person asked for (yes, partly, no, unclear), the level it teaches at, and one sentence on what the video is about. The answer is used three ways. It adds a plain-words note to the suggestion ("Checked the first 2 min of the video: it shows Houdini, not Blender"). It nudges the title score (yes +1.0, no -2.5; a clear wrong application -4.0 and the video is left out of the list). It never replaces the title ranking. A failed call (no key, budget stop, quota, a private video) leaves the suggestion as it was and says "Not checked against the video itself". In the app it runs only on live YouTube results, behind the cost guard, with the result kept for a day with the rest of the search.
+
+**Thumbnails: dropped by rule, not by a test.** The plan says GuideWire does not download or store YouTube video, audio or frames and keeps only text (`docs/compliance/google_youtube_questions.md`, lines 18 and 19). Reading a thumbnail would mean fetching an image from YouTube ourselves, so no thumbnail is fetched. The video is passed to the Gemini API by its public link with a clip window, the same way extraction does it. The proposal file itself is not in the repository, so the rule was taken from the compliance notes; if the proposal says something different, this should be rechecked.
+
+**Cost.** At the measured 96 tokens per second a 120 s clip is about 11,500 input tokens, about 0.35 cent on `gemini-3.5-flash-lite` ($0.30 per million input tokens). Three clips are about 1 cent per search, on top of the 200 units of free YouTube search quota. The test below made 18 real calls for $0.0635 in total, 0.35 cent each, which matches the input estimate (18 clips of about 11,500 tokens is about 6.2 cents; the answers are short).
+
+**Test (the only ground truth available: the six demo tutorials).** Nobody has labelled real search results as right or wrong, so the test uses the six videos whose content is known (two Blender, two Houdini, two Maya). Each has a goal that describes it. For each goal three candidates are built in the worst order a title ranking could produce, with title-score gaps of 0.4 (the live top-three gaps seen were 0.37 and 0.02, so a larger gap would make the test harder than real use): a video in another application (9.0), a video in the same application about something else (8.6), and the video the goal describes (8.2). 18 clips, `gemini-3.5-flash-lite`, results in `eval_data/fit_check_results.json`.
+
+| Question | Result (6 goals) |
+|---|---|
+| The video in another application is flagged as showing a different application | 6 of 6 |
+| The right video is kept (not called a wrong application, not called "no") | 6 of 6 |
+| The same-application video about something else is marked "partly" or "no" | 5 of 6 |
+| The right video ends first after the check (before the check it was last every time) | 4 of 6 |
+
+**The two misses, read one by one.** (1) The Blender beginner-armature goal: the other Blender video is also a beginner armature tutorial, and the model said "yes" to both, so this is a real tie, not an error. (2) The Maya goal "set up a leg with IK handles": the first two minutes of that video only place the joints, and the model said "partly" (it wrote that the IK handles are not in the clip yet). A clip from the start cannot see what comes later in the video.
+
+**What this does and does not show.** It shows that the check can tell a known right video from known wrong ones, and that the one mistake a learner cannot recover from (the wrong application) was caught every time in this set. It does not show an improvement in hit rate on real search results: that needs labelled searches. Six goals, one run, one model; the ranking nudge is a judgement (with a first run that used 1.0 title gaps the right video tied instead of winning in all 6 goals, 0 of 6 first, so the nudge only helps when the title scores are close, which they usually are). Because the check reads only the start, a video that introduces its topic late can be rated "partly" unfairly; the note says what the clip showed so the person can judge.
+
+**Reproduce:** `python scripts/fit_check_eval.py --dry-run` lists the 18 calls and the estimated cost without spending; without `--dry-run` it runs them (cached, so a repeat is free).
+
 ## 4. Application-specific improvement recommendations
 All items are PROPOSED unless marked. Each cites what the labelled runs showed.
 
@@ -492,7 +517,7 @@ Each item says which numbered item it extends. Basis for each is the proposal (l
 | # | Item | Extends | Why (basis) |
 |---|---|---|---|
 | D1 | Auto-rig titles: no penalty for a beginner or "quick" goal, a small penalty only when the goal says learn how rigs work; always add the note "teaches the tool, not how a rig is built". Replaces the flat -1.0 at `rigging_discovery.py:314`. Level read from the request words only | none | The penalty was for extraction convenience, not usefulness to a beginner |
-| D2 | Fit check on the top 3 results (a model watches a short part of each) and, only if a test shows it helps top-three hit rate, thumbnails. Check the proposal's rule that GuideWire does not download or cache YouTube content (line 388) before fetching images | none | Proposal names a video model for the discovery fit check (line 389); thumbnails are a weak, unmeasured signal |
+| D2 | **Done 2026-11-14 (section 3.12), thumbnails dropped by rule.** Fit check on the top 3 results (a model watches a short part of each) and, only if a test shows it helps top-three hit rate, thumbnails. Check the proposal's rule that GuideWire does not download or cache YouTube content (line 388) before fetching images | none | Proposal names a video model for the discovery fit check (line 389); thumbnails are a weak, unmeasured signal |
 
 **Track E, housekeeping**
 | # | Item | Why |

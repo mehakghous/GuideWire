@@ -31,7 +31,7 @@ The app (Mehak), the steps (Ayesha) and vision (Umaima) meet in one place: the s
 ## Test it by hand (needs Windows, Blender 5.2 and about 15 minutes)
 Do these in order; each says what it proves. Stop at the first that fails and note which.
 
-**Setup (once).** From `C:\dev\GuideWire` with the venv active:
+**Setup (once).** From `C:\dev\GuideWire` with the venv active: (every command below must be run in that same window: a plain `python` outside the venv has none of the packages, and fails with `No module named 'pydantic'`)
 ```powershell
 pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections
 python scripts/demo_check.py

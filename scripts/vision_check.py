@@ -45,7 +45,23 @@ def format_tick(t0: float, t) -> str:
     return f"{time.monotonic() - t0:5.1f}s  {t.state:11s} verdict={t.verdict or '-':12s} highlight={rect:22s} advanced={'YES' if t.advanced else 'no ':3s} {t.message}"
 
 
+def need_the_project_python() -> None:
+    """The packages (pydantic, PyQt6, the Windows OCR) live in the project's virtual environment; a plain `python` outside it does not have them."""
+    try:
+        import pydantic  # noqa: F401
+    except ModuleNotFoundError:
+        raise SystemExit("This python does not have the project's packages (pydantic is missing).
+"
+                         "Run it with the project's python instead, from C:\dev\GuideWire:
+"
+                         "    venv\Scripts\activate
+    python scripts/vision_check.py --overlay --seconds 40
+"
+                         "or:  venv\Scripts\python.exe scripts/vision_check.py --overlay --seconds 40") from None
+
+
 def main(argv=None) -> int:
+    need_the_project_python()
     ap = argparse.ArgumentParser()
     ap.add_argument("--file", type=Path, default=DEFAULT_FILE)
     ap.add_argument("--app", default="blender")

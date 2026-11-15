@@ -55,6 +55,18 @@ The line `[ok] the app's screen guidance (vision bridge) can load the vision ser
 
 What to write down if something fails: the line from `vision_check.py`, whether Blender was in front, the Windows scaling, and the Blender version. A highlight in the wrong place usually means the path text does not match what is on screen (check the step's `ui_element` against the real menu).
 
+## Verified so far against a real Blender 5.2.2 LTS (1366x728 window, default layout, no probe add-on)
+| Test | Result |
+|---|---|
+| M1 no Blender open | `no_window ... Open Blender in front so GuideWire can see it.`, no crash |
+| M2 find the step's UI path | "Add > Mesh > Cylinder": the "Add" header at screen 259,56 (22x8), checked on a captured image: the box sits exactly on the word. `observe` read mode `OBJECT` and the select-tool group; `verdict=unverifiable` because that step has no checkable state without the probe |
+| M5 overlay is click-through | the overlay window has the transparent, no-activate and topmost styles, and the window found at the highlighted point is Blender, not the overlay |
+| Windows OCR on a Qt app | main-thread OCR HANGS when a Qt application exists; on a worker thread it works. Fixed in the script; the session screen already used a worker |
+| Session screen end to end (offscreen window, real Blender, real OCR) | the 500 ms timer ran, the status line read "Watching the screen.", the highlight was drawn 13 times in 9 s, the event loop stayed responsive, the step did not move |
+| Minimized Blender | reported as "not visible" (vision skips minimized windows): keep Blender open, not minimized, with nothing over it |
+
+Still to do by hand (they need your clicks): M3, M4, M6, M7 (the real window), M8, M9, M10, M11.
+
 ## Not covered, and why
 - **Maya and Houdini**: their probes are prototypes never run inside those applications, so M2 to M6 are for Blender only. The bridge itself is application-neutral (`VisionBridge(...).tick(engine, "maya")`).
 - **A second monitor or a different scaling**: not tested.

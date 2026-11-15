@@ -1266,6 +1266,48 @@
       "url": "https://www.sidefx.com/docs/houdini/shelf/constraintpath.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "M81": {
+      "title": "Maya: Pipeline Cache > Alembic Cache > Export",
+      "url": "https://download.autodesk.com/global/docs/maya2014/en_us/files/Alembic_Export.htm",
+      "tier": "official",
+      "version": "Maya 2014 help (version from the address)"
+    },
+    "M82": {
+      "title": "Maya: Ghost an object",
+      "url": "https://help.autodesk.com/cloudhelp/2018/ENU/Maya-Animation/files/GUID-6DDE4665-8B7F-4577-B07D-841DEDC700B9.htm",
+      "tier": "official",
+      "version": "Maya 2018 help"
+    },
+    "M83": {
+      "title": "Maya: Create or import nCaches",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-SimulationEffects/files/GUID-0E2587C8-A442-4774-9992-BABBA841708A.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "H58": {
+      "title": "SideFX Houdini docs: PolyReduce 2.0 (SOP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/sop/polyreduce.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H59": {
+      "title": "SideFX Houdini docs: Vellum",
+      "url": "https://www.sidefx.com/docs/houdini/vellum/index.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "H60": {
+      "title": "SideFX Houdini docs: Ragdoll simulation (crowds)",
+      "url": "https://www.sidefx.com/docs/houdini/crowds/ragdoll.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15; first part of the page read verbatim"
+    },
+    "H61": {
+      "title": "SideFX Houdini docs: Alembic render node (ROP)",
+      "url": "https://www.sidefx.com/docs/houdini/nodes/out/alembic.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -14266,6 +14308,483 @@
           "tier": "official",
           "sources": [
             "H57"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.alembic_export",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "EXPT-05"
+      ],
+      "phrases": [
+        "export alembic from maya",
+        "alembic cache in maya",
+        "export selection to alembic",
+        "bake the deformation to alembic",
+        "alembic export options",
+        "filter euler rotations on export"
+      ],
+      "ui": [
+        {
+          "path": "Pipeline Cache > Alembic Cache > Export All to Alembic / Export Selection to Alembic",
+          "tier": "official",
+          "source": "M81",
+          "note": "The page is from the Maya 2014 help; the menu name may differ in newer versions."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the objects to cache and choose Pipeline Cache > Alembic Cache > Export Selection to Alembic (or Export All).",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        },
+        {
+          "text": "In the Alembic Export window set the Cache time range and sampling, and the Advanced options you need (for example Renderable Only, World Space, UV Write).",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        },
+        {
+          "text": "Export, then check the file in the target application.",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The exporter writes either all objects or selected polygon and NURBS objects to an Alembic cache file; by default files are saved in the cache/alembic folder of the current Maya project.",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        },
+        {
+          "text": "The Cache time range can come from the Render Settings, the Time Slider or a Start/End; Renderable Only leaves out non-renderable nodes such as hidden objects.",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        },
+        {
+          "text": "Advanced options include No Normals, Strip Namespaces, UV Write, Whole Frame Geo, World Space, Write Visibility and Filter Euler Rotations.",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The cache plays the same deformation in the other application.",
+          "tier": "official",
+          "sources": [
+            "M81"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.ghost_object",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "PATH-03"
+      ],
+      "phrases": [
+        "ghost an object in maya",
+        "ghosting",
+        "onion skin in maya",
+        "ghost selected",
+        "unghost",
+        "see the animation frames before and after"
+      ],
+      "ui": [
+        {
+          "path": "Animation menu set: Visualize > Ghost Selected / Unghost Selected / Unghost All",
+          "tier": "official",
+          "source": "M82"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the object or the root of the hierarchy to ghost.",
+          "tier": "official",
+          "sources": [
+            "M82"
+          ]
+        },
+        {
+          "text": "Choose Visualize > Ghost Selected, set the Ghost Options and click Ghost.",
+          "tier": "official",
+          "sources": [
+            "M82"
+          ]
+        },
+        {
+          "text": "Remove ghosts with Visualize > Unghost Selected or Unghost All.",
+          "tier": "official",
+          "sources": [
+            "M82"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Ghost objects let you see how an animation moves through a scene: a ghost shows a transparent copy of the object at the points in time you specify.",
+          "tier": "official",
+          "sources": [
+            "M82"
+          ]
+        },
+        {
+          "text": "You can unghost only the selected object, or the selected object and all its children; ghost colours are set in Window > Settings/Preferences > Color Settings.",
+          "tier": "official",
+          "sources": [
+            "M82"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Transparent copies of the object show at the chosen frames.",
+          "tier": "official",
+          "sources": [
+            "M82"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.ncache",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SECM-02"
+      ],
+      "phrases": [
+        "cache the nucleus simulation",
+        "ncache in maya",
+        "create cache ncloth",
+        "attach existing cache",
+        "cache hair and cloth",
+        "bake the cloth simulation in maya"
+      ],
+      "ui": [
+        {
+          "path": "FX menu set: nCache > Create Cache > nObject; nCache > Attach Existing Cache File",
+          "tier": "official",
+          "source": "M83",
+          "note": "This page covers caching Nucleus simulations (cloth, hair); how to build the dynamic chain itself was not on the pages read."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the Nucleus object (nCloth, nHair or fluid) and choose nCache > Create Cache > nObject in the FX menu set.",
+          "tier": "official",
+          "sources": [
+            "M83"
+          ]
+        },
+        {
+          "text": "To reuse a cache, choose nCache > Attach Existing Cache File; it must come from the same topology as the selected object.",
+          "tier": "official",
+          "sources": [
+            "M83"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "You can create single or multiple nCaches for your Nucleus objects or fluid effects; the FX menu has nCache > Create Cache for nObjects and Maya fluids.",
+          "tier": "official",
+          "sources": [
+            "M83"
+          ]
+        },
+        {
+          "text": "If a cache file name clashes, Auto-rename or Replace Existing creates the new file; an nCache over 4 GB is split automatically and the segments are blended.",
+          "tier": "official",
+          "sources": [
+            "M83"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The simulation plays back from the cache without being recomputed.",
+          "tier": "official",
+          "sources": [
+            "M83"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.polyreduce",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "PREP-07"
+      ],
+      "phrases": [
+        "reduce the polygon count in houdini",
+        "make a low resolution mesh",
+        "polyreduce",
+        "proxy mesh for animation",
+        "reduce to a percentage of polygons"
+      ],
+      "ui": [
+        {
+          "path": "PolyReduce 2.0 (SOP); shelf Polygon tab > PolyReduce",
+          "tier": "official",
+          "source": "H58"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the object and click the PolyReduce tool on the Polygon tab, or add a PolyReduce SOP.",
+          "tier": "official",
+          "sources": [
+            "H58"
+          ]
+        },
+        {
+          "text": "Choose Reduce to (a percentage of polygon or point count, or a fixed output count) and set the Percent or Number to keep.",
+          "tier": "official",
+          "sources": [
+            "H58"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "PolyReduce reduces the number of polygons in a model while retaining its shape.",
+          "tier": "official",
+          "sources": [
+            "H58"
+          ]
+        },
+        {
+          "text": "Reduce to can be a percentage of the input polygon or point count, or an output polygon or point count; Percent to keep and Number to keep set the amount.",
+          "tier": "official",
+          "sources": [
+            "H58"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The mesh has fewer polygons and keeps its silhouette.",
+          "tier": "official",
+          "sources": [
+            "H58"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.vellum",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SECM-02"
+      ],
+      "phrases": [
+        "vellum in houdini",
+        "simulate hair or cloth in houdini",
+        "position based dynamics",
+        "dynamic chain in houdini",
+        "vellum cloth hair grains softbody"
+      ],
+      "ui": [
+        {
+          "path": "Vellum (solver; Vellum Constraints SOP)",
+          "tier": "official",
+          "source": "H59",
+          "note": "The Vellum index page lists subtopics only; setup steps and the shelf tools were not on the page read."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Set up the geometry as cloth, hair, grains or a softbody with Vellum and run the Vellum solver.",
+          "tier": "official",
+          "sources": [
+            "H59"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Vellum uses a Position Based Dynamics approach to cloth, hair, grains, fluids and softbody objects.",
+          "tier": "official",
+          "sources": [
+            "H59"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The simulated geometry moves with the character and settles realistically.",
+          "tier": "official",
+          "sources": [
+            "H59"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.ragdoll",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "SECM-03"
+      ],
+      "phrases": [
+        "ragdoll in houdini",
+        "ragdoll simulation for crowd agents",
+        "rbd impact data trigger",
+        "switch an agent to ragdoll",
+        "partial ragdoll",
+        "motors stiffness ragdoll"
+      ],
+      "ui": [
+        {
+          "path": "Crowds shelf > Simulate; Crowd Trigger DOP > Type: RBD Impact Data",
+          "tier": "official",
+          "source": "H60",
+          "note": "This is the crowd (agent) ragdoll workflow; a ragdoll for a single KineFX character was not on the pages read."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Use the Simulate shelf tool to get a basic crowd simulation scene.",
+          "tier": "official",
+          "sources": [
+            "H60"
+          ]
+        },
+        {
+          "text": "Set the Crowd Trigger DOP Type to RBD Impact Data so impacts switch agents to ragdoll, and connect the Ground Plane DOP to the static collisions.",
+          "tier": "official",
+          "sources": [
+            "H60"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Ragdoll simulation transitions agents to a state where, instead of being controlled by animation, they are simulated; Active means agents are simulated as ragdolls as opposed to following an animation clip.",
+          "tier": "official",
+          "sources": [
+            "H60"
+          ]
+        },
+        {
+          "text": "Stiffness controls the resistance to changes in the agent's pose; partial ragdoll and motors are also listed as effects.",
+          "tier": "official",
+          "sources": [
+            "H60"
+          ]
+        },
+        {
+          "text": "For ragdolls, rotation limits are only necessary for joints which have a collision shape.",
+          "tier": "official",
+          "sources": [
+            "H60"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "An agent collapses naturally when hit.",
+          "tier": "official",
+          "sources": [
+            "H60"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.alembic_export",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "EXPT-05"
+      ],
+      "phrases": [
+        "export alembic from houdini",
+        "alembic rop",
+        "bake the deformation to alembic in houdini",
+        "alembic file and format",
+        "ogawa or hdf5"
+      ],
+      "ui": [
+        {
+          "path": "Alembic render node (ROP): Alembic File, Root Object / SOP Path",
+          "tier": "official",
+          "source": "H61"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add an Alembic ROP, set Alembic File to the archive name, and choose the Root Object or a SOP Path to export.",
+          "tier": "official",
+          "sources": [
+            "H61"
+          ]
+        },
+        {
+          "text": "Pick the Format (Default, HDF5 or Ogawa) and render to write the archive.",
+          "tier": "official",
+          "sources": [
+            "H61"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Alembic ROP exports the scene to an Alembic archive; Alembic File is the name of the archive to generate.",
+          "tier": "official",
+          "sources": [
+            "H61"
+          ]
+        },
+        {
+          "text": "Root Object includes all displayed objects under it; Use SOP Path exports a single geometry detail; Save All Non-Displayed Objects includes hidden objects; Format is Default, HDF5 or Ogawa.",
+          "tier": "official",
+          "sources": [
+            "H61"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The archive plays the same deformation in the other application.",
+          "tier": "official",
+          "sources": [
+            "H61"
           ]
         }
       ]

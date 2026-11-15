@@ -59,8 +59,9 @@ def default_window_finder(app: str) -> Rect4 | None:
     """The application's window on screen, from Umaima's Windows lookup (None when it is not visible or this is not Windows)."""
     try:
         from vision import winplatform
+        from vision.apps import profile
         winplatform.enable_dpi_awareness()
-        w = winplatform.find_window(WINDOW_NAMES.get(app, app))
+        w = winplatform.find_window(WINDOW_NAMES.get(app, app), profile(app).exe if app in WINDOW_NAMES else ())
     except Exception:
         return None
     return None if w is None else (w.rect.x, w.rect.y, w.rect.w, w.rect.h)

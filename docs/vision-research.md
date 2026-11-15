@@ -83,3 +83,29 @@ Cited from memory of well-known work; **check each reference and add page number
 - SideFX, [What are the restrictions of Houdini Apprentice?](https://www.sidefx.com/faq/question/435/)
 - Autodesk Education plan: [Autodesk education software overview](https://www.autodesk.com/education/edu-software/overview), plus university help pages that summarise it
 - Autodesk Maya help, [Python and threading](https://help.autodesk.com/cloudhelp/2017/ENU/Maya/files/GUID-9B5AECBB-B212-4C92-959A-22599760E91A.htm) (an older version; confirm for Maya 2027)
+
+## 4. Part A spike (2026-11-16): what Blender's Python API and Windows really give us
+Measured on Blender 5.2.2 LTS, Windows 10 (19045), a 1366x697 window at 96 dpi (100% scaling in this session; 150% not rechecked), English, default theme. Scripts used are not kept; `scripts/vision_bench.py` is.
+
+| Question | Result | Consequence |
+|---|---|---|
+| Do Blender's region rectangles match the screen? | `window.width/height` equal the Win32 CLIENT size (1366x697). The client origin on screen was (0, 31); the rectangle vision captures (DWM frame) was (-1, 0, 1368x729): it includes the 31 px title bar and a 1 px border. Region rectangles are in window pixels with the origin at the BOTTOM-left | every Blender-side coordinate needs the client origin and a y flip (A2); using the frame rectangle directly is off by 31 px |
+| Toolbar scroll | `region.view2d.region_to_view(0, height)` is readable: it went 1 -> -222 after six scroll steps; region size 56x548 | scroll position and "is tool N visible" can be computed, not guessed |
+| Ordered tool list for the mode | `ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D").tools_from_context(context)` gives groups and separators live (25 entries in Edit Mesh); `builtin.loop_cut` has label, keymap `3D View Tool: Edit Mesh, Loop Cut`, operator `mesh.loopcut_slide` | `toolbars.json` can be replaced by the live list. Private module (`bl_ui`), so wrap in try/except |
+| Toolbar layout depends on width | Blender's own `_layout_generator_detect_from_region` chooses one or two columns and text or icons by region width (`space_toolsystem_common.py`) | the slot of a tool must be computed from the same rule, not assumed |
+| Visible Properties tabs | `space.context` is a dynamic enum: assigning an invalid value raises a TypeError that lists the tabs available now. Hacky; the static `enum_items` lists all 20 | readable in principle, in order; needs a guarded helper |
+| Redo panel (Loop Cut and Slide, Subdivide) | a `HUD` region exists in the 3D view's region list (1x1 when no panel). Operators run from a script did not enlarge it | **not verified** with real clicks |
+| Operator history from real clicks | `window_manager.operators` stayed empty after script-run operators. My attempts to inject real input failed (Blender ignores posted window messages; sent mouse/keys did not reach the viewport) | **not verified**: needs a person in the live check (Part C) |
+| Panel collapsed state | the region object has no panel list (`active_panel_category`, `alignment`, `view2d`, size) | not readable: use pixels |
+| Keymap | `window_manager.keyconfigs.user.keymaps` items readable with context and `is_user_modified`; Loop Cut = Ctrl R in keymap "Mesh"; Object Mode: S, Ctrl P, Shift A, Tab; `keyconfigs.find_item_from_operator` exists | shortcuts can come from the user's own keymap |
+| Capture the window itself | `PrintWindow` returned a frame that differs strongly from the screen grab (mean abs. difference 187/255) | **not adopted**; keep the screen grab |
+| Hide our overlay from capture | `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)` succeeds on a plain Qt window but FAILS (error 8) on the translucent overlay, with or without the click-through flags | the cause is the translucent (layered) overlay style, not the Windows build. The guide box is not translucent and probably succeeds: unchecked |
+| Window lookup by title | with a browser tab titled "Get Involved - Blender" open, `find_window("Blender")` matched the browser (and, when Blender was minimized, only the browser). Fixed in A3: the window must also belong to `blender.exe` | live-confirmed bug, fixed |
+
+### Baseline latency (before Part A; median of 8 runs, ms)
+Blender in front with its splash screen still open, 1368x729 frame, Intel laptop (same machine as section 2, quieter):
+| find_window | windows_above | grab | mask | detect_layout | find_cells | OCR full frame | OCR 500x400 area | probe read |
+|---|---|---|---|---|---|---|---|---|
+| 2.6 | 0.2 | 33 | 1.0 | 56 | 8.5 | 370 | 85 | 0.1 (no add-on running) |
+
+A look that has to read the whole screen costs about 0.5 s, a small changed area about 0.15 s, and a probe read is free by comparison: the lever is reading less often, not reading faster. `detect_layout` reported confidence 0.17 and found 1 toolbar cell on this frame (splash open): a frame the area-splitting guess fails on. Re-run `python scripts/vision_bench.py --front` (only against a Blender you started yourself) after each part for the "after" numbers.

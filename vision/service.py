@@ -82,7 +82,7 @@ class VisionService:
         from vision import winplatform
         from vision.capture import grab, mask_occluders
         winplatform.enable_dpi_awareness()
-        win = winplatform.find_window(self.title)
+        win = winplatform.find_window(self.title, self.profile.exe)
         if win is None:
             return None, None
         frame = grab(win.rect)

@@ -36,6 +36,8 @@ class WindowInfo:
     title: str
     rect: Rect          # visible frame in virtual-desktop physical pixels (no invisible resize border)
     minimized: bool
+    pid: int = 0        # owning process
+    exe: str = ""       # that process's program file name, lower case ("blender.exe"); "" when it cannot be read
 
 
 def _require_windows() -> None:
@@ -71,6 +73,25 @@ def window_rect(hwnd: int) -> Rect:
     return Rect(r.left, r.top, r.right - r.left, r.bottom - r.top)
 
 
+def process_exe(pid: int) -> str:
+    """The program file name of a process ("blender.exe"), lower case, or "" when it cannot be read (a protected process)."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    kernel32 = ctypes.windll.kernel32
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    handle = kernel32.OpenProcess(0x1000, False, pid)           # PROCESS_QUERY_LIMITED_INFORMATION
+    if not handle:
+        return ""
+    try:
+        buf = ctypes.create_unicode_buffer(1024)
+        size = wintypes.DWORD(len(buf))
+        ok = kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size))
+        return os.path.basename(buf.value).lower() if ok else ""
+    finally:
+        kernel32.CloseHandle(handle)
+
+
 def list_windows() -> list[WindowInfo]:
     """Visible top-level windows that have a title."""
     _require_windows()
@@ -88,8 +109,9 @@ def list_windows() -> list[WindowInfo]:
             return True
         buf = ctypes.create_unicode_buffer(n + 1)
         user32.GetWindowTextW(hwnd, buf, n + 1)
-        found.append(WindowInfo(int(hwnd), buf.value, window_rect(int(hwnd)),
-                                bool(user32.IsIconic(hwnd))))
+        pid = wintypes.DWORD(0)
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        found.append(WindowInfo(int(hwnd), buf.value, window_rect(int(hwnd)), bool(user32.IsIconic(hwnd)), pid.value, process_exe(pid.value)))
         return True
 
     user32.EnumWindows(visit, 0)
@@ -125,11 +147,24 @@ def windows_above(hwnd: int) -> list[Rect]:
     return out if state["seen"] else []
 
 
-def find_window(title_contains: str = "Blender") -> WindowInfo | None:
-    """Largest non-minimized visible window whose title contains the text (case-insensitive)."""
+def pick_window(windows: list[WindowInfo], title_contains: str = "Blender", exe: tuple[str, ...] = (), pid: int | None = None) -> WindowInfo | None:
+    """The application's main window among `windows`. Pure.
+
+    A title alone is not enough: a browser tab called "Get Involved - Blender" matched "Blender" and could win by size. So when `pid` or `exe` is given the window must belong to that process (`exe` is a list of
+    substrings of the program file name, such as ("blender",)); the title is then only a tie-break filter. With neither, the old rule applies (title text only), for applications whose program name is not checked yet.
+    The largest non-minimized match wins."""
     needle = title_contains.lower()
-    hits = [w for w in list_windows() if needle in w.title.lower() and not w.minimized]
+    hits = [w for w in windows if needle in w.title.lower() and not w.minimized]
+    if pid is not None:
+        hits = [w for w in hits if w.pid == pid]
+    if exe:
+        hits = [w for w in hits if any(e.lower() in w.exe for e in exe)]
     return max(hits, key=lambda w: w.rect.w * w.rect.h, default=None)
+
+
+def find_window(title_contains: str = "Blender", exe: tuple[str, ...] = (), pid: int | None = None) -> WindowInfo | None:
+    """Largest non-minimized visible window of the application (see `pick_window`)."""
+    return pick_window(list_windows(), title_contains, exe, pid)
 
 
 def make_click_through(hwnd: int, hide_from_capture: bool = True) -> None:

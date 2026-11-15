@@ -27,6 +27,9 @@ jobs:
       - name: Lint (syntax errors, undefined names, unused imports and variables)
         run: ruff check .
 
+      - name: Types (vision package and oracle scorer; config in mypy.ini)
+        run: mypy
+
       - name: Tests (offline; live API tests are deselected by pytest.ini)
         run: python -m pytest -q -rs
 

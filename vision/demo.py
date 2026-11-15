@@ -93,8 +93,8 @@ def main() -> int:
         else:
             note = "" if found.complete else f"  (path not fully open yet: showing step {found.depth + 1} of {found.total})"
             print(f"locate {args.locate!r}: {found.matched!r} at {found.rect}, alternatives={found.alternatives}{note}")
-            r = found.rect
-            marks = [highlight_mark(Rect(win.rect.x + r.x, win.rect.y + r.y, r.w, r.h), found.matched)]
+            fr = found.rect
+            marks = [highlight_mark(Rect(win.rect.x + fr.x, win.rect.y + fr.y, fr.w, fr.h), found.matched)]
 
     from PyQt6.QtCore import QTimer
     from PyQt6.QtWidgets import QApplication

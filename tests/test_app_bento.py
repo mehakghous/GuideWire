@@ -252,3 +252,17 @@ def test_the_ask_conversation_follows_the_theme(win, qapp):
     win.ask_screen._append("GuideWire", "hi")
     page = win.ask_screen.transcript.toHtml()
     assert PALETTES["dark"]["accent"].lstrip("#") in page.lower() and "#222" not in page.lower() and "#1f4e79" not in page.lower()
+
+
+def test_the_sidebar_shows_after_sign_in_marks_the_screen_and_navigates(win):
+    assert not win.sidebar.isVisibleTo(win)                       # the sign-in screen has no sidebar
+    _login(win)
+    assert win.sidebar.isVisibleTo(win)
+    assert win.sidebar.buttons["home"].property("on") is True
+    win.sidebar.buttons["history"].click()
+    assert win.current_screen() is win.history
+    assert win.sidebar.buttons["history"].property("on") is True and win.sidebar.buttons["home"].property("on") is False
+    win.sidebar.buttons["settings"].click()
+    assert win.current_screen() is win.profile
+    win.sidebar.logout_button.click()
+    assert win.current_screen() is win.login and not win.sidebar.isVisibleTo(win)

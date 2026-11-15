@@ -5,18 +5,23 @@ GuideWire is used next to **Blender, Maya and Houdini**, so its look is chosen t
 ## Layout: bento
 Every screen is a grid of rounded tiles of different sizes on a soft canvas (`app/ui/bento.py`: `Tile`, `ActionTile`, `header`, `page_grid`). A screen only arranges widgets in tiles; its logic lives elsewhere. Tile variants: plain, `soft`, `mint`, `amber`, `slate`, `accent` (a solid block, used sparingly) and `hero` (calm tinted fill with an accent outline, for the one thing the learner is looking at, such as the current step).
 
-## Colour
-| Role | Light | Dark | Why |
+## Colour: plum and olive
+Taken from the mockups in `docs/design` (branch `design/ui-options`, option 1: Alabaster Gleam, Plum Wine and Olive Drab).
+| Role | Light | Dark | Use |
 |---|---|---|---|
-| Signature accent: **iris** (violet) | `#5b47e8` | `#9684ff` | None of the three applications uses violet. Blender and Houdini use orange; Maya highlights the active object in green and has a blue UI. |
-| On-screen highlight | `#b388ff` | `#b388ff` | The same iris family, brighter so it stands out on a grey application window. One colour always means "GuideWire". (`HIGHLIGHT_RGB`, shared by `app/ui/style.py` and `vision/overlay.py`.) |
-| Neutrals | cool light greys | graphite greys (`#1b1b1b` canvas, `#272727` tile) | Like the applications' own windows, so the app feels at home beside them. |
-| Status colours | green `ok`, amber `warn`, grey `muted` | same, lighter | Only as small labels: Checkable, Partly checkable, You confirm. Never the main colour. |
+| Paper (canvas) / tile | `#f3efe4` / `#faf8f2` | `#2a171f` / `#3b232d` | Warm alabaster in light, deep wine in dark |
+| Plum accent | `#5a3a47` | `#d3a9ba` | Main buttons, the current step, selection |
+| Olive | `#5f6334` (tile `#dcdfb8`) | `#b9be78` (tile `#3b3d1e`) | Status "Checkable", secondary tiles, sidebar dot |
+| Sidebar | `#3b232d` | `#1f0f15` | The navigation panel on the left of every screen |
+| On-screen highlight | `#ec8cc4` | same | A bright orchid from the plum family, so it reads on a grey application window (`HIGHLIGHT_RGB`, shared with `vision/overlay.py`) |
 
-Rules that follow from this:
-1. **Do not use orange, yellow or green as the main colour.** They are the applications' own colours, and yellow or orange would blur with the highlight.
-2. Text on the accent is **white in light mode and near-black in dark mode** (`accent_text`); white on the dark-mode accent would be too faint.
-3. Colours chosen in code must come from `current_palette()`, never a fixed hex value, or they break in the other theme.
+Rules:
+1. Orange (Blender, Houdini), Maya green and blue are the applications' own colours: the accent and the highlight stay at least 25 degrees of hue away from them (tested).
+2. Text on the accent uses `accent_text` (cream in light, near-black in dark).
+3. Colours chosen in code come from `current_palette()`, never a fixed hex value.
+
+## Navigation
+`app/ui/sidebar.py`: a plum panel (Home, Find a Tutorial, Ask GuideWire, New Tutorial, History, Settings, a Companion status card, the signed-in name and Log Out). Shown on every screen except sign-in.
 
 ## Themes
 Light and dark live in `app/ui/style.py` (`PALETTES`). The Profile "Theme" setting switches them; logging out returns to light.

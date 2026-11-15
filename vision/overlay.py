@@ -16,9 +16,9 @@ from vision.tracker import classify
 MarkKind = Literal["pointer", "highlight"]
 
 POINTER_RADIUS = 14
-# GuideWire's signature colour (iris). Blender and Houdini use orange, Maya highlights in green, so a violet ring is never mistaken for the application's own
+# GuideWire's signature colour (orchid, from the app plum). Blender and Houdini use orange, Maya highlights in green, so a pink ring is never mistaken for the application's own
 # selection. Same value as the app's accent family; defined here so vision/ does not import the PyQt app package.
-HIGHLIGHT_RGB = (179, 136, 255)
+HIGHLIGHT_RGB = (236, 140, 196)
 HIGHLIGHT_PAD = 4
 
 

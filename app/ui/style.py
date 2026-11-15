@@ -1,10 +1,7 @@
 """The look of the whole app: a bento grid. Content sits in rounded tiles of different sizes on a soft canvas; one signature colour marks the main action.
 
-The palette is chosen for a tool used NEXT TO Blender, Maya and Houdini (see docs/design.md):
-  * the signature colour is IRIS (violet, hue ~250). None of the three applications uses it: Blender and Houdini use orange, Maya highlights the
-    active object in green and has a blue UI. The on-screen highlight (vision/overlay.py) uses the same iris, so that colour always means "GuideWire".
-  * the neutrals are graphite greys, like the applications' own windows, so the app feels at home beside them;
-  * green, amber and grey appear only as small status colours (checkable / partly checked / you confirm), never as the main colour.
+The palette comes from the design mockups in docs/design (option 1): warm alabaster paper, PLUM as the accent, olive for small status colours, and a plum navigation panel.
+The accent and the on-screen highlight (vision/overlay.py) stay clear of the colours Blender, Maya and Houdini use for themselves (orange, green, blue), see docs/design.md.
 
 Plain Qt style sheets, nothing to install. `build_style(theme)` returns the sheet for "light" or "dark" (the Profile screen's Theme setting);
 `STYLE` is the light sheet. Tiles are `QFrame#tile` with an optional `variant` property (accent, hero, soft, mint, amber, slate); see app/ui/bento.py.
@@ -15,20 +12,22 @@ from __future__ import annotations
 THEMES = ("light", "dark")
 
 PALETTES = {
-    "light": dict(canvas="#edeef2", tile="#ffffff", border="#dfe2e9", text="#1b1e27", muted="#5f6675",
-                  accent="#5b47e8", accent_hover="#4a37cf", accent_soft="#ece9fd", accent_text="#ffffff", accent_hint="rgba(255, 255, 255, 205)",
-                  mint="#e3f5ea", amber="#fdf1dc", slate="#e8ebf2", ok="#17794f", warn="#9a5b00",
-                  danger="#b3261e", danger_soft="#fdecea", field="#f4f5f9", field_border="#d5d9e3", selected="#e7e3fd",
-                  disabled="#a0a7b6", disabled_bg="#eef0f5"),
-    "dark": dict(canvas="#1b1b1b", tile="#272727", border="#3a3a3a", text="#f2f2f2", muted="#a0a0a0",
-                 accent="#9684ff", accent_hover="#aa9bff", accent_soft="#2a2749", accent_text="#14121f", accent_hint="rgba(20, 18, 31, 200)",
-                 mint="#1f3a2e", amber="#3d3322", slate="#303136", ok="#4fd1a0", warn="#f2b84b",
-                 danger="#ff8a7a", danger_soft="#3a2220", field="#202020", field_border="#444444", selected="#322e58",
-                 disabled="#6b6b6b", disabled_bg="#222222"),
+    "light": dict(canvas="#f3efe4", tile="#faf8f2", border="#e1dac9", text="#2b1d25", muted="#5c4e56",
+                  accent="#5a3a47", accent_hover="#6c4756", accent_soft="#e9dce0", accent_text="#f6f1e6", accent_hint="rgba(246, 241, 230, 205)",
+                  mint="#dcdfb8", amber="#f1e4c4", slate="#e8e2d3", ok="#5f6334", warn="#855400",
+                  danger="#8a2f3c", danger_soft="#f4dde0", field="#e8e2d3", field_border="#d3cab5", selected="#e2d0d6",
+                  disabled="#9d9186", disabled_bg="#ece6d8",
+                  sidebar="#3b232d", sidebar_on="#4a2e3a", sidebar_text="#f3efe4", sidebar_muted="#c9bac0", sidebar_dot="#8b6f7b", sidebar_dot_on="#b9be78"),
+    "dark": dict(canvas="#2a171f", tile="#3b232d", border="#52363f", text="#f3efe4", muted="#c9bac0",
+                 accent="#d3a9ba", accent_hover="#e2bfcd", accent_soft="#4a2e3a", accent_text="#2b1d25", accent_hint="rgba(43, 29, 37, 200)",
+                 mint="#3b3d1e", amber="#4a3a22", slate="#46303a", ok="#b9be78", warn="#e3b15c",
+                 danger="#f0919b", danger_soft="#4a2229", field="#2f1b23", field_border="#5a3f4b", selected="#5a3a47",
+                 disabled="#8b6f7b", disabled_bg="#33202a",
+                 sidebar="#1f0f15", sidebar_on="#3b232d", sidebar_text="#f3efe4", sidebar_muted="#c9bac0", sidebar_dot="#8b6f7b", sidebar_dot_on="#b9be78"),
 }
 
-# The on-screen highlight over the application window (vision/overlay.py reads these). A brighter iris than the accent so it stands out on a grey window.
-HIGHLIGHT_RGB = (179, 136, 255)
+# The on-screen highlight over the application window (vision/overlay.py reads these). A bright orchid from the plum family, so it stands out on a grey window.
+HIGHLIGHT_RGB = (236, 140, 196)
 
 _TEMPLATE = """
 * { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; color: @text@; }
@@ -99,6 +98,19 @@ QScrollBar:horizontal { background: transparent; height: 10px; margin: 2px; }
 QScrollBar::handle:horizontal { background: @field_border@; border-radius: 4px; min-width: 28px; }
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0; }
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: transparent; }
+/* ---- sidebar (the plum navigation panel) */
+QFrame#sidebar { background: @sidebar@; border-radius: 22px; }
+QFrame#sidebar QLabel { color: @sidebar_text@; }
+QLabel#sideLogo { font-size: 17pt; font-weight: 800; }
+QLabel#sideSmall { color: @sidebar_muted@; font-size: 9pt; }
+QLabel#sideStatus { font-weight: 600; }
+QLabel#sideUser { font-weight: 600; padding-left: 6px; }
+QFrame#sideCard { background: rgba(255, 255, 255, 18); border-radius: 14px; }
+QPushButton#navItem { background: transparent; border: none; border-radius: 12px; color: @sidebar_text@; text-align: left; padding: 10px 14px; }
+QPushButton#navItem:hover { background: rgba(255, 255, 255, 20); }
+QPushButton#navItem[on="true"] { background: @sidebar_on@; font-weight: 600; }
+QPushButton#navLogout { background: transparent; border: none; color: @sidebar_muted@; text-align: left; padding: 6px 6px; }
+QPushButton#navLogout:hover { color: @sidebar_text@; }
 QToolTip { background: @tile@; color: @text@; border: 1px solid @border@; padding: 4px; }
 """
 
@@ -136,3 +148,4 @@ def contrast(fg: str, bg: str) -> float:
 
 
 STYLE = build_style("light")
+

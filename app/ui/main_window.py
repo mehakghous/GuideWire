@@ -4,7 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
 
 from .. import demo_content
 from ..accounts import Accounts, User
@@ -14,6 +14,7 @@ from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
+from .sidebar import Sidebar
 from .style import THEMES, build_style, set_theme
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
@@ -27,7 +28,7 @@ class MainWindow(QMainWindow):
         """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision` is the screen-guidance service (observe only); None means sessions run without it."""
         super().__init__()
         self.setWindowTitle("GuideWire")
-        self.resize(1120, 760)
+        self.resize(1260, 800)
         self.db = db
         self.accounts = Accounts(db)
         self.user: User | None = None
@@ -50,7 +51,20 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen):
             self.stack.addWidget(screen)
-        self.setCentralWidget(self.stack)
+        self.sidebar = Sidebar()
+        self.sidebar.set_companion(vision is not None)
+        self.sidebar.chosen.connect(self.on_nav)
+        self.sidebar.logout.connect(self.on_logout)
+        self.sidebar.hide()                       # only once someone is signed in
+        shell = QWidget()
+        shell.setObjectName("page")
+        row = QHBoxLayout(shell)
+        row.setContentsMargins(14, 14, 0, 14)
+        row.setSpacing(0)
+        row.addWidget(self.sidebar)
+        row.addWidget(self.stack, 1)
+        self.setCentralWidget(shell)
+        self.stack.currentChanged.connect(self._sync_sidebar)
         self.login.logged_in.connect(self.on_logged_in)
         self.home.logout.connect(self.on_logout)
         self.home.open_review.connect(self.open_review)
@@ -80,6 +94,19 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
         self.session.stop_guidance()                # never leave the highlight on screen after the app closes
         super().closeEvent(event)
+
+    def on_nav(self, key: str) -> None:
+        """A sidebar item was clicked."""
+        {"home": self.show_home, "find": self.open_find, "ask": self.open_ask, "import": self.open_new_tutorial,
+         "history": self.open_history, "settings": self.open_profile}[key]()
+
+    def _sync_sidebar(self, _index: int = 0) -> None:
+        """Show the panel on every screen except the sign-in, and mark the screen the user is on."""
+        screen = self.stack.currentWidget()
+        self.sidebar.setVisible(self.user is not None and screen is not self.login)
+        self.sidebar.set_user(self.user.display_name if self.user else "")
+        keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings"}
+        self.sidebar.set_active(keys.get(screen))
 
     def current_screen(self):
         return self.stack.currentWidget()

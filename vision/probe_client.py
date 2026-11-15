@@ -19,11 +19,12 @@ def _info_path() -> str:
 
 
 def read_probe(timeout: float = 0.5, info_path: str | None = None, properties: list[str] | None = None,
-               attributes: list[str] | None = None, app: str | None = None) -> dict[str, Any] | None:
+               attributes: list[str] | None = None, app: str | None = None, keys: list[str] | None = None) -> dict[str, Any] | None:
     """Current Blender state, or None. `properties` / `attributes` are paths to read; the probe reads
-    them on Blender's main thread, so a value asked for the first time may only appear on the next call."""
+    them on Blender's main thread, so a value asked for the first time may only appear on the next call. `keys` are operators (`mesh.loopcut_slide`, or `wm.tool_set_by_id|name=builtin.move`)
+    whose keymap entries are wanted; the answer is under `keys` in the state (snapshot v2)."""
     query = urllib.parse.urlencode({k: ",".join(v) for k, v in
-                                    (("properties", properties), ("attributes", attributes)) if v})
+                                    (("properties", properties), ("attributes", attributes), ("keys", keys)) if v})
     try:
         with open(info_path or _info_path(), encoding="utf-8") as f:
             info = json.load(f)

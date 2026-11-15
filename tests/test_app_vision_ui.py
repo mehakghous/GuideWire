@@ -5,9 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from app import vision_bridge as vb
-from app.ui.screen_guide import ScreenGuide
-from shared.grounding import GroundingResult, Rect
+pytest.importorskip("PyQt6")          # CI installs no Qt: the screen guide needs it
+
+from app import vision_bridge as vb  # noqa: E402
+from app.ui.screen_guide import ScreenGuide  # noqa: E402
+from shared.grounding import GroundingResult, Rect  # noqa: E402
 
 SAMPLE = Path("shared/examples/blender_cube_extrude.json")
 

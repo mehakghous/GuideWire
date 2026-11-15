@@ -507,7 +507,7 @@ class SessionScreen(QWidget):
         self.watch_label.setText(tick.message)
         self._last_window, self._last_hint = look.window_rect, tick.hint
         if tick.rect is not None:
-            self.guide.show(tick.rect, look.window_rect, tick.hint)
+            self.guide.show(tick.rect, look.window_rect)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)

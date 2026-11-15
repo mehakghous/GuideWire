@@ -224,10 +224,11 @@ def test_the_hint_names_the_next_click_from_the_path_and_what_is_visible():
     assert vb.hint_for(None, "x") == ""
 
 
-def test_the_highlight_carries_the_hint_as_its_label(env):
+def test_the_highlight_draws_no_text_because_text_over_the_application_is_read_back_by_the_ocr(env):
     screen, _e, _svc, overlay = env
     screen.poll()
-    assert overlay.marks and overlay.marks[0].label == "Click Add, then Mesh > Cylinder" or overlay.marks[0].label.startswith(("Click", "Open"))
+    assert overlay.marks and overlay.marks[0].label == ""
+    assert screen.panel is not None and screen.panel.hint.text().startswith(("Click", "Open"))      # the words go in the instruction box instead
 
 
 def test_the_instruction_box_shows_the_goal_how_to_and_hint_outside_the_window_when_there_is_room(env):

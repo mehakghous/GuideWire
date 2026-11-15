@@ -100,13 +100,51 @@ def app_of(engine) -> str:
 def default_service_factory(app: str):
     """The real vision service for an application. Imports are lazy: the app starts without OpenCV, the Windows OCR packages or Windows itself, and says what is missing instead.
 
-    It reads the screen AFRESH at every tick (`refresh()`): VisionService reuses its last reading while the whole screen changed by less than a small average, and opening a menu changes
-    only a small part of it, so the stale words would hide "Mesh" and "Cylinder" for up to five seconds. A fresh read costs about 0.3 s, and the tick that follows reuses it for `observe`."""
+    It reads only what CHANGED, the way Umaima's `vision/guide.py` does. A tick grabs the window (cheap), compares a small thumbnail with the one at the last reading, and then
+      * nothing changed      -> reuses the words read before (no OCR at all);
+      * a small area changed -> reads only that area (a menu that just opened) and merges the words into the ones known;
+      * most of the window changed, or it moved or was resized -> reads the whole window.
+    VisionService on its own compares the MEAN change of the whole screen, so a menu opening (a small area) looked like "no change" and the old words stayed for up to five seconds."""
     from vision.service import VisionService
 
     class LiveService(VisionService):
         def refresh(self) -> None:
+            """Forget what was read, so the next tick reads the whole window."""
             self._cache = {}
+
+        def _scene(self):
+            import cv2
+
+            from vision.guide import FULL_READ_SHARE, THUMB, box_to_rect, changed_box, merge_words
+            from vision.ocr import read_text
+            from vision.regions import default_layout, detect_layout
+            win, grabbed = self._frame()
+            if win is None:
+                self._cache = {}
+                return None, None, None, [], None
+            frame, pixels = grabbed
+            h, w = pixels.shape[:2]
+            thumb = cv2.resize(cv2.cvtColor(pixels, cv2.COLOR_BGR2GRAY), THUMB, interpolation=cv2.INTER_AREA)
+            c = self._cache
+            moved = not c or c.get("rect") != win.rect
+            box = None if moved else changed_box(c["thumb"], thumb)
+            if not moved and box is None:
+                return win, frame, pixels, c["words"], c["layout"]                      # nothing changed: no OCR
+            area = 1.0 if moved else (box[2] - box[0]) * (box[3] - box[1]) / (THUMB[0] * THUMB[1])
+            if moved or area > FULL_READ_SHARE:
+                layout = detect_layout(pixels)
+                if layout.confidence < 0.5:
+                    layout = default_layout(w, h)
+                words, serial = read_text(pixels), (c or {}).get("serial", 0)
+            else:                                                                       # a small area changed: read that area only
+                from dataclasses import replace
+                r = box_to_rect(box, w, h)
+                serial = c.get("serial", 0) + 1
+                fresh = [replace(wd, rect=type(wd.rect)(wd.rect.x + r.x, wd.rect.y + r.y, wd.rect.w, wd.rect.h), line=wd.line + serial * 100000)
+                         for wd in read_text(pixels[r.y:r.y + r.h, r.x:r.x + r.w], 2.0)]
+                words, layout = merge_words(c["words"], fresh, r), c["layout"]
+            self._cache = {"rect": win.rect, "thumb": thumb, "words": words, "layout": layout, "serial": serial}
+            return win, frame, pixels, words, layout
     return LiveService(app=app)
 
 
@@ -184,9 +222,6 @@ class VisionBridge:
         window = self.window_rect(app)
         rect, complete, ambiguous, matched = None, False, False, ""
         try:
-            refresh = getattr(svc, "refresh", None)
-            if refresh is not None:
-                refresh()                                # a fresh read: a menu that just opened must show up now
             if target:
                 g = svc.ground(target)
                 matched = getattr(g, "matched", "") or ""

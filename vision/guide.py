@@ -14,12 +14,8 @@ from __future__ import annotations
 from shared.grounding import Rect
 from vision.locate import Located, parse_path
 from vision.overlay import Mark, highlight_mark
+from vision.scene import FULL_READ_SHARE, MIN_CHANGED_CELLS, PAD, PIXEL_DELTA, THUMB, box_to_rect, changed_box, merge_words, union_box  # noqa: F401  (shared with the app: one change-reading policy, see vision/scene.py)
 
-THUMB = (192, 108)        # (w, h) of the grayscale thumbnail used to spot screen changes
-PIXEL_DELTA = 24          # grey-level difference that counts as a changed pixel
-MIN_CHANGED_CELLS = 3     # ignore isolated flicker
-PAD = 48                  # frame pixels added around a changed area before reading it
-FULL_READ_SHARE = 0.4     # if more than this share of the window changed, read the whole frame
 OCR_SCALE = 1.5
 
 
@@ -50,41 +46,6 @@ def click_hits(mark_rect: Rect, point: tuple[int, int] | None) -> bool:
         return False
     x, y = point
     return mark_rect.x <= x < mark_rect.x + mark_rect.w and mark_rect.y <= y < mark_rect.y + mark_rect.h
-
-
-def changed_box(prev, cur):
-    """Bounding box (x0, y0, x1, y1) in thumbnail cells of what changed, or None if nothing did."""
-    if prev is None or prev.shape != cur.shape:
-        return (0, 0, cur.shape[1], cur.shape[0])
-    diff = abs(prev.astype("int16") - cur.astype("int16")) > PIXEL_DELTA
-    if int(diff.sum()) < MIN_CHANGED_CELLS:
-        return None
-    ys, xs = diff.nonzero()
-    return (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
-
-
-def union_box(a, b):
-    if a is None:
-        return b
-    if b is None:
-        return a
-    return (min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3]))
-
-
-def box_to_rect(box, frame_w: int, frame_h: int, pad: int = PAD) -> Rect:
-    """Thumbnail-cell box -> frame-pixel rect, padded and clipped to the frame."""
-    sx, sy = frame_w / THUMB[0], frame_h / THUMB[1]
-    x0, y0 = max(int(box[0] * sx) - pad, 0), max(int(box[1] * sy) - pad, 0)
-    x1, y1 = min(int(box[2] * sx) + pad, frame_w), min(int(box[3] * sy) + pad, frame_h)
-    return Rect(x0, y0, x1 - x0, y1 - y0)
-
-
-def merge_words(old: list, new: list, region: Rect) -> list:
-    """Words known before, minus those inside the re-read region, plus the freshly read ones."""
-    def inside(w) -> bool:
-        cx, cy = w.rect.x + w.rect.w // 2, w.rect.y + w.rect.h // 2
-        return region.x <= cx < region.x + region.w and region.y <= cy < region.y + region.h
-    return [w for w in old if not inside(w)] + new
 
 
 def run_guide(ui_element: str, title: str = "Blender", seconds: float = 60, interval_ms: int = 80,

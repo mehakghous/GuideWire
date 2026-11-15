@@ -25,7 +25,6 @@ def main() -> int:
 
     import cv2
 
-    from shared.grounding import Rect
     from vision import uimodel, winplatform
     from vision.capture import grab, mask_occluders
     from vision.probe_client import read_probe

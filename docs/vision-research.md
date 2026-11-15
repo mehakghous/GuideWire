@@ -109,3 +109,16 @@ Blender in front with its splash screen still open, 1368x729 frame, Intel laptop
 | 2.6 | 0.2 | 33 | 1.0 | 56 | 8.5 | 370 | 85 | 0.1 (no add-on running) |
 
 A look that has to read the whole screen costs about 0.5 s, a small changed area about 0.15 s, and a probe read is free by comparison: the lever is reading less often, not reading faster. `detect_layout` reported confidence 0.17 and found 1 toolbar cell on this frame (splash open): a frame the area-splitting guess fails on. Re-run `python scripts/vision_bench.py --front` (only against a Blender you started yourself) after each part for the "after" numbers.
+
+### Part A results (same machine and window as the baseline above)
+| Check | Before | After |
+|---|---|---|
+| Layout of the window | `detect_layout` (pixel gaps): confidence 0.17 on a plain Layout frame; toolbar cells found 11 to 14, of which the cells inside the toolbar region Blender reports: not checkable | from the add-on: confidence 1.0, six areas named, `vision_uicheck` PASS: window size, client origin and frame agree; 14 of 14 toolbar cells found in the pixels sit inside the reported toolbar region (sidebar open, toolbar scrolled, Edit Mode) |
+| Look on an unchanged screen | whole-screen mean compare, a read when anything moved more than the mean threshold; at most 5 s stale | median 53 ms (capture 33 ms + compare), 11 of 12 looks read nothing; layout detection no longer runs (50 ms saved per full read) |
+| Menu or panel opens (small area) | missed by the mean compare (stale up to 5 s) in `VisionService`, read in the app's copy | read by the one shared reader, area only (about 60-120 ms) |
+| Toggled checkbox (12 px, +40 grey) | missed (2 cells of 3 needed on a 192x108 thumbnail) | seen (about 9 cells on 384x216), unit test |
+| Orbiting the 3D view | whole-window read per look | ignored while more than 35% of the viewport changed; a menu opening over it is still read (unit tests) |
+| Which Blender | title match: a Chrome tab titled "Get Involved - Blender" could be taken for it | program and, with the add-on, process id |
+| Old toolbar lookup with the toolbar scrolled (reproduced, NOT fixed in Part A) | `locate_tool("Loop Cut")` names visible cell 12 of 14, but 3 cells were scrolled off, so the highlight lands about 3 cells below the real Loop Cut (true index 12 of 21 in all) | fixed in Part C with the live tool list and the reported scroll |
+
+Not verified in Part A: the redo-panel (HUD) region size and `window_manager.operators` after real clicks (no way to inject real input into Blender found), 150% display scaling, a second monitor, and `mypy` locally (the PyQt6 stubs installed here do not parse under this mypy; CI is unchanged by this part).

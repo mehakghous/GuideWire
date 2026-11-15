@@ -126,7 +126,7 @@ class SceneReader:
 
     def reset(self) -> None:
         """Forget what was read: the next look reads the whole window."""
-        self._state: dict | None = None
+        self._state: dict[str, Any] | None = None
 
     @property
     def empty(self) -> bool:
@@ -148,6 +148,7 @@ class SceneReader:
         box, dropped = None, []
         full = force_full or c is None or c["window"] != window or now - c["full_at"] >= REFRESH_SECONDS
         if not full:
+            assert c is not None                                  # `full` is always True without a previous state
             diff = changed_cells(c["thumb"], thumb)
             if diff is None:
                 full = True
@@ -163,6 +164,7 @@ class SceneReader:
             self._state = {"window": window, "thumb": thumb, "words": words, "layout": layout, "serial": (c or {}).get("serial", 0), "full_at": now}
             self.stats.full += 1
             return Scene(words, layout, "full", Rect(0, 0, w, h), self._state["serial"])
+        assert c is not None
         if box is None:
             for y0, y1, x0, x1 in dropped:                        # a redraw was ignored: its reference is brought up to date. Other, small changes keep the old reference, so they add up until they are read
                 c["thumb"][y0:y1, x0:x1] = thumb[y0:y1, x0:x1]
@@ -188,15 +190,15 @@ class SceneReader:
 def layout_from_model(model, mapper, image_w: int, image_h: int):
     """A `vision.regions.Layout` built from what Blender reported instead of guessed from pixel gaps: viewport, outliner, properties and timeline from the areas, a top bar above the highest area and a
     status bar below the lowest. Confidence 1.0. Rectangles are in captured-image pixels."""
-    from vision.regions import Layout, Region
-    names = {"VIEW_3D": "viewport", "OUTLINER": "outliner", "PROPERTIES": "properties", "DOPESHEET_EDITOR": "timeline", "TIMELINE": "timeline"}
+    from vision.regions import Layout, Region, RegionName
+    names: dict[str, RegionName] = {"VIEW_3D": "viewport", "OUTLINER": "outliner", "PROPERTIES": "properties", "DOPESHEET_EDITOR": "timeline", "TIMELINE": "timeline"}
     regions, seen = [], set()
     top = image_h
     bottom = 0
     for a in sorted(model.areas, key=lambda a: -(a.rect.w * a.rect.h)):
         r = mapper.to_frame(a.rect)
         top, bottom = min(top, r.y), max(bottom, r.y + r.h)
-        name = names.get(a.type, "unknown")
+        name: RegionName = names.get(a.type, "unknown")
         if name in seen:                                       # a second area of the same kind (two 3D views): the first, larger one keeps the name
             name = "unknown"
         seen.add(name)

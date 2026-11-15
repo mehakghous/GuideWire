@@ -12,10 +12,13 @@ its exact values override what OCR read from the screen.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shared.grounding import CaptureGeometry, GroundingResult, Rect, to_screen
 from vision.locate import Located
+
+if TYPE_CHECKING:
+    from vision.uimodel import FrameMapper, UiModel
 
 
 @dataclass(frozen=True)
@@ -75,8 +78,8 @@ class VisionService:
         self.title = title or self.profile.title
         self.use_probe = use_probe
         self._reader = SceneReader(self._read_text, self._detect_layout)
-        self.ui = None            # vision.uimodel.UiModel from the add-on at the last look, or None (no add-on, an older one, or the snapshot is for another window size)
-        self.mapper = None        # vision.uimodel.FrameMapper for that look; None whenever `ui` cannot be trusted for the captured frame
+        self.ui: UiModel | None = None            # vision.uimodel.UiModel from the add-on at the last look, or None (no add-on, an older one, or the snapshot is for another window size)
+        self.mapper: FrameMapper | None = None        # vision.uimodel.FrameMapper for that look; None whenever `ui` cannot be trusted for the captured frame
 
     @staticmethod
     def _read_text(pixels, scale):

@@ -167,7 +167,7 @@ class HomeScreen(QWidget):
         title_box.addWidget(kicker)
         title_box.addWidget(self.greeting)
         hero = HeroTile(padding=26)
-        hero.setMinimumHeight(250)
+        hero.setMinimumHeight(220)
         hero.body.addWidget(pill("Your next tutorial"), 0, Qt.AlignmentFlag.AlignLeft)
         hero.body.addWidget(self.hero_title)
         hero.body.addWidget(self.hero_hint)

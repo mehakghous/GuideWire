@@ -193,7 +193,7 @@ class ClayBall(QWidget):
     """A round icon moulded like a clay ball, with a simple white symbol: search, chat, plus, star or clock."""
     COLOURS = {"search": ("teal_hi", "teal"), "chat": ("hero_hi", "hero"), "plus": ("accent_hi", "accent"), "star": ("#e6d9ff", "#a98af0"), "clock": ("tile_hi", "hero_lo")}
 
-    def __init__(self, kind: str, size: int = 42):
+    def __init__(self, kind: str, size: int = 34):
         super().__init__()
         self.kind = kind
         self.setFixedSize(size, size)
@@ -249,14 +249,14 @@ class ClayBall(QWidget):
 class IconTile(ActionTile):
     """An action tile with a round clay icon above its title: the big, friendly buttons on Home."""
 
-    def __init__(self, title: str, hint: str, kind: str, min_height: int = 128):
+    def __init__(self, title: str, hint: str, kind: str, min_height: int = 112):
         super().__init__(title, hint, "", min_height=min_height)
         box = self.layout()
-        box.setContentsMargins(18, 16, 18, 16)
+        box.setContentsMargins(26, 18, 22, 16)                 # roomy sideways: about 8 px more padding than a plain action tile
         self.title_label.setWordWrap(True)                  # long titles wrap instead of being cut off
         self.ball = ClayBall(kind)
         box.insertWidget(0, self.ball, 0, Qt.AlignmentFlag.AlignLeft)
-        box.insertSpacing(1, 6)
+        box.insertSpacing(1, 10)
 
 
 def pill(text: str) -> QLabel:

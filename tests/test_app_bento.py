@@ -337,3 +337,21 @@ def test_the_backdrop_paints_and_stops_when_hidden(qapp):
     b.grab()
     b.hide()
     assert b._anim.state() != b._anim.State.Running
+
+
+def test_page_headers_have_a_label_a_title_and_no_box(qapp):
+    from app.ui.bento import Head
+    back = QPushButton("Back")
+    h = header("History", "Past sessions", back=back, kicker="Your sessions")
+    texts = [lab.text() for lab in h.findChildren(QLabel)]
+    assert isinstance(h, Head) and not isinstance(h, Tile) and texts[:2] == ["Your sessions", "History"] and h.page_title.text() == "History"
+
+
+def test_the_login_brand_is_the_hero_slab(win):
+    from app.ui.bento import HeroTile
+    assert win.login.findChildren(HeroTile)
+
+
+def test_new_tutorial_keeps_its_message_and_create_button_in_the_text_slab(win):
+    nt = win.new_tutorial
+    assert nt.message.parent() is nt.create_button.parent() is nt.text.parent()

@@ -17,7 +17,7 @@ from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
-from .bento import ActionTile, HeroTile, IconTile, Tile, header, page_grid, pill, tidy_list
+from .bento import ActionTile, Head, HeroTile, IconTile, Tile, header, page_grid, pill, tidy_list
 from .style import current_palette
 from .workers import run_call
 
@@ -45,7 +45,7 @@ class LoginScreen(QWidget):
         self.message.setObjectName("error")
         self.login_button.setObjectName("primary")
         grid = page_grid(self)
-        brand = Tile(variant="accent", padding=28)
+        brand = HeroTile(padding=32)
         name = QLabel("GuideWire")
         name.setObjectName("brand")
         tagline = QLabel("Learn Blender, Maya and Houdini one step at a time, right on your own screen.")
@@ -299,7 +299,7 @@ class StepReviewScreen(QWidget):
         self.list.itemDoubleClicked.connect(lambda _: self.edit_selected())
         self.list.currentRowChanged.connect(lambda _: self.show_detail())
         grid = page_grid(self)
-        head = Tile(variant="soft", padding=16)
+        head = Head()
         top = QHBoxLayout()
         texts = QVBoxLayout()
         texts.setSpacing(2)
@@ -497,7 +497,7 @@ class SessionScreen(QWidget):
         self.prev_button.clicked.connect(lambda: self._do(self.engine.back))
         self.back_button.clicked.connect(self._leave)
         grid = page_grid(self)
-        head = Tile(variant="soft", padding=16)
+        head = Head()
         top = QHBoxLayout()
         top.addWidget(self.title, 1)
         top.addWidget(self.back_button)
@@ -690,7 +690,7 @@ class HistoryScreen(QWidget):
         self.back_button.clicked.connect(self.back.emit)
         self.empty.setObjectName("empty")
         grid = page_grid(self)
-        grid.addWidget(header("History", "Every session you have started, newest first.", back=self.back_button), 0, 0)
+        grid.addWidget(header("History", "Every session you have started, newest first.", back=self.back_button, kicker="Your sessions"), 0, 0)
         box = Tile("Sessions")
         box.body.addWidget(self.empty)
         box.body.addWidget(self.list, 1)
@@ -740,7 +740,7 @@ class ProfileScreen(QWidget):
         self.back_button.clicked.connect(self.back.emit)
         self.save_button.setObjectName("primary")
         grid = page_grid(self)
-        grid.addWidget(header("Profile", "Your name, how the app looks, and your password.", back=self.back_button), 0, 0, 1, 2)
+        grid.addWidget(header("Profile", "Your name, how the app looks, and your password.", back=self.back_button, kicker="Settings"), 0, 0, 1, 2)
         me = Tile("About you")
         form = QFormLayout()
         form.setSpacing(10)
@@ -822,7 +822,7 @@ class NewTutorialScreen(QWidget):
         self.notes.setObjectName("hint")
         self.create_button.setObjectName("primary")
         grid = page_grid(self)
-        grid.addWidget(header("New tutorial", "Turn instructions, a transcript or a YouTube link into steps you can review.", back=self.back_button), 0, 0, 1, 2)
+        grid.addWidget(header("New tutorial", "Turn instructions, a transcript or a YouTube link into steps you can review.", back=self.back_button, kicker="Create"), 0, 0, 1, 2)
         details = Tile("Details")
         form = QFormLayout()
         form.setSpacing(10)
@@ -838,17 +838,15 @@ class NewTutorialScreen(QWidget):
         tips.body.addStretch()
         paste = Tile("The tutorial")
         paste.body.addWidget(self.text, 1)
-        result = Tile(variant="soft", padding=14)
-        result.body.addWidget(self.message)
-        result.body.addWidget(self.notes)
+        paste.body.addWidget(self.message)
+        paste.body.addWidget(self.notes)
         actions = QHBoxLayout()
         actions.addStretch()
         actions.addWidget(self.create_button)
-        result.body.addLayout(actions)
+        paste.body.addLayout(actions)
         grid.addWidget(details, 1, 0)
         grid.addWidget(tips, 1, 1)
         grid.addWidget(paste, 2, 0, 1, 2)
-        grid.addWidget(result, 3, 0, 1, 2)
         grid.setRowStretch(2, 1)
         grid.setColumnStretch(0, 3)
         grid.setColumnStretch(1, 2)

@@ -55,7 +55,7 @@ class FindScreen(QWidget):
         self.steps_button.clicked.connect(lambda: (s := self.selected()) and self.make_steps.emit(s.url, self.result.app or ""))
         self.back_button.clicked.connect(self.back.emit)
         grid = page_grid(self)
-        grid.addWidget(header("Find a tutorial", "Say what you want to learn and get up to three suggested videos.", back=self.back_button), 0, 0, 1, 2)
+        grid.addWidget(header("Find a tutorial", "Say what you want to learn and get up to three suggested videos.", back=self.back_button, kicker="Discover"), 0, 0, 1, 2)
         search = Tile("What do you want to learn?", variant="soft")
         search.body.addWidget(self.goal)
         row = QHBoxLayout()

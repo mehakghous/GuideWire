@@ -274,25 +274,39 @@ def tidy_list(lst) -> None:
     lst.setWordWrap(False)
 
 
-def header(title: str, subtitle: str = "", back: QPushButton | None = None, extra: QWidget | None = None) -> Tile:
-    """The page's top tile: its title and a one-line hint, with the Back button and anything else on the right."""
-    tile = Tile(variant="soft", padding=16)
+class Head(QWidget):
+    """A page's top strip: no box, just a small label, a big title and the buttons on the right (the same look as the Home screen's greeting). `body` is its layout."""
+
+    def __init__(self):
+        super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, False)
+        self.body = QVBoxLayout(self)
+        self.body.setContentsMargins(6, 2, 6, 2)
+        self.body.setSpacing(0)
+
+
+def header(title: str, subtitle: str = "", back: QPushButton | None = None, extra: QWidget | None = None, kicker: str = "GuideWire") -> Head:
+    """The page's top strip: a small label, the title and a one-line hint, with the Back button and anything else on the right."""
+    head = Head()
     row = QHBoxLayout()
     texts = QVBoxLayout()
-    texts.setSpacing(2)
+    texts.setSpacing(0)
+    k = QLabel(kicker)
+    k.setObjectName("kicker")
+    texts.addWidget(k)
     t = QLabel(title)
     t.setObjectName("pageTitle")
     texts.addWidget(t)
     if subtitle:
-        s = QLabel(subtitle)
-        s.setObjectName("tileHint")
-        s.setWordWrap(True)
-        texts.addWidget(s)
+        sub = QLabel(subtitle)
+        sub.setObjectName("tileHint")
+        sub.setWordWrap(True)
+        texts.addWidget(sub)
     row.addLayout(texts, 1)
     if extra is not None:
         row.addWidget(extra)
     if back is not None:
-        row.addWidget(back)
-    tile.body.addLayout(row)
-    tile.page_title = t                       # type: ignore[attr-defined]
-    return tile
+        row.addWidget(back, 0, Qt.AlignmentFlag.AlignVCenter)
+    head.body.addLayout(row)
+    head.page_title = t                       # type: ignore[attr-defined]
+    return head

@@ -16,9 +16,51 @@ The app (Mehak), the steps (Ayesha) and vision (Umaima) meet in one place: the s
 - an ambiguous match points at nothing; a missing window asks the learner to bring the application forward;
 - the application (blender, maya, houdini) is read from the tutorial.
 
+## What the session screen does now (added with the timer)
+- **Watch my screen** switch (on by default, shown only when the vision bridge is available): while a step is active and the screen is shown, a timer looks at the application every half second.
+- The look (OCR) runs on a worker thread so the window never freezes; the judging (the database) stays on the main thread. A look that finishes after you pressed Done is thrown away.
+- A line under the buttons says in words what GuideWire sees ("Watching the screen.", "Open Blender in front so GuideWire can see it.", "Several places on the screen match; open the menu and it will narrow down.", or what is missing).
+- The highlight is Umaima's click-through overlay (`vision/overlay.py`), drawn over the application window; it is hidden from screen capture so OCR never reads it back, and it is closed with the window.
+- If GuideWire's own window overlaps the application's, a warning appears with **Move GuideWire to the side** (a strip at the right of the screen, never narrower than its content).
+- Done, Skip and Previous step always work by hand; vision can only complete a step the application shows finished.
+
+## Automated tests (no screen, no Windows, no OCR: a fake vision service and a fake overlay)
+- `tests/test_app_vision_bridge.py`: the bridge on a real session engine. `tests/test_app_vision_ui.py`: the timer, the message, the highlight, the step advancing in the window, a stale look ignored, the covering warning, a broken overlay.
+- Run them: `python -m pytest tests/test_app_vision_bridge.py tests/test_app_vision_ui.py -q`, and everything with `python -m pytest -q`.
+
+## Test it by hand (needs Windows, Blender 5.2 and about 15 minutes)
+Do these in order; each says what it proves. Stop at the first that fails and note which.
+
+**Setup (once).** From `C:\dev\GuideWire` with the venv active:
+```powershell
+pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections
+python scripts/demo_check.py
+```
+The line `[ok] the app's screen guidance (vision bridge) can load the vision service and the Windows OCR` must appear. Open **Blender 5.2** with the default layout, English, 1920x1080 at 150% scaling if you can (that is what vision was checked on).
+
+| # | Do | You should see | It proves |
+|---|---|---|---|
+| M1 | Without Blender open: `python scripts/vision_check.py --seconds 5` | `no_window ... Open Blender in front so GuideWire can see it.` and no crash | missing application is reported, not fatal |
+| M2 | Open Blender in front, run `python scripts/vision_check.py --seconds 30` | `watching ... highlight=x,y wxh` once "Add" is visible; the rectangle sits where the Add menu is | the bridge reads the real screen and finds the step's UI path |
+| M3 | Same run: click **Add > Mesh > Cylinder** slowly | the highlight moves from Add to Mesh to Cylinder; a cylinder appears; the line shows `advanced=YES` if the step's state was seen (see M4) | live guidance and the check (this is what Umaima's demo does, through the bridge) |
+| M4 | `python scripts/vision_check.py --step s05 --seconds 40` and do that step in Blender | `verdict=met ... advanced=YES` when the application shows it done; `verdict=unverifiable` for steps with no checkable state, which never advance | a step is completed only when seen done |
+| M5 | `python scripts/vision_check.py --overlay --seconds 30` | a transparent box over Blender; **click through it**: the click reaches Blender; the box never takes focus | the overlay is click-through |
+| M6 | Move and resize the Blender window during `--overlay` | the box follows a move; after a resize it is redrawn at the right place | the overlay tracks the window |
+| M7 | `python -m app.ui.main_window`, log in, **Add demo tutorials**, open the Blender armature tutorial, **Start session**, press Done until step 2 | under the buttons: the **Watch my screen** switch and a status line that changes with what is on screen | the timer and status line work in the real app |
+| M8 | In that session, drag GuideWire over the Blender window | within a second a warning appears: "GuideWire is covering part of the application..." and **Move GuideWire to the side**; click it: GuideWire becomes a strip at the right edge | the covering check and the fix |
+| M9 | Untick **Watch my screen** | the highlight disappears, the status line clears, no more looking; **Done** still works | the learner can switch it off and still use the app |
+| M10 | Close Blender in the middle of a session | the line says to open Blender in front; nothing crashes; the session keeps its place | the application going away is handled |
+| M11 | Press **Done** while a step is highlighted, then watch the next step | the highlight goes to the next step's path; no double advance | a manual Done and the timer do not fight |
+| M12 | In a PowerShell window without the OCR packages (a fresh venv) start the app and open a session | one line naming the missing packages and the pip command; the session works by hand | missing packages are explained |
+
+What to write down if something fails: the line from `vision_check.py`, whether Blender was in front, the Windows scaling, and the Blender version. A highlight in the wrong place usually means the path text does not match what is on screen (check the step's `ui_element` against the real menu).
+
+## Not covered, and why
+- **Maya and Houdini**: their probes are prototypes never run inside those applications, so M2 to M6 are for Blender only. The bridge itself is application-neutral (`VisionBridge(...).tick(engine, "maya")`).
+- **A second monitor or a different scaling**: not tested.
+- **The OCR on a worker thread**: the Windows OCR is called from a thread other than the window's; Umaima's own guide does the same, but check M7 for freezes or errors.
+
 ## What is still to do
-1. **Session screen** (Mehak's file): a `QTimer` that calls `bridge.tick(engine)` about twice a second, shows `Tick.message`, and draws or clears the overlay from `Tick.rect` (Umaima's `vision/overlay.py`); agree the change with her first.
-2. **Overlay inside the app's event loop**: `vision.guide.run_guide` owns its own Qt loop; the app needs the overlay as a widget it controls.
-3. **Run it for real**: install the Windows OCR packages (`pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections`), open Blender 5.2 at the default layout, and try the Blender armature demo tutorial step "Add > Armature > Single Bone".
-4. **Data**: on the six demo tutorials 61 of 111 steps have a UI path and 63 have an expected state, 39 both; the path text must match what is on screen.
-5. **Maya and Houdini**: their probes are prototypes never run inside those applications, so the first working demo is Blender.
+1. **Run the manual tests above** on the real Blender and fix what they find.
+2. **Data**: on the six demo tutorials 61 of 111 steps have a UI path and 63 have an expected state, 39 both; the path text must match what is on screen.
+3. **Maya and Houdini**: run their probes inside the applications (Umaima's side), then repeat M2 to M6.

@@ -54,7 +54,7 @@ Move it with G
 
 A video link that works: `https://www.youtube.com/watch?v=EBgHRd5tJfE` (the Blender armature tutorial). Videos must be public and up to 25 minutes. If the AI is not set up, the app says so and nothing breaks.
 
-**Be honest about:** the highlight on screen is Umaima's part and is not yet wired into the session screen; the app reads steps by itself, it does not yet check them against Blender; the AI parts call Google's model directly on this computer (the proposal's plan is to route them through our own gateway so the keys never sit on a learner's machine).
+**Be honest about:** the highlight on screen is Umaima's part: the session screen now has a **Watch my screen** switch that uses it (Windows, the OCR packages and Blender open in front are needed; see docs/vision_integration.md); the app reads steps by itself, it does not yet check them against Blender; the AI parts call Google's model directly on this computer (the proposal's plan is to route them through our own gateway so the keys never sit on a learner's machine).
 
 ### Optional: a pre-made account
 `python scripts/demo_setup.py --reset` makes a local database with an account `demo@guidewire.test` (password `guidewire-demo-2026`) that already holds the nine tutorials. To use it, start the app with `$env:GUIDEWIRE_DB = "C:\dev\GuideWire\local_data\demo.sqlite"` first. You never need it: any new account can click **Add demo tutorials**.

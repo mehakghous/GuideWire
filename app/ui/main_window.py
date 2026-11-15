@@ -22,8 +22,8 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None):
-        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline."""
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision_bridge=None):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) and `vision_bridge` (screen guidance for the session) are given by `main()`; tests and any run without them stay offline."""
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(1000, 680)
@@ -34,6 +34,8 @@ class MainWindow(QMainWindow):
         self.home = HomeScreen()
         self.review = StepReviewScreen()
         self.session = SessionScreen()
+        self.session.sync = sync
+        self.session.set_bridge(vision_bridge)
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
@@ -74,6 +76,10 @@ class MainWindow(QMainWindow):
         self.ask_screen.save_steps.connect(self.save_asked_steps)
         self.session.ask_about.connect(lambda tid: self.open_ask(tid))
         self.stack.setCurrentWidget(self.login)
+
+    def closeEvent(self, event) -> None:
+        self.session.guide.close()                 # the screen overlay must not outlive the window
+        super().closeEvent(event)
 
     def current_screen(self):
         return self.stack.currentWidget()
@@ -207,7 +213,8 @@ def main() -> int:
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=find_tutorials)
+    from ..vision_bridge import VisionBridge, default_service_factory
+    window = MainWindow(Database(), vision_bridge=VisionBridge(default_service_factory), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=find_tutorials)
     window.show()
     return app.exec()
 

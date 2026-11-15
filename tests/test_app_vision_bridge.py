@@ -163,3 +163,13 @@ def test_the_real_service_factory_fails_with_words_when_vision_cannot_load(monke
         vb.default_service_factory("blender")
     assert "Windows OCR packages" in vb.explain(ImportError("No module named 'winrt'"))
     assert "Windows only" in vb.explain(OSError("not windows"))
+
+
+def test_missing_ocr_packages_found_when_the_screen_is_first_read_are_explained_and_not_retried(eng):
+    svc = FakeService(boom=ImportError("No module named 'winrt.windows.media.ocr'"))
+    b = bridge_with(svc)
+    t = b.tick(eng)
+    assert t.state == "unavailable" and "Windows OCR packages" in t.message and "pip install" in t.message
+    n = len(svc.ground_calls)
+    b.tick(eng)
+    assert len(svc.ground_calls) == n                              # remembered: the screen is not read again until reset()

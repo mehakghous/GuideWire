@@ -1188,6 +1188,36 @@
       "url": "https://www.sidefx.com/docs/houdini/nodes/sop/kinefx--configurerigvis.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B60": {
+      "title": "Blender manual: Rotation Modes (Euler, Axis Angle, Quaternion)",
+      "url": "https://docs.blender.org/manual/en/latest/advanced/appendices/rotations.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "B61": {
+      "title": "Blender manual: glTF 2.0 exporter",
+      "url": "https://docs.blender.org/manual/en/latest/addons/scene_gltf2.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "M77": {
+      "title": "Maya: Fix corrupted curves (Euler Filter)",
+      "url": "https://help.autodesk.com/cloudhelp/2016/ENU/Maya/files/GUID-10782D86-F2BC-418B-8076-DE02725AFED8.htm",
+      "tier": "official",
+      "version": "Maya 2016 help"
+    },
+    "M78": {
+      "title": "Maya: Animated rotation in Maya (Euler, quaternion, Rotate Order)",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Animation/files/GUID-CBD30A0A-1166-4076-A564-1ADC946A15F3.htm",
+      "tier": "official",
+      "version": "Maya 2025 help"
+    },
+    "H55": {
+      "title": "SideFX Houdini docs: Import and export glTF",
+      "url": "https://www.sidefx.com/docs/houdini/io/gltf.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -13178,6 +13208,462 @@
           "tier": "official",
           "sources": [
             "H53"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.gltf_export",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "EXPT-03"
+      ],
+      "phrases": [
+        "export gltf from blender",
+        "export glb",
+        "gltf 2.0 export",
+        "export the character for the web",
+        "gltf animation export",
+        "use rest position armature"
+      ],
+      "ui": [
+        {
+          "path": "File > Import/Export > glTF 2.0 (.glb/.gltf)",
+          "tier": "official",
+          "source": "B61",
+          "note": "The manual page was read through a summary, so option names and defaults are paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose File > Import/Export > glTF 2.0 (.glb/.gltf) with the mesh and armature selected.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        },
+        {
+          "text": "In the options choose how animation is exported (Actions, Active Actions merged, NLA Tracks or Scene) and whether to use the rest position for the armature.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        },
+        {
+          "text": "Check the joint influences setting (4 or 8 are safest for viewers) and open the file in a glTF viewer to check the skin.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The glTF 2.0 exporter is under File > Import/Export > glTF 2.0 (.glb/.gltf).",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        },
+        {
+          "text": "Animation can be exported as Actions (the default), Active Actions merged, NLA Tracks or Scene.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        },
+        {
+          "text": "Use Rest Position Armature exports armatures using the rest position as the joint rest pose; when it is off the current frame's pose is used.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        },
+        {
+          "text": "The Bone influences setting controls how many joint influences per vertex are exported; values other than 4 or 8 may display incorrectly in many viewers.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The exported file shows the skin and animation in a viewer.",
+          "tier": "official",
+          "sources": [
+            "B61"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.rotation_modes",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CURV-07"
+      ],
+      "phrases": [
+        "gimbal lock in blender",
+        "euler or quaternion rotation",
+        "change the rotation mode of a bone",
+        "axis angle rotation",
+        "rotation order xyz",
+        "the bone flips when i rotate it"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Object / Bone > Transform > Rotation Mode",
+          "tier": "official",
+          "source": "B60",
+          "note": "The page was read through a summary, so the wording is paraphrased and the UI location is as Blender's Transform panel shows it, not from the page."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Pick the rotation mode that suits the control: a Euler order for simple, editable curves, quaternion to avoid gimbal lock.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        },
+        {
+          "text": "If the bone flips or loses an axis, change its Rotation Mode and re-key the pose.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Euler rotation has six possible orders: XYZ, XZY, YXZ, YZX, ZXY and ZYX.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        },
+        {
+          "text": "Gimbal lock is where the bottom axis ends up aligned with the top one, so one axis of rotation is lost.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        },
+        {
+          "text": "Axis Angle uses an axis (X, Y, Z) and an angle (W) around it; it avoids gimbal lock but its curves are hard to edit when axis and angle change together.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        },
+        {
+          "text": "Quaternion avoids gimbal lock and interpolates well between orientations, but cannot interpolate between orientations more than 180 degrees apart.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The bone rotates smoothly without losing an axis.",
+          "tier": "official",
+          "sources": [
+            "B60"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.euler_filter",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CLNP-02",
+        "CURV-05"
+      ],
+      "phrases": [
+        "euler filter in maya",
+        "fix the flipping rotation curves",
+        "mangled rotation curves from mocap",
+        "unroll the rotation curves",
+        "gimbal flip in the graph editor",
+        "fix corrupted curves"
+      ],
+      "ui": [
+        {
+          "path": "Graph Editor / Dope Sheet > Curves > Euler Filter",
+          "tier": "official",
+          "source": "M77"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Graph Editor select the mangled rotation curves (for example Rotate X, Y and Z).",
+          "tier": "official",
+          "sources": [
+            "M77"
+          ]
+        },
+        {
+          "text": "Choose Curves > Euler Filter.",
+          "tier": "official",
+          "sources": [
+            "M77"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Rotation curves can be mangled when the rotation values are restricted to a specific range, typically in motion capture data.",
+          "tier": "official",
+          "sources": [
+            "M77"
+          ]
+        },
+        {
+          "text": "Curves > Euler Filter fixes them; the filtering is always applied to entire curves, not to selected curve segments within a time range.",
+          "tier": "official",
+          "sources": [
+            "M77",
+            "M78"
+          ]
+        },
+        {
+          "text": "The Euler Filter is in the Curves menu of the Graph Editor or the Dope Sheet, and it does not work on Set Driven Keys or other non-time-based curves.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The rotation curves no longer jump between values.",
+          "tier": "official",
+          "sources": [
+            "M77"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.rotation_interpolation",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "CURV-07"
+      ],
+      "phrases": [
+        "rotate order in maya",
+        "gimbal lock in maya",
+        "quaternion rotation in maya",
+        "change rotation interpolation",
+        "independent or synchronized euler",
+        "reorder rotation"
+      ],
+      "ui": [
+        {
+          "path": "Channel Box > Rotate Order; Graph Editor > Curves > Change Rotation Interp; Modify > Reorder Rotation",
+          "tier": "official",
+          "source": "M78"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Set the object's Rotate Order attribute to the order that avoids gimbal lock for its motion.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        },
+        {
+          "text": "In the Graph Editor choose Change Rotation Interp to switch a curve between Euler and quaternion interpolation.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The default method of rotation interpolation in Maya is Euler; you can set the order of rotation for an object with its Rotate Order attribute.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        },
+        {
+          "text": "Independent Euler curves are ideal for simple animated rotations; quaternion curves use spherical linear interpolation (SLERP) with linear tangents and do not support tangent handles.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        },
+        {
+          "text": "Gimbal lock occurs when rotations about a single axis cause unwanted rotations about the complementary axes; quaternion curves do not generate artifacts such as gimbal lock and flipping, and the Channel Box always displays Euler angle values.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The joint rotates through the pose without flipping.",
+          "tier": "official",
+          "sources": [
+            "M78"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.gltf_export",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "EXPT-03"
+      ],
+      "phrases": [
+        "export gltf from houdini",
+        "export glb from houdini",
+        "rop gltf 2.0",
+        "export a rigged character as gltf",
+        "file export gltf"
+      ],
+      "ui": [
+        {
+          "path": "File > Export > GLTF; ROP GLTF 2.0 / ROP SOP GLTF 2.0",
+          "tier": "official",
+          "source": "H55",
+          "note": "The page does not list the export options (animation, skinning); only the nodes and the menu entry are given."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Choose File > Export > GLTF, or add a ROP GLTF 2.0 (objects) or ROP SOP GLTF 2.0 (SOP geometry) node.",
+          "tier": "official",
+          "sources": [
+            "H55"
+          ]
+        },
+        {
+          "text": "Assign materials with the shop_materialpath attribute so they are exported, and write a .gltf or .glb file.",
+          "tier": "official",
+          "sources": [
+            "H55"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Houdini's glTF importers and exporters adhere to the glTF 2.0 specification; as of Houdini 22.0 the support is built on a new underlying GLTF library.",
+          "tier": "official",
+          "sources": [
+            "H55"
+          ]
+        },
+        {
+          "text": "ROP GLTF 2.0 exports an Object network or a SOP node to a .gltf or .glb file, and ROP SOP GLTF 2.0 exports geometry from a SOP network.",
+          "tier": "official",
+          "sources": [
+            "H55"
+          ]
+        },
+        {
+          "text": "Materials assigned to geometry through the shop_materialpath attribute are exported; there are also older glTF character exporters for KineFX rigs.",
+          "tier": "official",
+          "sources": [
+            "H55"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The exported file opens in a glTF viewer.",
+          "tier": "official",
+          "sources": [
+            "H55"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.rotation_order",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "CURV-07"
+      ],
+      "phrases": [
+        "rotation order in houdini",
+        "gimbal lock in houdini",
+        "transform order on the rig pose",
+        "change the rotation order of a joint",
+        "xyz rotation order"
+      ],
+      "ui": [
+        {
+          "path": "Rig Pose (SOP) > Transformations > Transform Order",
+          "tier": "official",
+          "source": "H12",
+          "note": "The page does not list the order values or say which is the default."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the Rig Pose SOP set the Transform Order: the left menu is the order the transforms are applied and the right menu is the order to rotate around X, Y and Z.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        },
+        {
+          "text": "Pick the rotation order that makes the character's joint transforms easier to use.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "In the Rig Pose SOP the left Transform Order menu specifies the order in which the transforms are applied, and the right menu the order to rotate around the X, Y and Z axes.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        },
+        {
+          "text": "Depending on the character, certain rotation orders can make joint transforms easier to use; Use Joint Config takes the orders from a dictionary attribute set with the Configure Joints SOP.",
+          "tier": "official",
+          "sources": [
+            "H12"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The joints rotate without flipping in the animation.",
+          "tier": "official",
+          "sources": [
+            "H12"
           ]
         }
       ]

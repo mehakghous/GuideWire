@@ -50,14 +50,14 @@ def need_the_project_python() -> None:
     try:
         import pydantic  # noqa: F401
     except ModuleNotFoundError:
-        raise SystemExit("This python does not have the project's packages (pydantic is missing).
-"
-                         "Run it with the project's python instead, from C:\dev\GuideWire:
-"
-                         "    venv\Scripts\activate
-    python scripts/vision_check.py --overlay --seconds 40
-"
-                         "or:  venv\Scripts\python.exe scripts/vision_check.py --overlay --seconds 40") from None
+        lines = [
+            "This python does not have the project's packages (pydantic is missing).",
+            "Run it with the project's python instead, from C:\\dev\\GuideWire:",
+            "    venv\\Scripts\\activate",
+            "    python scripts/vision_check.py --overlay --seconds 40",
+            "or:  venv\\Scripts\\python.exe scripts/vision_check.py --overlay --seconds 40",
+        ]
+        raise SystemExit("\n".join(lines)) from None
 
 
 def main(argv=None) -> int:

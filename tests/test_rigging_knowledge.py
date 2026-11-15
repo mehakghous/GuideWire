@@ -185,7 +185,7 @@ def test_houdini_entries_cite_the_official_docs_and_say_the_forum_advice_is_comm
                         "houdini.fbx_export_character", "houdini.fbx_export_animation",
                         "houdini.normalize_capture_weights", "houdini.mirror_capture_weights", "houdini.delta_mush",
                         "houdini.retarget_animation", "houdini.mocap_import", "houdini.mocap_rest_pose", "houdini.configure_rig_vis",
-                        "houdini.gltf_export", "houdini.rotation_order"}
+                        "houdini.gltf_export", "houdini.rotation_order", "houdini.follow_path"}
     assert all(s.tier == "official" for e in ids.values() for s in e.facts)
     ts = ids["houdini.capture_weights"].troubleshooting
     assert {t["tier"] for t in ts} == {"community"} and all(k.sources[s]["url"].startswith("https://www.sidefx.com/forum") for t in ts for s in t["sources"])

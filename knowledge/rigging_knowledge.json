@@ -1218,6 +1218,54 @@
       "url": "https://www.sidefx.com/docs/houdini/io/gltf.html",
       "tier": "official",
       "version": "Houdini 22.0 page header, fetched 2026-11-15"
+    },
+    "B62": {
+      "title": "Blender manual: Follow Path constraint",
+      "url": "https://docs.blender.org/manual/en/latest/animation/constraints/relationship/follow_path.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B63": {
+      "title": "Blender manual: Bendy Bones",
+      "url": "https://docs.blender.org/manual/en/latest/animation/armatures/bones/properties/bendy_bones.html",
+      "tier": "official",
+      "version": "manual main, read from the local manual copy retrieved 2026-10-16"
+    },
+    "B64": {
+      "title": "Blender manual: Alembic",
+      "url": "https://docs.blender.org/manual/en/latest/files/import_export/alembic.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "B65": {
+      "title": "Blender manual: Universal Scene Description (USD)",
+      "url": "https://docs.blender.org/manual/en/latest/files/import_export/usd.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "B66": {
+      "title": "Blender manual: Lattice modifier",
+      "url": "https://docs.blender.org/manual/en/latest/modeling/modifiers/deform/lattice.html",
+      "tier": "official",
+      "version": "manual latest (page header Blender 5.3 Manual), read 2026-11-15; wording read from a long page and paraphrased"
+    },
+    "M79": {
+      "title": "Maya: Attach an object to a motion path",
+      "url": "https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Animation/files/GUID-A8D2F488-8215-46F2-8D96-9503E2D0669A.htm",
+      "tier": "official",
+      "version": "Maya 2024 help"
+    },
+    "M80": {
+      "title": "Maya: Edit lattice deformers",
+      "url": "https://help.autodesk.com/cloudhelp/2025/ENU/Maya-CharacterAnimation/files/GUID-D97BD9B6-890E-4066-940F-69E15786EF43.htm",
+      "tier": "official",
+      "version": "Maya 2025 help"
+    },
+    "H57": {
+      "title": "SideFX Houdini docs: Follow Path shelf tool",
+      "url": "https://www.sidefx.com/docs/houdini/shelf/constraintpath.html",
+      "tier": "official",
+      "version": "Houdini 22.0 page header, fetched 2026-11-15"
     }
   },
   "entries": [
@@ -13664,6 +13712,560 @@
           "tier": "official",
           "sources": [
             "H12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.follow_path",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "LOCO-04"
+      ],
+      "phrases": [
+        "make an object follow a curve",
+        "follow path constraint",
+        "move along a path in blender",
+        "bone follows a curve",
+        "offset factor on the path",
+        "path constraint ctrl p"
+      ],
+      "ui": [
+        {
+          "path": "Bone / Object Constraints > Follow Path (or Ctrl-P > Path Constraint)",
+          "tier": "official",
+          "source": "B62"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the object, add the curve to the selection, press Ctrl-P and click Path Constraint for a quick setup.",
+          "tier": "official",
+          "sources": [
+            "B62"
+          ]
+        },
+        {
+          "text": "Animate the Offset Factor (0 to 1) or the curve's evaluation time to move along the curve, and turn on Follow Curve to rotate with it.",
+          "tier": "official",
+          "sources": [
+            "B62"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Follow Path constraint positions an object or bone on a curve, by a frame number (the curve's evaluation time with an optional Offset) or by an Offset Factor between 0 and 1.",
+          "tier": "official",
+          "sources": [
+            "B62"
+          ]
+        },
+        {
+          "text": "Animating these properties moves the object or bone along the curve; it can also rotate to match the curve's direction. Use cases include cameras on rails, vehicles on roads and boxes on conveyor belts.",
+          "tier": "official",
+          "sources": [
+            "B62"
+          ]
+        },
+        {
+          "text": "It can be combined with a tracking constraint, for example to keep a moving camera pointed at an object.",
+          "tier": "official",
+          "sources": [
+            "B62"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation: the object travels along the curve.",
+          "tier": "official",
+          "sources": [
+            "B62"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.bendy_bones",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "CTRL-09"
+      ],
+      "phrases": [
+        "bendy bones",
+        "b-bones in blender",
+        "segments on a bone",
+        "bend the spine with one bone",
+        "curved bone for a limb",
+        "bone segments twist"
+      ],
+      "ui": [
+        {
+          "path": "Properties editor > Bone tab > Bendy Bones",
+          "tier": "official",
+          "source": "B63"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the bone and open Bone > Bendy Bones, then raise Segments so the bone can bend.",
+          "tier": "official",
+          "sources": [
+            "B63"
+          ]
+        },
+        {
+          "text": "Shape the curve with the bone's properties or through the neighbouring bones (its parent and first child).",
+          "tier": "official",
+          "sources": [
+            "B63"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Bendy Bones (B-Bones) are an easy way to replace long chains of many small rigid bones; a common use is spine columns or facial bones.",
+          "tier": "official",
+          "sources": [
+            "B63"
+          ]
+        },
+        {
+          "text": "Blender treats the bone as a section of a Bézier curve through the joints; each of the Segments bends and rolls to follow the curve, and handles at either end control the curvature.",
+          "tier": "official",
+          "sources": [
+            "B63"
+          ]
+        },
+        {
+          "text": "The USD exporter does not support bendy bones.",
+          "tier": "official",
+          "sources": [
+            "B65"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The bone bends smoothly in Pose Mode instead of staying straight.",
+          "tier": "official",
+          "sources": [
+            "B63"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.alembic_export",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "EXPT-05"
+      ],
+      "phrases": [
+        "export alembic from blender",
+        "bake the animation to alembic",
+        "alembic does not export the armature",
+        "transform samples geometry samples",
+        "cache the deformation"
+      ],
+      "ui": [
+        {
+          "path": "File > Export > Alembic (.abc)",
+          "tier": "official",
+          "source": "B64",
+          "note": "The page was read through a summary, so the wording is paraphrased and the menu path is not from the page."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Because Alembic does not support armatures, the deformed result is exported as animated geometry.",
+          "tier": "official",
+          "sources": [
+            "B64"
+          ]
+        },
+        {
+          "text": "Set Transform Samples and Geometry Samples if the animation needs sub-frame sampling.",
+          "tier": "official",
+          "sources": [
+            "B64"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Alembic has no support for particle systems, and does not support armatures either.",
+          "tier": "official",
+          "sources": [
+            "B64"
+          ]
+        },
+        {
+          "text": "Transform Samples sets the number of times per frame at which animated transformations are sampled and written to Alembic; Geometry Samples does the same for animated geometry.",
+          "tier": "official",
+          "sources": [
+            "B64"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Import the .abc elsewhere: the mesh moves as it did in Blender.",
+          "tier": "official",
+          "sources": [
+            "B64"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.usd_export",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "EXPT-04"
+      ],
+      "phrases": [
+        "export usd from blender",
+        "usd skeleton export",
+        "export armatures to usd",
+        "usdskel export",
+        "export the animation as usd"
+      ],
+      "ui": [
+        {
+          "path": "File > Export > Universal Scene Description (Export Options: Animation, Armatures)",
+          "tier": "official",
+          "source": "B65",
+          "note": "The page was read through a summary, so the wording is paraphrased and the menu path is not from the page."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "In the USD export options tick Animation to write the whole frame range.",
+          "tier": "official",
+          "sources": [
+            "B65"
+          ]
+        },
+        {
+          "text": "Tick Armatures to export armatures and meshes with Armature modifiers as USD skeletons and skinned meshes, and Only Deform Bones if you want only deform bones and their parents.",
+          "tier": "official",
+          "sources": [
+            "B65"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "When Animation is checked the entire scene frame range is exported; when unchecked only the current frame is.",
+          "tier": "official",
+          "sources": [
+            "B65"
+          ]
+        },
+        {
+          "text": "Armatures exports armatures and meshes with Armature modifiers as USD skeletons and skinned meshes; bendy bones are not supported and modifiers other than Armature are not applied.",
+          "tier": "official",
+          "sources": [
+            "B65"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The USD file contains a skeleton and skinned mesh.",
+          "tier": "official",
+          "sources": [
+            "B65"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "blender.lattice_modifier",
+      "apps": [
+        "blender"
+      ],
+      "features": [
+        "SKIN-12"
+      ],
+      "phrases": [
+        "lattice deform in blender",
+        "lattice modifier",
+        "deform a mesh with a lattice",
+        "squash and stretch with a lattice",
+        "lattice deform parent"
+      ],
+      "ui": [
+        {
+          "path": "Modifiers > Lattice (or Ctrl-P > Lattice Deform)",
+          "tier": "official",
+          "source": "B66",
+          "note": "The page was read through a summary, so the wording is paraphrased."
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Add a Lattice object around the mesh and add a Lattice modifier to the mesh, picking the lattice as its Object.",
+          "tier": "official",
+          "sources": [
+            "B66"
+          ]
+        },
+        {
+          "text": "Or parent the mesh to the lattice with the Lattice Deform option to add the modifier quickly; then move the lattice points.",
+          "tier": "official",
+          "sources": [
+            "B66"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Lattice modifier deforms the base object according to the shape of a Lattice object; it can quickly be added to selected objects by parenting them with the Lattice Deform option.",
+          "tier": "official",
+          "sources": [
+            "B66"
+          ]
+        },
+        {
+          "text": "Options are the lattice Object, a Vertex Group to limit the effect (with Invert) and a Strength factor that blends between original and deformed positions.",
+          "tier": "official",
+          "sources": [
+            "B66"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Moving the lattice points bends the mesh.",
+          "tier": "official",
+          "sources": [
+            "B66"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.motion_path",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "LOCO-04"
+      ],
+      "phrases": [
+        "attach to motion path",
+        "move an object along a curve in maya",
+        "motion path in maya",
+        "follow the curve with front axis and up axis",
+        "bank on the motion path"
+      ],
+      "ui": [
+        {
+          "path": "Animation menu set: Constrain > Motion Paths > Attach to Motion Path",
+          "tier": "official",
+          "source": "M79"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Select the object, then Shift-select the curve last.",
+          "tier": "official",
+          "sources": [
+            "M79"
+          ]
+        },
+        {
+          "text": "Choose Constrain > Motion Paths > Attach to Motion Path, set the Time range (Time Slider is recommended), turn Follow on and set the Front and Up axes; Bank is optional.",
+          "tier": "official",
+          "sources": [
+            "M79"
+          ]
+        },
+        {
+          "text": "Click Attach.",
+          "tier": "official",
+          "sources": [
+            "M79"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Attach to Motion Path is in the Animation menu set under Constrain > Motion Paths.",
+          "tier": "official",
+          "sources": [
+            "M79"
+          ]
+        },
+        {
+          "text": "The options are the Time range (Time Slider or Start/End), Follow (the object orients along the curve), Front Axis, Up Axis and Bank.",
+          "tier": "official",
+          "sources": [
+            "M79"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "Play the animation: the object travels along the curve and, with Follow on, turns with it.",
+          "tier": "official",
+          "sources": [
+            "M79"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "maya.lattice_deformer",
+      "apps": [
+        "maya"
+      ],
+      "features": [
+        "SKIN-12"
+      ],
+      "phrases": [
+        "lattice deformer in maya",
+        "edit the lattice",
+        "reset the lattice",
+        "remove lattice tweaks",
+        "ffd lattice",
+        "lattice resolution"
+      ],
+      "ui": [
+        {
+          "path": "Deform > Lattice; Deform > (Edit) Lattice > Reset Lattice / Remove Lattice Tweaks",
+          "tier": "official",
+          "source": "M80"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Move, rotate or scale the lattice handle (or its points) to change the deformation.",
+          "tier": "official",
+          "sources": [
+            "M80"
+          ]
+        },
+        {
+          "text": "Use Deform > (Edit) Lattice > Reset Lattice to start again, or Remove Lattice Tweaks to drop the points you changed.",
+          "tier": "official",
+          "sources": [
+            "M80"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "Deform > (Edit) Lattice > Reset Lattice and Remove Lattice Tweaks edit an existing lattice deformer; moving, rotating or scaling the handle changes the effect of the deformation.",
+          "tier": "official",
+          "sources": [
+            "M80"
+          ]
+        },
+        {
+          "text": "The lattice performance can be set to On, Off or Interactive, and the Lattice Resolution to Per Node, Global or Interactive in the Performance Settings.",
+          "tier": "official",
+          "sources": [
+            "M80"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The deformed object follows the lattice.",
+          "tier": "official",
+          "sources": [
+            "M80"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houdini.follow_path",
+      "apps": [
+        "houdini"
+      ],
+      "features": [
+        "LOCO-04"
+      ],
+      "phrases": [
+        "follow path in houdini",
+        "make an object follow a curve in houdini",
+        "follow path shelf tool",
+        "constraint path",
+        "keep position on the constraint"
+      ],
+      "ui": [
+        {
+          "path": "Shelf > Constraints tab > Follow Path",
+          "tier": "official",
+          "source": "H57"
+        }
+      ],
+      "prerequisites": [],
+      "outline": [
+        {
+          "text": "Draw a curve with the Draw Curve tool (Create tab).",
+          "tier": "official",
+          "sources": [
+            "H57"
+          ]
+        },
+        {
+          "text": "On the Constraints tab click Follow Path, select the object and press Enter, then select the path and press Enter.",
+          "tier": "official",
+          "sources": [
+            "H57"
+          ]
+        },
+        {
+          "text": "Keep Position keeps the current object position when applying the constraint; optionally pick a look-at target and an up target.",
+          "tier": "official",
+          "sources": [
+            "H57"
+          ]
+        }
+      ],
+      "facts": [
+        {
+          "text": "The Follow Path shelf tool creates or reuses a constraints CHOP network inside the object and adds a Follow Path CHOP.",
+          "tier": "official",
+          "sources": [
+            "H57"
+          ]
+        },
+        {
+          "text": "When Keep position is on, applying the constraint will not change the current object position; pressing Enter without a selection continues without a look-at target or uses the default up vector.",
+          "tier": "official",
+          "sources": [
+            "H57"
+          ]
+        }
+      ],
+      "verify": [
+        {
+          "text": "The object moves along the curve over time.",
+          "tier": "official",
+          "sources": [
+            "H57"
           ]
         }
       ]

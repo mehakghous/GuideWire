@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
+from pathlib import Path
 from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
@@ -294,17 +295,37 @@ Use the node label as the video shows it, without internal prefixes. When the tu
 """
 
 
-def _knowledge_notes(profile: AppProfile) -> str:
-    """v6: the menu paths and option names the researched documentation gives for this application (knowledge/rigging_knowledge.json). They help the model spell what it
-    sees the way the application does, and make clear that anything neither seen nor listed must not be written. Official names only; community advice is not put in a prompt."""
-    from .rigging_knowledge import load as knowledge
+PROMPT_NAMES_PATH = Path(__file__).resolve().parent.parent / "knowledge" / "prompt_names.json"
+
+
+def menu_lines(app: str, entries) -> list[str]:
+    """The menu-location lines the knowledge base gives for one application, as the prompt prints them (an entry's menu path and its official option names)."""
     lines = []
-    for e in knowledge().entries:
-        if profile.name not in e.apps:
+    for e in entries:
+        if app not in e.apps:
             continue
         for u in e.ui:
             opts = u.get("options") if u.get("options_tier") == "official" else None
             lines.append(f"  - {u['path']}" + (f"  [options: {', '.join(opts)}]" if opts else ""))
+    return lines
+
+
+def frozen_menu_lines(app: str) -> list[str]:
+    """The lines the prompt uses. They come from the FROZEN snapshot `knowledge/prompt_names.json`, not from the live knowledge base: the knowledge base grows (every new entry adds paths), and a
+    prompt that changes with it would silently invalidate cached runs and make earlier measurements describe a different prompt. Refresh deliberately with `python scripts/freeze_prompt_names.py`,
+    and say so in the report, because that changes the prompt text. Without the snapshot file the live knowledge base is used (so a fresh checkout still works)."""
+    import json
+    try:
+        return list(json.loads(PROMPT_NAMES_PATH.read_text(encoding="utf-8"))["apps"].get(app, []))
+    except (OSError, ValueError, KeyError):
+        from .rigging_knowledge import load as knowledge
+        return menu_lines(app, knowledge().entries)
+
+
+def _knowledge_notes(profile: AppProfile) -> str:
+    """v6: the menu paths and option names the researched documentation gives for this application (knowledge/rigging_knowledge.json). They help the model spell what it
+    sees the way the application does, and make clear that anything neither seen nor listed must not be written. Official names only; community advice is not put in a prompt."""
+    lines = frozen_menu_lines(profile.name)
     if not lines:
         return ""
     return (f"""

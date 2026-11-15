@@ -105,6 +105,13 @@ The guide box was redesigned: 300 px wide instead of 420, goal + keys + the next
 
 Still not done: the instruction box and the pulsing circle were drawn but not seen by me (my screen captures do not include them); the learner's own run (M7-M11) is the check.
 
+### Fourth round: the toolbar highlight that jumped between tools, the animated hands, Back
+
+* **Scale highlighted together with another tool, then random tools.** Reproduced against a throw-away Blender: the toolbar cell under the mouse is lighter than the others, so it was not found, the column was cut in two and the longer half won; tools were then named from the wrong cells (with the mouse over "Move" the Scale highlight landed on the cell of another tool). `vision/toolbar.py` now fills in one or two missing cells between two chains of equally sized cells (a smaller header button above the column is never joined). With the same hover the highlight stays on Scale. Test: `tests/test_vision.py::test_a_hovered_toolbar_cell_that_is_not_found_does_not_cut_the_column_in_two`. This is Umaima's file: tell her.
+* **The run ended after 60 s** because `scripts/vision_check.py` stops after `--seconds` (30 by default). Use `--seconds 600`.
+* **Animated hands in the guide** (`InputHint`): a mouse with the left or right button lit (a drag adds a moving arrow, a hover a wave), then the keys as key caps lit one after the other, looping, with the step's events in order ("Left click, Hover, Left click" for Add > Mesh > Cylinder; "Right click" for a context menu; "Press Ctrl + P"). The events come from the step's own actions (`app/guidance.inputs_for`).
+* **Back button** in the guide (previous step), next to Done and Skip.
+
 ## Not covered, and why
 - **Maya and Houdini**: their probes are prototypes never run inside those applications, so M2 to M6 are for Blender only. The bridge itself is application-neutral (`VisionBridge(...).tick(engine, "maya")`).
 - **A second monitor or a different scaling**: not tested.

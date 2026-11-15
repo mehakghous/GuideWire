@@ -35,6 +35,7 @@ class Tick:
     hint: str = ""                               # "Click Add, then Mesh > Cylinder": what to do next, for the highlight's label and the instruction box
     pointer: bool = False                        # rect is only WHERE to look (a region of the screen), not a found element: draw a pulsing pointer, not a box
     keys: tuple[str, ...] = ()                   # keys to press, shown as key caps
+    inputs: tuple[tuple[str, str], ...] = ()     # mouse and keyboard events in order, for the animated hint
 
 
 Rect4 = tuple[int, int, int, int]               # (x, y, width, height) in physical screen pixels
@@ -77,6 +78,7 @@ class Look:
     hint: str = ""
     pointer: bool = False
     keys: tuple[str, ...] = ()
+    inputs: tuple[tuple[str, str], ...] = ()
     problem: str | None = None                   # a plain-words reason nothing could be seen
     problem_state: str = "error"                 # unavailable | no_window | error
 
@@ -342,7 +344,7 @@ class VisionBridge:
         except Exception as e:                           # a vision failure must never break the session
             return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.", keys=keys)
         hint = describe(plan, found, matched, complete, step)
-        return Look(target, rect, complete, ambiguous, observed, window, hint=hint, pointer=pointer, keys=keys)
+        return Look(target, rect, complete, ambiguous, observed, window, hint=hint, pointer=pointer, keys=keys, inputs=plan.inputs)
 
     # ---- judging (touches the session: main thread)
     def apply(self, engine, look: Look) -> Tick:
@@ -350,17 +352,17 @@ class VisionBridge:
         if engine.current_step() is None:
             return Tick("idle", "No step is active.")
         if look.problem is not None:
-            return Tick(look.problem_state, look.problem, look.target, keys=look.keys)
+            return Tick(look.problem_state, look.problem, look.target, keys=look.keys, inputs=look.inputs)
         verdict = engine.check(look.observed or {})
         status = verdict.status if verdict is not None else None
         advanced = bool(self.auto_advance and engine.auto_check(look.observed or {}))
         if advanced:
-            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.pointer, look.keys)
+            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.pointer, look.keys, look.inputs)
         if look.rect is None and look.target and not look.keys:
             msg = "Several places on the screen match; open the menu and it will narrow down." if look.ambiguous else "Looking for that on the screen."
         else:
             msg = "Watching the screen."
-        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.pointer, look.keys)
+        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.pointer, look.keys, look.inputs)
 
     def tick(self, engine, app: str | None = None) -> Tick:
         """Look and judge in one call (tests, the live check script). Never raises."""

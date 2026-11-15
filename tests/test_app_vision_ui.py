@@ -333,3 +333,31 @@ def test_closing_the_window_closes_the_overlay_and_the_box(env):
     box = screen.panel
     screen.close_guides()
     assert overlay.closed and screen.panel is None and box.isHidden()
+
+
+def test_the_guide_animates_the_mouse_and_keys_of_the_step_and_has_a_back_button(env):
+    screen, engine, _svc, _o = env
+    p = screen._ensure_panel()
+    p.set_content("GuideWire · step 1 of 2", "Delete everything", [], "Press A then Delete", ("A", "Delete"), (("click", "right"), ("keys", "Ctrl+P"), ("drag", "left")))
+    h = p.input_hint
+    assert not h.isHidden() and h.label() == "Right click"
+    for _ in range(h.HOLD_TICKS):
+        h.advance()
+    assert h.label() == "Press Ctrl + P"
+    for _ in range(h.HOLD_TICKS):
+        h.advance()
+    assert h.label() == "Hold the left button and drag"
+    for _ in range(h.HOLD_TICKS):
+        h.advance()
+    assert h.label() == "Right click"                          # it loops
+    h.grab()                                                   # painting every kind of event does not raise
+    for i in range(3):
+        h.index = i
+        h.grab()
+    p.set_content("GuideWire", "x", [], "", (), ())
+    assert h.isHidden() and not h.timer.isActive()
+    engine.complete()
+    screen.refresh()
+    p.back_button.click()
+    assert engine.position == 1
+    screen.close()

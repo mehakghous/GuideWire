@@ -38,11 +38,17 @@ class Plan:
     anchor: str = "center"                     # where in the region the pointer goes: center | bottom-left
     mode_hint: str | None = None               # the mode the step starts in (the toolbar differs per mode)
     scene_items: tuple[str, ...] = ()          # things in the 3D viewport the step names
+    inputs: tuple[tuple[str, str], ...] = ()   # the mouse and keyboard events in order, for the animated hint
 
 
 def keys_of(step: Step) -> tuple[str, ...]:
     """The keys the step says to press, in order, as written on a keyboard ("A", "Delete", "Ctrl+P")."""
     out: list[str] = []
+    for a in getattr(step, "actions", []) or []:                       # the step's own key actions say it exactly (["Ctrl", "P"] = Ctrl+P)
+        if a.verb == "press_keys" and a.keys:
+            out.append("+".join(k if len(k) > 1 else k.upper() for k in a.keys))
+    if out:
+        return tuple(out)
     for h in step.how_to:
         for m in _KEY.finditer(h.text):
             parts = [p.strip() for p in m.group(1).split("+") if p.strip()]
@@ -50,6 +56,29 @@ def keys_of(step: Step) -> tuple[str, ...]:
                 continue
             out.append("+".join(p.upper() if len(p) == 1 else p.capitalize() for p in parts))
     return tuple(out)
+
+
+def inputs_for(step: Step) -> tuple[tuple[str, str], ...]:
+    """The mouse and keyboard events of a step in order, for the animated hint: ("click", "left" | "right" | "hover"), ("drag", "left"), ("keys", "Ctrl+P"), ("type", "10"). At most six."""
+    out: list[tuple[str, str]] = []
+    for a in step.actions:
+        ui = (a.ui_element or "").lower()
+        if a.verb == "press_keys":
+            if a.keys:
+                out.append(("keys", "+".join(k if len(k) > 1 else k.upper() for k in a.keys)))
+        elif a.verb == "drag":
+            out.append(("drag", "left"))
+        elif a.verb == "open_menu" and ui.startswith("viewport context menu"):
+            out += [("click", "right"), ("click", "left")]
+        elif a.verb == "open_menu":
+            out += [("click", "left"), ("click", "hover"), ("click", "left")] if ui.count(">") >= 2 else [("click", "left")]
+        elif a.verb == "set_value":
+            out.append(("type", a.value or ""))
+        elif ui:
+            out.append(("click", "left"))
+        elif a.verb in ("click", "select"):
+            out.append(("click", "left"))
+    return tuple(out[:6])
 
 
 def _is_scene_item(ui: str) -> bool:
@@ -91,7 +120,7 @@ def plan_for(step: Step) -> Plan:
     elif region is None and (scene or keys or any("viewport" in (h.text or "").lower() for h in step.how_to)):
         region = "viewport"
     mode = next((p.target for p in step.start_state if p.kind == "mode"), None)
-    return Plan(tuple(targets), keys, region, anchor, mode, tuple(scene))
+    return Plan(tuple(targets), keys, region, anchor, mode, tuple(scene), inputs_for(step))
 
 
 def describe(plan: Plan, found: Target | None, matched: str = "", complete: bool = False, step: Step | None = None) -> str:

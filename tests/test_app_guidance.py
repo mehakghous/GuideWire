@@ -126,3 +126,14 @@ def test_a_tool_is_looked_up_in_the_toolbar_of_the_steps_own_mode(S):
     svc = Svc()
     vb.VisionBridge(lambda app: svc, window_finder=lambda a: (0, 0, 1000, 700)).look(S["s05"], "blender")
     assert ("Toolbar > Scale", True, "EDIT_MESH") in svc.asked
+
+
+def test_the_mouse_and_keyboard_events_of_a_step_come_from_its_actions_in_order(S):
+    from app.guidance import inputs_for
+    assert inputs_for(S["s01"]) == (("keys", "A"), ("keys", "Delete"))
+    assert inputs_for(S["s02"]) == (("click", "left"), ("click", "hover"), ("click", "left"))      # Add, hover Mesh (the submenu opens), Cylinder
+    assert inputs_for(S["s05"]) == (("click", "left"), ("drag", "left"))
+    assert inputs_for(S["s07"])[-1] == ("type", "10")
+    assert inputs_for(S["s14"])[:2] == (("click", "right"), ("click", "left"))                    # the context menu is a right click
+    assert ("keys", "Ctrl+P") in inputs_for(S["s16"])
+    assert plan_for(S["s16"]).keys == ("Ctrl+P",)

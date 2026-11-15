@@ -63,7 +63,7 @@ def show_box(panel, engine, t, look, qapp, dismissed) -> None:
         if panel is not None:
             panel.hide()
         return
-    panel.set_content(f"GuideWire \u00b7 step {engine.position} of {len(engine.steps)}", step.goal, [h.text for h in step.how_to], t.hint)
+    panel.set_content(f"GuideWire \u00b7 step {engine.position} of {len(engine.steps)}", step.goal, [h.text for h in step.how_to], t.hint, t.keys, t.inputs)
     scr = qapp.primaryScreen()
     a = scr.availableGeometry()
     x, y, _where = panel_position(look.window_rect, (a.x(), a.y(), a.width(), a.height()), (panel.width(), panel.height()), scr.devicePixelRatio())
@@ -130,6 +130,7 @@ def main(argv=None) -> int:
         panel = InstructionPanel()
         panel.done_clicked.connect(lambda: engine.complete() if engine.current_step() is not None else None)
         panel.skip_clicked.connect(lambda: engine.skip() if engine.current_step() is not None else None)
+        panel.back_clicked.connect(lambda: engine.back() if engine.current_step() is not None and engine.position > 1 else None)
         panel.closed.connect(lambda: dismissed.append(engine.current_step().id) if engine.current_step() is not None else None)
     step = engine.current_step()
     print(f"Tutorial {a.file.name}, app {a.app}. Step {step.id}: {step.goal}")

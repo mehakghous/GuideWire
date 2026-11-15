@@ -12,7 +12,8 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import QRectF, Qt, QTimer, pyqtSignal
+from PyQt6.QtGui import QColor, QFont, QPainter, QPen
 from PyQt6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 
 Rect4 = tuple[int, int, int, int]
@@ -165,16 +166,113 @@ def panel_position(window: Rect4 | None, screen: Rect4, size: tuple[int, int], s
     return clamp_x(bx + bw - w - 12), max(sy, by + bh - h - 12), "inside"
 
 
+class InputHint(QWidget):
+    """A small animation of what the hands do, step by step: a mouse with the LEFT or RIGHT button lit (a drag adds a moving arrow, a hover a wave), then the keys as key caps, lit one after the other.
+    The events come from the step's own actions (`app.guidance.inputs_for`); it loops until the step changes. It draws only; it never touches the application."""
+    TICK_MS = 450
+    HOLD_TICKS = 4                                        # one event is shown for 4 ticks (1.8 s)
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.events: tuple[tuple[str, str], ...] = ()
+        self.index = 0
+        self.phase = 0
+        self.setFixedHeight(60)
+        self.timer = QTimer(self)
+        self.timer.setInterval(self.TICK_MS)
+        self.timer.timeout.connect(self.advance)
+
+    def set_events(self, events: tuple[tuple[str, str], ...]) -> None:
+        if tuple(events) == self.events:
+            return
+        self.events, self.index, self.phase = tuple(events), 0, 0
+        self.setVisible(bool(events))
+        if events and not self.timer.isActive():
+            self.timer.start()
+        elif not events:
+            self.timer.stop()
+        self.update()
+
+    def advance(self) -> None:
+        if not self.events:
+            return
+        self.phase += 1
+        if self.phase >= self.HOLD_TICKS:
+            self.phase, self.index = 0, (self.index + 1) % len(self.events)
+        self.update()
+
+    def label(self) -> str:
+        if not self.events:
+            return ""
+        kind, what = self.events[self.index]
+        return {"click": {"left": "Left click", "right": "Right click", "hover": "Hover (the submenu opens)"}.get(what, "Click"), "drag": "Hold the left button and drag",
+                "keys": "Press " + what.replace("+", " + "), "type": f"Type {what}"}.get(kind, "")
+
+    def paintEvent(self, _event) -> None:  # noqa: N802 (Qt override)
+        if not self.events:
+            return
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        kind, what = self.events[self.index]
+        lit = self.phase % 2 == 0
+        amber = QColor(255, 190, 0)
+        h = self.height()
+        if kind in ("click", "drag"):
+            self._mouse(p, 4, 4, h - 8, what if kind == "click" else "left", lit, moving=kind == "drag")
+            x_text = 4 + (h - 8) * 0.7 + 14
+        else:
+            x_text = 6
+            parts = what.split("+") if kind == "keys" else [what]
+            x = 6
+            p.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+            for i, k in enumerate(parts):
+                w = max(30, 12 + 8 * len(k))
+                on = (self.phase // 2 == min(i, 1)) if len(parts) > 1 else lit
+                p.setPen(QPen(QColor(17, 17, 17)))
+                p.setBrush(amber if on else QColor(242, 242, 242))
+                p.drawRoundedRect(QRectF(x, 10, w, 34), 6, 6)
+                p.drawText(QRectF(x, 10, w, 34), Qt.AlignmentFlag.AlignCenter, k)
+                x += w + 8
+            x_text = x + 6
+        p.setPen(QColor(242, 242, 242))
+        p.setFont(QFont("Segoe UI", 9))
+        p.drawText(QRectF(x_text, 0, self.width() - x_text - 34, h), Qt.AlignmentFlag.AlignVCenter | Qt.TextFlag.TextWordWrap, self.label())
+        p.setPen(QColor(150, 158, 172))
+        p.drawText(QRectF(self.width() - 34, 0, 30, h), Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight, f"{self.index + 1}/{len(self.events)}")
+
+    def _mouse(self, p: QPainter, x: float, y: float, h: float, button: str, lit: bool, moving: bool = False) -> None:
+        w = h * 0.7
+        amber, body = QColor(255, 190, 0), QColor(40, 44, 52)
+        p.setPen(QPen(QColor(230, 230, 230), 2))
+        p.setBrush(body)
+        p.drawRoundedRect(QRectF(x, y, w, h), w / 2.2, w / 2.2)
+        top = h * 0.42
+        for side, rx in (("left", x), ("right", x + w / 2)):
+            on = lit and button == side
+            p.setBrush(amber if on else body)
+            p.setPen(QPen(QColor(230, 230, 230), 1.5))
+            p.drawRoundedRect(QRectF(rx + 1, y + 1, w / 2 - 2, top), 6, 6)
+        p.setBrush(QColor(230, 230, 230))
+        p.drawRoundedRect(QRectF(x + w / 2 - 2, y + 6, 4, top * 0.6), 2, 2)       # the wheel
+        if moving or button == "hover":
+            p.setPen(QPen(amber, 3))
+            dx = 6 + 6 * (self.phase % 4)
+            p.drawLine(int(x + w + 4), int(y + h * 0.7), int(x + w + 4 + dx), int(y + h * 0.7))
+            p.drawLine(int(x + w + 4 + dx), int(y + h * 0.7), int(x + w + dx - 2), int(y + h * 0.7 - 5))
+            p.drawLine(int(x + w + 4 + dx), int(y + h * 0.7), int(x + w + dx - 2), int(y + h * 0.7 + 5))
+
+
 class InstructionPanel(QWidget):
     """A small guide that sits at the side like a browser extension: the step's goal, the keys to press, and the next click, in a box you can
     DRAG (by its header), RESIZE (by the corner grip), MINIMIZE (the dash: it becomes a thin tab that is still draggable; click the tab to open it again) and close (the cross).
     It is placed once, outside the application when there is room; as soon as you move or resize it yourself it stays where you put it."""
     done_clicked = pyqtSignal()
+    back_clicked = pyqtSignal()
     skip_clicked = pyqtSignal()
     closed = pyqtSignal()
 
-    NORMAL_SIZE = (300, 150)
-    MIN_SIZE = (220, 110)
+    NORMAL_SIZE = (300, 190)
+    MIN_SIZE = (220, 130)
     TAB_SIZE = (190, 26)
 
     def __init__(self) -> None:
@@ -218,18 +316,24 @@ class InstructionPanel(QWidget):
         self.more_button.setObjectName("tool")
         self.done_button = QPushButton("Done")
         self.skip_button = QPushButton("Skip")
+        self.back_button = QPushButton("Back")
+        self.back_button.setToolTip("Go back to the previous step")
+        self.input_hint = InputHint()
+        self.input_hint.setVisible(False)
         self.grip = QSizeGrip(self)
         self.minimize_button.clicked.connect(self.toggle_minimized)
         self.close_button.clicked.connect(self._close)
         self.more_button.clicked.connect(self._toggle_details)
         self.done_button.clicked.connect(self.done_clicked.emit)
         self.skip_button.clicked.connect(self.skip_clicked.emit)
+        self.back_button.clicked.connect(self.back_clicked.emit)
         top = QHBoxLayout()
         top.addWidget(self.header, 1)
         top.addWidget(self.minimize_button)
         top.addWidget(self.close_button)
         row = QHBoxLayout()
         row.addWidget(self.done_button)
+        row.addWidget(self.back_button)
         row.addWidget(self.skip_button)
         row.addWidget(self.more_button)
         row.addStretch()
@@ -239,6 +343,7 @@ class InstructionPanel(QWidget):
         body.setContentsMargins(0, 0, 0, 0)
         body.setSpacing(4)
         body.addWidget(self.goal)
+        body.addWidget(self.input_hint)
         body.addLayout(self.keys_row)
         body.addWidget(self.hint)
         body.addWidget(self.lines)
@@ -253,7 +358,7 @@ class InstructionPanel(QWidget):
         self.resize(*self.NORMAL_SIZE)
 
     # ---- content
-    def set_content(self, header: str, goal: str, lines: list[str], hint: str, keys: tuple[str, ...] = ()) -> None:
+    def set_content(self, header: str, goal: str, lines: list[str], hint: str, keys: tuple[str, ...] = (), inputs: tuple[tuple[str, str], ...] = ()) -> None:
         self._title = header
         self.header.setText(self._tab_text() if self.minimized else header)
         self.goal.setText(goal)
@@ -263,6 +368,7 @@ class InstructionPanel(QWidget):
             self.lines.setVisible(False)
         self.hint.setText(hint)
         self.hint.setVisible(bool(hint))
+        self.input_hint.set_events(inputs)
         for lab in self._key_labels:
             self.keys_row.removeWidget(lab)
             lab.deleteLater()

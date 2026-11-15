@@ -342,6 +342,7 @@ class SessionScreen(QWidget):
         self._last_window = None
         self._last_hint = ""
         self._last_keys: tuple[str, ...] = ()
+        self._last_inputs: tuple[tuple[str, str], ...] = ()
         self._app = "blender"
         self.watch_box = QCheckBox("Watch my screen and highlight the next click")
         self.watch_box.setToolTip("GuideWire only looks at the application window: it never clicks, types or moves anything.")
@@ -453,6 +454,7 @@ class SessionScreen(QWidget):
             self.panel = InstructionPanel()
             self.panel.done_clicked.connect(lambda: self._do(self.engine.complete))
             self.panel.skip_clicked.connect(lambda: self._do(self.engine.skip))
+            self.panel.back_clicked.connect(lambda: self._do(self.engine.back))
             self.panel.closed.connect(self._panel_closed)
         return self.panel
 
@@ -468,7 +470,7 @@ class SessionScreen(QWidget):
                 self.panel.hide()
             return
         p = self._ensure_panel()
-        p.set_content(f"GuideWire \u00b7 step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys)
+        p.set_content(f"GuideWire \u00b7 step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys, self._last_inputs)
         screen = self.window().screen()
         if screen is None:
             return
@@ -512,7 +514,7 @@ class SessionScreen(QWidget):
             return
         tick = self.bridge.apply(e, look)
         self.watch_label.setText(tick.message)
-        self._last_window, self._last_hint, self._last_keys = look.window_rect, tick.hint, tick.keys
+        self._last_window, self._last_hint, self._last_keys, self._last_inputs = look.window_rect, tick.hint, tick.keys, tick.inputs
         if tick.rect is not None:
             self.guide.show(tick.rect, look.window_rect, pointer=tick.pointer)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
         else:

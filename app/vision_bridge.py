@@ -31,6 +31,7 @@ class Tick:
     ambiguous: bool = False                      # several equally good matches: point at none rather than guess
     verdict: str | None = None                   # met | unmet | unverifiable, for the active step
     advanced: bool = False                       # the step was completed because the application showed it done
+    hint: str = ""                               # "Click Add, then Mesh > Cylinder": what to do next, for the highlight's label and the instruction box
 
 
 Rect4 = tuple[int, int, int, int]               # (x, y, width, height) in physical screen pixels
@@ -70,6 +71,7 @@ class Look:
     ambiguous: bool = False
     observed: dict | None = None
     window_rect: Rect4 | None = None             # the application's window, for the overlay and the "are we covering it" check
+    hint: str = ""
     problem: str | None = None                   # a plain-words reason nothing could be seen
     problem_state: str = "error"                 # unavailable | no_window | error
 
@@ -96,9 +98,30 @@ def app_of(engine) -> str:
 
 
 def default_service_factory(app: str):
-    """The real vision service for an application. Imports are lazy: the app starts without OpenCV, the Windows OCR packages or Windows itself, and says what is missing instead."""
+    """The real vision service for an application. Imports are lazy: the app starts without OpenCV, the Windows OCR packages or Windows itself, and says what is missing instead.
+
+    It reads the screen AFRESH at every tick (`refresh()`): VisionService reuses its last reading while the whole screen changed by less than a small average, and opening a menu changes
+    only a small part of it, so the stale words would hide "Mesh" and "Cylinder" for up to five seconds. A fresh read costs about 0.3 s, and the tick that follows reuses it for `observe`."""
     from vision.service import VisionService
-    return VisionService(app=app)
+
+    class LiveService(VisionService):
+        def refresh(self) -> None:
+            self._cache = {}
+    return LiveService(app=app)
+
+
+def hint_for(target: str | None, matched: str, complete: bool = False) -> str:
+    """Words for the learner about the next click, from the step's UI path and the part of it that was found on screen:
+    "Click Add, then Mesh > Cylinder"; "Open: Add > Mesh > Cylinder" when nothing of the path is visible yet."""
+    parts = [p.strip() for p in (target or "").split(">") if p.strip()]
+    if not parts:
+        return ""
+    low = [p.lower() for p in parts]
+    i = max((n for n, p in enumerate(low) if p == (matched or "").strip().lower()), default=None)
+    if i is None:
+        return "Open: " + " > ".join(parts)
+    rest = parts[i + 1:]
+    return f"Click {parts[i]}" if complete or not rest else f"Click {parts[i]}, then " + " > ".join(rest)
 
 
 def explain(exc: BaseException) -> str:
@@ -159,10 +182,14 @@ class VisionBridge:
         if svc is None:
             return Look(target, problem=self._failed.get(app, "Screen guidance is not available."), problem_state="unavailable")
         window = self.window_rect(app)
-        rect, complete, ambiguous = None, False, False
+        rect, complete, ambiguous, matched = None, False, False, ""
         try:
+            refresh = getattr(svc, "refresh", None)
+            if refresh is not None:
+                refresh()                                # a fresh read: a menu that just opened must show up now
             if target:
                 g = svc.ground(target)
+                matched = getattr(g, "matched", "") or ""
                 if getattr(g.grounding, "status", None) == "ok" and g.rect is not None:
                     rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
                 complete, ambiguous = bool(g.complete), bool(g.ambiguous)
@@ -177,7 +204,7 @@ class VisionBridge:
             return Look(target, window_rect=window, problem=self._failed[app], problem_state="unavailable")
         except Exception as e:                           # a vision failure must never break the session
             return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.")
-        return Look(target, rect, complete, ambiguous, observed, window)
+        return Look(target, rect, complete, ambiguous, observed, window, hint=hint_for(target, matched, complete))
 
     # ---- judging (touches the session: main thread)
     def apply(self, engine, look: Look) -> Tick:
@@ -190,12 +217,12 @@ class VisionBridge:
         status = verdict.status if verdict is not None else None
         advanced = bool(self.auto_advance and engine.auto_check(look.observed or {}))
         if advanced:
-            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True)
+            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint)
         if look.rect is None and look.target:
             msg = "Several places on the screen match; open the menu and it will narrow down." if look.ambiguous else "Looking for that on the screen."
         else:
             msg = "Watching the screen."
-        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False)
+        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint)
 
     def tick(self, engine, app: str | None = None) -> Tick:
         """Look and judge in one call (tests, the live check script). Never raises."""

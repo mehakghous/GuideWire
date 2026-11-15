@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.login)
 
     def closeEvent(self, event) -> None:
-        self.session.guide.close()                 # the screen overlay must not outlive the window
+        self.session.close_guides()                # the screen overlay and the instruction box must not outlive the window
         super().closeEvent(event)
 
     def current_screen(self):

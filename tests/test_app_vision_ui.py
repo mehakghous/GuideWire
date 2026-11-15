@@ -212,3 +212,96 @@ def test_the_geometry_helpers():
     assert vb.side_rect((0, 0, 1920, 1080), 0.3) == (1344, 0, 576, 1080)
     assert vb.side_rect((0, 0, 1920, 1080), 0.3, right=False) == (0, 0, 576, 1080)
     assert vb.side_rect((0, 0, 800, 600), 0.1)[2] == 320                 # never narrower than a usable panel
+
+
+# ---- the label, the instruction box and following the window
+
+def test_the_hint_names_the_next_click_from_the_path_and_what_is_visible():
+    assert vb.hint_for("Add > Mesh > Cylinder", "") == "Open: Add > Mesh > Cylinder"
+    assert vb.hint_for("Add > Mesh > Cylinder", "Add") == "Click Add, then Mesh > Cylinder"
+    assert vb.hint_for("Add > Mesh > Cylinder", "mesh") == "Click Mesh, then Cylinder"
+    assert vb.hint_for("Add > Mesh > Cylinder", "Cylinder", complete=True) == "Click Cylinder"
+    assert vb.hint_for(None, "x") == ""
+
+
+def test_the_highlight_carries_the_hint_as_its_label(env):
+    screen, _e, _svc, overlay = env
+    screen.poll()
+    assert overlay.marks and overlay.marks[0].label == "Click Add, then Mesh > Cylinder" or overlay.marks[0].label.startswith(("Click", "Open"))
+
+
+def test_the_instruction_box_shows_the_goal_how_to_and_hint_outside_the_window_when_there_is_room(env):
+    screen, engine, _svc, _o = env
+    screen.poll()
+    p = screen.panel
+    assert p is not None and not p.isHidden()
+    assert engine.current_step().goal in p.goal.text() and "step 1 of 4" in p.header.text() and p.hint.text()
+    from app.ui.screen_guide import panel_position
+    assert panel_position((0, 0, 1366, 728), (0, 0, 1920, 1080), (420, 200))[2] == "below"
+    assert panel_position((0, 0, 1366, 1000), (0, 0, 1920, 1080), (420, 200))[2] == "beside"
+    assert panel_position((0, 0, 1920, 1080), (0, 0, 1920, 1080), (420, 200))[2] == "inside"
+    assert panel_position(None, (0, 0, 1920, 1080), (420, 200))[2] == "corner"
+    x, y, where = panel_position((100, 50, 1366, 728), (0, 0, 1920, 1080), (420, 200), scale=1.5)       # physical window, logical screen
+    assert where == "below" and y == round(50 / 1.5) + round(728 / 1.5) + 8
+
+
+def test_closing_the_box_hides_it_for_that_step_and_the_next_step_shows_it_again(env):
+    screen, engine, _svc, _o = env
+    screen.poll()
+    screen.panel.close_button.click()
+    assert screen.panel.isHidden() and screen._dismissed_step == "s01"
+    screen.poll()
+    assert screen.panel.isHidden()                                     # still closed for this step
+    engine.complete()
+    screen.refresh()
+    screen.poll()
+    assert not screen.panel.isHidden() and "step 2" in screen.panel.header.text()
+
+
+def test_the_box_can_be_turned_off_and_back_on_and_its_buttons_drive_the_session(env):
+    screen, engine, _svc, _o = env
+    screen.poll()
+    screen.panel_box.setChecked(False)
+    assert screen.panel.isHidden()
+    screen.panel_box.setChecked(True)
+    assert not screen.panel.isHidden()
+    screen.panel.done_button.click()
+    assert engine.current_step().id == "s02"
+    screen.panel.skip_button.click()
+    assert engine.current_step().id == "s03"
+
+
+def test_the_highlight_follows_a_moved_window_and_is_cleared_by_a_resized_one(env):
+    screen, _e, _svc, overlay = env
+    screen.poll()
+    g = screen.guide
+    assert g.follow_window((0, 0, 1920, 1080)) == "same"
+    first = overlay.marks[0].rect
+    assert g.follow_window((30, 40, 1920, 1080)) == "moved"
+    moved = overlay.marks[0].rect
+    assert (moved.x - first.x, moved.y - first.y) == (30, 40) and overlay.covered == Rect(30, 40, 1920, 1080)
+    assert g.follow_window((30, 40, 1000, 700)) == "resized" and overlay.marks == [] and overlay.covered == Rect(30, 40, 1000, 700)
+    assert g.follow_window(None) == "lost" and g.follow_window((0, 0, 10, 10)) == "found"
+
+
+def test_the_fast_timer_asks_for_a_new_look_when_the_window_is_resized(env):
+    screen, _e, _svc, _o = env
+    sizes = [(0, 0, 1920, 1080), (0, 0, 1000, 700)]
+    screen.bridge.window_finder = lambda app: sizes[0]
+    screen.poll()
+    looks = []
+    real = screen.poll
+    screen.poll = lambda: looks.append(1) or real()
+    screen._track()
+    assert looks == []                                                 # nothing changed
+    screen.bridge.window_finder = lambda app: sizes[1]
+    screen._track()
+    assert looks == [1]                                                # resized: look again at once
+
+
+def test_closing_the_window_closes_the_overlay_and_the_box(env):
+    screen, _e, _svc, overlay = env
+    screen.poll()
+    box = screen.panel
+    screen.close_guides()
+    assert overlay.closed and screen.panel is None and box.isHidden()

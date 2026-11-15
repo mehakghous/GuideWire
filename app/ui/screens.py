@@ -13,7 +13,7 @@ from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_editor import EditError, StepEditor
 from ..vision_bridge import app_of, overlaps, side_rect
-from .screen_guide import ScreenGuide
+from .screen_guide import InstructionPanel, ScreenGuide, panel_position
 from .workers import run_call
 
 
@@ -334,11 +334,23 @@ class SessionScreen(QWidget):
         self.timer = QTimer(self)
         self.timer.setInterval(500)
         self.timer.timeout.connect(self.poll)
+        self.track_timer = QTimer(self)                  # cheap and fast: follows the application window (a move carries the highlight, a resize asks for a new look)
+        self.track_timer.setInterval(200)
+        self.track_timer.timeout.connect(self._track)
+        self.panel: InstructionPanel | None = None
+        self._dismissed_step: str | None = None
+        self._last_window = None
+        self._last_hint = ""
+        self._app = "blender"
         self.watch_box = QCheckBox("Watch my screen and highlight the next click")
         self.watch_box.setToolTip("GuideWire only looks at the application window: it never clicks, types or moves anything.")
         self.watch_box.setChecked(True)
         self.watch_box.setVisible(False)
         self.watch_box.toggled.connect(lambda _on: self._sync_timer())
+        self.panel_box = QCheckBox("Show the instruction box next to the application")
+        self.panel_box.setChecked(True)
+        self.panel_box.setVisible(False)
+        self.panel_box.toggled.connect(lambda _on: self._refresh_panel())
         self.watch_label = QLabel("")
         self.watch_label.setWordWrap(True)
         self.watch_label.setObjectName("hint")
@@ -373,6 +385,7 @@ class SessionScreen(QWidget):
         root.addWidget(self.ask_button)                      # its own row, so the window can be narrow enough to sit beside the application
         root.addWidget(self.status)
         root.addWidget(self.watch_box)
+        root.addWidget(self.panel_box)
         root.addWidget(self.watch_label)
         root.addWidget(self.cover_label)
         root.addWidget(self.side_button)
@@ -383,6 +396,7 @@ class SessionScreen(QWidget):
     def set_bridge(self, bridge) -> None:
         self.bridge = bridge
         self.watch_box.setVisible(bridge is not None and bridge.available)
+        self.panel_box.setVisible(bridge is not None and bridge.available)
         self._sync_timer()
 
     @property
@@ -393,13 +407,17 @@ class SessionScreen(QWidget):
         if self.watching and not self.sync and self.isVisible():
             if not self.timer.isActive():
                 self.timer.start()
+                self.track_timer.start()
         else:
             self.timer.stop()
+            self.track_timer.stop()
             if not self.watching:
                 self.guide.clear()
                 self.watch_label.setText("")
                 self.cover_label.setVisible(False)
                 self.side_button.setVisible(False)
+                if self.panel is not None:
+                    self.panel.hide()
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -408,7 +426,60 @@ class SessionScreen(QWidget):
     def hideEvent(self, event) -> None:
         super().hideEvent(event)
         self.timer.stop()
+        self.track_timer.stop()
         self.guide.clear()
+        if self.panel is not None:
+            self.panel.hide()
+
+    def close_guides(self) -> None:
+        """The overlay and the instruction box must not outlive the window."""
+        self.timer.stop()
+        self.track_timer.stop()
+        self.guide.close()
+        if self.panel is not None:
+            self.panel.close()
+            self.panel = None
+
+    # ---- the instruction box
+    def _ensure_panel(self) -> InstructionPanel:
+        if self.panel is None:
+            self.panel = InstructionPanel()
+            self.panel.done_clicked.connect(lambda: self._do(self.engine.complete))
+            self.panel.skip_clicked.connect(lambda: self._do(self.engine.skip))
+            self.panel.closed.connect(self._panel_closed)
+        return self.panel
+
+    def _panel_closed(self) -> None:
+        step = None if self.engine is None else self.engine.current_step()
+        self._dismissed_step = None if step is None else step.id            # closed for THIS step; the next step shows it again
+
+    def _refresh_panel(self) -> None:
+        e = self.engine
+        step = None if e is None else e.current_step()
+        if not (self.watching and self.panel_box.isChecked() and step is not None and step.id != self._dismissed_step):
+            if self.panel is not None:
+                self.panel.hide()
+            return
+        p = self._ensure_panel()
+        p.set_content(f"GuideWire \u00b7 step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint)
+        screen = self.window().screen()
+        if screen is None:
+            return
+        a = screen.availableGeometry()
+        x, y, _where = panel_position(self._last_window, (a.x(), a.y(), a.width(), a.height()), (p.width(), p.height()), self.window().devicePixelRatioF())
+        p.put(x, y)
+
+    def _track(self) -> None:
+        """Follow the application window between looks: a move carries the highlight along at once; a resize clears it and asks for a new look."""
+        if not self.watching or self.bridge is None:
+            return
+        window = self.bridge.window_rect(self._app)
+        change = self.guide.follow_window(window)
+        if change in ("moved", "resized", "found"):
+            self._last_window = window
+            self._refresh_panel()
+            if change == "resized":
+                self.poll()
 
     def poll(self) -> None:
         """One look at the screen for the active step. The look runs off the window's thread; the judging (the database) stays on it."""
@@ -417,7 +488,7 @@ class SessionScreen(QWidget):
         step = self.engine.current_step()
         if step is None:
             return
-        app = app_of(self.engine)
+        app = self._app
         self._busy = True
         from .workers import run_call
         run_call(self, lambda _s: self.bridge.look(step, app), lambda look, sid=step.id: self._looked(look, sid), sync=self.sync)
@@ -434,11 +505,13 @@ class SessionScreen(QWidget):
             return
         tick = self.bridge.apply(e, look)
         self.watch_label.setText(tick.message)
+        self._last_window, self._last_hint = look.window_rect, tick.hint
         if tick.rect is not None:
-            self.guide.show(tick.rect, look.window_rect)
+            self.guide.show(tick.rect, look.window_rect, tick.hint)
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)
+        self._refresh_panel()
         if tick.advanced:
             self.status.setText(tick.message)
             self.refresh()
@@ -476,6 +549,8 @@ class SessionScreen(QWidget):
         self.engine = engine
         self.status.setText("")
         self._busy = False
+        self._dismissed_step = None
+        self._app = app_of(engine)
         self.refresh()
 
     def _do(self, action) -> None:
@@ -510,6 +585,7 @@ class SessionScreen(QWidget):
         self.skip_button.setEnabled(e.state == ACTIVE)
         self.prev_button.setEnabled(e.state == ACTIVE and (e.position or 1) > 1)
         self._sync_timer()
+        self._refresh_panel()
 
 class HistoryScreen(QWidget):
     """The user's past and current sessions, newest first."""

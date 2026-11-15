@@ -48,6 +48,8 @@ The line `[ok] the app's screen guidance (vision bridge) can load the vision ser
 | M6 | Move and resize the Blender window during `--overlay` | the box follows a move; after a resize it is redrawn at the right place | the overlay tracks the window |
 | M7 | `python -m app.ui.main_window`, log in, **Add demo tutorials**, open the Blender armature tutorial, **Start session**, press Done until step 2 | under the buttons: the **Watch my screen** switch and a status line that changes with what is on screen | the timer and status line work in the real app |
 | M8 | In that session, drag GuideWire over the Blender window | within a second a warning appears: "GuideWire is covering part of the application..." and **Move GuideWire to the side**; click it: GuideWire becomes a strip at the right edge | the covering check and the fix |
+| M9a | While a step is highlighted, look at the instruction box (below or beside Blender) and press its **Done**, **Skip** and the **x** | Done and Skip move the session; the x closes the box for this step; the next step shows it again; the checkbox **Show the instruction box next to the application** turns it off for good | the instruction box |
+| M9b | Open the Add menu in Blender, then Mesh | the label under the highlight reads "Click Add, then Mesh > Cylinder", then "Click Mesh, then Cylinder", then "Click Cylinder"; the highlight is on that word each time | the highlight follows the menus |
 | M9 | Untick **Watch my screen** | the highlight disappears, the status line clears, no more looking; **Done** still works | the learner can switch it off and still use the app |
 | M10 | Close Blender in the middle of a session | the line says to open Blender in front; nothing crashes; the session keeps its place | the application going away is handled |
 | M11 | Press **Done** while a step is highlighted, then watch the next step | the highlight goes to the next step's path; no double advance | a manual Done and the timer do not fight |
@@ -65,7 +67,13 @@ What to write down if something fails: the line from `vision_check.py`, whether 
 | Session screen end to end (offscreen window, real Blender, real OCR) | the 500 ms timer ran, the status line read "Watching the screen.", the highlight was drawn 13 times in 9 s, the event loop stayed responsive, the step did not move |
 | Minimized Blender | reported as "not visible" (vision skips minimized windows): keep Blender open, not minimized, with nothing over it |
 
-Still to do by hand (they need your clicks): M3, M4, M6, M7 (the real window), M8, M9, M10, M11.
+| Highlight follows the open menus (second, throw-away Blender; a Blender script opened the Add menu and then the Mesh submenu; no mouse input) | the hint went "Click Add, then Mesh > Cylinder" -> "Click Mesh, then Cylinder" -> "Click Cylinder", and each box sat exactly on the word in a captured frame (checked by eye on two frames) |
+| Window resized and moved (same instance) | the old position was dropped and the element found again at its new place within 1.3 s |
+| Instruction box | rendered with the step goal, how-to lines, hint, Done, Skip and a close button; placement (below, beside, above, inside) and close-for-this-step are unit tested |
+
+**What was wrong in the first live run (reported by Ayesha):** the highlight stayed on "Add" because VisionService reuses its last screen reading while the whole screen changed by less than a small average, and opening a menu changes only a small part of it (up to 5 s stale). The bridge now reads afresh every tick (about 0.3 s). Also added: a label with the next click on the highlight, the instruction box (closeable, with Done and Skip), and window tracking every 200 ms (a move carries the highlight, a resize clears it and looks again).
+
+Still to do by hand (they need your clicks): M3, M7 (the real window), M8, M9, M10, M11, and a look at the instruction box and the highlight label on your own screen (the overlay and the box are hidden from screen capture on purpose, so I could check coordinates but not see them drawn).
 
 ## Not covered, and why
 - **Maya and Houdini**: their probes are prototypes never run inside those applications, so M2 to M6 are for Blender only. The bridge itself is application-neutral (`VisionBridge(...).tick(engine, "maya")`).

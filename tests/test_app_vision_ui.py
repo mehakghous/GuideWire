@@ -179,19 +179,46 @@ def test_a_second_poll_while_one_is_running_is_skipped(env):
     assert screen.watch_label.text() == ""
 
 
-def test_the_warning_appears_when_guidewire_covers_the_application_and_the_button_moves_it_aside(env):
+def test_the_warning_appears_when_guidewire_covers_the_application_and_the_button_hands_the_screen_over_to_the_small_guide(env):
     screen, _e, _svc, _o = env
     screen.show()
     own = screen._own_rect()
     screen._warn_if_covering((own[0], own[1], own[2] + 50, own[3] + 50))
-    assert not screen.cover_label.isHidden() and not screen.side_button.isHidden() and "covering part of the application" in screen.cover_label.text()
+    assert not screen.cover_label.isHidden() and not screen.side_button.isHidden() and "Minimize it" in screen.cover_label.text()
     screen._warn_if_covering((own[0] + own[2] + 500, own[1], 400, 400))
-    assert screen.cover_label.isHidden() and screen.side_button.isHidden()
-    screen.window().resize(900, 600)
-    screen.move_aside()
-    g = screen.window().geometry()
-    avail = screen.window().screen().availableGeometry()
-    assert g.x() + g.width() == avail.x() + avail.width() and g.width() >= screen.window().minimumSizeHint().width() and g.height() == avail.height()
+    assert screen.cover_label.isHidden() and not screen.side_button.isHidden()          # the button stays while watching: it is the way to give the application the whole screen
+    screen.poll()
+    screen.minimize_to_guide()
+    assert screen.window().isMinimized() or not screen.window().isVisible()
+    assert screen.panel is not None and not screen.panel.isHidden()                       # the small guide stays on screen
+    screen.close()
+
+
+def test_the_small_guide_can_be_minimized_to_a_tab_and_opened_again_and_keeps_where_the_learner_put_it(env):
+    screen, _e, _svc, _o = env
+    screen.poll()
+    p = screen.panel
+    assert p is not None and p.width() <= 320 and not p.minimized
+    p.set_content("GuideWire · step 3 of 18", "Go to Edit Mode", ["Press Tab"], "Click Edit Mode", ("Tab",))
+    p.toggle_minimized()
+    assert p.minimized and p.body.isHidden() and p.height() <= 40 and p.header.text() == "GuideWire 3/18 ▸"
+    p.toggle_minimized()
+    assert not p.minimized and not p.body.isHidden() and p.header.text() == "GuideWire · step 3 of 18"
+    p.move(321, 123)
+    p.moved_by_user = True
+    p.put(5, 5)
+    assert (p.x(), p.y()) == (321, 123)                       # the app no longer moves a box the learner placed
+    screen.close()
+
+
+def test_the_key_caps_are_shown_for_a_step_that_says_to_press_keys(env):
+    screen, _e, _svc, _o = env
+    p = screen._ensure_panel()
+    p.set_content("GuideWire", "Delete everything", [], "Press A then Delete", ("A", "Delete"))
+    caps = [lab.text() for lab in p._key_labels if lab.objectName() == "keys"]
+    assert caps == ["A", "Delete"]
+    p.set_content("GuideWire", "Next", [], "", ())
+    assert [lab for lab in p._key_labels if lab.objectName() == "keys"] == []
     screen.close()
 
 

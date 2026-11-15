@@ -12,7 +12,7 @@ from ..db import Database
 from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_editor import EditError, StepEditor
-from ..vision_bridge import app_of, overlaps, side_rect
+from ..vision_bridge import app_of, overlaps
 from .screen_guide import InstructionPanel, ScreenGuide, panel_position
 from .workers import run_call
 
@@ -341,6 +341,7 @@ class SessionScreen(QWidget):
         self._dismissed_step: str | None = None
         self._last_window = None
         self._last_hint = ""
+        self._last_keys: tuple[str, ...] = ()
         self._app = "blender"
         self.watch_box = QCheckBox("Watch my screen and highlight the next click")
         self.watch_box.setToolTip("GuideWire only looks at the application window: it never clicks, types or moves anything.")
@@ -357,9 +358,10 @@ class SessionScreen(QWidget):
         self.cover_label = QLabel("")
         self.cover_label.setWordWrap(True)
         self.cover_label.setVisible(False)
-        self.side_button = QPushButton("Move GuideWire to the side")
+        self.side_button = QPushButton("Minimize GuideWire (the small guide stays on screen)")
+        self.side_button.setToolTip("Hides this window so the application has the whole screen; the small guide box stays on top and can be moved, resized or minimized.")
         self.side_button.setVisible(False)
-        self.side_button.clicked.connect(self.move_aside)
+        self.side_button.clicked.connect(self.minimize_to_guide)
         self.start_button = QPushButton("Start")
         self.done_button = QPushButton("Done")
         self.skip_button = QPushButton("Skip")
@@ -404,7 +406,7 @@ class SessionScreen(QWidget):
         return (self.bridge is not None and self.bridge.available and self.watch_box.isChecked() and self.engine is not None and self.engine.state == ACTIVE)
 
     def _sync_timer(self) -> None:
-        if self.watching and not self.sync and self.isVisible():
+        if self.watching and not self.sync and (self.isVisible() or self._minimized()):
             if not self.timer.isActive():
                 self.timer.start()
                 self.track_timer.start()
@@ -423,8 +425,13 @@ class SessionScreen(QWidget):
         super().showEvent(event)
         self._sync_timer()
 
+    def _minimized(self) -> bool:
+        return self.window().isMinimized()
+
     def hideEvent(self, event) -> None:
         super().hideEvent(event)
+        if self._minimized():
+            return                                           # GuideWire minimized on purpose: the small guide and the highlight stay and keep watching
         self.timer.stop()
         self.track_timer.stop()
         self.guide.clear()
@@ -461,7 +468,7 @@ class SessionScreen(QWidget):
                 self.panel.hide()
             return
         p = self._ensure_panel()
-        p.set_content(f"GuideWire \u00b7 step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint)
+        p.set_content(f"GuideWire \u00b7 step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys)
         screen = self.window().screen()
         if screen is None:
             return
@@ -505,9 +512,9 @@ class SessionScreen(QWidget):
             return
         tick = self.bridge.apply(e, look)
         self.watch_label.setText(tick.message)
-        self._last_window, self._last_hint = look.window_rect, tick.hint
+        self._last_window, self._last_hint, self._last_keys = look.window_rect, tick.hint, tick.keys
         if tick.rect is not None:
-            self.guide.show(tick.rect, look.window_rect)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
+            self.guide.show(tick.rect, look.window_rect, pointer=tick.pointer)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)
@@ -524,22 +531,15 @@ class SessionScreen(QWidget):
     def _warn_if_covering(self, window) -> None:
         covering = overlaps(self._own_rect(), window)
         self.cover_label.setVisible(covering)
-        self.side_button.setVisible(covering)
+        self.side_button.setVisible(self.watching)
         if covering:
-            self.cover_label.setText("GuideWire is covering part of the application, so it cannot see everything. Put the application on the left and GuideWire on the right.")
+            self.cover_label.setText("GuideWire is covering part of the application, so it cannot see everything. Minimize it: the small guide box stays on screen.")
 
-    def move_aside(self) -> None:
-        """Put GuideWire in a strip at the right of the screen, so the application keeps the rest."""
-        w = self.window()
-        screen = w.screen()
-        if screen is None:
-            return
-        a = screen.availableGeometry()
-        x, y, width, height = side_rect((a.x(), a.y(), a.width(), a.height()), 0.3, right=True)
-        width = min(max(width, w.minimumSizeHint().width()), a.width())      # never narrower than the content, and always fully on screen
-        x = a.x() + a.width() - width
-        w.showNormal()
-        w.setGeometry(x, y, width, height)
+    def minimize_to_guide(self) -> None:
+        """Hide this window; the small guide box (draggable, resizable, minimizable) stays on top, so the application has the whole screen."""
+        self._dismissed_step = None
+        self._refresh_panel()
+        self.window().showMinimized()
 
     @property
     def tutorial_id(self) -> int | None:

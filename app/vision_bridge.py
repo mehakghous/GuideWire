@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from app.guidance import Plan, describe, plan_for
 from shared.step_record import Step
 
 WINDOW_NAMES = {"blender": "Blender", "maya": "Maya", "houdini": "Houdini"}
@@ -32,6 +33,8 @@ class Tick:
     verdict: str | None = None                   # met | unmet | unverifiable, for the active step
     advanced: bool = False                       # the step was completed because the application showed it done
     hint: str = ""                               # "Click Add, then Mesh > Cylinder": what to do next, for the highlight's label and the instruction box
+    pointer: bool = False                        # rect is only WHERE to look (a region of the screen), not a found element: draw a pulsing pointer, not a box
+    keys: tuple[str, ...] = ()                   # keys to press, shown as key caps
 
 
 Rect4 = tuple[int, int, int, int]               # (x, y, width, height) in physical screen pixels
@@ -72,6 +75,8 @@ class Look:
     observed: dict | None = None
     window_rect: Rect4 | None = None             # the application's window, for the overlay and the "are we covering it" check
     hint: str = ""
+    pointer: bool = False
+    keys: tuple[str, ...] = ()
     problem: str | None = None                   # a plain-words reason nothing could be seen
     problem_state: str = "error"                 # unavailable | no_window | error
 
@@ -108,6 +113,66 @@ def default_service_factory(app: str):
     from vision.service import VisionService
 
     class LiveService(VisionService):
+        mode_hint: str | None = None          # the mode the step starts in: the toolbar differs per mode
+        prefer_toolbar = False                # icon-only tools: look in the toolbar before the text
+
+        def ground(self, ui_element: str):
+            from shared.grounding import GroundingResult
+            from vision.probe_client import read_probe
+            from vision.service import Guidance, find_target, ground_located
+            win, frame, pixels, words, _ = self._scene()
+            if win is None:
+                return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
+            mode = self.mode_hint or ((read_probe(app=self.profile.key) or {}).get("mode") if self.use_probe else None)
+            found = self._tool(pixels, ui_element, mode) if self.prefer_toolbar and self.profile.toolbar else None
+            if found is None:
+                found = find_target(words, pixels, ui_element, mode, toolbar=self.profile.toolbar)
+            return ground_located(frame.geometry, win.rect, found)
+
+        def _tool(self, pixels, ui_element, mode):
+            """A toolbar tool by name, looked up in the toolbar of the step's own mode first (a tool name exists in several modes at different places)."""
+            from vision.locate import Located, parse_path
+            from vision.regions import default_layout, detect_layout
+            from vision.toolbar import find_cells, locate_tool, modes_matching
+            layout = detect_layout(pixels)
+            viewport = (layout if layout.confidence >= 0.5 else default_layout(pixels.shape[1], pixels.shape[0])).get("viewport")
+            path = parse_path(ui_element)
+            if viewport is None or not path:
+                return None
+            cells = find_cells(pixels, viewport)
+            for m in modes_matching(cells, mode):
+                rect = locate_tool(cells, m, path[-1])
+                if rect is not None:
+                    return Located(rect, path[-1], len(path) - 1, len(path), 1.0)
+            return None
+
+        def region_rect(self, name: str, anchor: str = "center"):
+            """A screen rectangle in a region of the application (viewport, properties...): where to point when the thing itself has no text to find."""
+            from shared.grounding import Rect
+            win, frame, pixels, words, layout = self._scene()
+            if win is None or layout is None or layout.get("viewport" if name == "toolbar" else name) is None:
+                return None
+            if name == "toolbar":                                        # the left toolbar: point at its last visible cell (a tool below it needs a scroll)
+                from vision.toolbar import find_cells
+                cells = find_cells(pixels, layout.get("viewport"))
+                if not cells:
+                    return None
+                c = cells[-1].rect
+                m = frame.geometry.monitor
+                sx, sy = m.w / frame.geometry.image_w, m.h / frame.geometry.image_h
+                return Rect(round(m.x + c.x * sx), round(m.y + c.y * sy), round(c.w * sx), round(c.h * sy))
+            r = layout.get(name)
+            size = max(40, min(r.w, r.h) // 6)
+            if anchor == "tabs":                                         # the column of tab icons at the left edge of the Properties editor
+                size = 34
+                x, y = r.x + 4, r.y + int(r.h * 0.6)
+            else:
+                x = r.x + (r.w - size) // 2 if anchor == "center" else r.x + 12
+                y = r.y + (r.h - size) // 2 if anchor == "center" else r.y + r.h - size - 12
+            m = frame.geometry.monitor
+            sx, sy = m.w / frame.geometry.image_w, m.h / frame.geometry.image_h
+            return Rect(round(m.x + x * sx), round(m.y + y * sy), round(size * sx), round(size * sy))
+
         def refresh(self) -> None:
             """Forget what was read, so the next tick reads the whole window."""
             self._cache = {}
@@ -146,6 +211,16 @@ def default_service_factory(app: str):
             self._cache = {"rect": win.rect, "thumb": thumb, "words": words, "layout": layout, "serial": serial}
             return win, frame, pixels, words, layout
     return LiveService(app=app)
+
+
+MODE_LABELS = {"OBJECT": "Object Mode", "EDIT_MESH": "Edit Mode", "EDIT_ARMATURE": "Edit Mode", "EDIT_CURVE": "Edit Mode", "POSE": "Pose Mode", "SCULPT": "Sculpt Mode",
+               "PAINT_WEIGHT": "Weight Paint", "PAINT_VERTEX": "Vertex Paint", "PAINT_TEXTURE": "Texture Paint"}
+
+
+def _as_dropdown(g):
+    """The guidance of the mode dropdown itself (found by the name of the mode it shows now): not 'the last part of the path'."""
+    from dataclasses import replace
+    return replace(g, complete=False)
 
 
 def hint_for(target: str | None, matched: str, complete: bool = False) -> str:
@@ -212,34 +287,62 @@ class VisionBridge:
             return None
 
     # ---- looking (vision only: safe on a worker thread, touches no database)
+    def _find(self, svc, plan: Plan):
+        """The first target of the plan that is on screen right now: (target, guidance), or (None, the guidance worth reporting)."""
+        last, saw = None, None
+        for t in plan.targets:
+            if hasattr(svc, "prefer_toolbar"):
+                svc.prefer_toolbar = t.kind == "tool"
+            names = [t.path]
+            if t.kind == "mode":                           # the item once the dropdown is open, else the dropdown itself (it shows the current mode)
+                names = [t.path.split(">", 1)[-1].strip(), MODE_LABELS.get(plan.mode_hint or "", "Object Mode")]
+            for i, name in enumerate(names):
+                g = svc.ground(name)
+                last = last or g
+                if getattr(g.grounding, "status", None) == "ok" and g.rect is not None and not g.ambiguous:
+                    if t.kind == "mode" and i == 1:
+                        g = _as_dropdown(g)
+                    return t, g
+                if g.ambiguous and saw is None:
+                    saw = g
+        return None, saw or last
+
     def look(self, step: Step, app: str) -> Look:
+        plan = plan_for(step)
         target = target_of(step)
+        keys = plan.keys
         if self.factory is None:
             return Look(target, problem="Screen guidance is not set up on this computer.", problem_state="unavailable")
         svc = self._service(app)
         if svc is None:
             return Look(target, problem=self._failed.get(app, "Screen guidance is not available."), problem_state="unavailable")
         window = self.window_rect(app)
-        rect, complete, ambiguous, matched = None, False, False, ""
+        rect, complete, ambiguous, matched, pointer, found = None, False, False, "", False, None
         try:
-            if target:
-                g = svc.ground(target)
-                matched = getattr(g, "matched", "") or ""
-                if getattr(g.grounding, "status", None) == "ok" and g.rect is not None:
-                    rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
-                complete, ambiguous = bool(g.complete), bool(g.ambiguous)
-                if ambiguous:
-                    rect = None                          # several equally good matches: ask, do not point at a guess
-                if rect is None and getattr(g.grounding, "reason", "").startswith("no visible window"):
-                    return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window")
+            if hasattr(svc, "mode_hint"):
+                svc.mode_hint = plan.mode_hint
+            if plan.targets:
+                found, g = self._find(svc, plan)
+                if g is not None:
+                    matched = getattr(g, "matched", "") or ""
+                    if found is not None and g.rect is not None:
+                        rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
+                    complete, ambiguous = bool(g.complete), bool(g.ambiguous and found is None)
+                    if found is None and getattr(g.grounding, "reason", "").startswith("no visible window"):
+                        return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=keys)
+            if rect is None and not ambiguous and plan.region and hasattr(svc, "region_rect"):
+                r = svc.region_rect(plan.region, plan.anchor)        # nothing to find by text: point at where it happens
+                if r is not None:
+                    rect, pointer = (r.x, r.y, r.w, r.h), True
             props, attrs = needs_of(step)
             observed = svc.observe(properties=props or None, attributes=attrs or None)
         except ImportError as e:                         # the OCR packages are missing: this fails the first time the screen is read, not when the service is made
             self._failed[app] = explain(e)
             return Look(target, window_rect=window, problem=self._failed[app], problem_state="unavailable")
         except Exception as e:                           # a vision failure must never break the session
-            return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.")
-        return Look(target, rect, complete, ambiguous, observed, window, hint=hint_for(target, matched, complete))
+            return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.", keys=keys)
+        hint = describe(plan, found, matched, complete, step)
+        return Look(target, rect, complete, ambiguous, observed, window, hint=hint, pointer=pointer, keys=keys)
 
     # ---- judging (touches the session: main thread)
     def apply(self, engine, look: Look) -> Tick:
@@ -247,17 +350,17 @@ class VisionBridge:
         if engine.current_step() is None:
             return Tick("idle", "No step is active.")
         if look.problem is not None:
-            return Tick(look.problem_state, look.problem, look.target)
+            return Tick(look.problem_state, look.problem, look.target, keys=look.keys)
         verdict = engine.check(look.observed or {})
         status = verdict.status if verdict is not None else None
         advanced = bool(self.auto_advance and engine.auto_check(look.observed or {}))
         if advanced:
-            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint)
-        if look.rect is None and look.target:
+            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.pointer, look.keys)
+        if look.rect is None and look.target and not look.keys:
             msg = "Several places on the screen match; open the menu and it will narrow down." if look.ambiguous else "Looking for that on the screen."
         else:
             msg = "Watching the screen."
-        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint)
+        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.pointer, look.keys)
 
     def tick(self, engine, app: str | None = None) -> Tick:
         """Look and judge in one call (tests, the live check script). Never raises."""

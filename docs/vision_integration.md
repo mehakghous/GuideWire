@@ -85,6 +85,26 @@ Found by running `vision_check.py --overlay` against a throw-away second Blender
 6. **Duplicated words:** the word "Add" also appears in the "Add Cylinder" panel Blender leaves at the bottom after a cylinder was added, so the first part of the path became ambiguous and the highlight was dropped until the menu opened. A limit of finding things by text (Umaima's `find_target`).
 7. **The real flow works:** with a fresh Blender, vision found Add in the header, then Mesh in the dropdown, then Cylinder in the submenu opened by hovering Mesh, and the click added a cylinder.
 
+## Third round: guidance for every kind of step, and the small guide (after the 18-step Blender report)
+
+The learner went through the 18-step Blender armature tutorial and reported which steps showed nothing. Cause and fix, per kind of step (`app/guidance.py`, pure and tested in `tests/test_app_guidance.py`):
+
+| Kind of step | Steps | What was wrong | What is shown now |
+|---|---|---|---|
+| keys only ("Press A, then Delete") | 1, 4, 16 | nothing to find by text | key caps (`A` then `Delete`) in the guide, and a pulsing circle in the 3D viewport = "mouse here" |
+| `Mode selector > Edit Mode` | 3, 8, 11, 15, 17 | the text "Mode selector" is not on screen | the dropdown is found by the mode it shows now (from the step's start state), and the item once the dropdown is open |
+| `Toolbar > Scale` / `Loop Cut` | 5, 6, 18 | the toolbar mode was guessed (Scale highlighted "extrude region"); Loop Cut is below the visible part of the toolbar on a 768 px screen | the tool is looked up in the toolbar of the step's own mode; when it is cut off the last visible cell pulses and the guide says to scroll or press the tool's key (Loop Cut: Ctrl+R) |
+| panel that exists only after an action (Loop Cut and Slide, Subdivide) | 7, 14 | not on screen yet | pulsing circle at the bottom-left of the viewport, where Blender puts it, and words saying which panel |
+| Properties > Data > Viewport Display > In Front | 10 | learner did not know where the panel is | pulsing circle at the tab column of the Properties editor, words: open the Object Data tab (the green icon), then Viewport Display > In Front |
+| `Add > Armature` | 9 | the how-to said Armature > Single Bone, Blender 5.2 adds one bone directly | the hint says so |
+| scene items (handles, joints, bones) | 5, 12, 13, 17, 18 | the screen never names them | pulsing circle in the viewport and the step's own words |
+
+All 18 steps were run against a throw-away Blender 5.2.2 (object, edit, armature-edit and pose states) with the real OCR: each gives a highlight or a pointer plus words. Step 6's Loop Cut on a 1366x728 window is the pointer-and-scroll case (the toolbar shows 12 of its 21 tools).
+
+The guide box was redesigned: 300 px wide instead of 420, goal + keys + the next click, details on demand, **draggable by its header, resizable by the corner, minimizable to a thin tab** (click the tab to open it), and it stays where the learner puts it. "Move GuideWire to the side" is replaced by "Minimize GuideWire": the main window minimizes and the small guide stays on top, still watching (a minimized window no longer stops the watching).
+
+Still not done: the instruction box and the pulsing circle were drawn but not seen by me (my screen captures do not include them); the learner's own run (M7-M11) is the check.
+
 ## Not covered, and why
 - **Maya and Houdini**: their probes are prototypes never run inside those applications, so M2 to M6 are for Blender only. The bridge itself is application-neutral (`VisionBridge(...).tick(engine, "maya")`).
 - **A second monitor or a different scaling**: not tested.

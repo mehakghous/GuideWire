@@ -28,6 +28,9 @@ class ScreenGuide:
         self._window: Rect4 | None = None
         self._rect: Rect4 | None = None
         self._label = ""
+        self._pointer = False
+        self._pulse_big = False
+        self._timer: Any = None
 
     def _overlay(self):
         if self._win is None and self.error is None:
@@ -48,7 +51,7 @@ class ScreenGuide:
             from shared.grounding import Rect
             from vision.overlay import highlight_mark
             win.cover(Rect(*self._window))
-            win.set_marks([highlight_mark(Rect(*self._rect), self._label)] if self._rect is not None else [])
+            win.set_marks([self._mark(Rect(*self._rect), highlight_mark)] if self._rect is not None else [])
             win.show_click_through()
             self.visible = True
             return True
@@ -56,12 +59,41 @@ class ScreenGuide:
             self.error = f"{type(e).__name__}: {str(e)[:80]}"
             return False
 
-    def show(self, rect: Rect4, window: Rect4 | None, label: str = "") -> bool:
+    def _mark(self, rect, highlight_mark):
+        """A box around a found element; for a place only ("move the mouse into the 3D viewport") a circle that pulses, so it reads as 'here' and not as 'this is the button'."""
+        from shared.grounding import Rect
+        from vision.overlay import Mark
+        if not self._pointer:
+            return highlight_mark(rect, self._label)
+        r = 34 if self._pulse_big else 24
+        cx, cy = rect.x + rect.w // 2, rect.y + rect.h // 2
+        return Mark("pointer", Rect(cx - r, cy - r, 2 * r, 2 * r), "")
+
+    def _start_pulse(self) -> None:
+        if self._timer is not None:
+            return
+        try:
+            from PyQt6.QtCore import QTimer
+            self._timer = QTimer()
+            self._timer.setInterval(450)
+            self._timer.timeout.connect(self._pulse)
+            self._timer.start()
+        except Exception:
+            self._timer = None
+
+    def _pulse(self) -> None:
+        if self._pointer and self.visible and self._rect is not None:
+            self._pulse_big = not self._pulse_big
+            self._draw()
+
+    def show(self, rect: Rect4, window: Rect4 | None, label: str = "", pointer: bool = False) -> bool:
         """Highlight `rect` (screen pixels) with a short `label`. The overlay covers the application's `window` so a moved window carries the mark; without a window nothing is drawn."""
         if window is None:
             self.clear()
             return False
-        self._window, self._rect, self._label = window, rect, label
+        self._window, self._rect, self._label, self._pointer = window, rect, label, pointer
+        if pointer:
+            self._start_pulse()
         return self._draw()
 
     def follow_window(self, window: Rect4 | None) -> str:
@@ -102,6 +134,9 @@ class ScreenGuide:
 
     def close(self) -> None:
         self.clear()
+        if self._timer is not None:
+            self._timer.stop()
+            self._timer = None
         if self._win is not None:
             try:
                 self._win.close()
@@ -131,67 +166,179 @@ def panel_position(window: Rect4 | None, screen: Rect4, size: tuple[int, int], s
 
 
 class InstructionPanel(QWidget):
+    """A small guide that sits at the side like a browser extension: the step's goal, the keys to press, and the next click, in a box you can
+    DRAG (by its header), RESIZE (by the corner grip), MINIMIZE (the dash: it becomes a thin tab that is still draggable; click the tab to open it again) and close (the cross).
+    It is placed once, outside the application when there is room; as soon as you move or resize it yourself it stays where you put it."""
     done_clicked = pyqtSignal()
     skip_clicked = pyqtSignal()
     closed = pyqtSignal()
 
+    NORMAL_SIZE = (300, 150)
+    MIN_SIZE = (220, 110)
+    TAB_SIZE = (190, 26)
+
     def __init__(self) -> None:
         super().__init__()
+        from PyQt6.QtWidgets import QSizeGrip
         self.setWindowFlags(Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setObjectName("instructionPanel")
-        self.setStyleSheet("#instructionPanel { background: #20242b; border: 2px solid #ffbe00; border-radius: 8px; } QLabel { color: #f2f2f2; } QLabel#hint { color: #ffd966; font-weight: bold; } "
-                           "QPushButton { background: #3a4150; color: white; border: 0; border-radius: 4px; padding: 4px 12px; } QPushButton:hover { background: #4b5568; } "
-                           "QPushButton#close { background: transparent; font-size: 16px; padding: 0 8px; }")
+        self.setStyleSheet("#instructionPanel { background: #20242b; border: 2px solid #ffbe00; border-radius: 8px; } QLabel { color: #f2f2f2; font-size: 12px; } QLabel#hint { color: #ffd966; font-weight: bold; } "
+                           "QLabel#keys { color: #111; background: #f2f2f2; border-radius: 4px; padding: 1px 7px; font-weight: bold; } "
+                           "QPushButton { background: #3a4150; color: white; border: 0; border-radius: 4px; padding: 2px 10px; } QPushButton:hover { background: #4b5568; } "
+                           "QPushButton#tool { background: transparent; font-size: 14px; padding: 0 6px; }")
+        self.minimized = False
+        self.moved_by_user = False
+        self._drag: tuple[int, int] | None = None
+        self._press = None
+        self._normal_size = self.NORMAL_SIZE
         self.header = QLabel("")
         self.header.setStyleSheet("font-weight: bold; color: #ffbe00;")
+        self.header.setCursor(Qt.CursorShape.SizeAllCursor)
+        self.header.setToolTip("Drag to move")
+        self.minimize_button = QPushButton("\u2013")
+        self.minimize_button.setObjectName("tool")
+        self.minimize_button.setToolTip("Minimize to a small tab")
+        self.close_button = QPushButton("\u2715")
+        self.close_button.setObjectName("tool")
+        self.close_button.setToolTip("Close this box for this step (it comes back on the next step)")
         self.goal = QLabel("")
         self.goal.setWordWrap(True)
-        self.goal.setStyleSheet("font-size: 14px; font-weight: bold;")
-        self.lines = QLabel("")
-        self.lines.setWordWrap(True)
+        self.goal.setStyleSheet("font-weight: bold;")
         self.hint = QLabel("")
         self.hint.setObjectName("hint")
         self.hint.setWordWrap(True)
-        self.close_button = QPushButton("✕")
-        self.close_button.setObjectName("close")
-        self.close_button.setToolTip("Close this box for this step (it comes back on the next step; turn it off in GuideWire)")
+        self.keys_row = QHBoxLayout()
+        self.keys_row.setSpacing(6)
+        self._key_labels: list[QLabel] = []
+        self.lines = QLabel("")
+        self.lines.setWordWrap(True)
+        self.lines.setVisible(False)
+        self.more_button = QPushButton("Details \u25be")
+        self.more_button.setObjectName("tool")
         self.done_button = QPushButton("Done")
         self.skip_button = QPushButton("Skip")
+        self.grip = QSizeGrip(self)
+        self.minimize_button.clicked.connect(self.toggle_minimized)
         self.close_button.clicked.connect(self._close)
+        self.more_button.clicked.connect(self._toggle_details)
         self.done_button.clicked.connect(self.done_clicked.emit)
         self.skip_button.clicked.connect(self.skip_clicked.emit)
         top = QHBoxLayout()
         top.addWidget(self.header, 1)
+        top.addWidget(self.minimize_button)
         top.addWidget(self.close_button)
         row = QHBoxLayout()
         row.addWidget(self.done_button)
         row.addWidget(self.skip_button)
+        row.addWidget(self.more_button)
         row.addStretch()
+        row.addWidget(self.grip, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
+        self.body = QWidget()
+        body = QVBoxLayout(self.body)
+        body.setContentsMargins(0, 0, 0, 0)
+        body.setSpacing(4)
+        body.addWidget(self.goal)
+        body.addLayout(self.keys_row)
+        body.addWidget(self.hint)
+        body.addWidget(self.lines)
+        body.addStretch(1)
+        body.addLayout(row)
         root = QVBoxLayout(self)
-        root.setContentsMargins(12, 8, 12, 10)
+        root.setContentsMargins(10, 6, 8, 6)
+        root.setSpacing(3)
         root.addLayout(top)
-        root.addWidget(self.goal)
-        root.addWidget(self.lines)
-        root.addWidget(self.hint)
-        root.addLayout(row)
-        self.setFixedWidth(420)
+        root.addWidget(self.body, 1)
+        self.setMinimumSize(*self.MIN_SIZE)
+        self.resize(*self.NORMAL_SIZE)
+
+    # ---- content
+    def set_content(self, header: str, goal: str, lines: list[str], hint: str, keys: tuple[str, ...] = ()) -> None:
+        self._title = header
+        self.header.setText(self._tab_text() if self.minimized else header)
+        self.goal.setText(goal)
+        self.lines.setText("\n".join(f"\u2022 {x}" for x in lines))
+        self.more_button.setVisible(bool(lines))
+        if not lines:
+            self.lines.setVisible(False)
+        self.hint.setText(hint)
+        self.hint.setVisible(bool(hint))
+        for lab in self._key_labels:
+            self.keys_row.removeWidget(lab)
+            lab.deleteLater()
+        self._key_labels = []
+        for i, k in enumerate(keys):
+            if i:
+                then = QLabel("then")
+                self._key_labels.append(then)
+                self.keys_row.addWidget(then)
+            cap = QLabel(k)
+            cap.setObjectName("keys")
+            self._key_labels.append(cap)
+            self.keys_row.addWidget(cap)
+        self.keys_row.addStretch(1)
+
+    def _tab_text(self) -> str:
+        """The short words on the minimized tab: "GuideWire 3/18 ▸"."""
+        return getattr(self, "_title", "GuideWire").replace("GuideWire · step ", "GuideWire ").replace(" of ", "/") + " ▸"
+
+    def _toggle_details(self) -> None:
+        on = not self.lines.isVisible()
+        self.lines.setVisible(on)
+        self.more_button.setText("Details \u25b4" if on else "Details \u25be")
+
+    # ---- minimize, close, move
+    def toggle_minimized(self) -> None:
+        title = getattr(self, "_title", self.header.text().replace("  \u25b8", ""))
+        if self.minimized:
+            self.minimized = False
+            self.body.setVisible(True)
+            self.minimize_button.setVisible(True)
+            self.close_button.setVisible(True)
+            self.setMinimumSize(*self.MIN_SIZE)
+            self.resize(*self._normal_size)
+            self.header.setText(title)
+        else:
+            self._normal_size = (self.width(), self.height())
+            self.minimized = True
+            self.body.setVisible(False)
+            self.minimize_button.setVisible(False)
+            self.close_button.setVisible(False)
+            self.setMinimumSize(0, 0)
+            self.resize(*self.TAB_SIZE)
+            self.header.setText(self._tab_text())
 
     def _close(self) -> None:
         self.hide()
         self.closed.emit()
 
-    def set_content(self, header: str, goal: str, lines: list[str], hint: str) -> None:
-        self.header.setText(header)
-        self.goal.setText(goal)
-        self.lines.setText("\n".join(f"• {x}" for x in lines))
-        self.lines.setVisible(bool(lines))
-        self.hint.setText(hint)
-        self.hint.setVisible(bool(hint))
-        self.adjustSize()
+    def mousePressEvent(self, e) -> None:  # noqa: N802 (Qt override)
+        if e.button() == Qt.MouseButton.LeftButton:
+            p = e.globalPosition().toPoint()
+            self._drag = (p.x() - self.x(), p.y() - self.y())
+            self._press = p
+            e.accept()
+
+    def mouseMoveEvent(self, e) -> None:  # noqa: N802
+        if self._drag is not None:
+            p = e.globalPosition().toPoint()
+            self.move(p.x() - self._drag[0], p.y() - self._drag[1])
+            self.moved_by_user = True
+
+    def mouseReleaseEvent(self, e) -> None:  # noqa: N802
+        if self._drag is not None and self.minimized and self._press is not None and (e.globalPosition().toPoint() - self._press).manhattanLength() < 4:
+            self.toggle_minimized()                      # a click on the tab opens it again; a drag only moves it
+        self._drag = None
+
+    def resizeEvent(self, e) -> None:  # noqa: N802
+        super().resizeEvent(e)
+        if self.isVisible() and not self.minimized and e.oldSize().isValid() and e.oldSize() != e.size() and self.grip.underMouse():
+            self.moved_by_user = True                    # the learner sized it: it stays as they made it
 
     def put(self, x: int, y: int) -> None:
-        self.move(x, y)
+        """Place the box where the app suggests, only until the learner has moved or resized it themselves."""
+        if not self.moved_by_user:
+            self.move(x, y)
         if not self.isVisible():
             self.show()
             import sys

@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidg
 
 from ..discovery import DiscoveryResult, Suggestion
 from ..pipeline import APPS
-from .bento import Tile, header, page_grid, tidy_list
+from .bento import HeroTile, Tile, header, page_grid, tidy_list
 from .workers import run_call
 
 FROM_WORDS = "(from my words)"
@@ -56,7 +56,7 @@ class FindScreen(QWidget):
         self.back_button.clicked.connect(self.back.emit)
         grid = page_grid(self)
         grid.addWidget(header("Find a tutorial", "Say what you want to learn and get up to three suggested videos.", back=self.back_button, kicker="Discover"), 0, 0, 1, 2)
-        search = Tile("What do you want to learn?", variant="soft")
+        search = HeroTile("What do you want to learn?")
         search.body.addWidget(self.goal)
         row = QHBoxLayout()
         row.addWidget(QLabel("Application"))

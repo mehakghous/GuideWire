@@ -193,7 +193,7 @@ class ClayBall(QWidget):
     """A round icon moulded like a clay ball, with a simple white symbol: search, chat, plus, star or clock."""
     COLOURS = {"search": ("teal_hi", "teal"), "chat": ("hero_hi", "hero"), "plus": ("accent_hi", "accent"), "star": ("#e6d9ff", "#a98af0"), "clock": ("tile_hi", "hero_lo")}
 
-    def __init__(self, kind: str, size: int = 58):
+    def __init__(self, kind: str, size: int = 42):
         super().__init__()
         self.kind = kind
         self.setFixedSize(size, size)
@@ -249,7 +249,7 @@ class ClayBall(QWidget):
 class IconTile(ActionTile):
     """An action tile with a round clay icon above its title: the big, friendly buttons on Home."""
 
-    def __init__(self, title: str, hint: str, kind: str, min_height: int = 150):
+    def __init__(self, title: str, hint: str, kind: str, min_height: int = 128):
         super().__init__(title, hint, "", min_height=min_height)
         box = self.layout()
         box.setContentsMargins(18, 16, 18, 16)

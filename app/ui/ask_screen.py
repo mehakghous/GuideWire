@@ -14,7 +14,7 @@ from shared.step_record import StepList
 
 from ..ask import Asker, AskResult
 from ..pipeline import APPS
-from .bento import Tile, header, page_grid
+from .bento import HeroTile, Tile, header, page_grid
 from .style import current_palette
 from .workers import run_call
 
@@ -71,7 +71,7 @@ class AskScreen(QWidget):
         foot.addWidget(self.save_button)
         foot.addWidget(self.status, 1)
         talk.body.addLayout(foot)
-        settings = Tile("What it is about", variant="soft")
+        settings = HeroTile("What it is about")
         form = QVBoxLayout()
         form.setSpacing(8)
         form.addWidget(QLabel("Application"))

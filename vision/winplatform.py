@@ -73,6 +73,19 @@ def window_rect(hwnd: int) -> Rect:
     return Rect(r.left, r.top, r.right - r.left, r.bottom - r.top)
 
 
+def client_rect(hwnd: int) -> Rect | None:
+    """The drawable (client) area of a window in virtual-desktop physical pixels: where the application's own pixels start, below the title bar and inside the borders. None when it cannot be read.
+    Blender's window size and region rectangles are relative to this, not to `window_rect` (measured: 1366x697 at (0, 31) inside a 1368x729 frame)."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    r, pt = wintypes.RECT(), wintypes.POINT(0, 0)
+    if not user32.GetClientRect(wintypes.HWND(hwnd), ctypes.byref(r)) or not user32.ClientToScreen(wintypes.HWND(hwnd), ctypes.byref(pt)):
+        return None
+    return Rect(pt.x, pt.y, r.right - r.left, r.bottom - r.top)
+
+
 def process_exe(pid: int) -> str:
     """The program file name of a process ("blender.exe"), lower case, or "" when it cannot be read (a protected process)."""
     _require_windows()
@@ -88,6 +101,23 @@ def process_exe(pid: int) -> str:
         size = wintypes.DWORD(len(buf))
         ok = kernel32.QueryFullProcessImageNameW(handle, 0, buf, ctypes.byref(size))
         return os.path.basename(buf.value).lower() if ok else ""
+    finally:
+        kernel32.CloseHandle(handle)
+
+
+def process_alive(pid: int) -> bool:
+    """True while a process with this id is running. A process that cannot be opened because it is protected counts as running (it exists); one that no longer exists, or has exited, does not."""
+    _require_windows()
+    import ctypes
+    from ctypes import wintypes
+    kernel32 = ctypes.windll.kernel32
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    handle = kernel32.OpenProcess(0x1000, False, pid)
+    if not handle:
+        return kernel32.GetLastError() == 5                                                # access denied: it exists
+    try:
+        code = wintypes.DWORD(0)
+        return bool(kernel32.GetExitCodeProcess(handle, ctypes.byref(code))) and code.value == 259       # STILL_ACTIVE
     finally:
         kernel32.CloseHandle(handle)
 
@@ -118,8 +148,21 @@ def list_windows() -> list[WindowInfo]:
     return found
 
 
+def _own_window_covers(user32, h) -> bool:
+    """Whether a window of THIS process hides pixels of the application from a capture. Our click-through overlay does not (it is transparent: its marks are drawn by us, the pixels below stay
+    readable) and masking it would blank the whole window. The guide box and the main window do, unless they were excluded from capture, in which case the capture sees through them."""
+    ex = user32.GetWindowLongW(h, GWL_EXSTYLE)
+    if ex & WS_EX_TRANSPARENT:
+        return False
+    import ctypes
+    affinity = ctypes.c_uint(0)
+    if user32.GetWindowDisplayAffinity(h, ctypes.byref(affinity)) and affinity.value == WDA_EXCLUDEFROMCAPTURE:
+        return False
+    return True
+
+
 def windows_above(hwnd: int) -> list[Rect]:
-    """Screen rects of visible windows stacked above `hwnd` (they cover part of it)."""
+    """Screen rects of visible windows stacked above `hwnd` that hide part of it from a capture: other applications' windows, and our own guide box and main window (not the click-through overlay)."""
     _require_windows()
     import ctypes
     from ctypes import wintypes
@@ -134,9 +177,10 @@ def windows_above(hwnd: int) -> list[Rect]:
             return False                      # EnumWindows runs top of the stack first
         pid = wintypes.DWORD(0)
         user32.GetWindowThreadProcessId(h, ctypes.byref(pid))
-        if pid.value == os.getpid():              # our own overlay is not a covering window
+        own = pid.value == os.getpid()
+        if own and not _own_window_covers(user32, h):
             return True
-        if user32.IsWindowVisible(h) and not user32.IsIconic(h) and user32.GetWindowTextLengthW(h) > 0:
+        if user32.IsWindowVisible(h) and not user32.IsIconic(h) and (own or user32.GetWindowTextLengthW(h) > 0):       # our own boxes may have no title; other processes' untitled windows are helpers
             cloaked = ctypes.c_int(0)
             ctypes.windll.dwmapi.DwmGetWindowAttribute(wintypes.HWND(h), 14, ctypes.byref(cloaked), 4)
             if not cloaked.value:

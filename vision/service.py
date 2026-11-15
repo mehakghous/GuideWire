@@ -82,7 +82,13 @@ class VisionService:
         from vision import winplatform
         from vision.capture import grab, mask_occluders
         winplatform.enable_dpi_awareness()
-        win = winplatform.find_window(self.title, self.profile.exe)
+        win = None
+        if self.use_probe:                                   # with two Blenders open, the one running the add-on is the one to read
+            from vision.probe_client import probe_info
+            info = probe_info(self.profile.key)
+            if info and isinstance(info.get("pid"), int):
+                win = winplatform.find_window(self.title, self.profile.exe, info["pid"])
+        win = win or winplatform.find_window(self.title, self.profile.exe)
         if win is None:
             return None, None
         frame = grab(win.rect)

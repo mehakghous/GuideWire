@@ -122,11 +122,13 @@ class SceneReader:
         """`ocr(pixels, scale) -> words` (the Windows OCR in the app), `layout(pixels) -> Layout`. Both are injected, so this is testable with no screen."""
         self._ocr, self._layout, self._clock, self._thumb = ocr, layout, clock, thumb
         self.stats = Stats()
+        self.last: Scene | None = None          # what the most recent look returned (`last.box` is the area it re-read: a menu that just opened)
         self.reset()
 
     def reset(self) -> None:
         """Forget what was read: the next look reads the whole window."""
         self._state: dict[str, Any] | None = None
+        self.last = None
 
     @property
     def empty(self) -> bool:
@@ -137,6 +139,11 @@ class SceneReader:
         return None if s is None else Scene(s["words"], s["layout"], "none", None, s["serial"])
 
     def read(self, pixels, window: Rect, busy: list[Rect] | None = None, force_full: bool = False) -> Scene:
+        scene = self._read(pixels, window, busy, force_full)
+        self.last = scene
+        return scene
+
+    def _read(self, pixels, window: Rect, busy: list[Rect] | None, force_full: bool) -> Scene:
         """Look at the frame (BGR pixels of the application window) and return the words known now. `window` is where the window sits on the screen: a different one than last time means it moved or
         was resized. `busy` rectangles are in frame pixels. `force_full` reads everything (a caller that knows the interface changed)."""
         import cv2

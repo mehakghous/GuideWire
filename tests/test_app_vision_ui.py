@@ -1,38 +1,20 @@
 """Screen guidance in the session screen: the timer, the status line, the highlight, the "covering the application" warning. Offscreen Qt, a fake vision service and a fake overlay."""
 import os
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 
 pytest.importorskip("PyQt6")          # CI installs no Qt: the screen guide needs it
 
+import vision_fakes as vf  # noqa: E402
 from app import vision_bridge as vb  # noqa: E402
 from app.ui.screen_guide import ScreenGuide  # noqa: E402
-from shared.grounding import GroundingResult, Rect  # noqa: E402
+from shared.grounding import Rect  # noqa: E402
 
 SAMPLE = Path("shared/examples/blender_cube_extrude.json")
 
 
-@dataclass
-class G:
-    grounding: GroundingResult
-    rect: Rect | None = None
-    complete: bool = False
-    ambiguous: bool = False
-
-
-class FakeService:
-    def __init__(self, observed=None, found=True):
-        self.observed, self.found = observed or {}, found
-
-    def ground(self, ui_element):
-        if not self.found:
-            return G(GroundingResult("none", reason="no visible window titled 'Blender'"))
-        return G(GroundingResult("ok", 60, 40), Rect(50, 30, 80, 20), True)
-
-    def observe(self, properties=None, attributes=None):
-        return dict(self.observed)
+FakeService = vf.FakeService                                  # tests/vision_fakes.py: look() -> (observed, context); the screen shows an Add menu in the top bar
 
 
 class FakeOverlay:
@@ -120,7 +102,7 @@ def test_a_poll_highlights_the_target_and_shows_a_plain_message(env):
     screen, engine, _svc, overlay = env
     screen.poll()
     assert screen.watch_label.text() and overlay.covered == Rect(0, 0, 1920, 1080)
-    assert len(overlay.marks) == 1 and overlay.marks[0].rect == Rect(46, 26, 88, 28) or overlay.marks[0].rect.w >= 80     # a highlight with a little padding
+    assert len(overlay.marks) == 1 and overlay.marks[0].rect == Rect(246, 16, 48, 24)        # the Add menu read at (250, 20, 40 x 16), with a little padding
     assert overlay.shown >= 1
 
 
@@ -169,16 +151,19 @@ def test_a_look_that_finishes_after_the_learner_moved_on_is_ignored(env):
     svc.observed = {"mode": "EDIT_MESH"}
     look = screen.bridge.look(engine.current_step(), "blender")
     first = engine.current_step().id
-    engine.complete()                                                 # the learner pressed Done while the screen was being read
+    screen.done_button.click()                                        # the learner pressed Done while the screen was being read
+    svc.observed = {"mode": "OBJECT"}                                 # and the new step (s02, Edit Mode) is not done on screen
     screen._looked(look, first)
     assert engine.current_step().id == "s02"                          # the stale look did not complete anything
+    assert screen._shown_step == "s02" and svc.looks                  # a look for the NEW step was started at once, not after the next timer tick
 
 
 def test_a_second_poll_while_one_is_running_is_skipped(env):
     screen, _e, _svc, _o = env
     screen._busy = True
+    before = screen.watch_label.text()
     screen.poll()
-    assert screen.watch_label.text() == ""
+    assert screen.watch_label.text() == before and not _svc.looks
 
 
 def test_the_warning_appears_when_guidewire_covers_the_application_and_the_button_hands_the_screen_over_to_the_small_guide(env):

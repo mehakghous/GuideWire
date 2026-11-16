@@ -343,6 +343,7 @@ class SessionScreen(QWidget):
         self._last_hint = ""
         self._last_keys: tuple[str, ...] = ()
         self._last_inputs: tuple[tuple[str, str], ...] = ()
+        self._shown_step: str | None = None              # the step the guide (highlight, box, status line) is showing: everything is cleared together when it changes
         self._app = "blender"
         self.watch_box = QCheckBox("Watch my screen and highlight the next click")
         self.watch_box.setToolTip("GuideWire only looks at the application window: it never clicks, types or moves anything.")
@@ -510,7 +511,9 @@ class SessionScreen(QWidget):
             return
         e = self.engine
         step = None if e is None else e.current_step()
-        if step is None or step.id != step_id:                 # the learner moved on while the screen was being read
+        if step is None or step.id != step_id:                 # the learner moved on while the screen was being read: that look is for a step that is gone; look at the new one now
+            if self.watching:
+                self.poll()
             return
         tick = self.bridge.apply(e, look)
         self.watch_label.setText(tick.message)
@@ -524,6 +527,17 @@ class SessionScreen(QWidget):
         if tick.advanced:
             self.status.setText(tick.message)
             self.refresh()
+
+    def _on_step_change(self, step) -> None:
+        """One step, one guide: when the step changes, the previous step's highlight, hint, keys and animation are cleared in the same call that shows the new goal. Nothing of the old step can
+        stay under the new one while the first look of the new step is being read."""
+        sid = None if step is None else step.id
+        if sid == self._shown_step:
+            return
+        self._shown_step = sid
+        self._last_hint, self._last_keys, self._last_inputs = "", (), ()
+        self.guide.clear()
+        self.watch_label.setText("Looking at the screen..." if (sid is not None and self.watching) else "")
 
     def _own_rect(self):
         w = self.window()
@@ -582,6 +596,7 @@ class SessionScreen(QWidget):
             if not step.verifiable:
                 lines.append("(GuideWire cannot check this step automatically: tell it when you are done.)")
             self.detail.setText("\n".join(lines))
+        self._on_step_change(step)
         self.start_button.setEnabled(e.state == NOT_STARTED)
         self.done_button.setEnabled(e.state == ACTIVE)
         self.skip_button.setEnabled(e.state == ACTIVE)

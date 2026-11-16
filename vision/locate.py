@@ -80,8 +80,9 @@ def _beside(prev: Rect, cand: Rect) -> bool:
     return dx >= -prev.w and dy >= -prev.h and abs(dx) <= NEAR and abs(dy) <= NEAR
 
 
-def locate(words: list[Word], ui_element: str, within: Rect | None = None) -> Located | None:
-    """The deepest visible, consistent part of the UI path, or None."""
+def locate(words: list[Word], ui_element: str, within: Rect | None = None, below_first: bool = False) -> Located | None:
+    """The deepest visible, consistent part of the UI path, or None. `within` limits where the FIRST part may be (the menu bar the path starts in); later parts are found beside the part before, wherever that is. `below_first`: the part after the first must lie BELOW it (the first is a menu in a header: its dropdown opens under it,
+    while a neighbour in the same header row, like Mesh next to Add in Edit Mode, is another menu, not its item)."""
     path = parse_path(ui_element)
     if not path:
         return None
@@ -91,7 +92,7 @@ def locate(words: list[Word], ui_element: str, within: Rect | None = None) -> Lo
     ties = sum(1 for _, s in first[1:] if s >= first[0][1] - 1e-9)
     best = Located(first[0][0], path[0], 0, len(path), first[0][1], ties)
     for depth, segment in enumerate(path[1:], start=1):
-        nxt = [(r, s) for r, s in find_phrase(words, segment, within) if _beside(best.rect, r)]
+        nxt = [(r, s) for r, s in find_phrase(words, segment) if _beside(best.rect, r) and not (below_first and depth == 1 and r.y < best.rect.y + best.rect.h)]          # `within` limits only where the path STARTS (the menu bar); a submenu opens wherever it opens
         if not nxt:
             break
         # Prefer the candidate nearest the parent item.

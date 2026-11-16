@@ -121,3 +121,25 @@ def tool_world(mode="EDIT_MESH", scroll=0.0, active_tool="builtin.select_box", *
     groups = [[t["id"] for t in e["group"]] for e in st["tools"] if "group" in e]
     ai = next((i for i, g in enumerate(groups) if active_tool in g), None)
     return st, toolbar_pixels(st, scroll, ai)
+
+
+class FakeOverlay:
+    """What ScreenGuide draws on: the overlay window's calls, recorded."""
+
+    def __init__(self):
+        self.covered, self.marks, self.shown, self.closed = None, [], 0, False
+
+    def cover(self, area):
+        self.covered = area
+
+    def set_marks(self, marks):
+        self.marks = list(marks)
+
+    def show_click_through(self):
+        self.shown += 1
+
+    def hide(self):
+        self.shown = 0
+
+    def close(self):
+        self.closed = True

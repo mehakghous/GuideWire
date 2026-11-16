@@ -93,7 +93,7 @@ def _advice(step: Step, ref: TargetRef, g: Grounded, observed: dict) -> str:
 
 
 def keys_text(step: Step) -> tuple[str, ...]:
-    from app.guidance import keys_of
+    from app.hands import keys_of
     return keys_of(step)
 
 

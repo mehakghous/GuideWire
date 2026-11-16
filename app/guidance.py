@@ -1,54 +1,111 @@
-"""What the learner's HANDS do in a step: the keys to press and the mouse and keyboard events in order (for the animated hint). Pure: no screen, no vision, no Qt.
+"""Screen guidance for a session: where to point for the active step, and whether the screen shows it is done.
 
-This module used to also decide WHAT to point at, from words in the step's text (a list of words that "name scene items", a list of panels that "open at the bottom left", a table of tool keys). That guessing
-is gone: the resolver (`ingestion/targets.py`) turns the words into typed targets once, the grounders (`vision/grounders.py`) locate them, and `app/step_state.py` decides what to show.
+Qt-free so it can be tested with a fake vision service. It uses two calls of `vision.service.VisionService` (or anything shaped like it):
+    vision.observe() -> dict      the state the evaluator reads; a missing key means "not observable"
+    vision.ground(ui_element) -> Guidance(grounding, rect, complete, ambiguous, matched)
+
+Threading rule: `compute` calls only the vision service, so it may run on a worker thread. `apply` touches the session engine (SQLite, one
+thread) and must run on the thread that owns it. A result is dropped when the active step has changed since it was computed.
+
+Guidance only exists for Blender today (that is all vision supports). It observes only: it never clicks or types. When vision is unavailable
+(not Windows, OCR missing, Blender not open) the session simply carries on by hand and says why.
 """
 from __future__ import annotations
 
-import re
+from dataclasses import dataclass, field
+from typing import Any, Protocol
 
 from shared.step_record import Step
 
-# words that are keys when they follow "press" in a how-to line ("Press Delete", "Press Ctrl+P")
-KEY_WORDS = {"delete", "tab", "enter", "return", "esc", "escape", "space", "backspace", "home", "end", "ctrl", "shift", "alt", "x", "z"}
-_KEY = re.compile(r"\bpress(?:ing)?\s+((?:(?:ctrl|shift|alt)\s*\+\s*)*[a-z0-9]+)", re.I)
+from .session_engine import ACTIVE, SessionEngine
+
+GUIDED_APPS = frozenset({"blender"})
+UNAVAILABLE = "Screen guidance is not available here ({why}). Follow the steps by hand: press Done when a step is finished."
 
 
-def keys_of(step: Step) -> tuple[str, ...]:
-    """The keys the step says to press, in order, as written on a keyboard ("A", "Delete", "Ctrl+P")."""
-    out: list[str] = []
-    for a in getattr(step, "actions", []) or []:                       # the step's own key actions say it exactly (["Ctrl", "P"] = Ctrl+P)
-        if a.verb == "press_keys" and a.keys:
-            out.append("+".join(k if len(k) > 1 else k.upper() for k in a.keys))
-    if out:
-        return tuple(out)
-    for h in step.how_to:
-        for m in _KEY.finditer(h.text):
-            parts = [p.strip() for p in m.group(1).split("+") if p.strip()]
-            if not parts or not all(len(p) == 1 or p.lower() in KEY_WORDS or re.fullmatch(r"f\d{1,2}", p.lower()) for p in parts):
-                continue
-            out.append("+".join(p.upper() if len(p) == 1 else p.capitalize() for p in parts))
-    return tuple(out)
+class VisionLike(Protocol):
+    def observe(self) -> dict[str, Any]: ...
+    def ground(self, ui_element: str) -> Any: ...
 
 
-def inputs_for(step: Step) -> tuple[tuple[str, str], ...]:
-    """The mouse and keyboard events of a step in order, for the animated hint: ("click", "left" | "right" | "hover"), ("drag", "left"), ("keys", "Ctrl+P"), ("type", "10"). At most six."""
-    out: list[tuple[str, str]] = []
+def ui_target(step: Step) -> str | None:
+    """The thing on screen to point at for a step: the first action that names a UI element, else None (a key press has nothing to highlight)."""
     for a in step.actions:
-        ui = (a.ui_element or "").lower()
-        if a.verb == "press_keys":
-            if a.keys:
-                out.append(("keys", "+".join(k if len(k) > 1 else k.upper() for k in a.keys)))
-        elif a.verb == "drag":
-            out.append(("drag", "left"))
-        elif a.verb == "open_menu" and ui.startswith("viewport context menu"):
-            out += [("click", "right"), ("click", "left")]
-        elif a.verb == "open_menu":
-            out += [("click", "left"), ("click", "hover"), ("click", "left")] if ui.count(">") >= 2 else [("click", "left")]
-        elif a.verb == "set_value":
-            out.append(("type", a.value or ""))
-        elif ui:
-            out.append(("click", "left"))
-        elif a.verb in ("click", "select"):
-            out.append(("click", "left"))
-    return tuple(out[:6])
+        if a.ui_element and a.ui_element.strip():
+            return a.ui_element.strip()
+    return None
+
+
+@dataclass
+class Snapshot:
+    """What the vision service reported for one step. Plain data, so it can cross from the worker thread to the UI thread."""
+    step_id: str
+    observed: dict[str, Any] = field(default_factory=dict)
+    guidance: Any = None
+    error: str | None = None
+    fatal: bool = False          # the service cannot work at all on this computer: stop asking
+
+
+@dataclass
+class Outcome:
+    advanced: bool = False       # the step was completed because the screen showed its expected state
+    marks: list = field(default_factory=list)   # vision.overlay.Mark objects to draw (empty = draw nothing)
+    hint: str = ""               # one line for the learner
+    stop: bool = False           # stop asking vision for the rest of this session
+
+
+def _is_fatal(e: Exception) -> bool:
+    return isinstance(e, (ImportError, NotImplementedError)) or type(e).__name__ == "PlatformUnavailable"
+
+
+class GuidanceController:
+    def __init__(self, engine: SessionEngine, vision: VisionLike | None):
+        self.engine = engine
+        self.vision = vision
+
+    @property
+    def available(self) -> bool:
+        return self.vision is not None and self.engine.app in GUIDED_APPS
+
+    def current(self) -> tuple[str, str | None] | None:
+        """(step id, ui target) of the active step, or None when no step is active. Read on the UI thread, passed to `compute`."""
+        step = self.engine.current_step()
+        if step is None or self.engine.state != ACTIVE:
+            return None
+        return step.id, ui_target(step)
+
+    def compute(self, step_id: str, target: str | None) -> Snapshot:
+        """Ask vision. Safe on a worker thread: it never touches the engine."""
+        if self.vision is None:
+            return Snapshot(step_id, error=UNAVAILABLE.format(why="no vision service"), fatal=True)
+        try:
+            observed = dict(self.vision.observe() or {})
+            guidance = self.vision.ground(target) if target else None
+        except Exception as e:                                   # vision is best effort: it must never break a session
+            return Snapshot(step_id, error=UNAVAILABLE.format(why=str(e) or type(e).__name__), fatal=_is_fatal(e))
+        return Snapshot(step_id, observed, guidance)
+
+    def apply(self, snap: Snapshot) -> Outcome:
+        """Use a snapshot on the UI thread. Ignored if the active step is no longer the one it was computed for."""
+        step = self.engine.current_step()
+        if step is None or step.id != snap.step_id:
+            return Outcome()
+        if snap.error:
+            return Outcome(hint=snap.error, stop=snap.fatal)
+        if snap.observed and self.engine.auto_check(snap.observed):
+            return Outcome(advanced=True, hint="Step completed: GuideWire saw it on screen.")
+        return self._pointing(snap)
+
+    @staticmethod
+    def _pointing(snap: Snapshot) -> Outcome:
+        from vision.overlay import highlight_mark
+        g = snap.guidance
+        if g is None:
+            return Outcome()
+        status = getattr(getattr(g, "grounding", None), "status", "none")
+        reason = getattr(getattr(g, "grounding", None), "reason", "") or ""
+        if status != "ok" or g.rect is None:
+            return Outcome(hint=("Blender is not visible: bring it to the front." if "window" in reason else "Could not find that on screen yet."))
+        if g.ambiguous:
+            return Outcome(marks=[highlight_mark(g.rect)], hint=f"Several places match '{g.matched}': pick the one the step means.")
+        return Outcome(marks=[highlight_mark(g.rect)], hint=(f"Click {g.matched}." if g.complete else f"Open {g.matched}, the next part will light up."))

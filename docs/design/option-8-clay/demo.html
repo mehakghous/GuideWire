@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GuideWire Clay Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#efe6dc; --clay:#f7efe6; --text:#4a3a33; --mut:#8c7a6f;
+  --teal:#3fc0dc; --teal-d:#1f8fab; --amber:#f5a23c; --amber-d:#c97a14; --verm:#ff7a3d; --verm-d:#d9531a; --cream:#fffaf2;
+  --sh-d:rgba(120,90,70,.28); --sh-l:rgba(255,255,255,.95);
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Nunito",system-ui,sans-serif;background:#e4d8cb;color:var(--text);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px}
+.fr{font-family:"Fredoka","Nunito",sans-serif}
+.app{width:min(1200px,100%);height:min(790px,calc(100vh - 32px));min-height:660px;display:flex;gap:20px;padding:20px;border-radius:44px;background:var(--bg);position:relative;overflow:hidden;
+  box-shadow:inset 8px 8px 20px var(--sh-d),inset -8px -8px 20px var(--sh-l),0 20px 50px rgba(90,60,40,.3)}
+/* the clay look: soft light top-left, soft dark bottom-right, plus an inner highlight */
+.clay{background:var(--clay);border-radius:30px;box-shadow:10px 12px 24px var(--sh-d),-8px -8px 18px var(--sh-l),inset -6px -8px 14px rgba(150,110,80,.14),inset 6px 6px 12px rgba(255,255,255,.9)}
+.blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.55;pointer-events:none;animation:float 9s ease-in-out infinite}
+.side{width:216px;flex:none;padding:20px 14px 14px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:2}
+.logo{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:700;padding:2px 6px 12px}
+.logo .o{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#a0eaff,var(--teal) 55%,var(--teal-d));box-shadow:4px 6px 10px var(--sh-d),inset -4px -5px 8px rgba(0,60,90,.3),inset 3px 3px 6px rgba(255,255,255,.6);animation:squish 3.5s ease-in-out infinite;position:relative}
+.logo .o::after{content:"";position:absolute;right:-8px;bottom:-4px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#ffe0a8,var(--amber) 60%,var(--amber-d));box-shadow:2px 3px 5px var(--sh-d)}
+.nav button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:22px;font:600 16px Fredoka;color:var(--mut);margin-bottom:6px;transition:transform .18s cubic-bezier(.3,1.6,.5,1),box-shadow .2s,color .2s;position:relative}
+.nav button i{width:26px;height:26px;border-radius:50%;flex:none;background:#e8dccf;box-shadow:inset 2px 2px 4px var(--sh-d),inset -2px -2px 4px var(--sh-l)}
+.nav button:hover{transform:translateX(5px) scale(1.03);color:var(--text)}
+.nav button:active{transform:scale(.95)}
+.nav button.on{color:#fff;background:linear-gradient(160deg,#ffb35c,var(--verm));box-shadow:6px 8px 14px rgba(217,83,26,.35),inset -4px -5px 8px rgba(160,50,0,.3),inset 3px 3px 6px rgba(255,255,255,.55)}
+.nav button.on i{background:radial-gradient(circle at 30% 28%,#fff,#ffd9b8);box-shadow:inset -2px -2px 4px rgba(160,50,0,.25)}
+.comp{margin-top:auto;padding:14px;border-radius:24px;background:linear-gradient(160deg,#bff1ff,#8adcf0);color:#0d4a5f;box-shadow:6px 8px 14px rgba(31,143,171,.3),inset -4px -5px 10px rgba(0,80,110,.2),inset 3px 3px 8px rgba(255,255,255,.7)}
+.comp b{font:600 15px Fredoka;display:flex;align-items:center;gap:8px}.comp small{font-weight:700;font-size:12.5px}
+.live{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 30% 28%,#d6ffe6,#4cc38a);box-shadow:0 0 0 0 rgba(76,195,138,.6);animation:pulse 1.6s infinite}
+.me{display:flex;justify-content:space-between;padding:6px 8px 0;font:600 15px Fredoka}.me u{color:var(--verm);cursor:pointer}
+
+.main{flex:1;min-width:0;position:relative}
+.screen{position:absolute;inset:0;padding:6px 10px 10px 6px;overflow:auto;opacity:0;pointer-events:none;transform:scale(.94) translateY(20px);transition:opacity .3s,transform .5s cubic-bezier(.3,1.5,.5,1)}
+.screen.on{opacity:1;pointer-events:auto;transform:none}
+.screen::-webkit-scrollbar{width:0}
+.hi{font:600 17px Fredoka;color:var(--teal-d)}
+h1{font:700 46px/1 Fredoka;margin-top:4px;color:var(--text);text-shadow:2px 3px 0 rgba(255,255,255,.9),3px 5px 6px var(--sh-d)}
+h2{font:600 24px/1.1 Fredoka}
+.hero{margin:20px 6px 0;padding:26px 28px;display:grid;grid-template-columns:1.3fr 1fr;gap:24px;background:linear-gradient(155deg,#ffc27a,var(--amber) 55%,#f08a1c);color:#5a2f00;border-radius:36px;position:relative;overflow:hidden;
+  box-shadow:12px 14px 26px rgba(201,122,20,.4),-8px -8px 18px var(--sh-l),inset -8px -10px 18px rgba(170,90,0,.28),inset 8px 8px 16px rgba(255,255,255,.55)}
+.hero .ball{position:absolute;border-radius:50%;box-shadow:inset -8px -10px 16px rgba(0,0,0,.15),inset 6px 6px 12px rgba(255,255,255,.6),6px 8px 14px rgba(120,60,0,.25)}
+.hero .b1{width:120px;height:120px;right:-30px;top:-30px;background:radial-gradient(circle at 30% 28%,#bff1ff,var(--teal));animation:float 7s ease-in-out infinite}
+.hero .b2{width:60px;height:60px;right:40%;bottom:-18px;background:radial-gradient(circle at 30% 28%,#ffd0b0,var(--verm));animation:float 5s ease-in-out infinite reverse}
+.hero > *{position:relative}
+.pill{display:inline-block;font:600 13px Fredoka;padding:4px 12px;border-radius:999px;background:var(--cream);color:var(--amber-d);box-shadow:2px 3px 6px rgba(120,60,0,.2),inset 2px 2px 4px #fff}
+.pill.t{color:var(--teal-d)}.pill.v{color:var(--verm-d)}.pill.m{color:var(--mut)}
+.hero h2{font-size:30px;margin:10px 0 4px}.hero p{font-weight:800;opacity:.8}
+.track{height:24px;border-radius:999px;margin:16px 0 6px;background:rgba(150,80,0,.25);box-shadow:inset 3px 4px 8px rgba(120,60,0,.35),inset -2px -2px 4px rgba(255,255,255,.4);padding:4px}
+.track i{display:block;height:100%;width:0;border-radius:999px;background:radial-gradient(circle at 30% 20%,#fff,#fff3dc 60%,#ffe2b0);box-shadow:2px 3px 5px rgba(120,60,0,.3);animation:fill 1.4s .3s cubic-bezier(.3,1.4,.5,1) forwards}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:10px;font:600 17px Fredoka;padding:13px 28px;border-radius:999px;color:#fff;
+  background:linear-gradient(160deg,#ff9b63,var(--verm) 60%,#f0601f);box-shadow:6px 8px 14px rgba(217,83,26,.4),inset -4px -6px 10px rgba(150,40,0,.3),inset 4px 4px 8px rgba(255,255,255,.55);text-shadow:0 1px 2px rgba(120,30,0,.4);
+  transition:transform .2s cubic-bezier(.3,1.7,.5,1),box-shadow .2s}
+.btn:hover{transform:translateY(-4px) scale(1.05);box-shadow:8px 14px 20px rgba(217,83,26,.45),inset -4px -6px 10px rgba(150,40,0,.3),inset 4px 4px 8px rgba(255,255,255,.55)}
+.btn:active{transform:scale(.92,.88);box-shadow:2px 3px 6px rgba(217,83,26,.4),inset 4px 5px 10px rgba(150,40,0,.35)}
+.btn.t{background:linear-gradient(160deg,#9be6fb,var(--teal) 60%,var(--teal-d));box-shadow:6px 8px 14px rgba(31,143,171,.4),inset -4px -6px 10px rgba(0,70,100,.3),inset 4px 4px 8px rgba(255,255,255,.55)}
+.btn.c{background:var(--cream);color:var(--text);text-shadow:none;box-shadow:6px 8px 14px var(--sh-d),-4px -4px 10px var(--sh-l),inset -3px -4px 8px rgba(150,110,80,.15),inset 3px 3px 6px #fff}
+.btn .arr{transition:transform .2s}.btn:hover .arr{transform:translateX(5px)}
+.next{background:var(--cream);border-radius:26px;padding:16px 18px;color:var(--text);box-shadow:inset 4px 5px 10px rgba(150,110,80,.2),inset -3px -3px 8px #fff;align-self:start}
+.next b{display:block;font:600 19px/1.15 Fredoka;margin:8px 0}.next code{font:700 12.5px Consolas,monospace;color:var(--teal-d)}
+.row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin:26px 6px 0}
+.tile{padding:18px 14px;text-align:center;cursor:pointer;transition:transform .25s cubic-bezier(.3,1.7,.5,1)}
+.tile:hover{transform:translateY(-8px) rotate(-2deg) scale(1.04)}.tile:active{transform:scale(.93,.9)}
+.tile .g{width:62px;height:62px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;font-size:28px;background:radial-gradient(circle at 30% 26%,#c9f3ff,var(--teal) 60%,var(--teal-d));box-shadow:5px 7px 12px var(--sh-d),inset -5px -6px 10px rgba(0,70,100,.3),inset 4px 4px 8px rgba(255,255,255,.6)}
+.tile:nth-child(2) .g{background:radial-gradient(circle at 30% 26%,#ffe5b8,var(--amber) 60%,var(--amber-d))}
+.tile:nth-child(3) .g{background:radial-gradient(circle at 30% 26%,#ffd5bd,var(--verm) 60%,var(--verm-d))}
+.tile:nth-child(4) .g{background:radial-gradient(circle at 30% 26%,#e6d9ff,#a98af0 60%,#7a5bd0)}
+.tile b{font:600 17px Fredoka;display:block}.tile span{font-size:13px;font-weight:700;color:var(--mut)}
+.list{margin:22px 6px 0;display:flex;flex-direction:column;gap:14px}
+.item{display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:999px;cursor:pointer;font:600 16px Fredoka;transition:transform .22s cubic-bezier(.3,1.6,.5,1)}
+.item:hover{transform:translateX(10px) scale(1.01)}.item:active{transform:scale(.97)}
+.item.sel{background:linear-gradient(160deg,#fff4e0,#ffe2b8)}
+.item .d{width:18px;height:18px;border-radius:50%;flex:none;background:radial-gradient(circle at 30% 28%,#fff,var(--teal));box-shadow:2px 3px 5px var(--sh-d)}
+.item em{margin-left:auto;font:700 13px Nunito;color:var(--mut);font-style:normal}
+.sess{display:grid;grid-template-columns:1fr 250px;gap:24px;margin:20px 6px 0}
+.step{padding:28px 30px;min-height:330px;position:relative;overflow:hidden;border-radius:36px;background:linear-gradient(155deg,#ffc27a,var(--amber) 55%,#f08a1c);color:#5a2f00;
+  box-shadow:12px 14px 26px rgba(201,122,20,.4),-8px -8px 18px var(--sh-l),inset -8px -10px 18px rgba(170,90,0,.28),inset 8px 8px 16px rgba(255,255,255,.55)}
+.step h2{font-size:36px;margin:12px 0;max-width:430px}.step p{font-weight:800;font-size:17px;line-height:1.4;max-width:420px}
+.step .n{position:absolute;right:20px;bottom:-30px;font:700 210px/1 Fredoka;color:rgba(255,255,255,.35);text-shadow:4px 6px 10px rgba(150,80,0,.3);animation:squish 4s ease-in-out infinite}
+.aside{display:flex;flex-direction:column;gap:20px}
+.ring{padding:16px 20px;display:flex;align-items:center;gap:16px}
+.ring .big{font:700 34px Fredoka}
+.toast{position:absolute;right:30px;bottom:26px;padding:14px 24px;border-radius:999px;font:600 18px Fredoka;color:#fff;background:linear-gradient(160deg,#9be6fb,var(--teal) 60%,var(--teal-d));box-shadow:8px 10px 18px rgba(31,143,171,.45),inset -4px -6px 10px rgba(0,70,100,.3),inset 4px 4px 8px rgba(255,255,255,.55);transform:translateY(120px) scale(.6);opacity:0;transition:.5s cubic-bezier(.3,1.8,.5,1);z-index:6}
+.toast.show{transform:none;opacity:1}
+.rev{display:grid;grid-template-columns:1fr 270px;gap:24px;margin:20px 6px 0}
+.detail{padding:22px;display:flex;flex-direction:column;gap:12px}
+.box{background:var(--cream);border-radius:20px;padding:10px 14px;font-weight:800;font-size:14px;box-shadow:inset 3px 4px 8px rgba(150,110,80,.18),inset -2px -2px 6px #fff}
+.box b{display:block;font:600 13px Fredoka;color:var(--amber-d)}
+@keyframes float{50%{transform:translateY(-16px) translateX(6px)}}
+@keyframes squish{0%,100%{transform:scale(1,1)}50%{transform:scale(1.06,.94)}}
+@keyframes fill{to{width:39%}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(76,195,138,.7)}100%{box-shadow:0 0 0 12px rgba(76,195,138,0)}}
+@keyframes boing{from{opacity:0;transform:translateY(30px) scale(.85)}}
+.pop > *{animation:boing .6s cubic-bezier(.3,1.7,.5,1) both}.pop > *:nth-child(2){animation-delay:.08s}.pop > *:nth-child(3){animation-delay:.16s}.pop > *:nth-child(4){animation-delay:.24s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.track i{width:39%}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="blob" style="width:200px;height:200px;background:#bff1ff;right:-50px;top:-50px"></div>
+  <div class="blob" style="width:160px;height:160px;background:#ffd9b8;left:30%;bottom:-70px;animation-delay:-3s"></div>
+  <aside class="side clay">
+    <div class="logo fr"><span class="o"></span>GuideWire</div>
+    <nav class="nav" id="nav">
+      <button class="on" data-go="home"><i></i>Home</button><button data-go="session"><i></i>Session</button><button data-go="review"><i></i>Review Steps</button>
+      <button data-go="home"><i></i>Find a Tutorial</button><button data-go="home"><i></i>Ask GuideWire</button><button data-go="home"><i></i>History</button>
+    </nav>
+    <div class="comp"><b><span class="live"></span>Watching Blender</b><small>Step 7 of 18 is ready to guide.</small></div>
+    <div class="me">Mehak <u>Log Out</u></div>
+  </aside>
+  <main class="main">
+    <section class="screen on" id="home">
+      <div class="hi">Good evening, Mehak</div><h1>Continue Learning</h1>
+      <div class="hero">
+        <div class="ball b1"></div><div class="ball b2"></div>
+        <div><span class="pill">Blender · Rigging</span><h2>Basic Rigging Tutorial</h2><p>Goal 4 of 8: Weight the Mesh</p>
+          <div class="track"><i></i></div><div style="font:700 13px Nunito">Step 7 of 18</div>
+          <div style="display:flex;gap:14px;margin-top:16px;flex-wrap:wrap"><button class="btn" data-go="session">Resume Guidance <span class="arr">→</span></button><button class="btn c" data-go="review">Review Steps</button></div></div>
+        <div class="next"><span class="pill t">Up Next</span><b>Parent the Mesh with Automatic Weights</b><code>Object › Parent › With Automatic Weights</code></div>
+      </div>
+      <div class="row pop">
+        <div class="tile clay"><div class="g">🔍</div><b>Find a Tutorial</b><span>Say your goal and level</span></div>
+        <div class="tile clay"><div class="g">💬</div><b>Ask GuideWire</b><span>Questions about any step</span></div>
+        <div class="tile clay"><div class="g">✚</div><b>New Tutorial</b><span>Paste text or a video link</span></div>
+        <div class="tile clay"><div class="g">⏱</div><b>History</b><span>Your past sessions</span></div>
+      </div>
+      <div class="list pop">
+        <div class="item clay"><span class="d"></span>Starter Plan: Rigging in Maya <span class="pill t">Maya</span><em>18 steps</em></div>
+        <div class="item clay"><span class="d" style="background:radial-gradient(circle at 30% 28%,#fff,var(--amber))"></span>Leg Setup and IK Handles <span class="pill">Blender</span><em>9 steps</em></div>
+      </div>
+    </section>
+    <section class="screen" id="session">
+      <div class="hi">Blender · Basic Rigging</div><h1>Guided Session</h1>
+      <div class="sess">
+        <div class="step"><span class="pill">Step 7 of 18</span><h2>Parent the Mesh with Automatic Weights</h2><p>Select the mesh, then the armature, and attach them so the bones move the surface.</p>
+          <div style="margin-top:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="pill t">Object</span><b>›</b><span class="pill">Parent</span><b>›</b><span class="pill v">With Automatic Weights</span></div><div class="n">7</div></div>
+        <div class="aside">
+          <div class="ring clay"><div class="big">7/18</div><div class="track" style="flex:1;margin:0;background:#e8dccf;box-shadow:inset 3px 4px 8px var(--sh-d),inset -2px -2px 4px #fff"><i style="background:radial-gradient(circle at 30% 20%,#c9f3ff,var(--teal))"></i></div></div>
+          <button class="btn" id="done" style="justify-content:center">Done ✓</button><button class="btn c" style="justify-content:center">Skip</button><button class="btn t" style="justify-content:center">Ask About This</button>
+        </div>
+      </div>
+      <div class="toast" id="toast">Yay! Step 8 is next ★</div>
+    </section>
+    <section class="screen" id="review">
+      <div class="hi">Blender · 18 steps</div><h1>Review Steps</h1>
+      <div class="rev">
+        <div class="list" style="margin:0" id="revlist">
+          <div class="item clay"><span class="d"></span>Add a Single Bone <span class="pill t" style="margin-left:auto">Checkable</span></div>
+          <div class="item clay sel"><span class="d"></span>Enter Edit Mode with Tab <span class="pill t" style="margin-left:auto">Checkable</span></div>
+          <div class="item clay"><span class="d"></span>Extrude the Bone Up <span class="pill" style="margin-left:auto">Partly</span></div>
+          <div class="item clay"><span class="d"></span>Parent with Automatic Weights <span class="pill v" style="margin-left:auto">You Confirm</span></div>
+        </div>
+        <div class="detail clay"><span class="pill t" style="align-self:flex-start">Step 2 of 18</span><h2>Enter Edit Mode with Tab</h2><div class="box"><b>Done when</b>Mode is Edit Mode</div><div class="box"><b>Where</b>3D Viewport, Tab</div><button class="btn" style="justify-content:center;margin-top:auto">Save Tutorial</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+const $=s=>document.querySelector(s);const labels={home:'Home',session:'Session',review:'Review Steps'};
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.textContent.trim()===labels[id]))}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t)go(t.dataset.go)});
+$('#done').onclick=()=>{const t=$('#toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900)};
+document.querySelectorAll('#revlist .item').forEach(it=>it.onclick=()=>{document.querySelectorAll('#revlist .item').forEach(x=>x.classList.remove('sel'));it.classList.add('sel')});
+</script>
+</body>
+</html>

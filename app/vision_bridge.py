@@ -232,7 +232,7 @@ class VisionBridge:
         self.stats.ms_look += (t_look - t_start) * 1000
         self.stats.ms_ground += (t_end - t_look) * 1000
         self.stats.ms_total += (t_end - t_start) * 1000
-        from app.guidance import inputs_for
+        from app.hands import inputs_for
         g = state.grounded
         rect = None
         if state.show_rect and g is not None and g.rect is not None:

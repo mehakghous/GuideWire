@@ -1,0 +1,197 @@
+{
+ "summary": {
+  "goals": 6,
+  "wrong_app_flagged": 6,
+  "other_topic_marked_no_or_partly": 5,
+  "target_kept": 6,
+  "target_first_after": 4,
+  "target_first_before": 0,
+  "all_checked": true,
+  "usd": 0.0,
+  "calls_made": 0,
+  "cache_hits": 18,
+  "model": "gemini-3.5-flash-lite"
+ },
+ "rows": [
+  {
+   "goal": "a beginner guide to rigging with a basic armature and automatic weights",
+   "app": "blender",
+   "order_before": [
+    "wrong_app",
+    "other_topic",
+    "target"
+   ],
+   "order_after": [
+    "other_topic",
+    "target",
+    "wrong_app"
+   ],
+   "wrong_app_flagged": true,
+   "other_topic": {
+    "covers": "yes",
+    "app_shown": "blender"
+   },
+   "target": {
+    "covers": "yes",
+    "app_shown": "blender",
+    "wrongly_flagged": false
+   },
+   "checked": 3,
+   "notes": [
+    "Checked the first 2 min of the video: The video demonstrates how to create a basic armature and position bones inside a leg mesh in Blender. It matches what you asked for.",
+    "Checked the first 2 min of the video: A beginner tutorial on creating a simple rod mesh, adding loop cuts, and rigging it with an armature. It matches what you asked for.",
+    "Checked the first 2 min of the video: it shows Houdini, not Blender."
+   ]
+  },
+  {
+   "goal": "rig a leg with inverse kinematics",
+   "app": "blender",
+   "order_before": [
+    "wrong_app",
+    "other_topic",
+    "target"
+   ],
+   "order_after": [
+    "target",
+    "other_topic",
+    "wrong_app"
+   ],
+   "wrong_app_flagged": true,
+   "other_topic": {
+    "covers": "partly",
+    "app_shown": "blender"
+   },
+   "target": {
+    "covers": "yes",
+    "app_shown": "blender",
+    "wrongly_flagged": false
+   },
+   "checked": 3,
+   "notes": [
+    "Checked the first 2 min of the video: The video shows how to create armature bones inside a leg mesh and set up controller bones in Blender. It matches what you asked for.",
+    "Checked the first 2 min of the video: how to add and prepare a cylinder mesh and an armature for basic rigging in Blender. It covers only part of what you asked for. the clip only shows basic armature setup and mesh preparation, not inverse kinematics rigging.",
+    "Checked the first 2 min of the video: it shows Houdini, not Blender."
+   ]
+  },
+  {
+   "goal": "simple IK rigging with APEX",
+   "app": "houdini",
+   "order_before": [
+    "wrong_app",
+    "other_topic",
+    "target"
+   ],
+   "order_after": [
+    "target",
+    "other_topic",
+    "wrong_app"
+   ],
+   "wrong_app_flagged": true,
+   "other_topic": {
+    "covers": "partly",
+    "app_shown": "houdini"
+   },
+   "target": {
+    "covers": "yes",
+    "app_shown": "houdini",
+    "wrongly_flagged": false
+   },
+   "checked": 3,
+   "notes": [
+    "Checked the first 2 min of the video: This video demonstrates how to set up a simple arm IK rig in Houdini using APEX. It matches what you asked for.",
+    "Checked the first 2 min of the video: The video demonstrates how to create a simple forward kinematics (FK) setup using APEX in Houdini. It covers only part of what you asked for. The tutorial covers FK setup instead of the requested IK setup.",
+    "Checked the first 2 min of the video: it shows Blender, not Houdini."
+   ]
+  },
+  {
+   "goal": "simple FK rigging with APEX",
+   "app": "houdini",
+   "order_before": [
+    "wrong_app",
+    "other_topic",
+    "target"
+   ],
+   "order_after": [
+    "target",
+    "other_topic",
+    "wrong_app"
+   ],
+   "wrong_app_flagged": true,
+   "other_topic": {
+    "covers": "partly",
+    "app_shown": "houdini"
+   },
+   "target": {
+    "covers": "yes",
+    "app_shown": "houdini",
+    "wrongly_flagged": false
+   },
+   "checked": 3,
+   "notes": [
+    "Checked the first 2 min of the video: The video demonstrates how to create a basic FK setup using APEX in Houdini. It matches what you asked for.",
+    "Checked the first 2 min of the video: Setting up an arm IK with APEX in Houdini. It covers only part of what you asked for. The tutorial focuses on arm IK rigging instead of simple FK rigging.",
+    "Checked the first 2 min of the video: it shows Blender, not Houdini."
+   ]
+  },
+  {
+   "goal": "rig a whole character quickly as a beginner",
+   "app": "maya",
+   "order_before": [
+    "wrong_app",
+    "other_topic",
+    "target"
+   ],
+   "order_after": [
+    "target",
+    "other_topic",
+    "wrong_app"
+   ],
+   "wrong_app_flagged": true,
+   "other_topic": {
+    "covers": "partly",
+    "app_shown": "maya"
+   },
+   "target": {
+    "covers": "yes",
+    "app_shown": "maya",
+    "wrongly_flagged": false
+   },
+   "checked": 3,
+   "notes": [
+    "Checked the first 2 min of the video: Using Maya's Quick Rig tool in step-by-step mode to rig a 3D character and adjust guides. It matches what you asked for.",
+    "Checked the first 2 min of the video: How to create and name joints for a basic leg and foot setup in Maya. It covers only part of what you asked for. The tutorial only covers the leg and foot setup, not a whole character.",
+    "Checked the first 2 min of the video: it shows Blender, not Maya."
+   ]
+  },
+  {
+   "goal": "set up a leg with IK handles",
+   "app": "maya",
+   "order_before": [
+    "wrong_app",
+    "other_topic",
+    "target"
+   ],
+   "order_after": [
+    "other_topic",
+    "target",
+    "wrong_app"
+   ],
+   "wrong_app_flagged": true,
+   "other_topic": {
+    "covers": "partly",
+    "app_shown": "maya"
+   },
+   "target": {
+    "covers": "partly",
+    "app_shown": "maya",
+    "wrongly_flagged": false
+   },
+   "checked": 3,
+   "notes": [
+    "Checked the first 2 min of the video: This video shows how to use Maya's Quick Rig feature in step-by-step mode to create and adjust character guides. It covers only part of what you asked for. The tutorial focuses on general quick rigging and guide adjustment rather than specifically setting up an IK handle for a leg.",
+    "Checked the first 2 min of the video: how to create and place joints for a leg in Maya. It covers only part of what you asked for. it only covers creating the joints, not setting up the IK handles yet in the clip.",
+    "Checked the first 2 min of the video: it shows Blender, not Maya."
+   ]
+  }
+ ]
+}

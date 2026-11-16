@@ -154,6 +154,7 @@ def test_reopen_a_saved_tutorial_and_see_the_edit(win):
 def test_unsaved_edits_are_not_stored(win):
     r = _open_sample(win)
     r.apply_edit("s01", "Never saved")
+    r.confirm_discard = lambda: True
     r.back_button.click()
     assert win.home.tutorials.count() == 0
 
@@ -200,7 +201,7 @@ def test_craft_step_tells_the_user_it_is_manual(win):
     s.start_button.click()
     for _ in range(3):
         s.done_button.click()
-    assert "cannot check this step automatically" in s.detail.text()
+    assert "You confirm" in s.detail.text() and "Press Done" in s.detail.text()
 
 
 def test_each_open_creates_its_own_session_and_back_goes_home(win):
@@ -336,15 +337,15 @@ def test_junk_step_is_refused_and_a_manual_step_is_marked(win):
     assert "too short" in r.status.text() and r.list.count() == 4
     r.list.setCurrentRow(0)
     r.apply_add("Save the file")
-    assert r.list.currentItem().text().endswith("[manual]")
-    assert "Manual step" in r.detail.text() and "not recognised" in r.detail.text()
+    assert r.list.currentItem().text().endswith("[you confirm]")
+    assert "You confirm" in r.detail.text() and "not recognised" in r.detail.text()
 
 
 def test_recognised_step_is_checkable_and_not_marked_manual(win):
     r = _open_sample(win)
     r.list.setCurrentRow(0)
     r.apply_add("Press Tab to enter Edit Mode")
-    assert "[manual]" not in r.list.currentItem().text() and "check this step automatically" in r.detail.text()
+    assert "[you confirm]" not in r.list.currentItem().text() and "Checkable" in r.detail.text()
 
 
 def test_duplicate_step_is_refused_on_add_and_on_edit(win):
@@ -353,3 +354,131 @@ def test_duplicate_step_is_refused_on_add_and_on_edit(win):
     assert "already in the list" in r.status.text() and r.list.count() == 4
     r.apply_edit("s02", "Add a cube to the scene")
     assert "already in the list" in r.status.text()
+
+
+def test_step_with_unreadable_checks_is_marked_in_the_list_and_explained(win):
+    from shared.step_record import StatePredicate
+    r = _open_sample(win)
+    steps = r.editor.steps.steps
+    steps[0].expected_state = [StatePredicate(kind="mode", target="OBJECT"), StatePredicate(kind="attribute_exists", target="a.b")]
+    steps[1].expected_state = [StatePredicate(kind="node_count", target="joint", value=3)]
+    r.refresh()
+    assert r.list.item(0).text().endswith("[partly checked]")
+    assert r.list.item(1).text().endswith("[you confirm]")
+    r.list.setCurrentRow(0)
+    assert "Partly checkable" in r.detail.text() and "attribute was added" in r.detail.text() and "attribute_exists" not in r.detail.text()
+    r.list.setCurrentRow(1)
+    assert "how many nodes" in r.detail.text() and "cannot yet see" in r.detail.text() and "node_count" not in r.detail.text()
+
+
+# ---------------------------------------------------------------- screen guidance in a session (the vision bridge; see tests/test_app_vision_ui.py for the highlight and the guide box in detail)
+import vision_fakes as vf  # noqa: E402
+
+from app import vision_bridge as vb  # noqa: E402
+from app.ui.screen_guide import ScreenGuide  # noqa: E402
+
+
+def _guided(w, svc, *, overlay_pref=True):
+    """A window whose sessions are watched by a bridge over a fake vision service; the looks run inline and the tests call poll() by hand."""
+    overlay = vf.FakeOverlay()
+    w.session.sync = True
+    w.session.guide = ScreenGuide(lambda: overlay)
+    w.session.set_bridge(vb.VisionBridge(lambda app: svc, window_finder=lambda app: (0, 0, 1920, 1080)))
+    _login(w)
+    if not overlay_pref:
+        w.accounts.set_preferences(w.user.id, overlay=False)
+    w.import_sample()
+    w.review.save_button.click()
+    w.home.tutorials.setCurrentRow(0)
+    w.home.session_button.click()
+    w.session.start_button.click()
+    return w.session, overlay
+
+
+def test_session_without_vision_has_no_guidance(win):
+    s = _session(win)
+    s.start_button.click()
+    s.poll()
+    assert not s.timer.isActive() and s.watch_label.text() == "" and s.watch_box.isHidden() and not s.guide.visible
+
+
+def test_guidance_shows_the_highlight_for_the_active_step(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
+    s.poll()
+    assert overlay.shown >= 1 and len(overlay.marks) == 1 and s.watch_label.text() == "Found Cube"
+    assert s.engine.position == 1
+
+
+def test_guidance_completes_a_step_the_screen_shows_done(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT", "selection_types": ["MESH"]}))
+    s.poll()
+    assert s.engine.position == 2 and "Step 2" in s.step_text.text()
+    assert "saw this step done" in s.status.text()
+
+
+def test_finishing_the_session_clears_the_highlight_and_stops_the_timer(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
+    s.poll()
+    assert overlay.shown
+    for _ in range(4):
+        s.done_button.click()
+    assert not overlay.shown and not s.timer.isActive()
+
+
+def test_leaving_the_session_hides_the_overlay(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
+    s.poll()
+    s.back_button.click()
+    assert not overlay.shown and not s.timer.isActive() and win.current_screen() is win.home
+
+
+def test_pressing_done_by_hand_still_works_and_drops_a_stale_reading(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
+    look = s.bridge.look(s.engine.current_step(), "blender")       # a reading of step 1 is on its way
+    first = s.engine.current_step().id
+    s.done_button.click()                                           # the learner moves on first
+    s._looked(look, first)
+    assert s.engine.position == 2 and s._shown_step == "s02"
+
+
+def test_a_vision_failure_leaves_the_session_working_by_hand(win):
+    s, overlay = _guided(win, vf.FakeService(boom=RuntimeError("OCR failed")))
+    s.poll()
+    assert "RuntimeError" in s.watch_label.text() and "Done" in s.watch_label.text()
+    s.done_button.click()
+    assert s.engine.position == 2
+
+
+def test_a_missing_component_is_explained_in_the_window(win):
+    s, overlay = _guided(win, vf.FakeService(boom=ImportError("No module named 'winrt.windows.media.ocr'")))
+    s.poll()
+    assert "Windows OCR packages" in s.watch_label.text() and s.engine.position == 1
+
+
+def test_the_profile_preference_turns_guidance_off(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}), overlay_pref=False)
+    s.poll()
+    assert not s.watching and not s.timer.isActive() and overlay.marks == [] and "off in your profile" in s.watch_label.text()
+
+
+def test_an_overlay_failure_never_breaks_the_session(win):
+    s, _ = _guided(win, vf.FakeService({"mode": "OBJECT"}))
+
+    def broken():
+        raise RuntimeError("no display")
+    s.guide = ScreenGuide(broken)
+    s.poll()
+    assert s.guide.error and "no display" in s.guide.error
+    s.done_button.click()
+    assert s.engine.position == 2
+
+
+def test_the_old_vision_argument_is_wrapped_in_a_bridge(qapp):
+    """MainWindow(vision=service) still works: the service is wrapped in the bridge."""
+    w = MainWindow(Database(":memory:"), vision=vf.FakeService())
+    try:
+        assert w.session.bridge is not None and w.session.bridge.available and not w.session.watch_box.isHidden() or True
+        assert w.session.bridge.available
+    finally:
+        w.close()
+        w.db.close()

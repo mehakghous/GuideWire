@@ -34,14 +34,14 @@ class SessionEngine:
             raise EngineError("session not found")
         self.db, self.user_id, self.session_id = db, user_id, session_id
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
+        self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
         self._resolve_targets(row["tutorial_id"])
 
     def _resolve_targets(self, tutorial_id: int) -> None:
         """Give every action of a Blender tutorial its resolved `target` (what the words mean in Blender: tool, mode, panel, operator) when it was saved without one. Done here, on every load, so tutorials saved
         before targets existed get them too; the stored steps are not touched. A failure leaves the steps as they were."""
         try:
-            tut = self.db.conn.execute("SELECT app FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
-            if tut is None or tut["app"] != "blender":
+            if self.app != "blender":
                 return
             from ingestion.targets import resolve_steps
             resolved = resolve_steps([s for _, s in self.steps])

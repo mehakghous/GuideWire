@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import time
+import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -69,8 +70,24 @@ def _read_cache(path: Path) -> dict:
         return {}
 
 
+_BEGINNER = re.compile(r"\b(beginners?|new to|first time|never (?:rigged|used)|just starting|starting out)\b", re.I)
+
+
+def default_fit_provider():
+    """The model that watches the first two minutes of each top suggestion: Gemini 3.5 Flash-Lite behind the cost guard (about 0.4 cent a clip). Raises when no key is set."""
+    from dotenv import load_dotenv
+
+    from ingestion.budget import TIERS, BudgetedProvider, BudgetExceeded, Ceilings, api_key_for
+    from ingestion.providers.gemini import GeminiProvider
+    load_dotenv()
+    try:
+        return BudgetedProvider(GeminiProvider(api_key=api_key_for("default"), model=TIERS["iterate"]), ceilings=Ceilings.from_env(max_usd_run=0.2), label="default")
+    except BudgetExceeded as e:
+        raise RuntimeError("no Gemini key") from e
+
+
 def find_tutorials(goal: str, app: str | None = None, *, limit: int = 3, live: bool = True, search=None, metadata=None,
-                   cache_path: Path | None = CACHE_PATH, now=time.time) -> DiscoveryResult:
+                   cache_path: Path | None = CACHE_PATH, now=time.time, fit_provider=None) -> DiscoveryResult:
     """Never raises: every problem comes back as a message."""
     from ingestion.rigging_discovery import discover_rigging, parse_goal
     from ingestion.tutorials import discover as discover_local
@@ -111,8 +128,20 @@ def find_tutorials(goal: str, app: str | None = None, *, limit: int = 3, live: b
         notes.append("No YouTube search key is set on this computer (YOUTUBE_API_KEY in .env), so these come from GuideWire's small local list.")
     if rd is None:
         rd = discover_rigging(goal, app=g.app, limit=limit, local=load_index())
-    sug = [_suggestion(r) for r in rd.recommendations]
-    notes = [*notes, *rd.notes, CAVEAT]
+    recs, caveat = rd.recommendations, CAVEAT
+    if source == "live" and fit_provider is not None and recs:                  # D2: a model watches the first two minutes of each suggestion
+        try:
+            from ingestion.fit_check import apply_fit_checks
+            before = len(recs)
+            provider = fit_provider() if callable(fit_provider) and not hasattr(fit_provider, "generate_json") else fit_provider
+            recs, _fits = apply_fit_checks(recs, provider, goal, g.app, "beginner" if _BEGINNER.search(goal) else None, drop_wrong_app=True)
+            if len(recs) < before:
+                notes.append(f"{before - len(recs)} suggestion(s) were left out because the video itself shows a different application.")
+            caveat = "Each suggestion was also checked against the first two minutes of its video (not the whole video), so check it fits before you use it."
+        except Exception as e:                                                  # no key, no budget, no network: keep the title-only ranking and say so
+            notes.append(f"The check against the videos themselves was not possible ({type(e).__name__}); these are ranked from titles only.")
+    sug = [_suggestion(r) for r in recs]
+    notes = [*notes, *rd.notes, caveat]
     msg = "" if sug else "I found no tutorial that matches that well. Try fewer words, or say which part you want to learn (the leg, skinning, IK)."
     if source == "live" and sug and cache_path is not None:
         try:

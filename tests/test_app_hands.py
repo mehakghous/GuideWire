@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 import app.hands as guidance
-from app.hands import inputs_for, keys_of
+from app.hands import keys_of
 from app.step_loader import load_steps
 from app.step_state import needs_of
 from ingestion import targets
@@ -32,15 +32,6 @@ def test_keys_are_only_read_from_press_phrases():
     class St:
         how_to = [H("Press Ctrl+P to parent"), H("Then press Delete and press Tab"), H("Click Add")]
     assert keys_of(St()) == ("Ctrl+P", "Delete", "Tab")
-
-
-def test_the_mouse_and_keyboard_events_of_a_step_come_from_its_actions_in_order(S):
-    assert inputs_for(S["s01"]) == (("keys", "A"), ("keys", "Delete"))
-    assert inputs_for(S["s02"]) == (("click", "left"), ("click", "hover"), ("click", "left"))      # Add, hover Mesh (the submenu opens), Cylinder
-    assert inputs_for(S["s05"]) == (("click", "left"), ("drag", "left"))
-    assert inputs_for(S["s07"])[-1] == ("type", "10")
-    assert inputs_for(S["s14"])[:2] == (("click", "right"), ("click", "left"))                    # the context menu is a right click
-    assert ("keys", "Ctrl+P") in inputs_for(S["s16"])
 
 
 def test_what_each_kind_of_step_needs_found_on_screen_comes_from_its_resolved_targets(S):

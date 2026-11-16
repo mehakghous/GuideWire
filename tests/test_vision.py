@@ -7,10 +7,10 @@ import sys
 
 import pytest
 
-from shared.grounding import GroundingResult, Rect, to_screen
+from shared.grounding import Rect, to_screen
 from vision import winplatform
 from vision.capture import downscale_size
-from vision.overlay import highlight_mark, pointer_mark, to_local, visible_marks
+from vision.overlay import highlight_mark, to_local, visible_marks
 
 np = pytest.importorskip("numpy")
 
@@ -88,13 +88,6 @@ def test_uniform_image_is_not_split():
 def test_default_layout_fallback_is_low_confidence_but_complete():
     layout = default_layout(1920, 1080)
     assert layout.confidence == 0.0 and layout.get("viewport") is not None
-
-
-def test_pointer_only_for_ok_grounding():
-    ok = to_screen(Frame(np.zeros((100, 100, 3), dtype=np.uint8), Rect(0, 0, 100, 100)).geometry, 50, 50)
-    assert pointer_mark(ok).rect.contains(50, 50)
-    assert pointer_mark(GroundingResult("none")) is None
-    assert pointer_mark(GroundingResult("out_of_bounds")) is None
 
 
 def test_marks_are_localised_and_offscreen_marks_dropped():

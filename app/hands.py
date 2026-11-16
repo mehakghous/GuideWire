@@ -1,4 +1,4 @@
-"""What the learner's HANDS do in a step: the keys to press and the mouse and keyboard events in order (for the animated hint). Pure: no screen, no vision, no Qt.
+"""What the learner's HANDS do in a step: the keys to press. Pure: no screen, no vision, no Qt.
 
 This module used to also decide WHAT to point at, from words in the step's text (a list of words that "name scene items", a list of panels that "open at the bottom left", a table of tool keys). That guessing
 is gone: the resolver (`ingestion/targets.py`) turns the words into typed targets once, the grounders (`vision/grounders.py`) locate them, and `app/step_state.py` decides what to show.
@@ -29,26 +29,3 @@ def keys_of(step: Step) -> tuple[str, ...]:
                 continue
             out.append("+".join(p.upper() if len(p) == 1 else p.capitalize() for p in parts))
     return tuple(out)
-
-
-def inputs_for(step: Step) -> tuple[tuple[str, str], ...]:
-    """The mouse and keyboard events of a step in order, for the animated hint: ("click", "left" | "right" | "hover"), ("drag", "left"), ("keys", "Ctrl+P"), ("type", "10"). At most six."""
-    out: list[tuple[str, str]] = []
-    for a in step.actions:
-        ui = (a.ui_element or "").lower()
-        if a.verb == "press_keys":
-            if a.keys:
-                out.append(("keys", "+".join(k if len(k) > 1 else k.upper() for k in a.keys)))
-        elif a.verb == "drag":
-            out.append(("drag", "left"))
-        elif a.verb == "open_menu" and ui.startswith("viewport context menu"):
-            out += [("click", "right"), ("click", "left")]
-        elif a.verb == "open_menu":
-            out += [("click", "left"), ("click", "hover"), ("click", "left")] if ui.count(">") >= 2 else [("click", "left")]
-        elif a.verb == "set_value":
-            out.append(("type", a.value or ""))
-        elif ui:
-            out.append(("click", "left"))
-        elif a.verb in ("click", "select"):
-            out.append(("click", "left"))
-    return tuple(out[:6])

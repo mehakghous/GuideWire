@@ -63,7 +63,7 @@ def show_box(panel, engine, t, look, qapp, dismissed) -> None:
         if panel is not None:
             panel.hide()
         return
-    panel.set_content(f"GuideWire \u00b7 step {engine.position} of {len(engine.steps)}", step.goal, [h.text for h in step.how_to], t.hint, t.keys, t.inputs)
+    panel.set_content(f"GuideWire \u00b7 step {engine.position} of {len(engine.steps)}", step.goal, [h.text for h in step.how_to], t.hint, t.keys)
     scr = qapp.primaryScreen()
     a = scr.availableGeometry()
     x, y, _where = panel_position(look.window_rect, (a.x(), a.y(), a.width(), a.height()), (panel.width(), panel.height()), scr.devicePixelRatio())

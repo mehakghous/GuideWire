@@ -211,6 +211,61 @@ def find_window(title_contains: str = "Blender", exe: tuple[str, ...] = (), pid:
     return pick_window(list_windows(), title_contains, exe, pid)
 
 
+def idle_seconds() -> float | None:
+    """Seconds since the learner last moved the mouse or pressed a key anywhere on the computer (one cheap call), or None when it cannot be read. GuideWire looks often while the learner is
+    working and rarely while they are reading or away."""
+    if sys.platform != "win32":
+        return None
+    import ctypes
+    from ctypes import wintypes
+
+    class LastInput(ctypes.Structure):
+        _fields_ = [("cbSize", wintypes.UINT), ("dwTime", wintypes.DWORD)]
+    info = LastInput(ctypes.sizeof(LastInput), 0)
+    if not ctypes.windll.user32.GetLastInputInfo(ctypes.byref(info)):
+        return None
+    now = ctypes.windll.kernel32.GetTickCount() & 0xFFFFFFFF
+    return ((now - info.dwTime) & 0xFFFFFFFF) / 1000.0
+
+
+def set_background_priority(on: bool) -> bool:
+    """Run GuideWire below normal priority while it watches another application, so that application's own work (Blender redrawing, Maya, Houdini) always comes first on a busy computer."""
+    if sys.platform != "win32":
+        return False
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    kernel32.GetCurrentProcess.restype = ctypes.c_void_p
+    return bool(kernel32.SetPriorityClass(ctypes.c_void_p(kernel32.GetCurrentProcess()), 0x4000 if on else 0x20))      # BELOW_NORMAL / NORMAL
+
+
+_FOUND: dict[tuple, tuple[float, WindowInfo]] = {}
+FIND_AGAIN_SECONDS = 2.0
+
+
+def find_window_cached(title_contains: str = "Blender", exe: tuple[str, ...] = (), pid: int | None = None) -> WindowInfo | None:
+    """`find_window`, but the full list of windows (every window and its program file: about 10 ms) is only walked every couple of seconds. In between, the window found last time is checked
+    (still there, visible, not minimized) and only its rectangle is read again (a move or a resize shows at once). The guide asks several times a second, so this is most of its saved time."""
+    import time
+    key = (title_contains, tuple(exe), pid)
+    now = time.monotonic()
+    hit = _FOUND.get(key)
+    if hit is not None and now - hit[0] < FIND_AGAIN_SECONDS:
+        w = hit[1]
+        try:
+            import ctypes
+            user32 = ctypes.windll.user32
+            if user32.IsWindow(w.hwnd) and user32.IsWindowVisible(w.hwnd) and not user32.IsIconic(w.hwnd):
+                return WindowInfo(w.hwnd, w.title, window_rect(w.hwnd), False, w.pid, w.exe)
+        except Exception:
+            pass
+    w = find_window(title_contains, exe, pid)
+    if w is None:
+        _FOUND.pop(key, None)
+    else:
+        _FOUND[key] = (now, w)
+    return w
+
+
 def make_click_through(hwnd: int, hide_from_capture: bool = True) -> None:
     """Apply click-through, always-on-top, no-focus, no-taskbar flags to an overlay window."""
     _require_windows()

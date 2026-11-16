@@ -467,6 +467,10 @@ class SessionScreen(QWidget):
     back = pyqtSignal()
     ask_about = pyqtSignal(int)        # tutorial id
 
+    LOOK_ACTIVE_MS = 400               # looking while the learner works
+    LOOK_IDLE_MS = 1500                # looking while they read or are away
+    IDLE_AFTER_S = 2.0
+
     def __init__(self):
         super().__init__()
         self.engine: SessionEngine | None = None
@@ -493,7 +497,7 @@ class SessionScreen(QWidget):
         self.guide = ScreenGuide()
         self._busy = False
         self.timer = QTimer(self)
-        self.timer.setInterval(500)
+        self.timer.setInterval(self.LOOK_ACTIVE_MS)
         self.timer.timeout.connect(self.poll)
         self.track_timer = QTimer(self)                  # cheap and fast: follows the application window (a move carries the highlight, a resize asks for a new look)
         self.track_timer.setInterval(200)
@@ -503,7 +507,6 @@ class SessionScreen(QWidget):
         self._last_window = None
         self._last_hint = ""
         self._last_keys: tuple[str, ...] = ()
-        self._last_inputs: tuple[tuple[str, str], ...] = ()
         self._shown_step: str | None = None              # the step the guide (highlight, box, status line) is showing: everything is cleared together when it changes
         self._app = "blender"
         self._profile_off = False                        # the learner's profile preference switched screen guidance off for sessions
@@ -604,9 +607,11 @@ class SessionScreen(QWidget):
             if not self.timer.isActive():
                 self.timer.start()
                 self.track_timer.start()
+                self._background(True)
         else:
             self.timer.stop()
             self.track_timer.stop()
+            self._background(False)
             if not self.watching:
                 self.guide.clear()
                 self.watch_label.setText(self._off_text())
@@ -677,7 +682,7 @@ class SessionScreen(QWidget):
                 self.panel.hide()
             return
         p = self._ensure_panel()
-        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys, self._last_inputs)
+        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys)
         screen = self.window().screen()
         if screen is None:
             return
@@ -685,10 +690,37 @@ class SessionScreen(QWidget):
         x, y, _where = panel_position(self._last_window, (a.x(), a.y(), a.width(), a.height()), (p.width(), p.height()), self.window().devicePixelRatioF())
         p.put(x, y)
 
+    def _background(self, on: bool) -> None:
+        """While watching, GuideWire runs below normal priority so the application it watches is never slowed by it, and nothing in its own window drifts (each repaint is CPU)."""
+        from .bento import set_calm
+        set_calm(on)
+        try:
+            from vision import winplatform
+            winplatform.set_background_priority(on)
+        except Exception:
+            pass
+
+    def _pace(self) -> None:
+        """How often to look at the screen. A look costs a capture of the application's window, so while the learner works (they moved the mouse or pressed a key in the last two seconds) it is
+        looked at every 0.4 s, and while they read or are away, every 1.5 s. The first input after a quiet spell brings a look at once, so a menu they just opened is seen straight away."""
+        try:
+            from vision import winplatform
+            idle = winplatform.idle_seconds()
+        except Exception:
+            return
+        if idle is None:
+            return
+        want = self.LOOK_ACTIVE_MS if idle < self.IDLE_AFTER_S else self.LOOK_IDLE_MS
+        if want != self.timer.interval():
+            self.timer.setInterval(want)
+            if want == self.LOOK_ACTIVE_MS:
+                QTimer.singleShot(150, self.poll)
+
     def _track(self) -> None:
         """Follow the application window between looks: a move carries the highlight along at once; a resize clears it and asks for a new look."""
         if not self.watching or self.bridge is None:
             return
+        self._pace()
         window = self.bridge.window_rect(self._app)
         change = self.guide.follow_window(window)
         if change in ("moved", "resized", "found"):
@@ -722,9 +754,9 @@ class SessionScreen(QWidget):
             return
         tick = self.bridge.apply(e, look)
         self.watch_label.setText(tick.message)
-        self._last_window, self._last_hint, self._last_keys, self._last_inputs = look.window_rect, tick.hint, tick.keys, tick.inputs
+        self._last_window, self._last_hint, self._last_keys = look.window_rect, tick.hint, tick.keys
         if tick.rect is not None:
-            self.guide.show(tick.rect, look.window_rect, pointer=tick.pointer)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
+            self.guide.show(tick.rect, look.window_rect)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)
@@ -740,7 +772,7 @@ class SessionScreen(QWidget):
         if sid == self._shown_step:
             return
         self._shown_step = sid
-        self._last_hint, self._last_keys, self._last_inputs = "", (), ()
+        self._last_hint, self._last_keys = "", ()
         self.guide.clear()
         self.watch_label.setText("Looking at the screen..." if (sid is not None and self.watching) else self._off_text())
 

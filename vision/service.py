@@ -107,8 +107,8 @@ class VisionService:
             from vision.probe_client import probe_info
             info = probe_info(self.profile.key)
             if info and isinstance(info.get("pid"), int):
-                win = winplatform.find_window(self.title, self.profile.exe, info["pid"])
-        win = win or winplatform.find_window(self.title, self.profile.exe)
+                win = winplatform.find_window_cached(self.title, self.profile.exe, info["pid"])
+        win = win or winplatform.find_window_cached(self.title, self.profile.exe)
         if win is None:
             return None, None
         frame = grab(win.rect)

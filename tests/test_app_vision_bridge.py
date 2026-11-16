@@ -103,7 +103,7 @@ def test_a_found_menu_root_gives_a_rectangle_a_phase_and_words_and_nothing_advan
     svc = FakeService(observed={"mode": "OBJECT", "selection_types": []})
     t = bridge_with(svc).tick(eng)
     assert t.state == "watching" and not t.advanced and eng.position == 1
-    assert t.phase == "visible" and t.rect == (250, 20, 40, 16) and t.message == "Found Cube" and t.hint == "Click Add, then Mesh > Cube" and not t.pointer
+    assert t.phase == "visible" and t.rect == (250, 20, 40, 16) and t.message == "Found Cube" and t.hint == "Click Add, then Mesh > Cube"
 
 
 def test_what_is_not_on_screen_is_the_locating_phase_with_the_whole_route_in_words(eng):

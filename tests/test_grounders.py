@@ -165,9 +165,14 @@ def test_a_properties_field_needs_the_right_tab_then_its_panel_then_its_label():
     state = vf.tool_state("OBJECT", context="DATA")
     both = vf.make_context(vf.phrase("Viewport Display", 1200, 300, 16, 3) + vf.phrase("In Front", 1170, 340, 16, 4), state, "OBJECT")
     r = g.ground_property(both, ref)
-    assert r.state == g.VISIBLE and r.rect == Rect(1170, 340, 62, 16) and "header" in r.evidence[0] and r.confidence >= 0.9
+    assert r.state == g.VISIBLE and r.complete and "header" in r.evidence[0] and r.confidence >= 0.9
+    assert r.rect.x < 1170 and r.rect.x + r.rect.w >= 1232 and r.rect.y == 340                     # the label AND the tick box in front of it, not only the words
     header_only = g.ground_property(vf.make_context(vf.phrase("Viewport Display", 1200, 300, 16, 3), state, "OBJECT"), ref)
-    assert header_only.state == g.OFFSCREEN and "Open the Viewport Display panel" in header_only.note          # collapsed or scrolled: Blender does not say which
+    assert header_only.state == g.OFFSCREEN and "Click Viewport Display to open it" in header_only.note          # nothing under it: closed
+    closed = g.ground_property(vf.make_context(vf.phrase("Viewport Display", 1200, 300, 16, 3) + vf.phrase("Inverse Kinematics", 1200, 330, 16, 4), state, "OBJECT"), ref)
+    assert closed.state == g.OFFSCREEN and "Click Viewport Display to open it" in closed.note and closed.rect == header_only.rect        # the next thing is another panel's header: closed
+    opened = g.ground_property(vf.make_context(vf.phrase("Viewport Display", 1200, 300, 16, 3) + vf.phrase("Display As", 1200, 330, 16, 4), state, "OBJECT"), ref)
+    assert opened.state == g.OFFSCREEN and opened.direction == "down" and "Scroll down" in opened.note             # its own content follows: open, the field is below what is in view
     nothing = g.ground_property(vf.make_context([], state, "OBJECT"), ref)
     assert nothing.state == g.OFFSCREEN and "Scroll the Properties editor" in nothing.note
 

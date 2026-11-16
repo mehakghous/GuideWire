@@ -140,3 +140,14 @@ def test_the_layout_comes_from_what_blender_reported_when_it_can_be_trusted():
     vp = layout.get("viewport")
     assert (vp.x, vp.y, vp.w, vp.h) == (3, 31 + 26, 1119, 600)                            # window pixels flipped and moved below the title bar
     assert layout.get("topbar").h == 57 and layout.get("statusbar").y == 31 + 697 - 23    # the band above the highest area; the band below the lowest
+
+
+def test_a_full_read_that_finds_different_words_changes_the_serial_so_old_answers_are_not_reused(reader):
+    """Seen live: opening a panel pushed the next ones down, the reader answered with a FULL read, the serial stayed the same and the cache kept answering "the panel is closed"."""
+    px = _frame()
+    first = reader.read(px, WINDOW)
+    same = reader.read(px, WINDOW, force_full=True)                         # a full read of the same screen: the same words, nothing to throw away
+    assert same.how == "full" and same.serial == first.serial
+    reader._ocr = lambda p, s: [Word("Moved", Rect(40, 40, 30, 8), 1)]       # the screen now says something else
+    changed = reader.read(px, WINDOW, force_full=True)
+    assert changed.how == "full" and changed.serial == first.serial + 1

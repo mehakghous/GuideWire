@@ -117,6 +117,11 @@ class Stats:
     ocr_ms: float = 0.0
 
 
+def _shape(words: list) -> list[tuple]:
+    """What the words say and where, without their OCR line numbers (those change with every read)."""
+    return sorted((w.text, w.rect.x, w.rect.y, w.rect.w, w.rect.h) for w in words)
+
+
 class SceneReader:
     def __init__(self, ocr: Callable[[Any, float], list], layout: Callable[[Any], Any], clock: Callable[[], float] = time.monotonic, thumb: tuple[int, int] = READER_THUMB):
         """`ocr(pixels, scale) -> words` (the Windows OCR in the app), `layout(pixels) -> Layout`. Both are injected, so this is testable with no screen."""
@@ -168,7 +173,10 @@ class SceneReader:
         if full:
             layout = self._layout(pixels)
             words = self._timed(lambda: self._ocr(pixels, OCR_SCALE_FULL))
-            self._state = {"window": window, "thumb": thumb, "words": words, "layout": layout, "serial": (c or {}).get("serial", 0), "full_at": now}
+            serial = (c or {}).get("serial", 0)
+            if c is not None and _shape(words) != _shape(c["words"]):
+                serial += 1                                      # a full read that found different words is a change like any other: results judged on the old words must not be reused (an opened panel pushed its neighbours down and the old answer stayed)
+            self._state = {"window": window, "thumb": thumb, "words": words, "layout": layout, "serial": serial, "full_at": now}
             self.stats.full += 1
             return Scene(words, layout, "full", Rect(0, 0, w, h), self._state["serial"])
         assert c is not None

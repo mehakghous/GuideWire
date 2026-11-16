@@ -41,9 +41,7 @@ class Tick:
     verdict: str | None = None                   # met | unmet | unverifiable, for the active step
     advanced: bool = False                       # the step was completed because the application showed it done
     hint: str = ""                               # what to do next, for the guide box
-    pointer: bool = False                        # kept for the guide's drawing code: no longer set by the bridge (a pointer at a guessed place was removed)
-    keys: tuple[str, ...] = ()                   # keys to press, shown as key caps
-    inputs: tuple[tuple[str, str], ...] = ()     # mouse and keyboard events in order, for the animated hint
+    keys: tuple[str, ...] = ()                   # keys to press, said in the step's text
     phase: str = ""                              # blocked | hidden | locating | visible | acting | verified: where the learner is in the step
     shortcut: str = ""                           # a shortcut advised now ("Ctrl R"), already included in `hint`
 
@@ -71,7 +69,7 @@ def default_window_finder(app: str) -> Rect4 | None:
         from vision import winplatform
         from vision.apps import profile
         winplatform.enable_dpi_awareness()
-        w = winplatform.find_window(WINDOW_NAMES.get(app, app), profile(app).exe if app in WINDOW_NAMES else ())
+        w = winplatform.find_window_cached(WINDOW_NAMES.get(app, app), profile(app).exe if app in WINDOW_NAMES else ())
     except Exception:
         return None
     return None if w is None else (w.rect.x, w.rect.y, w.rect.w, w.rect.h)
@@ -87,9 +85,7 @@ class Look:
     observed: dict | None = None
     window_rect: Rect4 | None = None             # the application's window, for the overlay and the "are we covering it" check
     hint: str = ""
-    pointer: bool = False
     keys: tuple[str, ...] = ()
-    inputs: tuple[tuple[str, str], ...] = ()
     problem: str | None = None                   # a plain-words reason nothing could be seen
     problem_state: str = "error"                 # unavailable | no_window | error
     phase: str = ""
@@ -232,13 +228,12 @@ class VisionBridge:
         self.stats.ms_look += (t_look - t_start) * 1000
         self.stats.ms_ground += (t_end - t_look) * 1000
         self.stats.ms_total += (t_end - t_start) * 1000
-        from app.hands import inputs_for
         g = state.grounded
         rect = None
         if state.show_rect and g is not None and g.rect is not None:
             rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
         label = " > ".join(state.target.path or [state.target.label]) if state.target is not None else target
-        return Look(label, rect, bool(g and g.complete and rect), bool(g and g.ambiguous), observed, window, state.hint, False, state.keys, inputs_for(step),
+        return Look(label, rect, bool(g and g.complete and rect), bool(g and g.ambiguous), observed, window, state.hint, state.keys,
                     None, "error", state.phase, state.status, state.shortcut, entry)
 
     def _assess(self, step: Step, svc, observed: dict, ctx, props, attrs, wanted) -> tuple[step_state.StepState, dict]:
@@ -277,14 +272,14 @@ class VisionBridge:
         if engine.current_step() is None:
             return Tick("idle", "No step is active.")
         if look.problem is not None:
-            return Tick(look.problem_state, look.problem, look.target, keys=look.keys, inputs=look.inputs)
+            return Tick(look.problem_state, look.problem, look.target, keys=look.keys)
         verdict = engine.check(look.observed or {}, look.entry)
         status = verdict.status if verdict is not None else None
         advanced = bool(self.auto_advance and engine.auto_check(look.observed or {}, look.entry))
         if advanced:
             self._cache.forget()
-            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, False, look.keys, look.inputs, "verified", look.shortcut)
-        return Tick("watching", look.status or "Watching the screen.", look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, False, look.keys, look.inputs, look.phase, look.shortcut)
+            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.keys, "verified", look.shortcut)
+        return Tick("watching", look.status or "Watching the screen.", look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.keys, look.phase, look.shortcut)
 
     def tick(self, engine, app: str | None = None) -> Tick:
         """Look and judge in one call (tests, the live check script). Never raises."""

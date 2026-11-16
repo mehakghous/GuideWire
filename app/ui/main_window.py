@@ -129,6 +129,14 @@ class MainWindow(QMainWindow):
     def _sync_sidebar(self, _index: int = 0) -> None:
         """Show the panel on every screen except the sign-in, and mark the screen the user is on."""
         screen = self.stack.currentWidget()
+        if screen is not self.session:                                   # left the session: the window may drift and run at normal priority again (a session that is watching turns both off)
+            from .bento import set_calm
+            set_calm(False)
+            try:
+                from vision import winplatform
+                winplatform.set_background_priority(False)
+            except Exception:
+                pass
         self.sidebar.setVisible(self.user is not None and screen is not self.login)
         self.sidebar.set_user(self.user.display_name if self.user else "")
         keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings",

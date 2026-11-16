@@ -276,6 +276,18 @@ def ground_mode(ctx: GroundContext, ref: TargetRef) -> Grounded:
     return Grounded("mode", NOT_FOUND, None, 0.0, (f"'{now}' was not read in the 3D view's header",), f"Open the mode dropdown at the top left of the 3D view and choose {target}.", label=target)
 
 
+def _tab_icon(ctx: GroundContext, nav, tabs: list[str], tab: str) -> tuple[Rect | None, str]:
+    """The screen rectangle of one tab's icon in the Properties editor's tab column, with the evidence (or the reason it could not be found)."""
+    if nav is None or ctx.pixels is None or not tabs:
+        return None, "the tab column was not available"
+    box = ctx.window_to_frame(nav.rect)
+    if box is None:
+        return None, "the snapshot does not fit this frame"
+    from vision.tabs import tab_cell
+    cell, why = tab_cell(ctx.pixels, box, list(tabs), tab)
+    return (None if cell is None else ctx.frame_to_screen(cell)), why
+
+
 def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
     """A Properties editor field: the right tab open? then its panel's header, then the field's label under it. The tab icons are not located (the add-on lists the tabs but not where they are drawn): the highlight is
     the column that holds them, with the words saying which tab."""
@@ -290,7 +302,11 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
         return Grounded("property", WRONG, nav_screen, 1.0, (f"the {tab_name} tab is not among the tabs available now: {', '.join(area.tabs)}",),
                         f"The {tab_name} tab is not available for what is selected. Select the object it belongs to first.", label=ref.label)
     if ref.tab and area.context != ref.tab:
-        return Grounded("property", WRONG, nav_screen, 1.0, (f"the open tab is {area.context}, the step needs {ref.tab}",),
+        icon, why = _tab_icon(ctx, nav, area.tabs, ref.tab)
+        if icon is not None:                                           # the tab's own icon, found from the pixels and the order of the tabs
+            return Grounded("property", WRONG, icon, 0.85, (f"the open tab is {area.context}, the step needs {ref.tab}", why),
+                            f"Click the {tab_name} tab: the highlighted icon in the column at the left of the Properties editor.", label=ref.label, matched=tab_name)
+        return Grounded("property", WRONG, nav_screen, 1.0, (f"the open tab is {area.context}, the step needs {ref.tab}", why),
                         f"Open the {tab_name} tab: it is one of the icons in the column at the left of the Properties editor (hover an icon to read its name).", label=ref.label)
     win = area.region("WINDOW")
     if win is None:
@@ -307,16 +323,48 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
     if field_hit:
         r, s = field_hit[0]
         ev = (f"the panel header '{ref.panel}' and the label '{ref.prop}' beneath it were both read",) if panel else (f"the label '{ref.prop}' was read in the {tab_name} tab",)
-        return Grounded("property", VISIBLE, ctx.frame_to_screen(r), round(min(s, 0.95 if panel else 0.8), 2), ev, f"Find {ref.prop} in the {ref.panel or tab_name} panel.", complete=True, label=ref.label)
+        return Grounded("property", VISIBLE, ctx.frame_to_screen(widget_rect(ctx.words, r, box)), round(min(s, 0.95 if panel else 0.8), 2), ev, f"Find {ref.prop} in the {ref.panel or tab_name} panel.", complete=True, label=ref.label)
     if panel:
-        return Grounded("property", OFFSCREEN, ctx.frame_to_screen(panel[0][0]), 0.6, (f"the header '{ref.panel}' is shown but '{ref.prop}' is not under it",),
-                        f"Open the {ref.panel} panel (click its header; it may be collapsed) and scroll to {ref.prop}.", label=ref.label)
+        header = panel[0][0]
+        if _panel_open(ctx, header, box, ref.tab):                     # open, and the field is under the part that is in view: it needs a scroll, not a click on the header
+            strip = ctx.window_to_screen(Rect(win.rect.x, win.rect.y, win.rect.w, 36))          # Blender's region rectangles count from the bottom: this is the bottom edge of the editor
+            return Grounded("property", OFFSCREEN, strip, 0.6, (f"the panel '{ref.panel}' is open and '{ref.prop}' is not in the part that is in view",),
+                            f"{ref.panel} is open. Scroll down in the Properties editor to {ref.prop}.", label=ref.label, direction="down")
+        return Grounded("property", OFFSCREEN, ctx.frame_to_screen(header), 0.6, (f"the header '{ref.panel}' is shown and the panel under it is closed",),
+                        f"Click {ref.panel} to open it; {ref.prop} is inside.", label=ref.label, matched=ref.panel)
     return Grounded("property", UNKNOWN, win_screen, 0.3, ("the tab is open; its content was not read",), f"Look for {ref.prop} in the {tab_name} tab.", label=ref.label)
+
+
+def _panel_open(ctx: GroundContext, header: Rect, box: Rect, tab: str | None) -> bool:
+    """Whether the panel whose header is at `header` is open. A closed panel is followed at once by the next panel's header; an open one by its own content. The headers that can follow are the panels of the
+    same tab in the application's own catalog, so nothing is guessed from the word shapes. With nothing readable under it, it is taken as closed (the safe thing to tell the learner is to click it)."""
+    below = [w for w in ctx.words if w.rect.y > header.y + header.h and box.contains(w.rect.x, w.rect.y) and any(c.isalpha() for c in w.text)]          # the arrow of a closed panel is read as a word of its own: not text
+    if not below:
+        return False
+    first_line = min(below, key=lambda w: (w.rect.y, w.rect.x)).line
+    text = " ".join(w.text for w in sorted((w for w in below if w.line == first_line), key=lambda w: w.rect.x))
+    try:
+        from ingestion.targets import _n, load_catalog
+        cat = load_catalog()
+    except Exception:
+        cat = None
+    if cat is None or not tab:
+        return True
+    labels = {label for (context, label) in cat.panels if context == tab.lower()}
+    return _n(text) not in labels
+
+
+def widget_rect(words: list[Word], label: Rect, region: Rect, reach: int = 190) -> Rect:
+    """A Properties field is its label AND its widget: a checkbox is drawn at the LEFT of its label (the tick in front of "In Front"), a value box at the right ("Display As [Octahedral]"). The label's rectangle
+    grown to cover the checkbox on its left and the value on its right, inside `region`."""
+    r = field_rect(words, label, reach)
+    left = max(region.x, label.x - 22)                                   # the box of a checkbox, about as wide as the row is high plus its gap
+    x = min(r.x, left) if not any(w.rect.x + w.rect.w <= label.x and label.x - (w.rect.x + w.rect.w) <= 22 and abs(w.rect.y - label.y) <= label.h for w in words) else r.x
+    return Rect(x, r.y, r.x + r.w - x, r.h)
 
 
 def ground_operator_panel(ctx: GroundContext, ref: TargetRef) -> Grounded:
     """A field of the panel an operator leaves after it ran (Loop Cut and Slide > Number of Cuts), or a choice in the popup an operator shows (Set Parent To > With Automatic Weights)."""
-    ui = ctx.ui
     if ref.id:                                                         # a choice in a popup: text, wherever the popup opened
         hits = find_phrase(ctx.words, ref.label, None, min_score=0.9)
         if len(hits) == 1:
@@ -324,16 +372,61 @@ def ground_operator_panel(ctx: GroundContext, ref: TargetRef) -> Grounded:
         if len(hits) > 1:
             return Grounded("operator_panel", AMBIGUOUS, None, 0.3, (f"'{ref.label}' appears {len(hits)} times",), "", ambiguous=True, label=ref.label)
         return Grounded("operator_panel", NOT_OPEN, None, 0.0, ("the popup is not open",), f"The choices appear after the shortcut or menu item that started them; then click {ref.label}.", label=ref.label)
-    area = None if ui is None else ui.area("VIEW_3D")
+    # A tool's or an operator's field is shown in one of two places, and which one depends on the Blender version and on what ran: the TOOL SETTINGS bar along the top of the 3D view (Loop Cut's
+    # "Number of Cuts" sits there while the tool is active) or the REDO PANEL at the bottom left (after an operator ran). The label is looked for in both, so the highlight goes to where it really is.
+    places = _field_places(ctx)
+    for where, box in places:
+        hits = find_phrase(ctx.words, ref.label, box, min_score=0.9)
+        if hits:
+            rect = field_rect(ctx.words, hits[0][0])
+            return Grounded("operator_panel", VISIBLE, ctx.frame_to_screen(rect), round(hits[0][1], 2), (f"'{ref.label}' was read in the {where}",), f"Set {ref.label} in the {where}.", complete=True, label=ref.label)
+    if not places:
+        hits = find_phrase(ctx.words, ref.label, None, min_score=0.9)                                  # no add-on: the label is searched on the whole screen, and only a single match is believed
+        if len(hits) == 1:
+            return Grounded("operator_panel", VISIBLE, ctx.frame_to_screen(field_rect(ctx.words, hits[0][0])), round(hits[0][1] * 0.85, 2), (f"'{ref.label}' was read once on screen",), f"Set {ref.label}.", complete=True, label=ref.label)
+        return Grounded("operator_panel", NOT_OPEN, None, 0.0, ("no settings panel is open",), f"Do the action first: Blender then shows its settings for it, along the top of the 3D view or in a panel at the bottom left, where you set {ref.label}.", label=ref.label)
+    where, box = places[0]
+    return Grounded("operator_panel", VISIBLE, ctx.window_to_screen(_hud_window_rect(ctx) or ctx.ui.area("VIEW_3D").rect), 0.75, (f"Blender reports the {where}; the label '{ref.label}' was not read in it",),
+                    f"Set {ref.label} in the {where} (click its header if it is collapsed).", label=ref.label)
+
+
+def _hud_window_rect(ctx: GroundContext):
+    area = None if ctx.ui is None else ctx.ui.area("VIEW_3D")
     hud = None if area is None else area.region("HUD")
-    if area is None or hud is None or ctx.mapper is None:
-        return Grounded("operator_panel", NOT_OPEN, None, 0.0, ("no redo panel is open",), f"Do the action first: Blender then shows its settings panel at the bottom left of the 3D view, where you set {ref.label}.", label=ref.label)
-    box = ctx.window_to_frame(hud.rect)
-    hits = find_phrase(ctx.words, ref.label, box, min_score=0.9)
-    if hits:
-        return Grounded("operator_panel", VISIBLE, ctx.frame_to_screen(hits[0][0]), round(hits[0][1], 2), (f"the redo panel is open and '{ref.label}' was read in it",), f"Set {ref.label} in the panel at the bottom left of the 3D view.", complete=True, label=ref.label)
-    return Grounded("operator_panel", VISIBLE, ctx.window_to_screen(hud.rect), 0.75, ("the redo panel is open (Blender reports its region); the field's label was not read",),
-                    f"Set {ref.label} in the panel at the bottom left of the 3D view (click its header if it is collapsed).", label=ref.label)
+    return None if hud is None else hud.rect
+
+
+def _field_places(ctx: GroundContext) -> list[tuple[str, Rect]]:
+    """Where a tool's or operator's fields can be right now, in frame pixels: the settings panel at the bottom left (when Blender reports it open) and the tool settings bar at the top of the 3D view."""
+    out: list[tuple[str, Rect]] = []
+    ui, mp = ctx.ui, ctx.mapper
+    if ui is None or mp is None:
+        return out
+    hud = _hud_window_rect(ctx)
+    if hud is not None:
+        box = ctx.window_to_frame(hud)
+        if box is not None:
+            out.append(("panel at the bottom left of the 3D view", box))
+    th = ui.region("VIEW_3D", "TOOL_HEADER")
+    if th is not None:
+        box = ctx.window_to_frame(th.rect)
+        if box is not None:
+            out.append(("tool settings bar at the top of the 3D view", box))
+    return out
+
+
+def field_rect(words: list[Word], label: Rect, reach: int = 190) -> Rect:
+    """A field is its label AND its value box ("Number of Cuts" and the 1 beside it): the label's rectangle grown over the words that follow it on the same line within `reach` pixels, so the highlight
+    surrounds the whole field and not just the first words of it."""
+    right = label.x + label.w
+    row = [w for w in words if abs((w.rect.y + w.rect.h // 2) - (label.y + label.h // 2)) <= max(label.h // 2, 4) and w.rect.x >= right - 2]
+    row.sort(key=lambda w: w.rect.x)
+    out = label
+    for w in row[:2]:
+        if w.rect.x - (out.x + out.w) > reach // 2 or w.rect.x + w.rect.w - label.x > reach + label.w:
+            break
+        out = Rect(label.x, min(out.y, w.rect.y), w.rect.x + w.rect.w - label.x, max(out.y + out.h, w.rect.y + w.rect.h) - min(out.y, w.rect.y))
+    return out
 
 
 def ground_context_menu(ctx: GroundContext, ref: TargetRef) -> Grounded:

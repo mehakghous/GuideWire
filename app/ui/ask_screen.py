@@ -14,6 +14,8 @@ from shared.step_record import StepList
 
 from ..ask import Asker, AskResult
 from ..pipeline import APPS
+from .bento import HeroTile, Tile, header, page_grid
+from .style import current_palette
 from .workers import run_call
 
 EXAMPLES = ("Try:  where do i start rigging in maya   |   give me the steps to bind the mesh   |   my knee flips when i move the ik handle   |   what should i do before rigging")
@@ -56,26 +58,39 @@ class AskScreen(QWidget):
         self.back_button.clicked.connect(self.back.emit)
         self.app.currentTextChanged.connect(lambda _t: self._new_conversation())
         self.tutorial.currentIndexChanged.connect(lambda _i: self._new_conversation())
-        top = QHBoxLayout()
-        top.addWidget(QLabel("Application"))
-        top.addWidget(self.app)
-        top.addWidget(QLabel("About"))
-        top.addWidget(self.tutorial, 1)
-        top.addWidget(self.use_model)
-        row = QHBoxLayout()
-        row.addWidget(self.input, 1)
-        row.addWidget(self.ask_button)
-        bottom = QHBoxLayout()
-        bottom.addWidget(self.save_button)
-        bottom.addWidget(self.status, 1)
-        bottom.addWidget(self.back_button)
-        root = QVBoxLayout(self)
-        root.addWidget(QLabel("<h2>Ask GuideWire</h2>"))
-        root.addLayout(top)
-        root.addWidget(self.transcript, 1)
-        root.addWidget(self.hint)
-        root.addLayout(row)
-        root.addLayout(bottom)
+        self.status.setObjectName("hint")
+        grid = page_grid(self)
+        grid.addWidget(header("Ask GuideWire", "Ask about a tool, a step or a whole workflow. Save the steps it gives you as a tutorial.", back=self.back_button, kicker="Questions"), 0, 0, 1, 2)
+        talk = Tile("Conversation")
+        talk.body.addWidget(self.transcript, 1)
+        ask_row = QHBoxLayout()
+        ask_row.addWidget(self.input, 1)
+        ask_row.addWidget(self.ask_button)
+        talk.body.addLayout(ask_row)
+        foot = QHBoxLayout()
+        foot.addWidget(self.save_button)
+        foot.addWidget(self.status, 1)
+        talk.body.addLayout(foot)
+        settings = HeroTile("What it is about")
+        form = QVBoxLayout()
+        form.setSpacing(8)
+        form.addWidget(QLabel("Application"))
+        form.addWidget(self.app)
+        form.addWidget(QLabel("About"))
+        form.addWidget(self.tutorial)
+        form.addWidget(self.use_model)
+        settings.body.addLayout(form)
+        settings.body.addStretch()
+        tips = Tile("Try asking", variant="mint")
+        tips.body.addWidget(self.hint)
+        tips.body.addStretch()
+        grid.addWidget(talk, 1, 0, 2, 1)
+        grid.addWidget(settings, 1, 1)
+        grid.addWidget(tips, 2, 1)
+        grid.setRowStretch(1, 2)
+        grid.setRowStretch(2, 1)
+        grid.setColumnStretch(0, 3)
+        grid.setColumnStretch(1, 2)
 
     # ---- the tutorials the user can ask about
     def set_tutorials(self, rows: list[tuple[int, str]], select: int | None = None) -> None:
@@ -94,11 +109,12 @@ class AskScreen(QWidget):
         self.last_steps = None
         self.save_button.setVisible(False)
         self.status.setText("")
-        self.transcript.setHtml("<p style='color:#666'>Ask a question below. " + ("This answer will be about the tutorial you chose." if self.tutorial.currentData() is not None else "No tutorial chosen: a general question.") + "</p>")
+        self.transcript.setHtml("<p style='color:" + current_palette()["muted"] + "'>Ask a question below. " + ("This answer will be about the tutorial you chose." if self.tutorial.currentData() is not None else "No tutorial chosen: a general question.") + "</p>")
 
     def _append(self, who: str, text: str) -> None:
         body = html.escape(text).replace("\n", "<br>")
-        color = "#1f4e79" if who == "You" else "#222"
+        pal = current_palette()
+        color = pal["accent"] if who == "You" else pal["text"]
         self.transcript.append(f"<p><b style='color:{color}'>{who}</b><br><span>{body}</span></p>")
 
     # ---- asking

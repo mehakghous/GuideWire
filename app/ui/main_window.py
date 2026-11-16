@@ -4,7 +4,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from PyQt6.QtCore import QEasingCurve, QPropertyAnimation
+from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QApplication, QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
 
 from .. import demo_content
 from ..accounts import Accounts, User
@@ -14,6 +16,9 @@ from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
+from .backdrop import Backdrop
+from .sidebar import Sidebar
+from .style import THEMES, build_style, current_palette, set_theme
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
 
@@ -22,11 +27,11 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None):
-        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline."""
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision` is the screen-guidance service (observe only); None means sessions run without it."""
         super().__init__()
         self.setWindowTitle("GuideWire")
-        self.resize(1000, 680)
+        self.resize(1260, 800)
         self.db = db
         self.accounts = Accounts(db)
         self.user: User | None = None
@@ -34,6 +39,7 @@ class MainWindow(QMainWindow):
         self.home = HomeScreen()
         self.review = StepReviewScreen()
         self.session = SessionScreen()
+        self.session.vision = vision                # None = sessions run without screen guidance
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
@@ -48,7 +54,20 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen):
             self.stack.addWidget(screen)
-        self.setCentralWidget(self.stack)
+        self.sidebar = Sidebar()
+        self.sidebar.set_companion(vision is not None)
+        self.sidebar.chosen.connect(self.on_nav)
+        self.sidebar.logout.connect(self.on_logout)
+        self.sidebar.hide()                       # only once someone is signed in
+        shell = Backdrop()
+        row = QHBoxLayout(shell)
+        row.setContentsMargins(14, 14, 0, 14)
+        row.setSpacing(0)
+        row.addWidget(self.sidebar)
+        row.addWidget(self.stack, 1)
+        self.setCentralWidget(shell)
+        self.stack.currentChanged.connect(self._sync_sidebar)
+        self.stack.currentChanged.connect(self._fade_in)
         self.login.logged_in.connect(self.on_logged_in)
         self.home.logout.connect(self.on_logout)
         self.home.open_review.connect(self.open_review)
@@ -74,6 +93,38 @@ class MainWindow(QMainWindow):
         self.ask_screen.save_steps.connect(self.save_asked_steps)
         self.session.ask_about.connect(lambda tid: self.open_ask(tid))
         self.stack.setCurrentWidget(self.login)
+
+    def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
+        self.session.stop_guidance()                # never leave the highlight on screen after the app closes
+        super().closeEvent(event)
+
+    def on_nav(self, key: str) -> None:
+        """A sidebar item was clicked."""
+        {"home": self.show_home, "find": self.open_find, "ask": self.open_ask, "import": self.open_new_tutorial,
+         "history": self.open_history, "settings": self.open_profile}[key]()
+
+    def _sync_sidebar(self, _index: int = 0) -> None:
+        """Show the panel on every screen except the sign-in, and mark the screen the user is on."""
+        screen = self.stack.currentWidget()
+        self.sidebar.setVisible(self.user is not None and screen is not self.login)
+        self.sidebar.set_user(self.user.display_name if self.user else "")
+        keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings"}
+        self.sidebar.set_active(keys.get(screen))
+
+    def _fade_in(self, _index: int = 0) -> None:
+        """Each screen eases in. The effect is removed when it ends, so it never costs anything while the screen is in use."""
+        screen = self.stack.currentWidget()
+        if screen is None or not screen.isVisibleTo(self):
+            return
+        fx = QGraphicsOpacityEffect(screen)
+        screen.setGraphicsEffect(fx)
+        anim = QPropertyAnimation(fx, b"opacity", screen)
+        anim.setDuration(260)
+        anim.setStartValue(0.0)
+        anim.setEndValue(1.0)
+        anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        anim.finished.connect(lambda: screen.setGraphicsEffect(None))
+        anim.start()
 
     def current_screen(self):
         return self.stack.currentWidget()
@@ -124,12 +175,28 @@ class MainWindow(QMainWindow):
         self.db.save_tutorial(self.user.id, final, steps, source_type="manual")
         self.ask_screen.saved(final)
 
+    def apply_theme(self) -> None:
+        """Show the signed-in user's chosen theme (light or dark); the light one when nobody is signed in."""
+        app = QApplication.instance()
+        if app is None:
+            return
+        theme = self.accounts.preferences(self.user.id).get("theme") if self.user else "light"
+        theme = set_theme(theme if theme in THEMES else "light")
+        app.setStyleSheet(build_style(theme))
+        for w in self.findChildren(QWidget):                       # the soft shadows are not in the style sheet: recolour them for the theme
+            fx = w.graphicsEffect()
+            if isinstance(fx, QGraphicsDropShadowEffect):
+                fx.setColor(QColor(current_palette()["shadow"]))
+        self.centralWidget().update()
+
     def on_logged_in(self, user: User) -> None:
         self.user = user
+        self.apply_theme()
         self.show_home()
 
     def on_logout(self) -> None:
         self.user = None
+        self.apply_theme()
         self.stack.setCurrentWidget(self.login)
 
     def show_home(self) -> None:
@@ -142,6 +209,7 @@ class MainWindow(QMainWindow):
 
     def on_profile_changed(self, user: User) -> None:
         self.user = user
+        self.apply_theme()
 
     def open_new_tutorial(self) -> None:
         if self.user is None:
@@ -197,8 +265,16 @@ class MainWindow(QMainWindow):
         except EngineError:
             self.show_home()
             return
-        self.session.load(engine)
+        self.session.load(engine, guidance=bool(self.accounts.preferences(self.user.id).get("overlay", True)))
         self.stack.setCurrentWidget(self.session)
+
+
+def _make_vision():
+    """The real screen-vision service on Windows (observe only); nothing elsewhere, so sessions simply run by hand."""
+    if sys.platform != "win32":
+        return None
+    from vision.service import VisionService
+    return VisionService("Blender")
 
 
 def main() -> int:
@@ -207,7 +283,7 @@ def main() -> int:
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider))
+    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision=_make_vision())
     window.show()
     return app.exec()
 

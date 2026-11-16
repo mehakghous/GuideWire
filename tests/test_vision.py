@@ -352,3 +352,14 @@ def test_a_hovered_toolbar_cell_that_is_not_found_does_not_cut_the_column_in_two
     out = _longest_chain(hovered)
     assert len(out) == 12 and out[0] == full[0] and out[4][0] - full[4][0] <= 6
     assert len(_longest_chain(full[:3] + full[6:])) == 6          # three missing cells are not guessed: the longer half wins as before
+
+
+def test_a_menu_path_skips_a_part_the_open_menu_does_not_show():
+    """Edit Mode's Add menu lists Cylinder directly (no Mesh row): the path "Add > Mesh > Cylinder" goes straight to Cylinder once the menu is open, but never to an 'Add Cylinder' panel elsewhere."""
+    header = [_w("Add", 312, 64, 0), _w("Mesh", 350, 64, 0)]
+    opened = header + [_w("Plane", 336, 92, 1), _w("Cylinder", 336, 192, 2), _w("Torus", 336, 232, 3)]
+    r = locate(opened, "Add > Mesh > Cylinder", below_first=True)
+    assert r is not None and r.matched == "Cylinder" and r.complete and r.rect.y == 192
+    closed = header + [_w("Add", 70, 600, 4), _w("Cylinder", 100, 600, 4)]               # only the operator panel at the bottom left
+    r = locate(closed, "Add > Mesh > Cylinder", within=Rect(0, 57, 1100, 26), below_first=True)
+    assert r is not None and r.matched == "Add" and not r.complete

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PyQt6.QtCore import QEasingCurve, QEvent, QPropertyAnimation
 from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import QApplication, QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
+from PyQt6.QtWidgets import QApplication, QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QHBoxLayout, QLayout, QMainWindow, QStackedWidget, QWidget
 
 from .. import demo_content
 from ..accounts import Accounts, User
@@ -33,6 +33,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(1260, 800)
+        self.layout().setSizeConstraint(QLayout.SizeConstraint.SetNoConstraint)      # a screen's own minimum must not push the window past a small laptop screen (1366x768 leaves ~705 high)
+        self.setMinimumSize(900, 560)
         self.db = db
         self.accounts = Accounts(db)
         self.user: User | None = None

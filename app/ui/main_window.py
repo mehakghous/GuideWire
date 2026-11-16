@@ -19,6 +19,7 @@ from .find_screen import FindScreen
 from .backdrop import Backdrop
 from .sidebar import Sidebar
 from .style import THEMES, build_style, current_palette, set_theme
+from .pages import ProgressScreen, achievements, learning_paths
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
 
@@ -45,6 +46,9 @@ class MainWindow(QMainWindow):
         self.session.sync = sync
         self.session.set_bridge(vision_bridge)      # None = sessions run without screen guidance
         self.history = HistoryScreen()
+        self.progress_page = ProgressScreen()
+        self.paths_page = learning_paths()
+        self.badges_page = achievements()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
         self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover), sync=sync)
@@ -56,7 +60,7 @@ class MainWindow(QMainWindow):
             self.new_tutorial.video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)
         self.new_tutorial.sync = sync
         self.stack = QStackedWidget()
-        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen):
+        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen, self.progress_page, self.paths_page, self.badges_page):
             self.stack.addWidget(screen)
         self.sidebar = Sidebar()
         self.sidebar.set_companion(vision_bridge is not None)
@@ -81,6 +85,11 @@ class MainWindow(QMainWindow):
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
         self.history.back.connect(self.show_home)
+        for page in (self.progress_page, self.paths_page, self.badges_page):
+            page.back.connect(self.show_home)
+        self.history.start_again.connect(self.open_session)
+        self.history.resume.connect(self.resume_session)
+        self.history.review.connect(self.open_review)
         self.new_tutorial.back.connect(self.show_home)
         self.new_tutorial.created.connect(self.open_editor)
         self.home.new_tutorial.connect(self.open_new_tutorial)
@@ -95,6 +104,8 @@ class MainWindow(QMainWindow):
         self.home.add_demo.connect(self.add_demo_tutorials)
         self.ask_screen.back.connect(self.show_home)
         self.ask_screen.save_steps.connect(self.save_asked_steps)
+        self.ask_screen.save_and_start.connect(lambda steps, title: self.save_asked_steps(steps, title, start=True))
+        self.ask_screen.start_session.connect(self.open_session)
         self.session.ask_about.connect(lambda tid: self.open_ask(tid))
         self.stack.setCurrentWidget(self.login)
 
@@ -110,14 +121,16 @@ class MainWindow(QMainWindow):
     def on_nav(self, key: str) -> None:
         """A sidebar item was clicked."""
         {"home": self.show_home, "find": self.open_find, "ask": self.open_ask, "import": self.open_new_tutorial,
-         "history": self.open_history, "settings": self.open_profile}[key]()
+         "history": self.open_history, "progress": self.open_progress, "paths": lambda: self._open_page(self.paths_page), "badges": lambda: self._open_page(self.badges_page),
+         "settings": self.open_profile}[key]()
 
     def _sync_sidebar(self, _index: int = 0) -> None:
         """Show the panel on every screen except the sign-in, and mark the screen the user is on."""
         screen = self.stack.currentWidget()
         self.sidebar.setVisible(self.user is not None and screen is not self.login)
         self.sidebar.set_user(self.user.display_name if self.user else "")
-        keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings"}
+        keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings",
+                self.progress_page: "progress", self.paths_page: "paths", self.badges_page: "badges"}
         self.sidebar.set_active(keys.get(screen))
 
     def _fade_in(self, _index: int = 0) -> None:
@@ -163,7 +176,8 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentWidget(self.login)
             return
         rows = [(r["id"], r["title"]) for r in self.db.list_tutorials(self.user.id)]
-        self.ask_screen.set_tutorials(rows, select=tutorial_id)          # from Home: a general question; from a session: that tutorial
+        self.ask_screen.set_user(self.db, self.user.id)
+        self.ask_screen.set_tutorials(rows, select=tutorial_id)          # from Home: a new chat; from a session: a new chat about that tutorial
         self.stack.setCurrentWidget(self.ask_screen)
 
     def _tutorial_for_ask(self, tutorial_id: int):
@@ -173,16 +187,18 @@ class MainWindow(QMainWindow):
         steps = StepList(source_type=row["source_type"], app=row["app"], title=row["title"], steps=[s for _, s in self.db.get_steps(tutorial_id)])
         return steps, row["title"], row["source_url"]
 
-    def save_asked_steps(self, steps, title: str) -> None:
-        """The user saved the steps an answer gave: they become one of their tutorials."""
+    def save_asked_steps(self, steps, title: str, start: bool = False) -> None:
+        """The user saved the steps an answer gave: they become one of their tutorials (and, with `start`, a session on it opens at once)."""
         if self.user is None:
             return
         have = {r["title"] for r in self.db.list_tutorials(self.user.id)}
         final, n = title, 2
         while final in have:
             final, n = f"{title} ({n})", n + 1
-        self.db.save_tutorial(self.user.id, final, steps, source_type="manual")
-        self.ask_screen.saved(final)
+        tid = self.db.save_tutorial(self.user.id, final, steps, source_type="manual")
+        self.ask_screen.saved(final, tid)
+        if start:
+            self.open_session(tid)
 
     def apply_theme(self) -> None:
         """Show the signed-in user's chosen theme (light or dark); the light one when nobody is signed in."""
@@ -234,6 +250,29 @@ class MainWindow(QMainWindow):
             return
         self.review.load(editor, self.db, self.user.id)
         self.stack.setCurrentWidget(self.review)
+
+    def open_progress(self) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.progress_page.show_summary(self.db.progress_summary(self.user.id))
+        self.stack.setCurrentWidget(self.progress_page)
+
+    def _open_page(self, page) -> None:
+        self.stack.setCurrentWidget(page if self.user is not None else self.login)
+
+    def resume_session(self, session_id: int) -> None:
+        """Pick an unfinished session up where it was left."""
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        try:
+            engine = SessionEngine.load(self.db, self.user.id, session_id)
+        except EngineError:
+            self.open_history()
+            return
+        self.session.load(engine, guidance=bool(self.accounts.preferences(self.user.id).get("overlay", True)))
+        self.stack.setCurrentWidget(self.session)
 
     def open_history(self) -> None:
         if self.user is None:

@@ -7,7 +7,7 @@ from __future__ import annotations
 import html
 
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFrame, QScrollArea, QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
@@ -157,7 +157,8 @@ class HomeScreen(QWidget):
         self.hero_hint = QLabel("")
         self.hero_hint.setObjectName("tileHint")
         self.hero_hint.setWordWrap(True)
-        grid = page_grid(self)
+        content = QWidget()                                       # the page scrolls as a whole, so nothing is squeezed on a short window and "Your tutorials" can always be reached
+        grid = page_grid(content)
         self.review_button.setMinimumHeight(40)
         self.session_button.setMinimumHeight(40)
         kicker = QLabel("Continue learning")
@@ -185,6 +186,7 @@ class HomeScreen(QWidget):
         stat.body.addWidget(caption)
         stat.body.addStretch()
         mine = Tile("Your tutorials")
+        mine.setMinimumHeight(330)
         mine.body.addWidget(self.empty, 1)
         mine.body.addWidget(self.tutorials, 1)
         grid.addLayout(title_box, 0, 0, 1, 5)
@@ -195,9 +197,19 @@ class HomeScreen(QWidget):
         grid.addWidget(mine, 3, 0, 1, 5)
         for col in range(5):
             grid.setColumnStretch(col, 1)
-        grid.setRowStretch(1, 2)
-        grid.setRowStretch(3, 3)
+        grid.setRowStretch(1, 0)
+        grid.setRowStretch(3, 1)
         self.tutorials.currentRowChanged.connect(lambda _row: self._show_hero())
+        scroll = QScrollArea()
+        scroll.setObjectName("pageScroll")
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidget(content)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(scroll)
+        self.scroll = scroll
 
     def _show_hero(self) -> None:
         item = self.tutorials.currentItem()
@@ -820,24 +832,43 @@ class SessionScreen(QWidget):
 
 
 class HistoryScreen(QWidget):
-    """The user's past and current sessions, newest first."""
+    """The user's past and current sessions, newest first. A session can be used again: start the same tutorial from the beginning, continue one that was not finished, or look at its steps."""
     back = pyqtSignal()
+    start_again = pyqtSignal(int)      # tutorial id
+    resume = pyqtSignal(int)           # session id
+    review = pyqtSignal(int)           # tutorial id
 
     def __init__(self):
         super().__init__()
+        self.rows: list[dict] = []
         self.list = QListWidget()
         tidy_list(self.list)
         self.empty = QLabel("")
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(self.back.emit)
         self.empty.setObjectName("empty")
+        self.again_button = QPushButton("Start again")
+        self.again_button.setObjectName("primary")
+        self.resume_button = QPushButton("Continue where I left off")
+        self.review_button = QPushButton("Review steps")
+        self.again_button.clicked.connect(lambda: self._emit(self.start_again, "tutorial_id"))
+        self.resume_button.clicked.connect(lambda: self._emit(self.resume, "id"))
+        self.review_button.clicked.connect(lambda: self._emit(self.review, "tutorial_id"))
+        self.list.currentRowChanged.connect(lambda _r: self._buttons())
+        self.list.itemDoubleClicked.connect(lambda _i: self._emit(self.start_again, "tutorial_id"))
         grid = page_grid(self)
-        grid.addWidget(header("History", "Every session you have started, newest first.", back=self.back_button, kicker="Your sessions"), 0, 0)
+        grid.addWidget(header("History", "Every session you have started, newest first. Pick one to use it again.", back=self.back_button, kicker="Your sessions"), 0, 0)
         box = Tile("Sessions")
         box.body.addWidget(self.empty)
         box.body.addWidget(self.list, 1)
+        row = QHBoxLayout()
+        for b in (self.again_button, self.resume_button, self.review_button):
+            row.addWidget(b)
+        row.addStretch()
+        box.body.addLayout(row)
         grid.addWidget(box, 1, 0)
         grid.setRowStretch(1, 1)
+        self._buttons()
 
     @staticmethod
     def describe(row: dict) -> str:
@@ -845,11 +876,30 @@ class HistoryScreen(QWidget):
         when = (row["finished_at"] or row["started_at"] or "")[:16].replace("T", " ")
         return f"{row['title']} - {state} - {row['dealt']}/{row['total']} steps" + (f" - {when}" if when else "")
 
+    def selected(self) -> dict | None:
+        i = self.list.currentRow()
+        return self.rows[i] if 0 <= i < len(self.rows) else None
+
+    def _buttons(self) -> None:
+        row = self.selected()
+        self.again_button.setEnabled(row is not None)
+        self.review_button.setEnabled(row is not None)
+        self.resume_button.setEnabled(row is not None and row["state"] == "active")
+
+    def _emit(self, signal, key: str) -> None:
+        row = self.selected()
+        if row is not None:
+            signal.emit(int(row[key]))
+
     def load(self, rows: list[dict]) -> None:
+        self.rows = rows
         self.list.clear()
         self.empty.setText("" if rows else "No sessions yet. Start one from Home.")
         for r in rows:
             self.list.addItem(self.describe(r))
+        if rows:
+            self.list.setCurrentRow(0)
+        self._buttons()
 
 
 class ProfileScreen(QWidget):

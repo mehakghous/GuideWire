@@ -105,10 +105,12 @@ def find_tutorials(goal: str, app: str | None = None, *, limit: int = 3, live: b
     if g.clarification:
         return DiscoveryResult(message=g.clarification, app=g.app)
     rigging = g.app in ("maya", "houdini") or bool(g.stages)
-    if not rigging:                                                # not a rigging or animation goal: the small local list
+    if not rigging:                                                # not a rigging or animation goal: the small local list first
         d = discover_local(goal, load_index(), None, limit=limit)
         sug = [_suggestion(r) for r in d.recommendations]
-        return DiscoveryResult(sug, "" if sug else "Nothing in GuideWire's small local list matches that. Try describing a rigging or animation goal.", [*d.notes, CAVEAT], "local", g.app)
+        if sug:
+            return DiscoveryResult(sug, "", [*d.notes, CAVEAT], "local", g.app)
+        # nothing in the local list: do not stop with "nothing matches"; search YouTube for it like any other goal (below)
     key = hashlib.sha256(f"{goal.lower()}|{g.app}|{limit}".encode()).hexdigest()[:20]
     if cache_path is not None:
         hit = _read_cache(cache_path).get(key)
@@ -142,7 +144,7 @@ def find_tutorials(goal: str, app: str | None = None, *, limit: int = 3, live: b
             notes.append(f"The check against the videos themselves was not possible ({type(e).__name__}); these are ranked from titles only.")
     sug = [_suggestion(r) for r in recs]
     notes = [*notes, *rd.notes, caveat]
-    msg = "" if sug else "I found no tutorial that matches that well. Try fewer words, or say which part you want to learn (the leg, skinning, IK)."
+    msg = "" if sug else "I found no tutorial that matches that well. Try fewer words, or say which part you want to learn (for example the leg, skinning, IK, or the shape you want to make)."
     if source == "live" and sug and cache_path is not None:
         try:
             cache = _read_cache(cache_path)

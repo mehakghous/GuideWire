@@ -27,6 +27,15 @@ Kept so they can be picked up again. Each says what it is, why it is not done no
 | Keyboard access to every action, status shown by icon and word everywhere | Not yet checked screen by screen. |
 | Learning Paths, Achievements and the charts of the Progress page | Placeholder pages marked Work in progress. |
 
+## Put back for now, to do again (18 Nov 2026)
+
+| Item | Note |
+|---|---|
+| The new session screen: tutorial video on the left with Replay, Pause and Skip step, the steps list with a status word on each step, a question box, and the current step below | Built and tested, then put back to the earlier session screen because it did not work well enough yet. The code is in git history (commit f97a013, `SessionScreen` in app/ui/screens.py) and its tests were removed. Redo it once the video works. |
+| The embedded YouTube player | Built (app/ui/player.py) but never seen playing: Qt WebEngine closes the whole program when it shows a web view on the development computer, with Qt 6.11 and 6.12 and every Chromium flag tried. To do: find out why (graphics driver, Windows setting, or a different Qt build), try another computer, and check that YouTube allows playback inside the app (the page claims the address https://guidewire.local/). |
+| Pin the Qt and WebEngine versions in requirements.txt | They are pinned to 6.11 for the player; revisit if the player is dropped. |
+| Find a tutorial: goals that are not rigging now search YouTube when the small local list has no match, instead of saying nothing matches | Done 18 Nov 2026; check the wording once the live search is tried with a real key. |
+
 ## Ideas
 
 | Idea | Note |

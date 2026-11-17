@@ -258,12 +258,12 @@ def find_window_cached(title_contains: str = "Blender", exe: tuple[str, ...] = (
                 return WindowInfo(w.hwnd, w.title, window_rect(w.hwnd), False, w.pid, w.exe)
         except Exception:
             pass
-    w = find_window(title_contains, exe, pid)
-    if w is None:
+    found = find_window(title_contains, exe, pid)
+    if found is None:
         _FOUND.pop(key, None)
     else:
-        _FOUND[key] = (now, w)
-    return w
+        _FOUND[key] = (now, found)
+    return found
 
 
 def make_click_through(hwnd: int, hide_from_capture: bool = True) -> None:

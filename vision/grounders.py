@@ -276,7 +276,7 @@ def ground_mode(ctx: GroundContext, ref: TargetRef) -> Grounded:
     return Grounded("mode", NOT_FOUND, None, 0.0, (f"'{now}' was not read in the 3D view's header",), f"Open the mode dropdown at the top left of the 3D view and choose {target}.", label=target)
 
 
-def _tab_icon(ctx: GroundContext, nav, tabs: list[str], tab: str) -> tuple[Rect | None, str]:
+def _tab_icon(ctx: GroundContext, nav, tabs: tuple[str, ...] | list[str], tab: str) -> tuple[Rect | None, str]:
     """The screen rectangle of one tab's icon in the Properties editor's tab column, with the evidence (or the reason it could not be found)."""
     if nav is None or ctx.pixels is None or not tabs:
         return None, "the tab column was not available"
@@ -331,7 +331,7 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
             return Grounded("property", OFFSCREEN, strip, 0.6, (f"the panel '{ref.panel}' is open and '{ref.prop}' is not in the part that is in view",),
                             f"{ref.panel} is open. Scroll down in the Properties editor to {ref.prop}.", label=ref.label, direction="down")
         return Grounded("property", OFFSCREEN, ctx.frame_to_screen(header), 0.6, (f"the header '{ref.panel}' is shown and the panel under it is closed",),
-                        f"Click {ref.panel} to open it; {ref.prop} is inside.", label=ref.label, matched=ref.panel)
+                        f"Click {ref.panel} to open it; {ref.prop} is inside.", label=ref.label, matched=ref.panel or "")
     return Grounded("property", UNKNOWN, win_screen, 0.3, ("the tab is open; its content was not read",), f"Look for {ref.prop} in the {tab_name} tab.", label=ref.label)
 
 
@@ -386,7 +386,9 @@ def ground_operator_panel(ctx: GroundContext, ref: TargetRef) -> Grounded:
             return Grounded("operator_panel", VISIBLE, ctx.frame_to_screen(field_rect(ctx.words, hits[0][0])), round(hits[0][1] * 0.85, 2), (f"'{ref.label}' was read once on screen",), f"Set {ref.label}.", complete=True, label=ref.label)
         return Grounded("operator_panel", NOT_OPEN, None, 0.0, ("no settings panel is open",), f"Do the action first: Blender then shows its settings for it, along the top of the 3D view or in a panel at the bottom left, where you set {ref.label}.", label=ref.label)
     where, box = places[0]
-    return Grounded("operator_panel", VISIBLE, ctx.window_to_screen(_hud_window_rect(ctx) or ctx.ui.area("VIEW_3D").rect), 0.75, (f"Blender reports the {where}; the label '{ref.label}' was not read in it",),
+    area = None if ctx.ui is None else ctx.ui.area("VIEW_3D")
+    reported = _hud_window_rect(ctx) or (None if area is None else area.rect)
+    return Grounded("operator_panel", VISIBLE, None if reported is None else ctx.window_to_screen(reported), 0.75, (f"Blender reports the {where}; the label '{ref.label}' was not read in it",),
                     f"Set {ref.label} in the {where} (click its header if it is collapsed).", label=ref.label)
 
 

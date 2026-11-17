@@ -3,7 +3,9 @@ import os
 
 import pytest
 
-from app.ui.player import page_html, video_id_of
+pytest.importorskip("PyQt6")                    # the lean CI install has no Qt
+
+from app.ui.player import page_html, video_id_of  # noqa: E402
 
 
 @pytest.fixture

@@ -287,7 +287,7 @@ class AskScreen(QWidget):
         picks.setSpacing(6)
         picks.addWidget(self.about_button)
         picks.addStretch(1)
-        picks.addWidget(self.use_model)
+        self.use_model.setVisible(False)            # no with/without choice: the normal flow uses the AI whenever it is available
         picks.addWidget(self.app_button)
         main.body.addLayout(picks)
         grid.addWidget(side, 0, 0)
@@ -558,7 +558,7 @@ class AskScreen(QWidget):
         tut = title = url = None
         if tid is not None and self.load_tutorial is not None:
             tut, title, url = self.load_tutorial(tid)
-        app, use_model = self.app.currentText(), self.use_model.isChecked()
+        app, use_model = self.app.currentText(), self.asker.model_available
         self.send_button.setEnabled(False)
         self.status.setText("")
         self._thinking = self._add_bubble("GuideWire", "Thinking..." if use_model else "Looking that up...", user=False)

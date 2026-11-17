@@ -34,6 +34,7 @@ class SessionEngine:
             raise EngineError("session not found")
         self.db, self.user_id, self.session_id = db, user_id, session_id
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
+        self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
 
     # ---- creating / resuming
     @classmethod

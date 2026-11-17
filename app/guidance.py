@@ -10,9 +10,12 @@ A tutorial step is not always "click this menu item". Looking at an 18-step Blen
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any, Protocol
 
 from shared.step_record import Step
+
+from .session_engine import ACTIVE, SessionEngine
 
 # words that name something in the 3D viewport, not a menu or panel (they are never found as text)
 SCENE_WORDS = ("handle", "joint", "gizmo", "viewport mesh", "cylinder mesh", "armature object", "bone", "object")
@@ -162,3 +165,97 @@ def describe(plan: Plan, found: Target | None, matched: str = "", complete: bool
     if step is not None and step.how_to:
         return step.how_to[0].text.rstrip(".")
     return step.goal if step is not None else ""
+
+
+# ======================================================================================== the first guidance controller (kept)
+# What follows is the controller for a vision service with observe() and ground(). The session screen now uses the vision bridge (app/vision_bridge.py) instead; this stays for its callers and its tests.
+GUIDED_APPS = frozenset({"blender"})
+UNAVAILABLE = "Screen guidance is not available here ({why}). Follow the steps by hand: press Done when a step is finished."
+
+
+class VisionLike(Protocol):
+    def observe(self) -> dict[str, Any]: ...
+    def ground(self, ui_element: str) -> Any: ...
+
+
+def ui_target(step: Step) -> str | None:
+    """The thing on screen to point at for a step: the first action that names a UI element, else None (a key press has nothing to highlight)."""
+    for a in step.actions:
+        if a.ui_element and a.ui_element.strip():
+            return a.ui_element.strip()
+    return None
+
+
+@dataclass
+class Snapshot:
+    """What the vision service reported for one step. Plain data, so it can cross from the worker thread to the UI thread."""
+    step_id: str
+    observed: dict[str, Any] = field(default_factory=dict)
+    guidance: Any = None
+    error: str | None = None
+    fatal: bool = False          # the service cannot work at all on this computer: stop asking
+
+
+@dataclass
+class Outcome:
+    advanced: bool = False       # the step was completed because the screen showed its expected state
+    marks: list = field(default_factory=list)   # vision.overlay.Mark objects to draw (empty = draw nothing)
+    hint: str = ""               # one line for the learner
+    stop: bool = False           # stop asking vision for the rest of this session
+
+
+def _is_fatal(e: Exception) -> bool:
+    return isinstance(e, (ImportError, NotImplementedError)) or type(e).__name__ == "PlatformUnavailable"
+
+
+class GuidanceController:
+    def __init__(self, engine: SessionEngine, vision: VisionLike | None):
+        self.engine = engine
+        self.vision = vision
+
+    @property
+    def available(self) -> bool:
+        return self.vision is not None and self.engine.app in GUIDED_APPS
+
+    def current(self) -> tuple[str, str | None] | None:
+        """(step id, ui target) of the active step, or None when no step is active. Read on the UI thread, passed to `compute`."""
+        step = self.engine.current_step()
+        if step is None or self.engine.state != ACTIVE:
+            return None
+        return step.id, ui_target(step)
+
+    def compute(self, step_id: str, target: str | None) -> Snapshot:
+        """Ask vision. Safe on a worker thread: it never touches the engine."""
+        if self.vision is None:
+            return Snapshot(step_id, error=UNAVAILABLE.format(why="no vision service"), fatal=True)
+        try:
+            observed = dict(self.vision.observe() or {})
+            guidance = self.vision.ground(target) if target else None
+        except Exception as e:                                   # vision is best effort: it must never break a session
+            return Snapshot(step_id, error=UNAVAILABLE.format(why=str(e) or type(e).__name__), fatal=_is_fatal(e))
+        return Snapshot(step_id, observed, guidance)
+
+    def apply(self, snap: Snapshot) -> Outcome:
+        """Use a snapshot on the UI thread. Ignored if the active step is no longer the one it was computed for."""
+        step = self.engine.current_step()
+        if step is None or step.id != snap.step_id:
+            return Outcome()
+        if snap.error:
+            return Outcome(hint=snap.error, stop=snap.fatal)
+        if snap.observed and self.engine.auto_check(snap.observed):
+            return Outcome(advanced=True, hint="Step completed: GuideWire saw it on screen.")
+        return self._pointing(snap)
+
+    @staticmethod
+    def _pointing(snap: Snapshot) -> Outcome:
+        from vision.overlay import highlight_mark
+        g = snap.guidance
+        if g is None:
+            return Outcome()
+        status = getattr(getattr(g, "grounding", None), "status", "none")
+        reason = getattr(getattr(g, "grounding", None), "reason", "") or ""
+        if status != "ok" or g.rect is None:
+            return Outcome(hint=("Blender is not visible: bring it to the front." if "window" in reason else "Could not find that on screen yet."))
+        if g.ambiguous:
+            return Outcome(marks=[highlight_mark(g.rect)], hint=f"Several places match '{g.matched}': pick the one the step means.")
+        return Outcome(marks=[highlight_mark(g.rect)], hint=(f"Click {g.matched}." if g.complete else f"Open {g.matched}, the next part will light up."))

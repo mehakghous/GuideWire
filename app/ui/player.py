@@ -43,9 +43,58 @@ def _minor(version: str) -> str:
     return ".".join(parts[:2])
 
 
-def web_engine_problem() -> str | None:
-    """Why the embedded player cannot be used here, or None when it can. Qt WebEngine must be the same Qt version as the rest of Qt: a mismatched pair imports fine and then crashes the whole application the
-    moment a web view is shown, so the two versions are compared before any web view is made."""
+_PROBE = """
+import sys
+from PyQt6 import QtWebEngineWidgets
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QTimer
+app = QApplication([])
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+v = QWebEngineView()
+v.resize(320, 200)
+v.show()
+print("ok", flush=True)
+QTimer.singleShot(400, app.quit)
+sys.exit(app.exec())
+"""
+
+
+def _cache_file():
+    import os
+    from pathlib import Path
+    return Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "GuideWire" / "webengine_probe.json"
+
+
+def _probe_in_a_separate_process(key: str) -> str | None:
+    """Show a web view in a throw-away process and see whether it survives. On some computers Qt WebEngine imports fine and then kills the whole process the moment a web view is shown (seen on the development
+    machine with every flag tried), so GuideWire never shows one in its own process before this has passed. The answer is remembered for this version of Qt and WebEngine."""
+    import json
+    import subprocess
+    import sys
+    cache = _cache_file()
+    try:
+        data = json.loads(cache.read_text(encoding="utf-8"))
+        if data.get("key") == key:
+            return data.get("problem")
+    except Exception:
+        pass
+    problem: str | None
+    try:
+        r = subprocess.run([sys.executable, "-c", _PROBE], capture_output=True, timeout=25)
+        problem = None if (r.returncode == 0 and b"ok" in r.stdout) else f"Qt WebEngine stops the program on this computer (exit code {r.returncode}); the video opens in the browser instead."
+    except Exception as e:
+        problem = f"Qt WebEngine could not be tried here ({type(e).__name__}); the video opens in the browser instead."
+    try:
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps({"key": key, "problem": problem}), encoding="utf-8")
+    except Exception:
+        pass
+    return problem
+
+
+def web_engine_problem(probe: bool = True) -> str | None:
+    """Why the embedded player cannot be used here, or None when it can. Qt WebEngine must be the same Qt version as the rest of Qt (a mismatched pair imports fine and then crashes the application), and a web view
+    must survive being shown on this computer: that is tried once in a separate process (`probe=False` skips it, for tests)."""
     try:
         from PyQt6 import QtWebEngineWidgets  # noqa: F401
         from PyQt6.QtCore import QT_VERSION_STR
@@ -54,7 +103,7 @@ def web_engine_problem() -> str | None:
         return "Qt WebEngine is not installed (pip install PyQt6-WebEngine)."
     if _minor(qWebEngineVersion()) != _minor(QT_VERSION_STR):
         return f"Qt WebEngine {qWebEngineVersion()} does not match Qt {QT_VERSION_STR}: install the same version of both (see requirements.txt)."
-    return None
+    return _probe_in_a_separate_process(f"{QT_VERSION_STR}|{qWebEngineVersion()}") if probe else None
 
 
 def web_engine_available() -> bool:

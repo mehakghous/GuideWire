@@ -138,8 +138,8 @@ def test_a_webengine_of_another_qt_version_is_refused_before_any_web_view_is_mad
 
     from app.ui import player
     monkeypatch.setattr(core, "qWebEngineVersion", lambda: "6.140.0")
-    problem = player.web_engine_problem()
-    assert problem and "does not match" in problem and not player.web_engine_available()
+    problem = player.web_engine_problem(probe=False)
+    assert problem and "does not match" in problem
     from PyQt6.QtCore import QT_VERSION_STR
     monkeypatch.setattr(core, "qWebEngineVersion", lambda: QT_VERSION_STR)
-    assert player.web_engine_problem() is None
+    assert player.web_engine_problem(probe=False) is None

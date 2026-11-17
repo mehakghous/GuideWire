@@ -1,3 +1,4 @@
+"""The first guidance controller (app/guidance.py: GuidanceController, for a vision service with observe() and ground()). The session screen now uses the vision bridge; these tests keep the controller itself covered."""
 from pathlib import Path
 
 import pytest

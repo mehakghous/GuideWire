@@ -343,3 +343,12 @@ def test_find_target_falls_back_to_toolbar_for_icon_only_tools():
     move = find_target(words, img, "Move")
     assert move is not None and move.rect.x < 100 and move.complete
     assert find_target(words, img, "Toolbar > Add Cube").rect.y > move.rect.y
+
+
+def test_a_hovered_toolbar_cell_that_is_not_found_does_not_cut_the_column_in_two():
+    from vision.toolbar import _longest_chain
+    full = [(118 + 36 * i, 151 + 36 * i) for i in range(12)]
+    hovered = full[:4] + full[5:]                      # the cell under the mouse is lighter and is not found
+    out = _longest_chain(hovered)
+    assert len(out) == 12 and out[0] == full[0] and out[4][0] - full[4][0] <= 6
+    assert len(_longest_chain(full[:3] + full[6:])) == 6          # three missing cells are not guessed: the longer half wins as before

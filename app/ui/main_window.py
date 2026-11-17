@@ -27,8 +27,8 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None):
-        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision` is the screen-guidance service (observe only); None means sessions run without it."""
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None, vision_bridge=None):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision_bridge` (app.vision_bridge.VisionBridge) is the screen guidance for sessions; `vision` is the older form, a vision service that is wrapped in a bridge. None of them means sessions run by hand."""
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(1260, 800)
@@ -39,7 +39,11 @@ class MainWindow(QMainWindow):
         self.home = HomeScreen()
         self.review = StepReviewScreen()
         self.session = SessionScreen()
-        self.session.vision = vision                # None = sessions run without screen guidance
+        if vision_bridge is None and vision is not None:
+            from ..vision_bridge import VisionBridge
+            vision_bridge = VisionBridge(lambda app: vision)
+        self.session.sync = sync
+        self.session.set_bridge(vision_bridge)      # None = sessions run without screen guidance
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
@@ -55,7 +59,7 @@ class MainWindow(QMainWindow):
         for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen):
             self.stack.addWidget(screen)
         self.sidebar = Sidebar()
-        self.sidebar.set_companion(vision is not None)
+        self.sidebar.set_companion(vision_bridge is not None)
         self.sidebar.chosen.connect(self.on_nav)
         self.sidebar.logout.connect(self.on_logout)
         self.sidebar.hide()                       # only once someone is signed in
@@ -95,7 +99,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.login)
 
     def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
-        self.session.stop_guidance()                # never leave the highlight on screen after the app closes
+        self.session.close_guides()                # the screen overlay and the instruction box must not outlive the window
         super().closeEvent(event)
 
     def on_nav(self, key: str) -> None:
@@ -269,12 +273,12 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.session)
 
 
-def _make_vision():
-    """The real screen-vision service on Windows (observe only); nothing elsewhere, so sessions simply run by hand."""
+def _make_bridge():
+    """The real screen guidance on Windows: the vision bridge over the real vision service (observe only). Nothing elsewhere, so sessions simply run by hand."""
     if sys.platform != "win32":
         return None
-    from vision.service import VisionService
-    return VisionService("Blender")
+    from ..vision_bridge import VisionBridge, default_service_factory
+    return VisionBridge(default_service_factory)
 
 
 def main() -> int:
@@ -283,7 +287,7 @@ def main() -> int:
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision=_make_vision())
+    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision_bridge=_make_bridge())
     window.show()
     return app.exec()
 

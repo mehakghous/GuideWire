@@ -66,7 +66,26 @@ def _longest_chain(runs: list[tuple[int, int]]) -> list[tuple[int, int]]:
             chains[-1].append(run)
         else:
             chains.append([run])
-    return max(chains, key=len)
+    return max(_join_chains(chains, height), key=len)
+
+
+def _join_chains(chains: list[list[tuple[int, int]]], height: int) -> list[list[tuple[int, int]]]:
+    """Join chains that are separated by one or two MISSING cells. The cell under the mouse is lighter than the others, so it is not found; that used to cut the column in two, and the
+    longer half won (so the tools were named from the wrong cell, and the highlight jumped between tools while the learner hovered over the toolbar). The missing cells are filled in."""
+    merged = [list(chains[0])]
+    for ch in chains[1:]:
+        gap = ch[0][0] - merged[-1][-1][1]
+        missing = round(gap / (height + 4))
+        same_size = all(abs((r[1] - r[0]) - height) <= 0.3 * height for r in (merged[-1][-1], ch[0]))     # a header button above the column is smaller: never joined
+        if same_size and 1 <= missing <= 2 and gap > 0.6 * height:
+            slot, end = gap / missing, merged[-1][-1][1]
+            for k in range(missing):
+                top = int(end + k * slot + 3)
+                merged[-1].append((top, top + height))
+            merged[-1].extend(ch)
+        else:
+            merged.append(list(ch))
+    return merged
 
 
 def find_cells(bgr, viewport: Rect) -> list[Cell]:

@@ -371,55 +371,63 @@ def test_step_with_unreadable_checks_is_marked_in_the_list_and_explained(win):
     assert "how many nodes" in r.detail.text() and "cannot yet see" in r.detail.text() and "node_count" not in r.detail.text()
 
 
-# ---------------------------------------------------------------- screen guidance in a session
-from concurrent.futures import Future  # noqa: E402
-
+# ---------------------------------------------------------------- screen guidance in a session (the vision bridge; tests/test_app_vision_ui.py covers the highlight, the timer and the guide box in detail)
+from app import vision_bridge as vb  # noqa: E402
+from app.ui.screen_guide import ScreenGuide  # noqa: E402
 from shared.grounding import GroundingResult, Rect  # noqa: E402
-from vision.service import Guidance  # noqa: E402
 
 
-class _SyncExecutor:
-    def submit(self, fn, *a):
-        f = Future()
-        f.set_result(fn(*a))
-        return f
-
-
-class _FakeOverlay:
-    def __init__(self):
-        self.marks, self.visible, self.log = [], False, []
-
-    def set_marks(self, marks):
-        self.marks = marks
-        self.log.append(len(marks))
-
-    def show(self):
-        self.visible = True
-
-    def hide(self):
-        self.visible = False
+class _G:
+    def __init__(self, grounding, rect=None, complete=False, ambiguous=False, matched=""):
+        self.grounding, self.rect, self.complete, self.ambiguous, self.matched = grounding, rect, complete, ambiguous, matched
 
 
 class _FakeVision:
+    """A vision service shaped like the real one (observe and ground), with a fixed answer."""
+
     def __init__(self, observed=None, guidance=None, boom=None):
         self.observed, self.guidance, self.boom, self.asked = observed or {}, guidance, boom, []
 
-    def observe(self):
+    def observe(self, properties=None, attributes=None):
         if self.boom:
             raise self.boom
-        return self.observed
+        return dict(self.observed)
 
     def ground(self, ui_element):
         self.asked.append(ui_element)
         return self.guidance
 
 
-def _guided(w, vision, *, overlay_pref=True):
-    w.session.vision = vision
-    w.session.executor = _SyncExecutor()
+class _FakeOverlay:
+    def __init__(self):
+        self.marks, self.shown, self.closed = [], 0, False
+
+    def cover(self, area):
+        self.covered = area
+
+    def set_marks(self, marks):
+        self.marks = list(marks)
+
+    def show_click_through(self):
+        self.shown += 1
+
+    def hide(self):
+        self.shown = 0
+
+    def close(self):
+        self.closed = True
+
+
+def _pointing(matched="Add"):
+    return _G(GroundingResult("ok", 140, 210), Rect(100, 200, 80, 20), False, False, matched)
+
+
+def _guided(w, svc, *, overlay_pref=True):
+    """A window whose sessions are watched by a bridge over a fake vision service; the looks run inline and the tests call poll() by hand."""
     overlay = _FakeOverlay()
-    w.session.overlay_factory = lambda: overlay
-    w.session.guide_interval_ms = 10_000_000          # tests drive tick() by hand
+    w.session.sync = True
+    w.session.guide = ScreenGuide(lambda: overlay)
+    w.session.set_bridge(vb.VisionBridge(lambda app: svc, window_finder=lambda app: (0, 0, 1920, 1080)))
     _login(w)
     if not overlay_pref:
         w.accounts.set_preferences(w.user.id, overlay=False)
@@ -431,101 +439,63 @@ def _guided(w, vision, *, overlay_pref=True):
     return w.session, overlay
 
 
-def _pointing(matched="Add"):
-    return Guidance(GroundingResult("ok", 140, 210), Rect(100, 200, 80, 20), False, False, matched)
-
-
 def test_session_without_vision_has_no_guidance(win):
     s = _session(win)
     s.start_button.click()
-    s.tick()
-    assert not s._timer.isActive() and s.guide_hint.text() == "" and s._overlay is None
+    assert not s.timer.isActive() and s.watch_box.isHidden() and s.watch_label.text() == ""
 
 
 def test_guidance_shows_the_highlight_for_the_active_step(win):
     s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
-    assert s._timer.isActive()
-    s.tick()                                          # starts the reading (synchronous in tests)
-    s.tick()                                          # applies it
-    assert overlay.visible and len(overlay.marks) == 1 and "Open Add" in s.guide_hint.text()
+    s.show()
+    assert s.watching
+    s.poll()
+    assert overlay.shown >= 1 and len(overlay.marks) == 1 and s.watch_label.text()
     assert s.engine.position == 1
 
 
 def test_guidance_completes_a_step_the_screen_shows_done(win):
     s, overlay = _guided(win, _FakeVision({"mode": "OBJECT", "selection_types": ["MESH"]}, _pointing()))
-    s.tick()
-    s.tick()
-    assert s.engine.position == 2 and "Step 2" in s.step_text.text() and not overlay.visible
-    assert "saw it on screen" in s.guide_hint.text()
-
-
-def test_finishing_the_session_clears_the_highlight_and_stops_the_timer(win):
-    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
-    s.tick()
-    s.tick()
-    assert overlay.visible
-    for _ in range(4):
-        s.done_button.click()
-    assert not overlay.visible and not s._timer.isActive()
-
-
-def test_leaving_the_session_hides_the_overlay(win):
-    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
-    s.tick()
-    s.tick()
-    s.back_button.click()
-    assert not overlay.visible and not s._timer.isActive() and win.current_screen() is win.home
-
-
-def test_pressing_done_by_hand_still_works_and_drops_a_stale_reading(win):
-    s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
-    s.tick()                                          # a reading of step 1 is pending
-    s.done_button.click()                             # the learner moves on first
-    s.tick()
-    assert s.engine.position == 2 and not overlay.visible
+    s.poll()
+    assert s.engine.position == 2 and "Step 2" in s.step_text.text()
 
 
 def test_a_vision_failure_leaves_the_session_working_by_hand(win):
-    s, overlay = _guided(win, _FakeVision(boom=RuntimeError("OCR failed")))
-    s.tick()
-    s.tick()
-    assert "OCR failed" in s.guide_hint.text() and s._timer.isActive()      # transient: it will try again
+    s, overlay = _guided(win, _FakeVision(boom=RuntimeError("capture failed")))
+    s.poll()
+    assert s.engine.position == 1 and not overlay.marks
     s.done_button.click()
     assert s.engine.position == 2
-
-
-def test_a_missing_component_switches_guidance_off_for_the_session(win):
-    s, overlay = _guided(win, _FakeVision(boom=ImportError("winrt")))
-    s.tick()
-    s.tick()
-    assert not s.guide_enabled and not s._timer.isActive() and "not available" in s.guide_hint.text()
 
 
 def test_the_profile_preference_turns_guidance_off(win):
     s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()), overlay_pref=False)
-    s.tick()
-    assert not s._timer.isActive() and overlay.marks == [] and "off in your profile" in s.guide_hint.text()
+    s.poll()
+    assert not s.watch_box.isChecked() and not s.watching and not overlay.marks
+    assert "off in your profile" in s.watch_label.text()
 
 
-def test_an_overlay_failure_never_breaks_the_session(win):
-    s, _ = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
-
-    def broken():
-        raise RuntimeError("no display")
-    s.overlay_factory = broken
-    s.tick()
-    s.tick()
-    assert "no display" in s.guide_hint.text() and not s.guide_enabled
-    s.done_button.click()
-    assert s.engine.position == 2
-
-
-def test_closing_the_window_hides_the_overlay(win):
+def test_leaving_the_session_hides_the_overlay_and_closing_the_window_closes_it(win):
     s, overlay = _guided(win, _FakeVision({"mode": "EDIT_MESH"}, _pointing()))
-    s.tick()
-    s.tick()
+    s.show()
+    s.poll()
+    assert overlay.shown >= 1
+    win.show_home()
+    assert overlay.shown == 0
     win.close()
-    assert not overlay.visible
+    assert overlay.closed
+
+
+def test_the_old_vision_argument_is_wrapped_in_a_bridge(qapp):
+    """MainWindow(vision=service) still works: the service is wrapped in the bridge."""
+    from app.db import Database
+    from app.ui.main_window import MainWindow
+    w = MainWindow(Database(":memory:"), vision=_FakeVision())
+    try:
+        assert w.session.bridge is not None and w.session.bridge.available
+    finally:
+        w.close()
+
 
 
 # ---------------------------------------------------------------- Step Review: leaving, escaping, detail card

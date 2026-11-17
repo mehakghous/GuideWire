@@ -79,7 +79,7 @@ def test_probe_records_requested_paths_and_client_sends_them(tmp_path):
     state = read_probe(info_path=str(info), properties=["objects['Cube'].location[0]"], attributes=["Cube.my_prop"])
     server.shutdown()
     assert state == {"mode": "OBJECT"}                                         # not read yet: main thread does that
-    assert probe._wanted["properties"] == {"objects['Cube'].location[0]"} and probe._wanted["attributes"] == {"Cube.my_prop"}
+    assert set(probe._wanted["properties"]) == {"objects['Cube'].location[0]"} and set(probe._wanted["attributes"]) == {"Cube.my_prop"}
 
 
 def test_service_shares_one_read_between_ground_and_observe(monkeypatch):

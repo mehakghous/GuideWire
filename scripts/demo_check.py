@@ -167,6 +167,18 @@ def check_vision(r: Report) -> None:
             r.add(INFO, f"package {mod} is missing ({why}; only needed for the vision part)", "pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections" if "winrt" in mod else "pip install -r requirements.txt")
 
 
+def check_vision_bridge(r: Report) -> None:
+    """Can the app's screen guidance start here? (Optional: only the live Blender part of the demo needs it.)"""
+    try:
+        from app.vision_bridge import default_service_factory, explain
+        default_service_factory("blender")
+        importlib.import_module("winrt.windows.media.ocr")                 # the service is made without it; reading the screen needs it
+        r.add(OK, "the app's screen guidance (vision bridge) can load the vision service and the Windows OCR")
+    except Exception as e:
+        from app.vision_bridge import explain
+        r.add(INFO, f"screen guidance cannot start here: {explain(e)}", "see docs/vision_integration.md, 'Test it by hand'")
+
+
 def run(db_path: Path = DEMO_DB, fix: bool = False) -> Report:
     r = Report()
     check_environment(r)
@@ -176,6 +188,7 @@ def run(db_path: Path = DEMO_DB, fix: bool = False) -> Report:
     check_ingestion(r)
     check_applications(r)
     check_vision(r)
+    check_vision_bridge(r)
     return r
 
 

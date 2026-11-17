@@ -92,12 +92,12 @@ class G:
 class Svc:
     def __init__(self, texts=(), region=Rect(500, 300, 80, 80)):
         self.texts, self.region = set(texts), region
-        self.mode_hint = None
-        self.prefer_toolbar = False
         self.asked = []
 
-    def ground(self, name):
-        self.asked.append((name, self.prefer_toolbar, self.mode_hint))
+    takes_hints = True
+
+    def ground(self, name, mode_hint=None, prefer_toolbar=False):
+        self.asked.append((name, prefer_toolbar, mode_hint))
         if name in self.texts:
             return G(GroundingResult("ok", 10, 10), Rect(5, 5, 40, 12), True, matched=name.split(">")[-1].strip())
         return G(GroundingResult("none", reason="not on screen"))

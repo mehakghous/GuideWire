@@ -19,6 +19,8 @@ input to the application.
 - `toolbar.py` finds the icon-only toolbar cells from pixels and names them with `toolbars.json`
   (Blender's own tool order per mode, dumped from 5.2.3). A cell holding several tools reports the group
   (`active_tool_candidates`); `active_tool` is set only when the group has one tool.
+- `scene.py` the ONE reader of the screen (since Part A4; it replaced three copies of "compare a thumbnail, read what changed"). Nothing changed: no OCR; a menu opened: only that area; most of the window or a moved window: all of it; a full read at least every 30 s. A busy region (the 3D viewport) that mostly changed is a redraw, not text, and is ignored. `layout_from_model` builds the area layout from what Blender reported. `stats` counts looks by kind for the latency harness.
+- `uimodel.py` the interface as the add-on reports it (areas, regions, toolbar scroll, ordered tool list, Properties tabs, keymap entries, `ui_rev` / `scene_rev`) and `FrameMapper`: Blender window pixels (origin bottom-left) -> screen -> captured frame, refusing (`valid` False) when the snapshot and the capture are not the same window size.
 - `overlay.py` PyQt6 click-through highlight that follows the window.
 - `guide.py` live guidance: re-reads only the changed screen area, ends when the destination is clicked.
 - `blender_addon/guidewire_probe.py` + `probe_client.py` read-only state over loopback with a
@@ -28,6 +30,8 @@ input to the application.
   `properties` and `attributes`. Paths are attribute/index access only (no calls), the same rule as
   `verification/snapshot_blender.py`. Blender is only read on its main thread, so a path asked for the
   first time shows up on the next call. Probe values override OCR.
+  Snapshot v2 (add-on 0.2, additive to protocol v1) adds `snapshot_version`, `pid`, `blender_version`, `ui`, `tools`, `keys` (asked for with `read_probe(keys=[...])`), `ui_rev`, `scene_rev`. Requested paths now expire 30 s after the last request. `probe_info` ignores a `probe.json` whose process is gone or is not the application's program.
+- `winplatform.find_window(title, exe, pid)` finds the window by program (`blender.exe`) and, when the add-on runs, by its process id: a browser tab titled "Blender" is no longer taken for Blender. `client_rect` gives the drawable area Blender's coordinates are relative to. `windows_above` masks our own guide box (the click-through overlay is not masked).
 - `apps.py` per-application profile (window title, pinned version, whether the toolbar logic and a real
   capture check exist). `VisionService(app="maya")` selects it.
 - `history.py` history-based verification: `HistoryTracker` turns the probe's operator list into new
@@ -51,6 +55,10 @@ input to the application.
 All three speak protocol v1 and write their connection details (with the app name) to
 `%LOCALAPPDATA%/GuideWire/probe.json`, so run one application at a time. An idle, unfocused Blender
 wakes its timers only about every 10 seconds; while someone is working in it they run every 0.5 s.
+
+## Measure and check against a real Blender (a Blender you started yourself; add-on 0.2 enabled for the second)
+    python scripts/vision_bench.py --front --json before.json   # time every stage; --diag also checks PrintWindow and the capture-exclusion flag
+    python scripts/vision_uicheck.py --out ui_check.png         # the add-on's regions must land on the right pixels; draws them on the capture
 
 ## Run the manual checks (Blender open and in front)
     python -m vision.demo                                  # detect areas and draw them

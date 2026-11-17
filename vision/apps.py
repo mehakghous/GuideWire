@@ -17,11 +17,12 @@ class AppProfile:
     toolbar: bool               # icon toolbar detection (Blender only for now)
     validated: bool             # checked on real captures of this application
     probe: str                  # where the read-only probe lives
+    exe: tuple[str, ...] = ()   # substrings of the program file name ("blender" for blender.exe): the window must belong to it. Empty = match by title only (not checked for that application yet)
 
 
 PROFILES = {
     "blender": AppProfile("blender", "Blender", "5.2", toolbar=True, validated=True,
-                          probe="vision/blender_addon/guidewire_probe.py"),
+                          probe="vision/blender_addon/guidewire_probe.py", exe=("blender",)),
     "maya": AppProfile("maya", "Maya", "2027", toolbar=False, validated=False,
                        probe="vision/probes/maya_probe.py"),
     "houdini": AppProfile("houdini", "Houdini", "22.0.466", toolbar=False, validated=False,

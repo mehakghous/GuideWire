@@ -59,8 +59,9 @@ def default_window_finder(app: str) -> Rect4 | None:
     """The application's window on screen, from Umaima's Windows lookup (None when it is not visible or this is not Windows)."""
     try:
         from vision import winplatform
+        from vision.apps import profile
         winplatform.enable_dpi_awareness()
-        w = winplatform.find_window(WINDOW_NAMES.get(app, app))
+        w = winplatform.find_window(WINDOW_NAMES.get(app, app), profile(app).exe if app in WINDOW_NAMES else ())
     except Exception:
         return None
     return None if w is None else (w.rect.x, w.rect.y, w.rect.w, w.rect.h)
@@ -107,26 +108,20 @@ def app_of(engine) -> str:
 def default_service_factory(app: str):
     """The real vision service for an application. Imports are lazy: the app starts without OpenCV, the Windows OCR packages or Windows itself, and says what is missing instead.
 
-    It reads only what CHANGED, the way Umaima's `vision/guide.py` does. A tick grabs the window (cheap), compares a small thumbnail with the one at the last reading, and then
-      * nothing changed      -> reuses the words read before (no OCR at all);
-      * a small area changed -> reads only that area (a menu that just opened) and merges the words into the ones known;
-      * most of the window changed, or it moved or was resized -> reads the whole window.
-    VisionService on its own compares the MEAN change of the whole screen, so a menu opening (a small area) looked like "no change" and the old words stayed for up to five seconds."""
+    Reading only what CHANGED (nothing: no OCR; a menu: that area; most of the window or a moved window: all of it) is `vision/scene.py`'s job, shared by every caller since Part A4.
+    This subclass adds the toolbar lookup and the region pointers, which Part C replaces with grounders."""
     from vision.service import VisionService
 
     class LiveService(VisionService):
-        mode_hint: str | None = None          # the mode the step starts in: the toolbar differs per mode
-        prefer_toolbar = False                # icon-only tools: look in the toolbar before the text
-
-        def ground(self, ui_element: str):
+        def ground(self, ui_element: str, mode_hint: str | None = None, prefer_toolbar: bool = False):
             from shared.grounding import GroundingResult
             from vision.probe_client import read_probe
             from vision.service import Guidance, find_target, ground_located
             win, frame, pixels, words, _ = self._scene()
             if win is None:
                 return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
-            mode = self.mode_hint or ((read_probe(app=self.profile.key) or {}).get("mode") if self.use_probe else None)
-            found = self._tool(pixels, ui_element, mode) if self.prefer_toolbar and self.profile.toolbar else None
+            mode = mode_hint or ((read_probe(app=self.profile.key) or {}).get("mode") if self.use_probe else None)
+            found = self._tool(pixels, ui_element, mode) if prefer_toolbar and self.profile.toolbar else None
             if found is None:
                 found = find_target(words, pixels, ui_element, mode, toolbar=self.profile.toolbar)
             return ground_located(frame.geometry, win.rect, found)
@@ -174,44 +169,6 @@ def default_service_factory(app: str):
             m = frame.geometry.monitor
             sx, sy = m.w / frame.geometry.image_w, m.h / frame.geometry.image_h
             return Rect(round(m.x + x * sx), round(m.y + y * sy), round(size * sx), round(size * sy))
-
-        def refresh(self) -> None:
-            """Forget what was read, so the next tick reads the whole window."""
-            self._cache = {}
-
-        def _scene(self):
-            import cv2
-
-            from vision.guide import FULL_READ_SHARE, THUMB, box_to_rect, changed_box, merge_words
-            from vision.ocr import read_text
-            from vision.regions import default_layout, detect_layout
-            win, grabbed = self._frame()
-            if win is None:
-                self._cache = {}
-                return None, None, None, [], None
-            frame, pixels = grabbed
-            h, w = pixels.shape[:2]
-            thumb = cv2.resize(cv2.cvtColor(pixels, cv2.COLOR_BGR2GRAY), THUMB, interpolation=cv2.INTER_AREA)
-            c = self._cache
-            moved = not c or c.get("rect") != win.rect
-            box = None if moved else changed_box(c["thumb"], thumb)
-            if not moved and box is None:
-                return win, frame, pixels, c["words"], c["layout"]                      # nothing changed: no OCR
-            area = 1.0 if moved else (box[2] - box[0]) * (box[3] - box[1]) / (THUMB[0] * THUMB[1])
-            if moved or area > FULL_READ_SHARE:
-                layout = detect_layout(pixels)
-                if layout.confidence < 0.5:
-                    layout = default_layout(w, h)
-                words, serial = read_text(pixels), (c or {}).get("serial", 0)
-            else:                                                                       # a small area changed: read that area only
-                from dataclasses import replace
-                r = box_to_rect(box, w, h)
-                serial = c.get("serial", 0) + 1
-                fresh = [replace(wd, rect=type(wd.rect)(wd.rect.x + r.x, wd.rect.y + r.y, wd.rect.w, wd.rect.h), line=wd.line + serial * 100000)
-                         for wd in read_text(pixels[r.y:r.y + r.h, r.x:r.x + r.w], 2.0)]
-                words, layout = merge_words(c["words"], fresh, r), c["layout"]
-            self._cache = {"rect": win.rect, "thumb": thumb, "words": words, "layout": layout, "serial": serial}
-            return win, frame, pixels, words, layout
     return LiveService(app=app)
 
 
@@ -293,13 +250,12 @@ class VisionBridge:
         """The first target of the plan that is on screen right now: (target, guidance), or (None, the guidance worth reporting)."""
         last, saw = None, None
         for t in plan.targets:
-            if hasattr(svc, "prefer_toolbar"):
-                svc.prefer_toolbar = t.kind == "tool"
+            hints = {"mode_hint": plan.mode_hint, "prefer_toolbar": t.kind == "tool"} if getattr(svc, "takes_hints", False) else {}
             names = [t.path]
             if t.kind == "mode":                           # the item once the dropdown is open, else the dropdown itself (it shows the current mode)
                 names = [t.path.split(">", 1)[-1].strip(), MODE_LABELS.get(plan.mode_hint or "", "Object Mode")]
             for i, name in enumerate(names):
-                g = svc.ground(name)
+                g = svc.ground(name, **hints)
                 last = last or g
                 if getattr(g.grounding, "status", None) == "ok" and g.rect is not None and not g.ambiguous:
                     if t.kind == "mode" and i == 1:
@@ -321,8 +277,6 @@ class VisionBridge:
         window = self.window_rect(app)
         rect, complete, ambiguous, matched, pointer, found = None, False, False, "", False, None
         try:
-            if hasattr(svc, "mode_hint"):
-                svc.mode_hint = plan.mode_hint
             if plan.targets:
                 found, g = self._find(svc, plan)
                 if g is not None:

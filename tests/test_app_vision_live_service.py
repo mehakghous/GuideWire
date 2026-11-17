@@ -16,6 +16,7 @@ def svc(monkeypatch):
     import vision.regions as regions
     from vision.ocr import Word
     s = vb.default_service_factory("blender")
+    s.use_probe = False                                    # hermetic: never read a real add-on that happens to be running
     state = {"rect": Rect(0, 0, 400, 240), "pixels": np.zeros((240, 400, 3), np.uint8), "reads": []}
     s.state = state
     monkeypatch.setattr(s, "_frame", lambda: (SimpleNamespace(rect=state["rect"], hwnd=1), (SimpleNamespace(), state["pixels"])))
@@ -65,4 +66,4 @@ def test_a_big_change_or_a_moved_window_reads_everything_again(svc):
 def test_no_window_clears_what_was_known(svc, monkeypatch):
     svc._scene()
     monkeypatch.setattr(svc, "_frame", lambda: (None, None))
-    assert svc._scene() == (None, None, None, [], None) and svc._cache == {}
+    assert svc._scene() == (None, None, None, [], None) and svc._reader.empty

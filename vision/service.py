@@ -12,10 +12,13 @@ its exact values override what OCR read from the screen.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from shared.grounding import CaptureGeometry, GroundingResult, Rect, to_screen
 from vision.locate import Located
+
+if TYPE_CHECKING:
+    from vision.uimodel import FrameMapper, UiModel
 
 
 @dataclass(frozen=True)
@@ -63,64 +66,94 @@ def find_target(words, pixels, ui_element: str, mode_hint: str | None = None, to
     return found
 
 
-SAME_SCREEN_DIFF = 1.5     # mean grey-level change below which two captures count as the same screen
-CACHE_SECONDS = 5.0        # never reuse a reading older than this
-
-
 class VisionService:
-    """One capture and one OCR pass are shared by `ground` and `observe` while the screen is unchanged,
-    so the app can call both every tick without paying for the read twice."""
+    """One capture and one OCR pass are shared by `ground` and `observe`: `SceneReader` (vision/scene.py) decides on every call whether the pixels changed, and reads only what did."""
+
+    takes_hints = True        # `ground` accepts `mode_hint` and `prefer_toolbar` as arguments (the bridge checks this before passing them)
 
     def __init__(self, title: str | None = None, use_probe: bool = True, app: str = "blender") -> None:
         from vision.apps import profile
+        from vision.scene import SceneReader
         self.profile = profile(app)
         self.title = title or self.profile.title
         self.use_probe = use_probe
-        self._cache: dict[str, Any] = {}
+        self._reader = SceneReader(self._read_text, self._detect_layout)
+        self.ui: UiModel | None = None            # vision.uimodel.UiModel from the add-on at the last look, or None (no add-on, an older one, or the snapshot is for another window size)
+        self.mapper: FrameMapper | None = None        # vision.uimodel.FrameMapper for that look; None whenever `ui` cannot be trusted for the captured frame
+
+    @staticmethod
+    def _read_text(pixels, scale):
+        from vision import ocr
+        return ocr.read_text(pixels, scale)
+
+    def _detect_layout(self, pixels):
+        """The areas of the window: from what Blender reported when it can be trusted for this very frame, else guessed from pixel gaps (which failed on a plain default frame in a live check)."""
+        from vision.regions import default_layout, detect_layout
+        from vision.scene import layout_from_model
+        if self.ui is not None and self.mapper is not None:
+            return layout_from_model(self.ui, self.mapper, pixels.shape[1], pixels.shape[0])
+        layout = detect_layout(pixels)
+        return layout if layout.confidence >= 0.5 else default_layout(pixels.shape[1], pixels.shape[0])
 
     def _frame(self):
         from vision import winplatform
         from vision.capture import grab, mask_occluders
         winplatform.enable_dpi_awareness()
-        win = winplatform.find_window(self.title)
+        win = None
+        if self.use_probe:                                   # with two Blenders open, the one running the add-on is the one to read
+            from vision.probe_client import probe_info
+            info = probe_info(self.profile.key)
+            if info and isinstance(info.get("pid"), int):
+                win = winplatform.find_window(self.title, self.profile.exe, info["pid"])
+        win = win or winplatform.find_window(self.title, self.profile.exe)
         if win is None:
             return None, None
         frame = grab(win.rect)
         pixels = mask_occluders(frame.pixels, win.rect, winplatform.windows_above(win.hwnd))
         return win, (frame, pixels)
 
+    def _read_ui(self, win, frame, pixels) -> None:
+        """The add-on's interface block for this frame: `self.ui`, and `self.mapper` only when the snapshot and the capture describe the same window (same size, client area inside the frame)."""
+        self.ui = self.mapper = None
+        if not self.use_probe or not getattr(frame, "region", None):
+            return
+        from vision import uimodel, winplatform
+        from vision.probe_client import read_probe
+        model = uimodel.parse(read_probe(app=self.profile.key))
+        if model is None:
+            return
+        client = winplatform.client_rect(win.hwnd)
+        mapper = None if client is None else uimodel.mapper_for(model, client, frame.region, pixels.shape[1], pixels.shape[0])
+        self.ui, self.mapper = (model, mapper) if mapper is not None and mapper.valid else (None, None)
+
     def _scene(self):
-        """(window, frame, pixels, words, layout) for the screen as it is now, reusing the last read if
-        nothing changed. (None, ...) when the window is not visible."""
-        import time
-
-        import cv2
-
-        from vision.ocr import read_text
-        from vision.regions import default_layout, detect_layout
+        """(window, frame, pixels, words, layout) for the screen as it is now; only what changed since the last call is read. (None, ...) when the window is not visible."""
         win, grabbed = self._frame()
         if win is None:
+            self._reader.reset()
+            self.ui = self.mapper = None
             return None, None, None, [], None
         frame, pixels = grabbed
-        thumb = cv2.resize(cv2.cvtColor(pixels, cv2.COLOR_BGR2GRAY), (192, 108), interpolation=cv2.INTER_AREA)
-        c = self._cache
-        if (c and c["rect"] == win.rect and time.monotonic() - c["at"] < CACHE_SECONDS
-                and float(abs(c["thumb"].astype("int16") - thumb.astype("int16")).mean()) < SAME_SCREEN_DIFF):
-            return win, frame, pixels, c["words"], c["layout"]
-        layout = detect_layout(pixels)
-        if layout.confidence < 0.5:
-            layout = default_layout(pixels.shape[1], pixels.shape[0])
-        words = read_text(pixels)
-        self._cache = {"rect": win.rect, "thumb": thumb, "at": time.monotonic(), "words": words, "layout": layout}
-        return win, frame, pixels, words, layout
+        self._read_ui(win, frame, pixels)
+        busy = []
+        if self.mapper is not None:                          # the 3D viewport redraws while the learner orbits or drags: that is not text
+            viewport = self.ui.region("VIEW_3D", "WINDOW")
+            if viewport is not None:
+                busy.append(self.mapper.to_frame(viewport.rect))
+        scene = self._reader.read(pixels, win.rect, busy=busy or None)
+        return win, frame, pixels, scene.words, scene.layout
 
-    def ground(self, ui_element: str) -> Guidance:
+    def reset(self) -> None:
+        """Forget what was read, so the next look reads the whole window."""
+        self._reader.reset()
+
+    def ground(self, ui_element: str, mode_hint: str | None = None, prefer_toolbar: bool = False) -> Guidance:
         win, frame, pixels, words, _ = self._scene()
         if win is None:
             return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
         from vision.probe_client import read_probe
         probe = read_probe(app=self.profile.key) if self.use_probe else None
-        found = find_target(words, pixels, ui_element, (probe or {}).get("mode"), toolbar=self.profile.toolbar)
+        found = find_target(words, pixels, ui_element, mode_hint or (probe or {}).get("mode"), toolbar=self.profile.toolbar)
         return ground_located(frame.geometry, win.rect, found)
 
     def observe(self, properties: list[str] | None = None, attributes: list[str] | None = None) -> dict[str, Any]:

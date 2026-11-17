@@ -66,10 +66,11 @@ def find_target(words, pixels, ui_element: str, mode_hint: str | None = None, to
     return found
 
 
+SETTLE_SECONDS = 1.2        # Blender animates a toolbar scroll for about a second; cell positions are not trusted until the interface has been unchanged this long
+
+
 class VisionService:
     """One capture and one OCR pass are shared by `ground` and `observe`: `SceneReader` (vision/scene.py) decides on every call whether the pixels changed, and reads only what did."""
-
-    takes_hints = True        # `ground` accepts `mode_hint` and `prefer_toolbar` as arguments (the bridge checks this before passing them)
 
     def __init__(self, title: str | None = None, use_probe: bool = True, app: str = "blender") -> None:
         from vision.apps import profile
@@ -79,6 +80,8 @@ class VisionService:
         self.use_probe = use_probe
         self._reader = SceneReader(self._read_text, self._detect_layout)
         self.ui: UiModel | None = None            # vision.uimodel.UiModel from the add-on at the last look, or None (no add-on, an older one, or the snapshot is for another window size)
+        self._probe: dict | None = None                           # the add-on's state read for the current look
+        self._ui_seen: tuple[Any, float] = (None, 0.0)            # (interface revision at the last look, when it last changed)
         self.mapper: FrameMapper | None = None        # vision.uimodel.FrameMapper for that look; None whenever `ui` cannot be trusted for the captured frame
 
     @staticmethod
@@ -104,29 +107,34 @@ class VisionService:
             from vision.probe_client import probe_info
             info = probe_info(self.profile.key)
             if info and isinstance(info.get("pid"), int):
-                win = winplatform.find_window(self.title, self.profile.exe, info["pid"])
-        win = win or winplatform.find_window(self.title, self.profile.exe)
+                win = winplatform.find_window_cached(self.title, self.profile.exe, info["pid"])
+        win = win or winplatform.find_window_cached(self.title, self.profile.exe)
         if win is None:
             return None, None
         frame = grab(win.rect)
         pixels = mask_occluders(frame.pixels, win.rect, winplatform.windows_above(win.hwnd))
         return win, (frame, pixels)
 
-    def _read_ui(self, win, frame, pixels) -> None:
-        """The add-on's interface block for this frame: `self.ui`, and `self.mapper` only when the snapshot and the capture describe the same window (same size, client area inside the frame)."""
+    def _read_ui(self, win, frame, pixels, properties=None, attributes=None, keys=None) -> None:
+        """Read the add-on ONCE for this look (`self._probe`, with the paths and keys the step asked for) and build the interface model from it: `self.ui`, and `self.mapper` only when the snapshot and the capture
+        describe the same window (same size, client area inside the frame)."""
         self.ui = self.mapper = None
-        if not self.use_probe or not getattr(frame, "region", None):
+        self._probe = None
+        if not self.use_probe:
             return
         from vision import uimodel, winplatform
         from vision.probe_client import read_probe
-        model = uimodel.parse(read_probe(app=self.profile.key))
+        self._probe = read_probe(properties=properties, attributes=attributes, app=self.profile.key, keys=keys)
+        if not getattr(frame, "region", None):
+            return
+        model = uimodel.parse(self._probe)
         if model is None:
             return
         client = winplatform.client_rect(win.hwnd)
         mapper = None if client is None else uimodel.mapper_for(model, client, frame.region, pixels.shape[1], pixels.shape[0])
         self.ui, self.mapper = (model, mapper) if mapper is not None and mapper.valid else (None, None)
 
-    def _scene(self):
+    def _scene(self, properties=None, attributes=None, keys=None):
         """(window, frame, pixels, words, layout) for the screen as it is now; only what changed since the last call is read. (None, ...) when the window is not visible."""
         win, grabbed = self._frame()
         if win is None:
@@ -134,7 +142,7 @@ class VisionService:
             self.ui = self.mapper = None
             return None, None, None, [], None
         frame, pixels = grabbed
-        self._read_ui(win, frame, pixels)
+        self._read_ui(win, frame, pixels, properties, attributes, keys)
         busy = []
         if self.mapper is not None:                          # the 3D viewport redraws while the learner orbits or drags: that is not text
             viewport = self.ui.region("VIEW_3D", "WINDOW")
@@ -147,7 +155,7 @@ class VisionService:
         """Forget what was read, so the next look reads the whole window."""
         self._reader.reset()
 
-    def ground(self, ui_element: str, mode_hint: str | None = None, prefer_toolbar: bool = False) -> Guidance:
+    def ground(self, ui_element: str, mode_hint: str | None = None) -> Guidance:
         win, frame, pixels, words, _ = self._scene()
         if win is None:
             return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
@@ -157,14 +165,29 @@ class VisionService:
         return ground_located(frame.geometry, win.rect, found)
 
     def observe(self, properties: list[str] | None = None, attributes: list[str] | None = None) -> dict[str, Any]:
-        """State for the evaluator. `properties` / `attributes` are the paths the active step needs read
-        by the Blender probe (ignored when the probe is not running)."""
+        """State for the evaluator. `properties` / `attributes` are the paths the active step needs read by the Blender probe (ignored when the probe is not running)."""
+        return self.look(properties, attributes)[0]
+
+    def look(self, properties: list[str] | None = None, attributes: list[str] | None = None, keys: list[str] | None = None):
+        """One look at the application: (observed, GroundContext). `observed` is the dict the evaluator reads (the add-on's state, with what the screen showed filling the gaps); the context is everything a grounder
+        needs for this very frame. The context is None when the window is not visible (observed may still hold what the add-on reports). One capture serves both."""
+        from vision.grounders import GroundContext
         from vision.observe import observe_blender
-        from vision.probe_client import merge_observed, read_probe
-        win, _, pixels, words, layout = self._scene()
-        probe = (read_probe(properties=properties, attributes=attributes, app=self.profile.key)
-                 if self.use_probe else None)
+        from vision.probe_client import merge_observed
+        win, frame, pixels, words, layout = self._scene(properties, attributes, keys)
+        probe = self._probe if self.use_probe else None                     # read once, in `_scene`, for this very frame
         if win is None or not self.profile.validated:      # hidden, or an app whose screen layout is not built yet
-            return merge_observed({}, probe)               # the probe can still answer
-        screen = observe_blender(words, pixels, layout, mode_hint=(probe or {}).get("mode"))
-        return merge_observed(screen, probe)
+            return merge_observed({}, probe), None
+        have = probe is not None and all(k in probe for k in ("mode", "workspace", "active_tool"))
+        screen = {} if have else observe_blender(words, pixels, layout, mode_hint=(probe or {}).get("mode"))      # the add-on knows exactly: the screen is only read for what it cannot say
+        observed = merge_observed(screen, probe)
+        last = self._reader.last
+        import time
+        now = time.monotonic()
+        rev = (observed.get("ui_rev"), (win.rect.x, win.rect.y, win.rect.w, win.rect.h))
+        if rev != self._ui_seen[0]:
+            self._ui_seen = (rev, now)                                       # the interface or the window just changed
+        settled = now - self._ui_seen[1] >= SETTLE_SECONDS
+        epoch = (observed.get("ui_rev"), observed.get("scene_rev"), (win.rect.x, win.rect.y, win.rect.w, win.rect.h), last.serial if last is not None else 0, settled)
+        ctx = GroundContext(self.ui, self.mapper, frame.geometry, pixels, words, layout, observed.get("mode"), last.box if last is not None and last.how == "area" else None, epoch, settled)
+        return observed, ctx

@@ -176,7 +176,17 @@ def test_houdini_entries_cite_the_official_docs_and_say_the_forum_advice_is_comm
     k = load()
     ids = {e.id: e for e in k.entries if "houdini" in e.apps}
     assert set(ids) == {"houdini.apex_autorig", "houdini.capture_weights", "houdini.skeleton_sop", "houdini.orient_joints", "houdini.skeleton_mirror",
-                        "houdini.ik_chains", "houdini.rig_doctor", "houdini.kinefx_workflow", "houdini.rig_pose", "houdini.rig_stash_pose"}
+                        "houdini.ik_chains", "houdini.rig_doctor", "houdini.kinefx_workflow", "houdini.rig_pose", "houdini.rig_stash_pose", "houdini.scene_units", "houdini.import_mesh",
+                        "houdini.set_keyframe", "houdini.frame_rate_range", "houdini.playbar",
+                        "houdini.save_hip", "houdini.python_hou", "houdini.transform_sop",
+                        "houdini.auto_key", "houdini.edit_keys", "houdini.dopesheet", "houdini.graph_view", "houdini.interpolation_slopes", "houdini.bake_keyframes",
+                        "houdini.parent_constraint", "houdini.lookat_constraint", "houdini.spare_parameters", "houdini.lock_parameter",
+                        "houdini.blend_shapes", "houdini.blend_shape_controls",
+                        "houdini.fbx_export_character", "houdini.fbx_export_animation",
+                        "houdini.normalize_capture_weights", "houdini.mirror_capture_weights", "houdini.delta_mush",
+                        "houdini.retarget_animation", "houdini.mocap_import", "houdini.mocap_rest_pose", "houdini.configure_rig_vis",
+                        "houdini.gltf_export", "houdini.rotation_order", "houdini.follow_path",
+                        "houdini.polyreduce", "houdini.vellum", "houdini.ragdoll", "houdini.alembic_export"}
     assert all(s.tier == "official" for e in ids.values() for s in e.facts)
     ts = ids["houdini.capture_weights"].troubleshooting
     assert {t["tier"] for t in ts} == {"community"} and all(k.sources[s]["url"].startswith("https://www.sidefx.com/forum") for t in ts for s in t["sources"])

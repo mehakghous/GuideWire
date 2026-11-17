@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import html
 
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtCore import QUrl
-from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QTextBrowser, QVBoxLayout, QWidget
+from PyQt6.QtCore import QSize, Qt, QUrl, pyqtSignal
+from PyQt6.QtGui import QDesktopServices, QIcon, QPixmap
+from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QTextBrowser, QWidget
 
+from .. import thumbnails
 from ..discovery import DiscoveryResult, Suggestion
 from ..pipeline import APPS
+from .bento import HeroTile, Tile, header, page_grid, tidy_list
 from .workers import run_call
 
 FROM_WORDS = "(from my words)"
@@ -28,6 +29,8 @@ class FindScreen(QWidget):
         self.sync = sync
         self.finder = None                          # set by the main window: (goal, app or None) -> DiscoveryResult. None = not available
         self.open_url = lambda url: QDesktopServices.openUrl(QUrl(url))
+        self.thumbnail_fetcher = thumbnails.fetch_all          # ([video id]) -> {video id: image bytes}; tests give a fake, so no network is used
+        self.pictures: dict[str, QPixmap] = {}                 # in memory only
         self.result: DiscoveryResult | None = None
         self.goal = QLineEdit()
         self.goal.setPlaceholderText("What do you want to learn? e.g. I am a beginner and want to rig a leg with IK in Maya")
@@ -40,6 +43,11 @@ class FindScreen(QWidget):
         self.message.setWordWrap(True)
         self.message.setObjectName("hint")
         self.results = QListWidget()
+        tidy_list(self.results)
+        self.results.setIconSize(QSize(128, 72))
+        self.thumb = QLabel("")                                  # the larger picture of the chosen video
+        self.thumb.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.thumb.setVisible(False)
         self.details = QTextBrowser()
         self.open_button = QPushButton("Open in browser")
         self.steps_button = QPushButton("Turn this video into steps")
@@ -52,28 +60,39 @@ class FindScreen(QWidget):
         self.open_button.clicked.connect(lambda: (s := self.selected()) and self.open_url(s.url))
         self.steps_button.clicked.connect(lambda: (s := self.selected()) and self.make_steps.emit(s.url, self.result.app or ""))
         self.back_button.clicked.connect(self.back.emit)
-        top = QHBoxLayout()
-        top.addWidget(self.goal, 1)
-        top.addWidget(QLabel("Application"))
-        top.addWidget(self.app)
-        top.addWidget(self.search_button)
-        bottom = QHBoxLayout()
-        bottom.addWidget(self.open_button)
-        bottom.addWidget(self.steps_button)
-        bottom.addStretch()
-        bottom.addWidget(self.back_button)
-        root = QVBoxLayout(self)
-        root.addWidget(QLabel("<h2>Find a tutorial</h2>"))
-        root.addLayout(top)
-        root.addWidget(self.message)
-        root.addWidget(self.results)
-        root.addWidget(self.details, 1)
-        root.addLayout(bottom)
+        grid = page_grid(self)
+        grid.addWidget(header("Find a tutorial", "Say what you want to learn and get up to three suggested videos.", back=self.back_button, kicker="Discover"), 0, 0, 1, 2)
+        search = HeroTile("What do you want to learn?")
+        search.body.addWidget(self.goal)
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Application"))
+        row.addWidget(self.app)
+        row.addStretch()
+        row.addWidget(self.search_button)
+        search.body.addLayout(row)
+        search.body.addWidget(self.message)
+        found = Tile("Suggestions")
+        found.body.addWidget(self.results, 1)
+        about = Tile("About this video")
+        about.body.addWidget(self.thumb)
+        about.body.addWidget(self.details, 1)
+        buttons = QHBoxLayout()
+        buttons.addWidget(self.open_button)
+        buttons.addWidget(self.steps_button)
+        about.body.addLayout(buttons)
+        grid.addWidget(search, 1, 0, 1, 2)
+        grid.addWidget(found, 2, 0)
+        grid.addWidget(about, 2, 1)
+        grid.setRowStretch(2, 1)
+        grid.setColumnStretch(0, 2)
+        grid.setColumnStretch(1, 3)
         self.reset()
 
     def reset(self) -> None:
         self.result = None
         self.results.clear()
+        self.pictures = {}
+        self.thumb.setVisible(False)
         self.details.setHtml("")
         self.open_button.setEnabled(False)
         self.steps_button.setEnabled(False)
@@ -112,12 +131,36 @@ class FindScreen(QWidget):
         self.message.setText((result.message + " " if result.message else "") + (f"{src}: {len(result.suggestions)} suggestion(s). Pick one to see why." if result.suggestions else ""))
         if result.suggestions:
             self.results.setCurrentRow(0)
+            ids = [s.video_id for s in result.suggestions if s.video_id]
+            if ids:
+                run_call(self, lambda _status: self.thumbnail_fetcher(ids), self._on_thumbnails, sync=self.sync)
+
+    def _on_thumbnails(self, found) -> None:
+        """The pictures arrived (or none did: then the list simply stays text). Each one goes beside its suggestion."""
+        if isinstance(found, Exception) or not found or self.result is None:
+            return
+        for i, s in enumerate(self.result.suggestions):
+            data = found.get(s.video_id)
+            if not data:
+                continue
+            pix = QPixmap()
+            if pix.loadFromData(data):
+                self.pictures[s.video_id] = pix
+                item = self.results.item(i)
+                if item is not None:
+                    item.setIcon(QIcon(pix))
+        self._show(self.results.currentRow())
 
     def _show(self, _row: int) -> None:
         s = self.selected()
         self.open_button.setEnabled(s is not None)
         self.steps_button.setEnabled(s is not None)
         if s is None or self.result is None:
+            self.thumb.setVisible(False)
             return
+        pix = self.pictures.get(s.video_id)
+        self.thumb.setVisible(pix is not None)
+        if pix is not None:
+            self.thumb.setPixmap(pix.scaledToWidth(320, Qt.TransformationMode.SmoothTransformation))
         notes = "".join(f"<li>{html.escape(n)}</li>" for n in self.result.notes)
         self.details.setHtml(f"<h3>{html.escape(s.title)}</h3><p>{html.escape(s.summary)}<br><a href='{html.escape(s.url)}'>{html.escape(s.url)}</a></p><p>{html.escape(s.note)}</p><ul>{notes}</ul>")

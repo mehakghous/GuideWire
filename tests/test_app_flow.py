@@ -57,18 +57,28 @@ def test_add_demo_tutorials_gives_any_account_nine_tutorials_once(win):
     assert demo_content.add_demo_tutorials(win.db, other.id) == 9 and len(win.db.list_tutorials(other.id)) == 9
 
 
+def ask(win, text):
+    """Type into the chat's message box and send it, as a person does."""
+    win.ask_screen.composer.setPlainText(text)
+    win.ask_screen.submit()
+
+
+def latest_card(win):
+    return win.ask_screen._cards[-1][0]
+
+
 def test_the_whole_journey_ask_where_to_start_save_review_and_run_a_session(win):
     register(win)
     win.home.ask_button.click()
     assert win.current_screen() is win.ask_screen
     win.ask_screen.app.setCurrentText("maya")
-    win.ask_screen.input.setText("where do i start rigging in maya")
-    win.ask_screen.submit()
+    ask(win, "where do i start rigging in maya")
     assert win.ask_screen.last_steps is not None and len(win.ask_screen.last_steps.steps) == 21
-    assert not win.ask_screen.save_button.isHidden() and "Save these 21 steps" in win.ask_screen.save_button.text()
-    assert "/load" not in win.ask_screen.transcript.toPlainText()                                         # no terminal-only hint in the app
-    win.ask_screen.save_button.click()
-    assert win.ask_screen.save_button.isHidden() and "Saved as" in win.ask_screen.transcript.toPlainText()
+    card = latest_card(win)
+    assert not card.save_button.isHidden() and "21 steps" in card.findChildren(type(card.saved_label))[0].text()
+    assert "/load" not in win.ask_screen.transcript_text()                                                # no terminal-only hint in the app
+    card.save_button.click()
+    assert card.save_button.isHidden() and "Saved as" in card.saved_label.text() and not card.open_button.isHidden()
     win.ask_screen.back_button.click()
     assert win.home.tutorials.count() == 1 and "Starter plan" in win.home.tutorials.item(0).text()
     win.home.review_button.click()
@@ -88,9 +98,8 @@ def test_saving_the_same_answer_twice_does_not_overwrite_the_first(win):
     win.home.ask_button.click()
     for _ in range(2):
         win.ask_screen.app.setCurrentText("blender")
-        win.ask_screen.input.setText("what should i do before rigging")
-        win.ask_screen.submit()
-        win.ask_screen.save_button.click()
+        ask(win, "what should i do before rigging")
+        latest_card(win).save_button.click()
     titles = [r["title"] for r in win.db.list_tutorials(win.user.id)]
     assert len(titles) == 2 and len(set(titles)) == 2 and any(t.endswith("(2)") for t in titles)
 
@@ -102,20 +111,18 @@ def test_a_question_about_a_chosen_tutorial_is_answered_from_its_steps_and_offer
     win.home.ask_button.click()
     win.ask_screen.set_tutorials([(r["id"], r["title"]) for r in win.db.list_tutorials(win.user.id)], select=tid)
     win.ask_screen.app.setCurrentText("blender")
-    win.ask_screen.input.setText("what is he doing at 1:30")
-    win.ask_screen.submit()
-    page = win.ask_screen.transcript.toPlainText()
-    assert "s08" in page and "Object Mode" in page and win.ask_screen.save_button.isHidden()
+    ask(win, "what is he doing at 1:30")
+    page = win.ask_screen.transcript_text()
+    assert "s08" in page and "Object Mode" in page and not win.ask_screen._cards
 
 
 def test_a_plain_how_to_question_without_the_ai_model_still_gets_steps_from_the_knowledge_base(win):
     register(win)
     win.home.ask_button.click()
     win.ask_screen.app.setCurrentText("maya")
-    assert not win.ask_screen.use_model.isEnabled()                                                       # no AI model on this window: the checkbox says so
-    win.ask_screen.input.setText("how do i bind my mesh in maya")
-    win.ask_screen.submit()
-    assert "Smooth Bind" in win.ask_screen.transcript.toPlainText() and win.ask_screen.last_steps is not None
+    assert not win.ask_screen.use_model.isEnabled()                                                       # no AI model on this window: the toggle says so
+    ask(win, "how do i bind my mesh in maya")
+    assert "Smooth Bind" in win.ask_screen.transcript_text() and win.ask_screen.last_steps is not None
 
 
 def test_ask_about_this_tutorial_from_a_session_opens_the_ask_screen_on_that_tutorial(win):

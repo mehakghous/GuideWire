@@ -111,10 +111,10 @@ def check_app_starts(r: Report, db_path: Path | None = None) -> None:
         w.show_home()
         w.home.ask_button.click()
         w.ask_screen.app.setCurrentText("maya")
-        w.ask_screen.input.setText("where do i start rigging in maya")
+        w.ask_screen.composer.setPlainText("where do i start rigging in maya")
         w.ask_screen.submit()
         assert w.ask_screen.last_steps is not None, "asking where to start should give steps"
-        w.ask_screen.save_button.click()
+        w.ask_screen._cards[-1][0].save_button.click()
         w.show_home()
         tid = w.home.selected_tutorial()
         w.open_review(tid)

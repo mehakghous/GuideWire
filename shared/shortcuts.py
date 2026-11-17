@@ -60,6 +60,11 @@ def _catalog() -> dict[str, Any]:
         return {}
 
 
+def catalog() -> dict[str, Any]:
+    """The dumped Blender interface catalog (empty when the file is missing)."""
+    return _catalog()
+
+
 def catalog_version() -> str | None:
     return _catalog().get("version")
 
@@ -140,6 +145,16 @@ def operator_for_keys(keys: list[str] | tuple[str, ...] | str, mode: str | None 
         if _valid_in(row["keymap"], mode) and _row_keys(row) == want and row["op"] not in found and row["value"] in ("PRESS", "ANY", "CLICK"):
             found.append(row["op"])
     return found
+
+
+def tool_operator(tool_id: str) -> str | None:
+    """The operator a toolbar tool runs (Loop Cut -> mesh.loopcut_slide), from the catalog, or None."""
+    for rows in _catalog().get("tools", {}).values():
+        for row in rows:
+            for t in row.get("group", []):
+                if t["id"] == tool_id and t.get("operator"):
+                    return t["operator"]
+    return None
 
 
 def tool_shortcut(tool_id: str, mode: str | None = None) -> Shortcut | None:

@@ -137,6 +137,11 @@ class FrameMapper:
         kx, ky = self.image_w / self.frame.w, self.image_h / self.frame.h
         return Rect(round((s.x - self.frame.x) * kx), round((s.y - self.frame.y) * ky), round(s.w * kx), round(s.h * ky))
 
+    def frame_to_screen(self, r: Rect) -> Rect:
+        """A rectangle in captured-image pixels -> screen pixels (where a highlight is drawn)."""
+        kx, ky = self.frame.w / self.image_w, self.frame.h / self.image_h
+        return Rect(round(self.frame.x + r.x * kx), round(self.frame.y + r.y * ky), round(r.w * kx), round(r.h * ky))
+
     def from_frame(self, r: Rect) -> Rect:
         """A rectangle in captured-image pixels -> Blender window pixels (to ask which region a detected thing is in)."""
         kx, ky = self.frame.w / self.image_w, self.frame.h / self.image_h

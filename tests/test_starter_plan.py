@@ -57,8 +57,8 @@ def test_menu_paths_lose_their_bracketed_notes_for_the_overlay():
 
 
 def test_modes_before_and_after_the_skeleton():
-    assert [g for _, g, _ in starter_plan("blender", "before").groups] == ["Apply the object's transforms (Object > Apply)"]
-    assert starter_plan("houdini", "before") is None                                                    # the knowledge base has nothing for it: no invented answer
+    assert [g for _, g, _ in starter_plan("blender", "before").groups] == ["Set the scene units (Scene > Units)", "Bring the character mesh in (File > Import)", "Apply the object's transforms (Object > Apply)"]
+    assert [g for _, g, _ in starter_plan("houdini", "before").groups] == ["Check the scene units (Preferences > Unit Length)", "Bring the character mesh in (FBX or File SOP)"]   # units and import only: the knowledge base has no clean-up stage for Houdini, and none is invented
     after = [g.lower() for _, g, _ in starter_plan("maya", "after_skeleton").groups]
     assert after[0].startswith("name the joints") and any("bind" in g for g in after) and not any("freeze" in g or "create a joint" in g for g in after)       # naming comes next; neither the clean-up nor the joints are repeated
     blender = [g.lower() for _, g, _ in starter_plan("blender", "after_skeleton").groups]

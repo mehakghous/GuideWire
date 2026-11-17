@@ -1,139 +1,151 @@
-"""What the learner is told for each kind of step (app/guidance.py), checked on the 18-step Blender armature tutorial, and how the bridge uses it with a fake service."""
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 
-from app import vision_bridge as vb
-from app.guidance import describe, keys_of, plan_for
+from app.db import Database
+from app.guidance import UNAVAILABLE, GuidanceController, Snapshot, ui_target
+from app.session_engine import SessionEngine
+from app.step_editor import StepEditor
 from shared.grounding import GroundingResult, Rect
+from shared.step_record import Action, Step
+from vision.service import Guidance
 
-DEMO = Path("demo/data/blender_armature_EBgHRd5tJfE.json")
-
-
-def steps():
-    from shared.step_record import StepList
-    return {s.id: s for s in StepList.model_validate_json(DEMO.read_text(encoding="utf-8")).steps}
+SAMPLE = "shared/examples/blender_cube_extrude.json"      # s01 mode+selection, s02 EDIT_MESH, s03 extrude tool (Extrude Region), s04 craft
+OBJECT_WITH_MESH = {"mode": "OBJECT", "selection_types": ["MESH"]}
 
 
-@pytest.fixture(scope="module")
-def S():
-    return steps()
+class FakeVision:
+    def __init__(self, observed=None, guidance=None, boom=None):
+        self.observed, self.guidance, self.boom = observed or {}, guidance, boom
+        self.asked: list[str] = []
+
+    def observe(self):
+        if self.boom:
+            raise self.boom
+        return self.observed
+
+    def ground(self, ui_element):
+        self.asked.append(ui_element)
+        return self.guidance
 
 
-def test_a_step_that_says_to_press_keys_gets_the_keys_in_order_and_a_place_to_point_at(S):
-    p = plan_for(S["s01"])
-    assert p.keys == ("A", "Delete") and p.region == "viewport" and not p.targets
-    assert describe(p, None, step=S["s01"]) == "Press A then Delete with the mouse over the 3D viewport"
-    assert plan_for(S["s04"]).keys == ("S",)
+def ok(rect=Rect(100, 200, 80, 20), complete=True, ambiguous=False, matched="Extrude Region"):
+    return Guidance(GroundingResult("ok", 140, 210), rect, complete, ambiguous, matched)
 
 
-def test_the_mode_selector_is_a_mode_target_and_the_start_mode_is_kept_for_the_toolbar(S):
-    p = plan_for(S["s03"])
-    assert p.targets[0].kind == "mode" and p.mode_hint == "OBJECT"
-    assert plan_for(S["s05"]).mode_hint == "EDIT_MESH"
+@pytest.fixture
+def engine():
+    db = Database(":memory:")
+    uid = db.add_user("a@x.com", b"h")
+    tid = StepEditor.from_json_file(SAMPLE).save(db, uid)
+    e = SessionEngine.create(db, uid, tid)
+    e.start()
+    yield e
+    db.close()
 
 
-def test_toolbar_tools_are_tool_targets_and_say_where_the_tool_is_and_its_key_when_it_cannot_be_seen(S):
-    p = plan_for(S["s06"])
-    assert p.targets[0].kind == "tool" and p.region == "toolbar"
-    text = describe(p, None, step=S["s06"])
-    assert "Loop Cut" in text and "Ctrl+R" in text and "scroll" in text
-    s05 = plan_for(S["s05"])
-    assert "Z Scale Handle" in describe(s05, s05.targets[0], matched="Scale", complete=True, step=S["s05"])
+def test_ui_target_is_the_first_named_element():
+    s = Step(id="s1", order=1, goal="g", actions=[Action(verb="press_keys", keys=["Tab"]), Action(verb="click", ui_element="  Extrude Region ")])
+    assert ui_target(s) == "Extrude Region"
+    assert ui_target(Step(id="s2", order=2, goal="g", actions=[Action(verb="press_keys", keys=["Tab"])])) is None
+    assert ui_target(Step(id="s3", order=3, goal="g")) is None
 
 
-def test_a_panel_that_only_exists_after_an_action_points_at_the_bottom_left_of_the_viewport(S):
-    p = plan_for(S["s07"])
-    assert p.anchor == "bottom-left" and "bottom-left" in describe(p, None, step=S["s07"])
+def test_the_engine_knows_its_application(engine):
+    assert engine.app == "blender"
 
 
-def test_the_properties_step_says_which_tab_to_open(S):
-    p = plan_for(S["s10"])
-    assert p.region == "properties" and p.anchor == "tabs"
-    assert "Object Data" in describe(p, None, step=S["s10"]) and "In Front" in describe(p, None, step=S["s10"])
+def test_available_only_for_blender_with_a_vision_service(engine):
+    assert GuidanceController(engine, FakeVision()).available
+    assert not GuidanceController(engine, None).available
 
 
-def test_blender_5_adds_a_single_bone_directly_so_add_armature_says_so(S):
-    p = plan_for(S["s09"])
-    text = describe(p, p.targets[0], matched="Armature", complete=True, step=S["s09"])
-    assert "single bone" in text.lower()
+def test_current_is_none_unless_a_step_is_active(engine):
+    c = GuidanceController(engine, FakeVision())
+    assert c.current() == ("s01", "Add > Mesh > Cube")
+    for _ in range(4):
+        engine.complete()
+    assert c.current() is None
 
 
-def test_a_key_press_followed_by_a_menu_item_says_both(S):
-    assert describe(plan_for(S["s16"]), None, step=S["s16"]).endswith("then choose Set Parent To > With Automatic Weights")
+def test_screen_state_that_matches_completes_the_step(engine):
+    c = GuidanceController(engine, FakeVision(OBJECT_WITH_MESH))
+    out = c.apply(c.compute("s01", "Add > Mesh > Cube"))
+    assert out.advanced and engine.position == 2 and "saw it on screen" in out.hint
+    assert engine.db.session_steps(engine.session_id)[0]["status_by"] == "observed"
 
 
-def test_things_in_the_3d_viewport_are_scene_items_not_text_to_find(S):
-    p = plan_for(S["s12"])
-    assert p.scene_items and not p.targets and p.region == "viewport"
+def test_state_that_does_not_match_points_at_the_target_instead(engine):
+    v = FakeVision({"mode": "EDIT_MESH"}, ok(matched="Add", complete=False))
+    c = GuidanceController(engine, v)
+    out = c.apply(c.compute("s01", "Add > Mesh > Cube"))
+    assert not out.advanced and engine.position == 1
+    assert v.asked == ["Add > Mesh > Cube"] and len(out.marks) == 1 and out.marks[0].rect.contains(140, 210)
+    assert "Open Add" in out.hint
 
 
-def test_keys_are_only_read_from_press_phrases():
-    class H:
-        def __init__(self, text):
-            self.text = text
-
-    class St:
-        how_to = [H("Press Ctrl+P to parent"), H("Then press Delete and press Tab"), H("Click Add")]
-    assert keys_of(St()) == ("Ctrl+P", "Delete", "Tab")
+def test_final_item_says_click_it_and_ambiguity_is_said(engine):
+    c = GuidanceController(engine, FakeVision({}, ok(matched="Cube")))
+    assert c.apply(c.compute("s01", "Add > Mesh > Cube")).hint == "Click Cube."
+    c = GuidanceController(engine, FakeVision({}, ok(ambiguous=True, matched="Cube")))
+    assert "Several places match" in c.apply(c.compute("s01", "Add > Mesh > Cube")).hint
 
 
-# ---- the bridge with a fake service
-@dataclass
-class G:
-    grounding: GroundingResult
-    rect: Rect | None = None
-    complete: bool = False
-    ambiguous: bool = False
-    matched: str = ""
+def test_nothing_found_draws_nothing_and_says_so(engine):
+    c = GuidanceController(engine, FakeVision({}, Guidance(GroundingResult("none", reason="model reported no element"))))
+    out = c.apply(c.compute("s01", "Add > Mesh > Cube"))
+    assert out.marks == [] and "Could not find" in out.hint
+    c = GuidanceController(engine, FakeVision({}, Guidance(GroundingResult("none", reason="no visible window titled 'Blender'"))))
+    assert "bring it to the front" in c.apply(c.compute("s01", "Add > Mesh > Cube")).hint
 
 
-class Svc:
-    def __init__(self, texts=(), region=Rect(500, 300, 80, 80)):
-        self.texts, self.region = set(texts), region
-        self.asked = []
-
-    takes_hints = True
-
-    def ground(self, name, mode_hint=None, prefer_toolbar=False):
-        self.asked.append((name, prefer_toolbar, mode_hint))
-        if name in self.texts:
-            return G(GroundingResult("ok", 10, 10), Rect(5, 5, 40, 12), True, matched=name.split(">")[-1].strip())
-        return G(GroundingResult("none", reason="not on screen"))
-
-    def region_rect(self, name, anchor="center"):
-        return self.region
-
-    def observe(self, properties=None, attributes=None):
-        return {}
+def test_a_step_with_no_target_only_observes(engine):
+    v = FakeVision({"mode": "OBJECT"}, ok())
+    c = GuidanceController(engine, v)
+    out = c.apply(c.compute("s01", None))
+    assert v.asked == [] and out.marks == [] and not out.advanced
 
 
-def test_nothing_to_find_points_at_the_region_with_a_pulsing_pointer_and_the_keys(S):
-    look = vb.VisionBridge(lambda app: Svc(), window_finder=lambda a: (0, 0, 1000, 700)).look(S["s01"], "blender")
-    assert look.pointer and look.rect == (500, 300, 80, 80) and look.keys == ("A", "Delete") and look.hint.startswith("Press A then Delete")
+def test_a_stale_snapshot_is_ignored(engine):
+    c = GuidanceController(engine, FakeVision(OBJECT_WITH_MESH))
+    snap = c.compute("s01", "Add > Mesh > Cube")
+    engine.complete()                                          # the learner moved on while vision was reading
+    out = c.apply(snap)
+    assert not out.advanced and out.marks == [] and engine.position == 2
 
 
-def test_the_mode_dropdown_is_found_by_the_mode_it_shows_and_the_item_once_it_is_open(S):
-    bridge = vb.VisionBridge(lambda app: Svc(["Object Mode"]), window_finder=lambda a: (0, 0, 1000, 700))
-    look = bridge.look(S["s03"], "blender")
-    assert look.rect == (5, 5, 40, 12) and not look.complete and "mode dropdown" in look.hint
-    opened = vb.VisionBridge(lambda app: Svc(["Edit Mode"]), window_finder=lambda a: (0, 0, 1000, 700)).look(S["s03"], "blender")
-    assert opened.complete and opened.hint == "Click Edit Mode"
+def test_a_snapshot_never_completes_a_step_it_was_not_computed_for(engine):
+    c = GuidanceController(engine, FakeVision({"mode": "EDIT_MESH"}))
+    engine.complete()
+    out = c.apply(Snapshot("s01", {"mode": "EDIT_MESH"}))      # s01 snapshot while s02 is active
+    assert engine.position == 2 and not out.advanced
 
 
-def test_a_tool_is_looked_up_in_the_toolbar_of_the_steps_own_mode(S):
-    svc = Svc()
-    vb.VisionBridge(lambda app: svc, window_finder=lambda a: (0, 0, 1000, 700)).look(S["s05"], "blender")
-    assert ("Toolbar > Scale", True, "EDIT_MESH") in svc.asked
+def test_a_vision_failure_never_breaks_the_session(engine):
+    c = GuidanceController(engine, FakeVision(boom=RuntimeError("no OCR")))
+    out = c.apply(c.compute("s01", "Add > Mesh > Cube"))
+    assert "no OCR" in out.hint and not out.stop and engine.position == 1
 
 
-def test_the_mouse_and_keyboard_events_of_a_step_come_from_its_actions_in_order(S):
-    from app.guidance import inputs_for
-    assert inputs_for(S["s01"]) == (("keys", "A"), ("keys", "Delete"))
-    assert inputs_for(S["s02"]) == (("click", "left"), ("click", "hover"), ("click", "left"))      # Add, hover Mesh (the submenu opens), Cylinder
-    assert inputs_for(S["s05"]) == (("click", "left"), ("drag", "left"))
-    assert inputs_for(S["s07"])[-1] == ("type", "10")
-    assert inputs_for(S["s14"])[:2] == (("click", "right"), ("click", "left"))                    # the context menu is a right click
-    assert ("keys", "Ctrl+P") in inputs_for(S["s16"])
-    assert plan_for(S["s16"]).keys == ("Ctrl+P",)
+def test_a_missing_component_stops_further_attempts(engine):
+    for boom in (ImportError("winrt"), NotImplementedError("needs Windows")):
+        out = GuidanceController(engine, FakeVision(boom=boom)).apply(GuidanceController(engine, FakeVision(boom=boom)).compute("s01", "x"))
+        assert out.stop
+    assert UNAVAILABLE.split("{")[0] in out.hint
+
+
+def test_craft_steps_are_never_completed_by_the_screen(engine):
+    for _ in range(3):
+        engine.complete()
+    c = GuidanceController(engine, FakeVision(OBJECT_WITH_MESH))
+    assert engine.current_step().id == "s04"
+    assert not c.apply(c.compute("s04", None)).advanced and engine.position == 4
+
+
+def test_other_applications_get_no_guidance(engine):
+    engine.app = "maya"
+    assert not GuidanceController(engine, FakeVision()).available
+
+
+def test_sample_file_exists():
+    assert Path(SAMPLE).exists()

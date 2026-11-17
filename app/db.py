@@ -192,6 +192,11 @@ class Database:
         row = self.conn.execute("SELECT app FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
         return None if row is None else row["app"]
 
+    def tutorial_source(self, tutorial_id: int) -> str | None:
+        """The link a tutorial was made from (a YouTube address), or None for written, catalogue and sample tutorials."""
+        row = self.conn.execute("SELECT source_url FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
+        return None if row is None else row["source_url"]
+
     def get_session(self, session_id: int) -> sqlite3.Row | None:
         return self.conn.execute("SELECT * FROM session WHERE id = ?", (session_id,)).fetchone()
 

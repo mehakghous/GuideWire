@@ -1,4 +1,3 @@
-PyQt6
 opencv-python
 mss
 pydantic>=2.6
@@ -18,3 +17,8 @@ winrt-Windows.Storage.Streams
 winrt-Windows.Globalization
 winrt-Windows.Foundation
 winrt-Windows.Foundation.Collections
+# the embedded video player: Qt and WebEngine MUST be the same version (a mismatched pair crashes the app when the player is shown)
+PyQt6==6.11.0
+PyQt6-Qt6==6.11.2
+PyQt6-WebEngine==6.11.0
+PyQt6-WebEngine-Qt6==6.11.2

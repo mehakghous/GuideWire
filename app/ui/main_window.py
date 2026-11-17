@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.login = LoginScreen(self.accounts)
         self.home = HomeScreen()
         self.review = StepReviewScreen()
-        self.session = SessionScreen()
+        self.session = SessionScreen(web=not sync)             # the embedded video player is not started in tests
         if vision_bridge is None and vision is not None:
             from ..vision_bridge import VisionBridge
             vision_bridge = VisionBridge(lambda app: vision)
@@ -56,6 +56,8 @@ class MainWindow(QMainWindow):
         self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover), sync=sync)
         self.find_screen = FindScreen(sync=sync)
         self.find_screen.finder = discover
+        if sync:
+            self.find_screen.thumbnail_fetcher = lambda ids: {}                # tests never reach the network
         self.ask_screen.load_tutorial = self._tutorial_for_ask
         if video_provider_factory is not None:
             from ..pipeline import video_steps
@@ -105,6 +107,7 @@ class MainWindow(QMainWindow):
         self.find_screen.make_steps.connect(self.steps_from_video)
         self.home.add_demo.connect(self.add_demo_tutorials)
         self.ask_screen.back.connect(self.show_home)
+        self.session.ask_question.connect(self._ask_from_session)
         self.ask_screen.save_steps.connect(self.save_asked_steps)
         self.ask_screen.save_and_start.connect(lambda steps, title: self.save_asked_steps(steps, title, start=True))
         self.ask_screen.start_session.connect(self.open_session)
@@ -146,7 +149,7 @@ class MainWindow(QMainWindow):
     def _fade_in(self, _index: int = 0) -> None:
         """Each screen eases in. The effect is removed when it ends, so it never costs anything while the screen is in use."""
         screen = self.stack.currentWidget()
-        if screen is None or not screen.isVisibleTo(self):
+        if screen is None or not screen.isVisibleTo(self) or screen is self.session:           # the session screen holds the web view, which a graphics effect would crash
             return
         fx = QGraphicsOpacityEffect(screen)
         screen.setGraphicsEffect(fx)
@@ -314,6 +317,11 @@ class MainWindow(QMainWindow):
         self.review.load(StepEditor.from_json_file(path), self.db, self.user.id)
         self.stack.setCurrentWidget(self.review)
 
+    def _ask_from_session(self, tutorial_id: int, question: str) -> None:
+        """A question typed in the session screen: open Ask GuideWire about that tutorial and send it."""
+        self.open_ask(tutorial_id)
+        self.ask_screen.send(question)
+
     def open_session(self, tutorial_id: int) -> None:
         if self.user is None:
             self.stack.setCurrentWidget(self.login)
@@ -339,6 +347,10 @@ def main() -> int:
     from ..ask import default_model_factory
     from ..discovery import default_fit_provider, find_tutorials
     from ..pipeline import default_video_provider
+    try:
+        from PyQt6 import QtWebEngineWidgets  # noqa: F401  (Qt wants WebEngine imported before the application exists; without it the video shows a note and a browser button)
+    except Exception:
+        pass
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
     window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision_bridge=_make_bridge())

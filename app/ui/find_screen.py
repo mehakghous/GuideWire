@@ -7,11 +7,11 @@ from __future__ import annotations
 
 import html
 
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtCore import QUrl
+from PyQt6.QtCore import QSize, Qt, QUrl, pyqtSignal
+from PyQt6.QtGui import QDesktopServices, QIcon, QPixmap
 from PyQt6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QTextBrowser, QWidget
 
+from .. import thumbnails
 from ..discovery import DiscoveryResult, Suggestion
 from ..pipeline import APPS
 from .bento import HeroTile, Tile, header, page_grid, tidy_list
@@ -29,6 +29,8 @@ class FindScreen(QWidget):
         self.sync = sync
         self.finder = None                          # set by the main window: (goal, app or None) -> DiscoveryResult. None = not available
         self.open_url = lambda url: QDesktopServices.openUrl(QUrl(url))
+        self.thumbnail_fetcher = thumbnails.fetch_all          # ([video id]) -> {video id: image bytes}; tests give a fake, so no network is used
+        self.pictures: dict[str, QPixmap] = {}                 # in memory only
         self.result: DiscoveryResult | None = None
         self.goal = QLineEdit()
         self.goal.setPlaceholderText("What do you want to learn? e.g. I am a beginner and want to rig a leg with IK in Maya")
@@ -42,6 +44,10 @@ class FindScreen(QWidget):
         self.message.setObjectName("hint")
         self.results = QListWidget()
         tidy_list(self.results)
+        self.results.setIconSize(QSize(128, 72))
+        self.thumb = QLabel("")                                  # the larger picture of the chosen video
+        self.thumb.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.thumb.setVisible(False)
         self.details = QTextBrowser()
         self.open_button = QPushButton("Open in browser")
         self.steps_button = QPushButton("Turn this video into steps")
@@ -68,6 +74,7 @@ class FindScreen(QWidget):
         found = Tile("Suggestions")
         found.body.addWidget(self.results, 1)
         about = Tile("About this video")
+        about.body.addWidget(self.thumb)
         about.body.addWidget(self.details, 1)
         buttons = QHBoxLayout()
         buttons.addWidget(self.open_button)
@@ -84,6 +91,8 @@ class FindScreen(QWidget):
     def reset(self) -> None:
         self.result = None
         self.results.clear()
+        self.pictures = {}
+        self.thumb.setVisible(False)
         self.details.setHtml("")
         self.open_button.setEnabled(False)
         self.steps_button.setEnabled(False)
@@ -122,12 +131,36 @@ class FindScreen(QWidget):
         self.message.setText((result.message + " " if result.message else "") + (f"{src}: {len(result.suggestions)} suggestion(s). Pick one to see why." if result.suggestions else ""))
         if result.suggestions:
             self.results.setCurrentRow(0)
+            ids = [s.video_id for s in result.suggestions if s.video_id]
+            if ids:
+                run_call(self, lambda _status: self.thumbnail_fetcher(ids), self._on_thumbnails, sync=self.sync)
+
+    def _on_thumbnails(self, found) -> None:
+        """The pictures arrived (or none did: then the list simply stays text). Each one goes beside its suggestion."""
+        if isinstance(found, Exception) or not found or self.result is None:
+            return
+        for i, s in enumerate(self.result.suggestions):
+            data = found.get(s.video_id)
+            if not data:
+                continue
+            pix = QPixmap()
+            if pix.loadFromData(data):
+                self.pictures[s.video_id] = pix
+                item = self.results.item(i)
+                if item is not None:
+                    item.setIcon(QIcon(pix))
+        self._show(self.results.currentRow())
 
     def _show(self, _row: int) -> None:
         s = self.selected()
         self.open_button.setEnabled(s is not None)
         self.steps_button.setEnabled(s is not None)
         if s is None or self.result is None:
+            self.thumb.setVisible(False)
             return
+        pix = self.pictures.get(s.video_id)
+        self.thumb.setVisible(pix is not None)
+        if pix is not None:
+            self.thumb.setPixmap(pix.scaledToWidth(320, Qt.TransformationMode.SmoothTransformation))
         notes = "".join(f"<li>{html.escape(n)}</li>" for n in self.result.notes)
         self.details.setHtml(f"<h3>{html.escape(s.title)}</h3><p>{html.escape(s.summary)}<br><a href='{html.escape(s.url)}'>{html.escape(s.url)}</a></p><p>{html.escape(s.note)}</p><ul>{notes}</ul>")

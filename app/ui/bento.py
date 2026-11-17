@@ -77,7 +77,8 @@ def raise_on_hover(widget: QWidget, blur: int = 30, dy: int = 9) -> None:
 class Tile(QFrame):
     """A rounded box. `body` is the vertical layout to put content in. `variant` is one of: "", soft, mint, amber, slate, accent, hero (a calm tinted fill with an accent outline)."""
 
-    def __init__(self, title: str | None = None, hint: str | None = None, variant: str = "", padding: int = 18):
+    def __init__(self, title: str | None = None, hint: str | None = None, variant: str = "", padding: int = 18, shadow: bool = True):
+        """`shadow=False` for a tile that holds a web view: Qt WebEngine cannot be drawn through a graphics effect (it crashes the application)."""
         super().__init__()
         self.setObjectName("tile")
         self.setProperty("variant", variant)
@@ -85,7 +86,8 @@ class Tile(QFrame):
         self.body.setContentsMargins(padding, padding, padding, padding)
         self.body.setSpacing(10)
         self.title_label: QLabel | None = None
-        soft_shadow(self, 28, 8)
+        if shadow:
+            soft_shadow(self, 28, 8)
         if title:
             self.title_label = QLabel(title)
             self.title_label.setObjectName("tileTitle")

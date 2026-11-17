@@ -8,9 +8,11 @@ A `Tile` is a rounded box with an optional heading; `ActionTile` is a whole tile
 """
 from __future__ import annotations
 
+import weakref
+
 from PyQt6.QtCore import QEasingCurve, QEvent, QObject, QPointF, QPropertyAnimation, QRectF, Qt, QVariantAnimation
 from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen, QRadialGradient
-from PyQt6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QGridLayout, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QFrame, QGraphicsDropShadowEffect, QGridLayout, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
 from .style import current_palette
 
@@ -75,7 +77,8 @@ def raise_on_hover(widget: QWidget, blur: int = 30, dy: int = 9) -> None:
 class Tile(QFrame):
     """A rounded box. `body` is the vertical layout to put content in. `variant` is one of: "", soft, mint, amber, slate, accent, hero (a calm tinted fill with an accent outline)."""
 
-    def __init__(self, title: str | None = None, hint: str | None = None, variant: str = "", padding: int = 18):
+    def __init__(self, title: str | None = None, hint: str | None = None, variant: str = "", padding: int = 18, shadow: bool = True):
+        """`shadow=False` for a tile that holds a web view: Qt WebEngine cannot be drawn through a graphics effect (it crashes the application)."""
         super().__init__()
         self.setObjectName("tile")
         self.setProperty("variant", variant)
@@ -83,7 +86,8 @@ class Tile(QFrame):
         self.body.setContentsMargins(padding, padding, padding, padding)
         self.body.setSpacing(10)
         self.title_label: QLabel | None = None
-        soft_shadow(self, 28, 8)
+        if shadow:
+            soft_shadow(self, 28, 8)
         if title:
             self.title_label = QLabel(title)
             self.title_label.setObjectName("tileTitle")
@@ -129,6 +133,32 @@ class ActionTile(QPushButton):
         self.hint_label.setText(hint)
 
 
+_MOVING: "weakref.WeakSet" = weakref.WeakSet()      # every widget with a drifting animation (the hero tiles and the window's backdrop)
+_calm = False
+
+
+def set_calm(on: bool) -> None:
+    """Calm mode: nothing drifts. On while GuideWire watches another application (every repaint of the window is CPU that application could use)."""
+    global _calm
+    _calm = on
+    for w in list(_MOVING):
+        try:
+            w.sync_animation()
+        except RuntimeError:                              # the widget is already gone
+            pass
+
+
+def is_calm() -> bool:
+    return _calm
+
+
+def should_move(widget: QWidget) -> bool:
+    return not _calm and widget.isVisible() and QApplication.applicationState() == Qt.ApplicationState.ApplicationActive
+
+
+MIN_STEP = 0.05                                       # radians: the smallest change of a drifting animation that is worth a repaint
+
+
 class HeroTile(Tile):
     """The one big slab on a screen (variant "hero"): amber clay with soft balls floating in it and, if given, a huge faint word or number behind the text."""
 
@@ -142,14 +172,31 @@ class HeroTile(Tile):
         self._anim.setDuration(9000)
         self._anim.setLoopCount(-1)
         self._anim.valueChanged.connect(self._tick)
+        QApplication.instance().applicationStateChanged.connect(self._app_state)
+        _MOVING.add(self)
 
     def _tick(self, value) -> None:
-        self._phase = float(value)
-        self.update()
+        value = float(value)
+        if abs(value - self._phase) >= MIN_STEP:          # a slow drift needs no more than about ten repaints a second
+            self._phase = value
+            self.update()
+
+    def sync_animation(self) -> None:
+        """Run only when it can be seen and costs nothing that matters: visible, GuideWire in use, and not in calm mode."""
+        running = self._anim.state() == self._anim.State.Running
+        if should_move(self) and not running:
+            self._anim.start()
+        elif not should_move(self) and running:
+            self._anim.stop()
+
+    def _app_state(self, _state) -> None:
+        self.sync_animation()
 
     def showEvent(self, event) -> None:  # noqa: N802 (Qt override)
         self._anim.start()
         super().showEvent(event)
+        if is_calm():
+            self._anim.stop()
 
     def hideEvent(self, event) -> None:  # noqa: N802 (Qt override)
         self._anim.stop()

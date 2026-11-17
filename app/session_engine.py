@@ -35,6 +35,19 @@ class SessionEngine:
         self.db, self.user_id, self.session_id = db, user_id, session_id
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
         self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
+        self._resolve_targets(row["tutorial_id"])
+
+    def _resolve_targets(self, tutorial_id: int) -> None:
+        """Give every action of a Blender tutorial its resolved `target` (what the words mean in Blender: tool, mode, panel, operator) when it was saved without one. Done here, on every load, so tutorials saved
+        before targets existed get them too; the stored steps are not touched. A failure leaves the steps as they were."""
+        try:
+            if self.app != "blender":
+                return
+            from ingestion.targets import resolve_steps
+            resolved = resolve_steps([s for _, s in self.steps])
+            self.steps = [(sid, new) for (sid, _), new in zip(self.steps, resolved, strict=True)]
+        except Exception:
+            pass
 
     # ---- creating / resuming
     @classmethod
@@ -112,14 +125,14 @@ class SessionEngine:
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos - 1)
 
     # ---- checking against what the application shows
-    def check(self, observed: dict[str, Any]) -> Verdict | None:
-        """Compare the active step with an observed application state. Changes nothing."""
+    def check(self, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> Verdict | None:
+        """Compare the active step with an observed application state. Changes nothing. `entry` is the state observed when the step began: a result that was already true then is not evidence (see ingestion.evaluator)."""
         step = self.current_step()
-        return None if step is None else evaluate_step(step, observed)
+        return None if step is None else evaluate_step(step, observed, entry)
 
-    def auto_check(self, observed: dict[str, Any]) -> bool:
+    def auto_check(self, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> bool:
         """Complete the active step if (and only if) every part of its expected state is observed to hold. Returns True if it advanced."""
-        v = self.check(observed)
+        v = self.check(observed, entry)
         if v is None or v.status != "met" or v.unobservable:
             return False
         self.complete(by="observed")

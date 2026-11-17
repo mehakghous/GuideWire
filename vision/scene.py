@@ -117,16 +117,23 @@ class Stats:
     ocr_ms: float = 0.0
 
 
+def _shape(words: list) -> list[tuple]:
+    """What the words say and where, without their OCR line numbers (those change with every read)."""
+    return sorted((w.text, w.rect.x, w.rect.y, w.rect.w, w.rect.h) for w in words)
+
+
 class SceneReader:
     def __init__(self, ocr: Callable[[Any, float], list], layout: Callable[[Any], Any], clock: Callable[[], float] = time.monotonic, thumb: tuple[int, int] = READER_THUMB):
         """`ocr(pixels, scale) -> words` (the Windows OCR in the app), `layout(pixels) -> Layout`. Both are injected, so this is testable with no screen."""
         self._ocr, self._layout, self._clock, self._thumb = ocr, layout, clock, thumb
         self.stats = Stats()
+        self.last: Scene | None = None          # what the most recent look returned (`last.box` is the area it re-read: a menu that just opened)
         self.reset()
 
     def reset(self) -> None:
         """Forget what was read: the next look reads the whole window."""
         self._state: dict[str, Any] | None = None
+        self.last = None
 
     @property
     def empty(self) -> bool:
@@ -137,6 +144,11 @@ class SceneReader:
         return None if s is None else Scene(s["words"], s["layout"], "none", None, s["serial"])
 
     def read(self, pixels, window: Rect, busy: list[Rect] | None = None, force_full: bool = False) -> Scene:
+        scene = self._read(pixels, window, busy, force_full)
+        self.last = scene
+        return scene
+
+    def _read(self, pixels, window: Rect, busy: list[Rect] | None, force_full: bool) -> Scene:
         """Look at the frame (BGR pixels of the application window) and return the words known now. `window` is where the window sits on the screen: a different one than last time means it moved or
         was resized. `busy` rectangles are in frame pixels. `force_full` reads everything (a caller that knows the interface changed)."""
         import cv2
@@ -161,7 +173,10 @@ class SceneReader:
         if full:
             layout = self._layout(pixels)
             words = self._timed(lambda: self._ocr(pixels, OCR_SCALE_FULL))
-            self._state = {"window": window, "thumb": thumb, "words": words, "layout": layout, "serial": (c or {}).get("serial", 0), "full_at": now}
+            serial = (c or {}).get("serial", 0)
+            if c is not None and _shape(words) != _shape(c["words"]):
+                serial += 1                                      # a full read that found different words is a change like any other: results judged on the old words must not be reused (an opened panel pushed its neighbours down and the old answer stayed)
+            self._state = {"window": window, "thumb": thumb, "words": words, "layout": layout, "serial": serial, "full_at": now}
             self.stats.full += 1
             return Scene(words, layout, "full", Rect(0, 0, w, h), self._state["serial"])
         assert c is not None

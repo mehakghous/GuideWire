@@ -7,7 +7,7 @@ from __future__ import annotations
 import html
 
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFrame, QScrollArea, QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
@@ -15,9 +15,9 @@ from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
-from ..vision_bridge import app_of, overlaps
-from .bento import ActionTile, Head, HeroTile, IconTile, Tile, header, page_grid, pill, tidy_list
+from ..vision_bridge import overlaps
 from .screen_guide import InstructionPanel, ScreenGuide, panel_position
+from .bento import ActionTile, Head, HeroTile, IconTile, Tile, header, page_grid, pill, tidy_list
 from .style import current_palette
 from .workers import run_call
 
@@ -157,7 +157,8 @@ class HomeScreen(QWidget):
         self.hero_hint = QLabel("")
         self.hero_hint.setObjectName("tileHint")
         self.hero_hint.setWordWrap(True)
-        grid = page_grid(self)
+        content = QWidget()                                       # the page scrolls as a whole, so nothing is squeezed on a short window and "Your tutorials" can always be reached
+        grid = page_grid(content)
         self.review_button.setMinimumHeight(40)
         self.session_button.setMinimumHeight(40)
         kicker = QLabel("Continue learning")
@@ -185,6 +186,7 @@ class HomeScreen(QWidget):
         stat.body.addWidget(caption)
         stat.body.addStretch()
         mine = Tile("Your tutorials")
+        mine.setMinimumHeight(330)
         mine.body.addWidget(self.empty, 1)
         mine.body.addWidget(self.tutorials, 1)
         grid.addLayout(title_box, 0, 0, 1, 5)
@@ -195,9 +197,19 @@ class HomeScreen(QWidget):
         grid.addWidget(mine, 3, 0, 1, 5)
         for col in range(5):
             grid.setColumnStretch(col, 1)
-        grid.setRowStretch(1, 2)
-        grid.setRowStretch(3, 3)
+        grid.setRowStretch(1, 0)
+        grid.setRowStretch(3, 1)
         self.tutorials.currentRowChanged.connect(lambda _row: self._show_hero())
+        scroll = QScrollArea()
+        scroll.setObjectName("pageScroll")
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setWidget(content)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(scroll)
+        self.scroll = scroll
 
     def _show_hero(self) -> None:
         item = self.tutorials.currentItem()
@@ -447,9 +459,17 @@ class StepReviewScreen(QWidget):
 
 
 class SessionScreen(QWidget):
-    """Shows the active step with Done / Skip / Back. All state and rules live in SessionEngine."""
+    """Shows the active step with Done / Skip / Back, and, while it is watching, guides the learner on the application's own screen. All step state and rules live in SessionEngine; what is on screen comes from
+    the vision bridge (app/vision_bridge.py). The layout is the bento one: the step is the hero tile, and everything about the screen guidance is in the "On your screen" tile.
+
+    Guidance in one picture: one look at a time on a worker thread (`poll`), judged on this thread (`_looked`); the highlight, the small guide box and the status line all come from the same `Tick`, and all are cleared
+    together when the step changes (`_on_step_change`), so nothing of the previous step stays under the new one."""
     back = pyqtSignal()
     ask_about = pyqtSignal(int)        # tutorial id
+
+    LOOK_ACTIVE_MS = 400               # looking while the learner works
+    LOOK_IDLE_MS = 1500                # looking while they read or are away
+    IDLE_AFTER_S = 2.0
 
     def __init__(self):
         super().__init__()
@@ -469,12 +489,15 @@ class SessionScreen(QWidget):
         self.detail.setWordWrap(True)
         self.detail.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         self.status = QLabel("")
+        self.status.setObjectName("error")
+        self.status.setWordWrap(True)
+        # ---- screen guidance (vision observes only; the learner does every action)
         self.bridge = None                      # the vision bridge (app.vision_bridge.VisionBridge); None = no screen guidance on this computer
         self.sync = False                       # tests run the look inline and call poll() themselves
         self.guide = ScreenGuide()
         self._busy = False
         self.timer = QTimer(self)
-        self.timer.setInterval(500)
+        self.timer.setInterval(self.LOOK_ACTIVE_MS)
         self.timer.timeout.connect(self.poll)
         self.track_timer = QTimer(self)                  # cheap and fast: follows the application window (a move carries the highlight, a resize asks for a new look)
         self.track_timer.setInterval(200)
@@ -484,29 +507,30 @@ class SessionScreen(QWidget):
         self._last_window = None
         self._last_hint = ""
         self._last_keys: tuple[str, ...] = ()
-        self._last_inputs: tuple[tuple[str, str], ...] = ()
+        self._shown_step: str | None = None              # the step the guide (highlight, box, status line) is showing: everything is cleared together when it changes
         self._app = "blender"
+        self._profile_off = False                        # the learner's profile preference switched screen guidance off for sessions
+        self._window_minimized = False                   # set by the main window (and by `minimize_to_guide`): asking Qt from hideEvent is not safe while the window is being destroyed
         self.watch_box = QCheckBox("Watch my screen and highlight the next click")
         self.watch_box.setToolTip("GuideWire only looks at the application window: it never clicks, types or moves anything.")
         self.watch_box.setChecked(True)
         self.watch_box.setVisible(False)
         self.watch_box.toggled.connect(lambda _on: self._sync_timer())
-        self.panel_box = QCheckBox("Show the instruction box next to the application")
+        self.panel_box = QCheckBox("Show the small guide box next to the application")
         self.panel_box.setChecked(True)
         self.panel_box.setVisible(False)
         self.panel_box.toggled.connect(lambda _on: self._refresh_panel())
-        self.watch_label = QLabel("")
+        self.watch_label = QLabel("")                    # the status line: what GuideWire sees, in words
         self.watch_label.setWordWrap(True)
         self.watch_label.setObjectName("hint")
         self.cover_label = QLabel("")
         self.cover_label.setWordWrap(True)
+        self.cover_label.setObjectName("error")
         self.cover_label.setVisible(False)
         self.side_button = QPushButton("Minimize GuideWire (the small guide stays on screen)")
         self.side_button.setToolTip("Hides this window so the application has the whole screen; the small guide box stays on top and can be moved, resized or minimized.")
         self.side_button.setVisible(False)
         self.side_button.clicked.connect(self.minimize_to_guide)
-        self.status.setObjectName("error")
-        self._profile_off = False                        # the learner's profile preference switched screen guidance off for sessions
         self.start_button = QPushButton("Start")
         self.done_button = QPushButton("Done")
         self.done_button.setObjectName("primary")
@@ -519,7 +543,7 @@ class SessionScreen(QWidget):
         self.done_button.clicked.connect(lambda: self._do(self.engine.complete))
         self.skip_button.clicked.connect(lambda: self._do(self.engine.skip))
         self.prev_button.clicked.connect(lambda: self._do(self.engine.back))
-        self.back_button.clicked.connect(self.back.emit)
+        self.back_button.clicked.connect(self._leave)
         grid = page_grid(self)
         head = Head()
         top = QHBoxLayout()
@@ -567,7 +591,7 @@ class SessionScreen(QWidget):
         for col in range(3):
             grid.setColumnStretch(col, 1)
 
-    # ---- screen guidance (vision observes only; the learner does every action)
+    # ---- screen guidance
     def set_bridge(self, bridge) -> None:
         self.bridge = bridge
         self.watch_box.setVisible(bridge is not None and bridge.available)
@@ -583,9 +607,11 @@ class SessionScreen(QWidget):
             if not self.timer.isActive():
                 self.timer.start()
                 self.track_timer.start()
+                self._background(True)
         else:
             self.timer.stop()
             self.track_timer.stop()
+            self._background(False)
             if not self.watching:
                 self.guide.clear()
                 self.watch_label.setText(self._off_text())
@@ -594,14 +620,20 @@ class SessionScreen(QWidget):
                 if self.panel is not None:
                     self.panel.hide()
 
-    def showEvent(self, event) -> None:
+    def showEvent(self, event) -> None:  # noqa: N802 (Qt override)
         super().showEvent(event)
+        self._window_minimized = False
+        self._sync_timer()
+
+    def set_window_minimized(self, on: bool) -> None:
+        """The main window was minimized or restored. A minimized GuideWire keeps watching: the small guide box stays on screen."""
+        self._window_minimized = on
         self._sync_timer()
 
     def _minimized(self) -> bool:
-        return self.window().isMinimized()
+        return self._window_minimized
 
-    def hideEvent(self, event) -> None:
+    def hideEvent(self, event) -> None:  # noqa: N802 (Qt override)
         super().hideEvent(event)
         if self._minimized():
             return                                           # GuideWire minimized on purpose: the small guide and the highlight stay and keep watching
@@ -619,6 +651,14 @@ class SessionScreen(QWidget):
         if self.panel is not None:
             self.panel.close()
             self.panel = None
+
+    def stop_guidance(self) -> None:
+        """Leave the screen clean (leaving the session, closing the app)."""
+        self.timer.stop()
+        self.track_timer.stop()
+        self.guide.clear()
+        if self.panel is not None:
+            self.panel.hide()
 
     # ---- the instruction box
     def _ensure_panel(self) -> InstructionPanel:
@@ -642,7 +682,7 @@ class SessionScreen(QWidget):
                 self.panel.hide()
             return
         p = self._ensure_panel()
-        p.set_content(f"GuideWire \u00b7 step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys, self._last_inputs)
+        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys)
         screen = self.window().screen()
         if screen is None:
             return
@@ -650,10 +690,37 @@ class SessionScreen(QWidget):
         x, y, _where = panel_position(self._last_window, (a.x(), a.y(), a.width(), a.height()), (p.width(), p.height()), self.window().devicePixelRatioF())
         p.put(x, y)
 
+    def _background(self, on: bool) -> None:
+        """While watching, GuideWire runs below normal priority so the application it watches is never slowed by it, and nothing in its own window drifts (each repaint is CPU)."""
+        from .bento import set_calm
+        set_calm(on)
+        try:
+            from vision import winplatform
+            winplatform.set_background_priority(on)
+        except Exception:
+            pass
+
+    def _pace(self) -> None:
+        """How often to look at the screen. A look costs a capture of the application's window, so while the learner works (they moved the mouse or pressed a key in the last two seconds) it is
+        looked at every 0.4 s, and while they read or are away, every 1.5 s. The first input after a quiet spell brings a look at once, so a menu they just opened is seen straight away."""
+        try:
+            from vision import winplatform
+            idle = winplatform.idle_seconds()
+        except Exception:
+            return
+        if idle is None:
+            return
+        want = self.LOOK_ACTIVE_MS if idle < self.IDLE_AFTER_S else self.LOOK_IDLE_MS
+        if want != self.timer.interval():
+            self.timer.setInterval(want)
+            if want == self.LOOK_ACTIVE_MS:
+                QTimer.singleShot(150, self.poll)
+
     def _track(self) -> None:
         """Follow the application window between looks: a move carries the highlight along at once; a resize clears it and asks for a new look."""
         if not self.watching or self.bridge is None:
             return
+        self._pace()
         window = self.bridge.window_rect(self._app)
         change = self.guide.follow_window(window)
         if change in ("moved", "resized", "found"):
@@ -671,7 +738,6 @@ class SessionScreen(QWidget):
             return
         app = self._app
         self._busy = True
-        from .workers import run_call
         run_call(self, lambda _s: self.bridge.look(step, app), lambda look, sid=step.id: self._looked(look, sid), sync=self.sync)
 
     def _looked(self, look, step_id: str) -> None:
@@ -682,13 +748,15 @@ class SessionScreen(QWidget):
             return
         e = self.engine
         step = None if e is None else e.current_step()
-        if step is None or step.id != step_id:                 # the learner moved on while the screen was being read
+        if step is None or step.id != step_id:                 # the learner moved on while the screen was being read: that look is for a step that is gone; look at the new one now
+            if self.watching:
+                self.poll()
             return
         tick = self.bridge.apply(e, look)
         self.watch_label.setText(tick.message)
-        self._last_window, self._last_hint, self._last_keys, self._last_inputs = look.window_rect, tick.hint, tick.keys, tick.inputs
+        self._last_window, self._last_hint, self._last_keys = look.window_rect, tick.hint, tick.keys
         if tick.rect is not None:
-            self.guide.show(tick.rect, look.window_rect, pointer=tick.pointer)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
+            self.guide.show(tick.rect, look.window_rect)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)
@@ -696,6 +764,20 @@ class SessionScreen(QWidget):
         if tick.advanced:
             self.status.setText(tick.message)
             self.refresh()
+
+    def _on_step_change(self, step) -> None:
+        """One step, one guide: when the step changes, the previous step's highlight, hint, keys and animation are cleared in the same call that shows the new goal. Nothing of the old step can
+        stay under the new one while the first look of the new step is being read."""
+        sid = None if step is None else step.id
+        if sid == self._shown_step:
+            return
+        self._shown_step = sid
+        self._last_hint, self._last_keys = "", ()
+        self.guide.clear()
+        self.watch_label.setText("Looking at the screen..." if (sid is not None and self.watching) else self._off_text())
+
+    def _off_text(self) -> str:
+        return "Screen guidance is off in your profile." if (self._profile_off and self.bridge is not None) else ""
 
     def _own_rect(self):
         w = self.window()
@@ -713,28 +795,33 @@ class SessionScreen(QWidget):
         """Hide this window; the small guide box (draggable, resizable, minimizable) stays on top, so the application has the whole screen."""
         self._dismissed_step = None
         self._refresh_panel()
+        self._window_minimized = True
         self.window().showMinimized()
 
+    # ---- the session
     @property
     def tutorial_id(self) -> int | None:
         return None if self.engine is None else self.engine.db.get_session(self.engine.session_id)["tutorial_id"]
 
     def load(self, engine: SessionEngine, *, guidance: bool = True) -> None:
-        """Open a session. `guidance` is the learner's profile preference (\"Highlight the target on screen during a session\"): when it is off the screen is not watched."""
+        """Open a session. `guidance` is the learner's profile preference ("Highlight the target on screen during a session"): when it is off the screen is not watched."""
+        self.stop_guidance()
         self.engine = engine
         self.status.setText("")
         self._busy = False
         self._dismissed_step = None
-        self._app = app_of(engine)
+        self._shown_step = None
+        self._app = engine.app
         self.watch_box.blockSignals(True)
-        self.watch_box.setChecked(guidance)               # the profile's "Highlight the target on screen during a session"
+        self.watch_box.setChecked(guidance)
         self.watch_box.blockSignals(False)
         self._profile_off = not guidance
         self.watch_label.setText(self._off_text())
         self.refresh()
 
-    def _off_text(self) -> str:
-        return "Screen guidance is off in your profile." if (self._profile_off and self.bridge is not None) else ""
+    def _leave(self) -> None:
+        self.stop_guidance()
+        self.back.emit()
 
     def _do(self, action) -> None:
         try:
@@ -767,6 +854,7 @@ class SessionScreen(QWidget):
             if check.level != "checkable":
                 lines.append(f"{check.full} Press Done when you have finished it.")
             self.detail.setText("\n".join(lines))
+        self._on_step_change(step)
         self.start_button.setEnabled(e.state == NOT_STARTED)
         self.done_button.setEnabled(e.state == ACTIVE)
         self.skip_button.setEnabled(e.state == ACTIVE)
@@ -776,24 +864,43 @@ class SessionScreen(QWidget):
 
 
 class HistoryScreen(QWidget):
-    """The user's past and current sessions, newest first."""
+    """The user's past and current sessions, newest first. A session can be used again: start the same tutorial from the beginning, continue one that was not finished, or look at its steps."""
     back = pyqtSignal()
+    start_again = pyqtSignal(int)      # tutorial id
+    resume = pyqtSignal(int)           # session id
+    review = pyqtSignal(int)           # tutorial id
 
     def __init__(self):
         super().__init__()
+        self.rows: list[dict] = []
         self.list = QListWidget()
         tidy_list(self.list)
         self.empty = QLabel("")
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(self.back.emit)
         self.empty.setObjectName("empty")
+        self.again_button = QPushButton("Start again")
+        self.again_button.setObjectName("primary")
+        self.resume_button = QPushButton("Continue where I left off")
+        self.review_button = QPushButton("Review steps")
+        self.again_button.clicked.connect(lambda: self._emit(self.start_again, "tutorial_id"))
+        self.resume_button.clicked.connect(lambda: self._emit(self.resume, "id"))
+        self.review_button.clicked.connect(lambda: self._emit(self.review, "tutorial_id"))
+        self.list.currentRowChanged.connect(lambda _r: self._buttons())
+        self.list.itemDoubleClicked.connect(lambda _i: self._emit(self.start_again, "tutorial_id"))
         grid = page_grid(self)
-        grid.addWidget(header("History", "Every session you have started, newest first.", back=self.back_button, kicker="Your sessions"), 0, 0)
+        grid.addWidget(header("History", "Every session you have started, newest first. Pick one to use it again.", back=self.back_button, kicker="Your sessions"), 0, 0)
         box = Tile("Sessions")
         box.body.addWidget(self.empty)
         box.body.addWidget(self.list, 1)
+        row = QHBoxLayout()
+        for b in (self.again_button, self.resume_button, self.review_button):
+            row.addWidget(b)
+        row.addStretch()
+        box.body.addLayout(row)
         grid.addWidget(box, 1, 0)
         grid.setRowStretch(1, 1)
+        self._buttons()
 
     @staticmethod
     def describe(row: dict) -> str:
@@ -801,11 +908,30 @@ class HistoryScreen(QWidget):
         when = (row["finished_at"] or row["started_at"] or "")[:16].replace("T", " ")
         return f"{row['title']} - {state} - {row['dealt']}/{row['total']} steps" + (f" - {when}" if when else "")
 
+    def selected(self) -> dict | None:
+        i = self.list.currentRow()
+        return self.rows[i] if 0 <= i < len(self.rows) else None
+
+    def _buttons(self) -> None:
+        row = self.selected()
+        self.again_button.setEnabled(row is not None)
+        self.review_button.setEnabled(row is not None)
+        self.resume_button.setEnabled(row is not None and row["state"] == "active")
+
+    def _emit(self, signal, key: str) -> None:
+        row = self.selected()
+        if row is not None:
+            signal.emit(int(row[key]))
+
     def load(self, rows: list[dict]) -> None:
+        self.rows = rows
         self.list.clear()
         self.empty.setText("" if rows else "No sessions yet. Start one from Home.")
         for r in rows:
             self.list.addItem(self.describe(r))
+        if rows:
+            self.list.setCurrentRow(0)
+        self._buttons()
 
 
 class ProfileScreen(QWidget):

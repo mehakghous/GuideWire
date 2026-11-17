@@ -129,3 +129,38 @@ def test_find_screen_shows_the_question_for_a_vague_request_and_is_off_without_a
     w.find_screen.finder = None
     w.find_screen.reset()
     assert "not available" in w.find_screen.message.text()
+
+
+def test_each_suggestion_shows_its_video_thumbnail_and_the_chosen_one_a_larger_picture(window):
+    from PyQt6.QtCore import QBuffer, QByteArray, QIODevice
+    from PyQt6.QtGui import QColor, QImage
+    img = QImage(320, 180, QImage.Format.Format_RGB32)
+    img.fill(QColor("#3a6ea5"))
+    ba = QByteArray()
+    buf = QBuffer(ba)
+    buf.open(QIODevice.OpenModeFlag.WriteOnly)
+    img.save(buf, "PNG")
+    png = bytes(ba)
+    w = window
+    asked = []
+    w.find_screen.thumbnail_fetcher = lambda ids: asked.append(list(ids)) or {ids[0]: png, ids[1]: b"not an image"}          # one real picture, one broken, the rest missing
+    w.home.find_button.click()
+    w.find_screen.app.setCurrentText("maya")
+    w.find_screen.goal.setText("rig a leg with ik")
+    w.find_screen.search()
+    s = w.find_screen
+    assert asked and len(asked[0]) == s.results.count()                                    # one request for all of them
+    assert not s.results.item(0).icon().isNull()                                          # the first has its picture
+    assert s.results.item(1).icon().isNull()                                              # a broken one is just left out
+    assert s.thumb.isVisible() is False or s.thumb.pixmap() is not None
+    s.results.setCurrentRow(0)
+    assert not s.thumb.isHidden() and s.thumb.pixmap().width() == 320                     # the chosen video's picture is shown larger
+    s.results.setCurrentRow(1)
+    assert s.thumb.isHidden()                                                             # no picture for it: nothing is shown
+
+
+def test_the_thumbnail_fetch_refuses_anything_that_is_not_a_video_id(monkeypatch):
+    from app import thumbnails
+    called = []
+    monkeypatch.setattr(thumbnails.urllib.request, "urlopen", lambda *a, **k: called.append(a))
+    assert thumbnails.fetch("../etc/passwd") is None and thumbnails.fetch("") is None and not called

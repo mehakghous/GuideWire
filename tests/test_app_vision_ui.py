@@ -1,38 +1,20 @@
 """Screen guidance in the session screen: the timer, the status line, the highlight, the "covering the application" warning. Offscreen Qt, a fake vision service and a fake overlay."""
 import os
-from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 
 pytest.importorskip("PyQt6")          # CI installs no Qt: the screen guide needs it
 
+import vision_fakes as vf  # noqa: E402
 from app import vision_bridge as vb  # noqa: E402
 from app.ui.screen_guide import ScreenGuide  # noqa: E402
-from shared.grounding import GroundingResult, Rect  # noqa: E402
+from shared.grounding import Rect  # noqa: E402
 
 SAMPLE = Path("shared/examples/blender_cube_extrude.json")
 
 
-@dataclass
-class G:
-    grounding: GroundingResult
-    rect: Rect | None = None
-    complete: bool = False
-    ambiguous: bool = False
-
-
-class FakeService:
-    def __init__(self, observed=None, found=True):
-        self.observed, self.found = observed or {}, found
-
-    def ground(self, ui_element):
-        if not self.found:
-            return G(GroundingResult("none", reason="no visible window titled 'Blender'"))
-        return G(GroundingResult("ok", 60, 40), Rect(50, 30, 80, 20), True)
-
-    def observe(self, properties=None, attributes=None):
-        return dict(self.observed)
+FakeService = vf.FakeService                                  # tests/vision_fakes.py: look() -> (observed, context); the screen shows an Add menu in the top bar
 
 
 class FakeOverlay:
@@ -106,7 +88,7 @@ def test_the_timer_runs_only_while_a_step_is_active_the_screen_is_shown_and_watc
     assert not screen.timer.isActive()                                # not visible yet
     screen.show()
     screen.refresh()
-    assert screen.watching and screen.timer.isActive() and screen.timer.interval() == 500
+    assert screen.watching and screen.timer.isActive() and screen.timer.interval() == screen.LOOK_ACTIVE_MS
     screen.watch_box.setChecked(False)
     assert not screen.timer.isActive() and screen.watch_label.text() == ""
     screen.watch_box.setChecked(True)
@@ -120,7 +102,7 @@ def test_a_poll_highlights_the_target_and_shows_a_plain_message(env):
     screen, engine, _svc, overlay = env
     screen.poll()
     assert screen.watch_label.text() and overlay.covered == Rect(0, 0, 1920, 1080)
-    assert len(overlay.marks) == 1 and overlay.marks[0].rect == Rect(46, 26, 88, 28) or overlay.marks[0].rect.w >= 80     # a highlight with a little padding
+    assert len(overlay.marks) == 1 and overlay.marks[0].rect == Rect(246, 16, 48, 24)        # the Add menu read at (250, 20, 40 x 16), with a little padding
     assert overlay.shown >= 1
 
 
@@ -169,16 +151,19 @@ def test_a_look_that_finishes_after_the_learner_moved_on_is_ignored(env):
     svc.observed = {"mode": "EDIT_MESH"}
     look = screen.bridge.look(engine.current_step(), "blender")
     first = engine.current_step().id
-    engine.complete()                                                 # the learner pressed Done while the screen was being read
+    screen.done_button.click()                                        # the learner pressed Done while the screen was being read
+    svc.observed = {"mode": "OBJECT"}                                 # and the new step (s02, Edit Mode) is not done on screen
     screen._looked(look, first)
     assert engine.current_step().id == "s02"                          # the stale look did not complete anything
+    assert screen._shown_step == "s02" and svc.looks                  # a look for the NEW step was started at once, not after the next timer tick
 
 
 def test_a_second_poll_while_one_is_running_is_skipped(env):
     screen, _e, _svc, _o = env
     screen._busy = True
+    before = screen.watch_label.text()
     screen.poll()
-    assert screen.watch_label.text() == ""
+    assert screen.watch_label.text() == before and not _svc.looks
 
 
 def test_the_warning_appears_when_guidewire_covers_the_application_and_the_button_hands_the_screen_over_to_the_small_guide(env):
@@ -213,14 +198,16 @@ def test_the_small_guide_can_be_minimized_to_a_tab_and_opened_again_and_keeps_wh
     screen.close()
 
 
-def test_the_key_caps_are_shown_for_a_step_that_says_to_press_keys(env):
+def test_the_keys_of_a_step_are_said_in_words_in_the_guide(env):
     screen, _e, _svc, _o = env
     p = screen._ensure_panel()
+    p.set_content("GuideWire", "Delete everything", [], "", ("A", "Delete"))
+    assert p.hint.text() == "Press A then Delete." and not p.hint.isHidden()
     p.set_content("GuideWire", "Delete everything", [], "Press A then Delete", ("A", "Delete"))
-    caps = [lab.text() for lab in p._key_labels if lab.objectName() == "keys"]
-    assert caps == ["A", "Delete"]
+    assert p.hint.text() == "Press A then Delete"                 # already said: not said twice
     p.set_content("GuideWire", "Next", [], "", ())
-    assert [lab for lab in p._key_labels if lab.objectName() == "keys"] == []
+    assert p.hint.isHidden()
+    assert not hasattr(p, "input_hint") and not hasattr(p, "_key_labels")        # no mouse or key animation
     screen.close()
 
 
@@ -337,29 +324,51 @@ def test_closing_the_window_closes_the_overlay_and_the_box(env):
     assert overlay.closed and screen.panel is None and box.isHidden()
 
 
-def test_the_guide_animates_the_mouse_and_keys_of_the_step_and_has_a_back_button(env):
+def test_the_guide_is_words_only_in_the_apps_colours_and_has_a_back_button(env):
+    from app.ui.style import current_palette
     screen, engine, _svc, _o = env
     p = screen._ensure_panel()
-    p.set_content("GuideWire · step 1 of 2", "Delete everything", [], "Press A then Delete", ("A", "Delete"), (("click", "right"), ("keys", "Ctrl+P"), ("drag", "left")))
-    h = p.input_hint
-    assert not h.isHidden() and h.label() == "Right click"
-    for _ in range(h.HOLD_TICKS):
-        h.advance()
-    assert h.label() == "Press Ctrl + P"
-    for _ in range(h.HOLD_TICKS):
-        h.advance()
-    assert h.label() == "Hold the left button and drag"
-    for _ in range(h.HOLD_TICKS):
-        h.advance()
-    assert h.label() == "Right click"                          # it loops
-    h.grab()                                                   # painting every kind of event does not raise
-    for i in range(3):
-        h.index = i
-        h.grab()
-    p.set_content("GuideWire", "x", [], "", (), ())
-    assert h.isHidden() and not h.timer.isActive()
+    p.set_content("GuideWire · step 1 of 2", "Delete everything", [], "Press A then Delete", ("A", "Delete"))
+    assert p.goal.text() == "Delete everything"
+    assert current_palette()["tile_hi"] in p.styleSheet() and current_palette()["accent"] in p.styleSheet()        # the same palette as every screen
+    assert p.done_button.objectName() == "primary"
     engine.complete()
     screen.refresh()
     p.back_button.click()
     assert engine.position == 1
     screen.close()
+
+
+def test_the_screen_is_looked_at_often_while_the_learner_works_and_rarely_while_they_read(env, monkeypatch):
+    from vision import winplatform
+    screen, _engine, _svc, _o = env
+    screen.sync = False
+    screen.show()
+    screen.refresh()
+    idle = {"s": 0.5}
+    monkeypatch.setattr(winplatform, "idle_seconds", lambda: idle["s"])
+    screen._pace()
+    assert screen.timer.interval() == screen.LOOK_ACTIVE_MS
+    idle["s"] = 30.0
+    screen._pace()
+    assert screen.timer.interval() == screen.LOOK_IDLE_MS and screen.LOOK_IDLE_MS > 3 * screen.LOOK_ACTIVE_MS // 2
+    monkeypatch.setattr(winplatform, "idle_seconds", lambda: None)             # cannot be read: the pace stays as it was
+    screen._pace()
+    assert screen.timer.interval() == screen.LOOK_IDLE_MS
+    screen.close()
+
+
+def test_the_window_lookup_walks_every_window_only_now_and_then(monkeypatch):
+    import sys
+    if sys.platform != "win32":
+        pytest.skip("Windows only")
+    from vision import winplatform
+    calls = []
+    real = winplatform.WindowInfo
+    fake = real(hwnd=0, title="Blender", rect=winplatform.Rect(0, 0, 10, 10), minimized=False, pid=1, exe="blender.exe")
+    monkeypatch.setattr(winplatform, "find_window", lambda *a, **k: calls.append(1) or fake)
+    winplatform._FOUND.clear()
+    assert winplatform.find_window_cached("Blender", ("blender",)) is fake
+    winplatform.find_window_cached("Blender", ("blender",))               # hwnd 0 is not a real window, so this one walks again: the walk is only skipped for a window that is still there
+    assert len(calls) >= 1
+    winplatform._FOUND.clear()

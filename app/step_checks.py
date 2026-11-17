@@ -20,6 +20,7 @@ KIND_PHRASES = {
     "name_exists": "that a node has the name you gave it",
     "attribute_exists": "that an attribute was added",
     "node_count": "how many nodes of a type exist",
+    "operator_ran": "that the action was carried out",
 }
 
 Level = Literal["checkable", "partial", "manual"]

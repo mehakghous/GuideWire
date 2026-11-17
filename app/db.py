@@ -64,6 +64,26 @@ CREATE TABLE IF NOT EXISTS session_step (
     updated_at TEXT NOT NULL,
     PRIMARY KEY (session_id, step_id)
 );
+CREATE TABLE IF NOT EXISTS conversation (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+    title       TEXT NOT NULL,
+    app         TEXT NOT NULL DEFAULT 'blender',
+    tutorial_id INTEGER REFERENCES tutorial(id) ON DELETE SET NULL,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS chat_message (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversation_id INTEGER NOT NULL REFERENCES conversation(id) ON DELETE CASCADE,
+    role            TEXT NOT NULL,
+    text            TEXT NOT NULL,
+    steps_json      TEXT,
+    meta            TEXT NOT NULL DEFAULT '{}',
+    created_at      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_conversation_user ON conversation(user_id);
+CREATE INDEX IF NOT EXISTS idx_chat_message_conv ON chat_message(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_tutorial_user ON tutorial(user_id);
 CREATE INDEX IF NOT EXISTS idx_session_user ON session(user_id);
 """
@@ -172,6 +192,11 @@ class Database:
         row = self.conn.execute("SELECT app FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
         return None if row is None else row["app"]
 
+    def tutorial_source(self, tutorial_id: int) -> str | None:
+        """The link a tutorial was made from (a YouTube address), or None for written, catalogue and sample tutorials."""
+        row = self.conn.execute("SELECT source_url FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
+        return None if row is None else row["source_url"]
+
     def get_session(self, session_id: int) -> sqlite3.Row | None:
         return self.conn.execute("SELECT * FROM session WHERE id = ?", (session_id,)).fetchone()
 
@@ -195,9 +220,71 @@ class Database:
     def session_history(self, user_id: int) -> list[dict[str, Any]]:
         """One row per session of this user, newest first, with the tutorial title and how many steps are dealt with (done or skipped)."""
         rows = self.conn.execute(
-            """SELECT s.id, s.state, s.started_at, s.finished_at, t.title,
+            """SELECT s.id, s.tutorial_id, s.state, s.started_at, s.finished_at, t.title, t.app,
                       (SELECT COUNT(*) FROM session_step ss WHERE ss.session_id = s.id) AS total,
                       (SELECT COUNT(*) FROM session_step ss WHERE ss.session_id = s.id AND ss.status != 'pending') AS dealt
                FROM session s JOIN tutorial t ON t.id = s.tutorial_id
                WHERE s.user_id = ? ORDER BY s.id DESC""", (user_id,)).fetchall()
         return [dict(r) for r in rows]
+
+    # ---- chats (the Ask GuideWire conversations)
+    def new_conversation(self, user_id: int, title: str, app: str = "blender", tutorial_id: int | None = None) -> int:
+        with self.tx() as c:
+            cur = c.execute("INSERT INTO conversation (user_id, title, app, tutorial_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", (user_id, title[:80], app, tutorial_id, now(), now()))
+            return int(cur.lastrowid)
+
+    def list_conversations(self, user_id: int) -> list[dict[str, Any]]:
+        """This user's chats, most recently used first, each with how many messages it holds."""
+        rows = self.conn.execute(
+            """SELECT c.*, (SELECT COUNT(*) FROM chat_message m WHERE m.conversation_id = c.id) AS messages
+               FROM conversation c WHERE c.user_id = ?
+               ORDER BY COALESCE((SELECT MAX(m.id) FROM chat_message m WHERE m.conversation_id = c.id), 0) DESC, c.id DESC""", (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+    def get_conversation(self, user_id: int, conversation_id: int) -> dict[str, Any] | None:
+        row = self.conn.execute("SELECT * FROM conversation WHERE id = ? AND user_id = ?", (conversation_id, user_id)).fetchone()
+        return None if row is None else dict(row)
+
+    def update_conversation(self, conversation_id: int, *, app: str | None = None, tutorial_id: int | None = ..., title: str | None = None) -> None:     # type: ignore[assignment]
+        with self.tx() as c:
+            if app is not None:
+                c.execute("UPDATE conversation SET app = ? WHERE id = ?", (app, conversation_id))
+            if tutorial_id is not ...:
+                c.execute("UPDATE conversation SET tutorial_id = ? WHERE id = ?", (tutorial_id, conversation_id))
+            if title is not None:
+                c.execute("UPDATE conversation SET title = ? WHERE id = ?", (title[:80], conversation_id))
+
+    def delete_conversation(self, user_id: int, conversation_id: int) -> bool:
+        with self.tx() as c:
+            return c.execute("DELETE FROM conversation WHERE id = ? AND user_id = ?", (conversation_id, user_id)).rowcount > 0
+
+    def add_chat_message(self, conversation_id: int, role: str, text: str, steps_json: str | None = None, meta: dict[str, Any] | None = None) -> int:
+        with self.tx() as c:
+            cur = c.execute("INSERT INTO chat_message (conversation_id, role, text, steps_json, meta, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                            (conversation_id, role, text, steps_json, json.dumps(meta or {}, sort_keys=True), now()))
+            c.execute("UPDATE conversation SET updated_at = ? WHERE id = ?", (now(), conversation_id))
+            return int(cur.lastrowid)
+
+    def chat_messages(self, conversation_id: int) -> list[dict[str, Any]]:
+        rows = self.conn.execute("SELECT * FROM chat_message WHERE conversation_id = ? ORDER BY id", (conversation_id,)).fetchall()
+        out = []
+        for r in rows:
+            d = dict(r)
+            d["meta"] = json.loads(d["meta"] or "{}")
+            out.append(d)
+        return out
+
+    def set_chat_message_meta(self, message_id: int, meta: dict[str, Any]) -> None:
+        with self.tx() as c:
+            c.execute("UPDATE chat_message SET meta = ? WHERE id = ?", (json.dumps(meta, sort_keys=True), message_id))
+
+    # ---- numbers for the Progress page
+    def progress_summary(self, user_id: int) -> dict[str, int]:
+        q = self.conn.execute
+        return {
+            "tutorials": q("SELECT COUNT(*) FROM tutorial WHERE user_id = ?", (user_id,)).fetchone()[0],
+            "sessions": q("SELECT COUNT(*) FROM session WHERE user_id = ? AND state != 'not_started'", (user_id,)).fetchone()[0],
+            "finished": q("SELECT COUNT(*) FROM session WHERE user_id = ? AND state = 'finished'", (user_id,)).fetchone()[0],
+            "steps_done": q("""SELECT COUNT(*) FROM session_step ss JOIN session s ON s.id = ss.session_id WHERE s.user_id = ? AND ss.status = 'done'""", (user_id,)).fetchone()[0],
+            "chats": q("SELECT COUNT(*) FROM conversation WHERE user_id = ?", (user_id,)).fetchone()[0],
+        }

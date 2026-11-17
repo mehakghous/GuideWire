@@ -1,4 +1,4 @@
-"""Pointer and highlight overlay.
+"""Highlight overlay.
 
 `Mark` and the helpers are pure (testable without a display). `OverlayWindow` is the PyQt6
 window that draws them: transparent, always on top, never takes focus or mouse input, so the
@@ -10,12 +10,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
-from shared.grounding import GroundingResult, Rect
+from shared.grounding import Rect
 from vision.tracker import classify
 
-MarkKind = Literal["pointer", "highlight"]
+MarkKind = Literal["highlight"]
 
-POINTER_RADIUS = 14
 # GuideWire's signature colour (orchid, from the app plum). Blender and Houdini use orange, Maya highlights in green, so a pink ring is never mistaken for the application's own
 # selection. Same value as the app's accent family; defined here so vision/ does not import the PyQt app package.
 HIGHLIGHT_RGB = (236, 140, 196)
@@ -25,16 +24,8 @@ HIGHLIGHT_PAD = 4
 @dataclass(frozen=True)
 class Mark:
     kind: MarkKind
-    rect: Rect               # screen physical pixels; a pointer is a small square around its point
+    rect: Rect               # screen physical pixels
     label: str = ""
-
-
-def pointer_mark(result: GroundingResult, label: str = "") -> Mark | None:
-    """A pointer at a grounded point, or None if grounding did not produce a usable point."""
-    if result.status != "ok" or result.x is None or result.y is None:
-        return None
-    r = POINTER_RADIUS
-    return Mark("pointer", Rect(result.x - r, result.y - r, 2 * r, 2 * r), label)
 
 
 def highlight_mark(rect: Rect, label: str = "") -> Mark:
@@ -153,12 +144,8 @@ def make_overlay_window():
                 r = QRect(round(m.rect.x / k), round(m.rect.y / k),
                           round(m.rect.w / k), round(m.rect.h / k))
                 p.setPen(QPen(QColor(*HIGHLIGHT_RGB), 3))
-                if m.kind == "pointer":
-                    p.setBrush(QColor(*HIGHLIGHT_RGB, 70))
-                    p.drawEllipse(r)
-                else:
-                    p.setBrush(QColor(*HIGHLIGHT_RGB, 45))
-                    p.drawRoundedRect(r, 4, 4)
+                p.setBrush(QColor(*HIGHLIGHT_RGB, 45))
+                p.drawRoundedRect(r, 4, 4)
                 if m.label:
                     p.setFont(QFont("Segoe UI", 10))
                     p.setPen(QColor(255, 255, 255))

@@ -391,9 +391,10 @@ def ground_sidebar(ctx: GroundContext, ref: TargetRef) -> Grounded:
     path = f"{ref.panel + ' > ' if ref.panel else ''}{label}"
     ui = ctx.ui
     area = None if ui is None else ui.area("VIEW_3D")
-    known = ui is not None and area is not None and ctx.mapper is not None
+    known = False
     region_screen = None
-    if known:
+    if ui is not None and area is not None and ctx.mapper is not None:
+        known = True
         shown = area.region("UI")
         if area.sidebar_shown is False or shown is None:
             edge = Rect(area.rect.x + max(0, area.rect.w - 24), area.rect.y, min(24, area.rect.w), area.rect.h)          # the right edge of the 3D view, where Blender shows a small arrow to bring the sidebar back

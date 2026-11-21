@@ -82,6 +82,15 @@ CREATE TABLE IF NOT EXISTS chat_message (
     meta            TEXT NOT NULL DEFAULT '{}',
     created_at      TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS find_search (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id    INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+    goal       TEXT NOT NULL,
+    app        TEXT,
+    result     TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_find_search_user ON find_search(user_id);
 CREATE INDEX IF NOT EXISTS idx_conversation_user ON conversation(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_message_conv ON chat_message(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_tutorial_user ON tutorial(user_id);
@@ -167,6 +176,15 @@ class Database:
     def list_tutorials(self, user_id: int) -> list[sqlite3.Row]:
         return self.conn.execute("SELECT * FROM tutorial WHERE user_id = ? ORDER BY updated_at DESC, id DESC", (user_id,)).fetchall()
 
+    def tutorial_for_video(self, user_id: int, url: str) -> sqlite3.Row | None:
+        """The newest tutorial of this user that was made from this YouTube video (links are compared by video id, so youtu.be and watch?v= are the same video)."""
+        from ingestion.rigging_discovery import video_id_of
+        want = video_id_of(url)
+        if not want:
+            return None
+        rows = self.conn.execute("SELECT * FROM tutorial WHERE user_id = ? AND source_url IS NOT NULL ORDER BY updated_at DESC, id DESC", (user_id,)).fetchall()
+        return next((r for r in rows if video_id_of(r["source_url"]) == want), None)
+
     def get_steps(self, tutorial_id: int) -> list[tuple[int, Step]]:
         """(step row id, Step) in order."""
         rows = self.conn.execute("SELECT id, record FROM step WHERE tutorial_id = ? ORDER BY position", (tutorial_id,)).fetchall()
@@ -191,6 +209,10 @@ class Database:
         """The application a tutorial is for (blender, maya or houdini), or None if there is no such tutorial."""
         row = self.conn.execute("SELECT app FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
         return None if row is None else row["app"]
+
+    def tutorial_title(self, tutorial_id: int) -> str | None:
+        row = self.conn.execute("SELECT title FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()
+        return None if row is None else row["title"]
 
     def tutorial_source(self, tutorial_id: int) -> str | None:
         """The link a tutorial was made from (a YouTube address), or None for written, catalogue and sample tutorials."""
@@ -277,6 +299,29 @@ class Database:
     def set_chat_message_meta(self, message_id: int, meta: dict[str, Any]) -> None:
         with self.tx() as c:
             c.execute("UPDATE chat_message SET meta = ? WHERE id = ?", (json.dumps(meta, sort_keys=True), message_id))
+
+    # ---- Find a tutorial: the searches a learner made, with what they found (kept so the screen is as they left it and the history can be opened again without a new search)
+    MAX_SEARCHES = 50
+
+    def save_search(self, user_id: int, goal: str, app: str | None, result_json: str) -> int:
+        """Remember a search. Asking the same thing again (same words, same application) replaces the earlier entry and moves it to the top; only the newest MAX_SEARCHES are kept."""
+        with self.tx() as c:
+            c.execute("DELETE FROM find_search WHERE user_id = ? AND lower(goal) = lower(?) AND COALESCE(app, '') = ?", (user_id, goal.strip(), app or ""))
+            cur = c.execute("INSERT INTO find_search (user_id, goal, app, result, created_at) VALUES (?, ?, ?, ?, ?)", (user_id, goal.strip(), app, result_json, now()))
+            c.execute("DELETE FROM find_search WHERE user_id = ? AND id NOT IN (SELECT id FROM find_search WHERE user_id = ? ORDER BY id DESC LIMIT ?)", (user_id, user_id, self.MAX_SEARCHES))
+            return int(cur.lastrowid)
+
+    def list_searches(self, user_id: int) -> list[dict[str, Any]]:
+        """This user's searches, newest first (id, goal, app, created_at, result as saved)."""
+        return [dict(r) for r in self.conn.execute("SELECT * FROM find_search WHERE user_id = ? ORDER BY id DESC", (user_id,)).fetchall()]
+
+    def delete_search(self, user_id: int, search_id: int) -> bool:
+        with self.tx() as c:
+            return c.execute("DELETE FROM find_search WHERE id = ? AND user_id = ?", (search_id, user_id)).rowcount > 0
+
+    def clear_searches(self, user_id: int) -> int:
+        with self.tx() as c:
+            return c.execute("DELETE FROM find_search WHERE user_id = ?", (user_id,)).rowcount
 
     # ---- numbers for the Progress page
     def progress_summary(self, user_id: int) -> dict[str, int]:

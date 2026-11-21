@@ -25,7 +25,7 @@ from shared.step_record import Action, Step, TargetRef
 from vision.grounders import HIDDEN, NOT_OPEN, OFFSCREEN, VISIBLE, WORDS, WRONG, Grounded, mode_label
 from vision.verify import Gated
 
-GROUNDED_KINDS = ("tool", "menu", "mode", "property", "operator_panel", "context_menu")      # kinds a grounder can locate on screen
+GROUNDED_KINDS = ("tool", "menu", "mode", "property", "sidebar", "operator_panel", "context_menu")      # kinds a grounder can locate on screen
 
 
 @dataclass(frozen=True)

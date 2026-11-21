@@ -138,3 +138,33 @@ def test_the_resolved_target_is_never_part_of_the_schema_a_model_is_asked_to_fil
     schema = json.dumps(Action.model_json_schema())
     assert "target" not in Action.model_json_schema()["properties"] and "TargetRef" not in schema
     assert Action.model_validate({"verb": "click", "target": {"kind": "tool", "label": "Loop Cut", "id": "builtin.loop_cut"}}).target.id == "builtin.loop_cut"      # but it loads and saves
+
+
+def test_the_sidebar_is_a_target_of_its_own_with_its_panel_and_field(cat):
+    t = act("Sidebar > Transform > Roll", "set_value", mode="EDIT_ARMATURE", cat=cat)
+    assert (t.kind, t.panel, t.prop, t.tab) == ("sidebar", "Transform", "Roll", None) and t.confidence == 1.0
+    t = act("N panel > Item > Transform > Roll", "set_value", mode="EDIT_ARMATURE", cat=cat)
+    assert (t.kind, t.tab, t.panel, t.prop) == ("sidebar", "ITEM", "Transform", "Roll")
+    t = act("Sidebar > Roll", "set_value", cat=cat)
+    assert (t.kind, t.panel, t.prop) == ("sidebar", None, "Roll") and t.confidence < 0.8          # a field and nothing else to tell where: less sure
+    assert act("Sidebar", "click", cat=cat) is None                                                  # a container word with nothing after it: nothing to point at
+
+
+def test_a_sidebar_path_that_names_a_properties_tab_goes_to_the_properties_editor(cat):
+    t = act("Sidebar > Bone properties > Transform > Roll", "set_value", mode="EDIT_ARMATURE", cat=cat)
+    assert (t.kind, t.tab, t.panel, t.prop) == ("property", "BONE", "Transform", "Roll")
+    assert act("Sidebar > Tool > Options", "click", cat=cat).tab == "TOOL" or act("Sidebar > Tool > Options", "click", cat=cat).kind == "sidebar"
+
+
+def test_properties_tab_names_are_read_loosely(cat):
+    for words in ("Bone Constraints", "Bone Constraint properties", "Bone Constraint"):
+        t = act(f"Properties:{words} > Copy Location > Head/Tail", "set_value", cat=cat)
+        assert t is not None and (t.kind, t.tab, t.panel, t.prop) == ("property", "BONE_CONSTRAINT", "Copy Location", "Head/Tail")
+    assert act("Properties:Object > Viewport Display > In Front", cat=cat).tab == "OBJECT"           # still as before
+
+
+def test_the_leg_tutorial_steps_that_were_not_highlighted_now_have_targets(cat):
+    sl, _ = targets.resolve_steplist(load_steps(json.loads((DEMO / "blender_leg_ik_PctSMB-RGsM.json").read_text(encoding="utf-8"))), cat)
+    s25, s33 = sl.steps[24], sl.steps[32]
+    assert s25.actions[0].target.kind == "sidebar" and s25.actions[0].target.prop == "Roll"
+    assert s33.actions[0].target.kind == "property" and s33.actions[0].target.prop == "Head/Tail"

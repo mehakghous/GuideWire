@@ -7,17 +7,20 @@ from __future__ import annotations
 import html
 
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtWidgets import QFrame, QScrollArea, QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFrame, QScrollArea, QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
 from ..pipeline import _YOUTUBE, APPS, request_steps
+from ..prerequisites import check as unmet_prerequisites
+from ..prerequisites import prerequisites
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
 from ..vision_bridge import overlaps
 from .screen_guide import InstructionPanel, ScreenGuide, panel_position
 from .bento import ActionTile, Head, HeroTile, IconTile, Tile, header, page_grid, pill, tidy_list
+from .step_list import StepList
 from .style import current_palette
 from .workers import run_call
 
@@ -463,19 +466,31 @@ class SessionScreen(QWidget):
     the vision bridge (app/vision_bridge.py). The layout is the bento one: the step is the hero tile, and everything about the screen guidance is in the "On your screen" tile.
 
     Guidance in one picture: one look at a time on a worker thread (`poll`), judged on this thread (`_looked`); the highlight, the small guide box and the status line all come from the same `Tick`, and all are cleared
-    together when the step changes (`_on_step_change`), so nothing of the previous step stays under the new one."""
+    together when the step changes (`_on_step_change`), so nothing of the previous step stays under the new one.
+
+    The learner is in charge of the pace. PAUSE holds the session on the step: nothing is looked at, highlighted or completed until Resume, so a step can be read and studied (Previous step pauses too, so the step
+    you went back to is not completed again the moment it is shown, which it would be whenever the application is already in the state that step ends in). The list of ALL steps shows where you are; clicking a
+    step only LOOKS at it (`viewing`), and "Go to this step" is what moves the session."""
     back = pyqtSignal()
     ask_about = pyqtSignal(int)        # tutorial id
 
     LOOK_ACTIVE_MS = 400               # looking while the learner works
     LOOK_IDLE_MS = 1500                # looking while they read or are away
     IDLE_AFTER_S = 2.0
+    PAUSE_TIP = "Hold the session on this step: nothing is checked or highlighted until you press Resume, so you can read the step, look at the application, or go back."
 
     def __init__(self):
         super().__init__()
         self.engine: SessionEngine | None = None
+        self.paused = False                     # the learner holds the session on this step: no looking, no highlight, no automatic completion
+        self.viewing: int | None = None         # a step (1-based) the learner is only LOOKING at, not the one they are on
+        self.prereqs: list = []                 # what the tutorial assumes you already have (app/prerequisites.py)
+        self.prereq_missing: list = []          # the ones the application's own state showed to be missing
+        self._prereq_checked = False
         self.title = QLabel("Session")
         self.title.setObjectName("pageTitle")
+        self.title.setWordWrap(True)                                          # a long video title wraps; it must never make the page wider than the window
+        self.title.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self.progress = QLabel("")
         self.progress.setObjectName("tileTitle")
         self.progress_bar = QProgressBar()
@@ -536,24 +551,50 @@ class SessionScreen(QWidget):
         self.done_button.setObjectName("primary")
         self.skip_button = QPushButton("Skip")
         self.prev_button = QPushButton("Previous step")
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.setToolTip(self.PAUSE_TIP)
+        self.goto_button = QPushButton("Go to this step")
+        self.goto_button.setToolTip("Move the session to the step you are looking at (steps in between are skipped, or become to-do again when it is earlier).")
+        self.unview_button = QPushButton("Back to my step")
         self.back_button = QPushButton("Back")
         self.ask_button = QPushButton("Ask about this tutorial")
+        self.prereq_button = QPushButton("Before you start")
+        self.prereq_button.setCheckable(True)
+        self.prereq_button.setToolTip("What this tutorial assumes you already have.")
         self.ask_button.clicked.connect(lambda: self.tutorial_id is not None and self.ask_about.emit(self.tutorial_id))
-        self.start_button.clicked.connect(lambda: self._do(self.engine.start))
-        self.done_button.clicked.connect(lambda: self._do(self.engine.complete))
-        self.skip_button.clicked.connect(lambda: self._do(self.engine.skip))
-        self.prev_button.clicked.connect(lambda: self._do(self.engine.back))
+        self.start_button.clicked.connect(lambda: self._advance(self.engine.start))
+        self.done_button.clicked.connect(lambda: self._advance(self.engine.complete))
+        self.skip_button.clicked.connect(lambda: self._advance(self.engine.skip))
+        self.prev_button.clicked.connect(self._previous)
+        self.pause_button.clicked.connect(self.toggle_pause)
+        self.goto_button.clicked.connect(self._goto_viewed)
+        self.unview_button.clicked.connect(self._unview)
+        self.prereq_button.toggled.connect(lambda _on: self.refresh() if self.engine is not None else None)
         self.back_button.clicked.connect(self._leave)
-        grid = page_grid(self)
+        self.steps_list = StepList()
+        self.steps_list.chosen.connect(self._view)
+        self.prereq_label = QLabel("")
+        self.prereq_label.setWordWrap(True)
+        self.prereq_label.setTextFormat(Qt.TextFormat.RichText)
+        content = QWidget()                                       # the page scrolls as a whole, so nothing is squeezed on a short window
+        grid = page_grid(content)
         head = Head()
         top = QHBoxLayout()
         top.addWidget(self.title, 1)
         top.addWidget(self.back_button)
         head.body.addLayout(top)
         self.step_tile = step_tile = HeroTile(padding=26)
-        step_tile.body.addWidget(pill("Your current step"), 0, Qt.AlignmentFlag.AlignLeft)
+        self.step_pill = pill("Your current step")
+        step_tile.body.addWidget(self.step_pill, 0, Qt.AlignmentFlag.AlignLeft)
         step_tile.body.addWidget(self.step_text)
         step_tile.body.addWidget(self.detail, 1)
+        view_row = QHBoxLayout()
+        view_row.addWidget(self.goto_button)
+        view_row.addWidget(self.unview_button)
+        view_row.addStretch()
+        step_tile.body.addLayout(view_row)
+        self.prereq_tile = Tile("Before you start", variant="amber")
+        self.prereq_tile.body.addWidget(self.prereq_label)
         progress_tile = Tile("Progress", variant="mint")
         progress_tile.body.addWidget(self.progress)
         progress_tile.body.addWidget(self.progress_bar)
@@ -565,8 +606,12 @@ class SessionScreen(QWidget):
         row2 = QHBoxLayout()
         row2.addWidget(self.prev_button)
         row2.addWidget(self.skip_button)
+        row3 = QHBoxLayout()
+        row3.addWidget(self.pause_button)
+        row3.addWidget(self.prereq_button)
         controls.body.addLayout(row1)
         controls.body.addLayout(row2)
+        controls.body.addLayout(row3)
         controls.body.addWidget(self.ask_button)
         controls.body.addStretch()
         guide = Tile("On your screen", variant="slate")
@@ -581,15 +626,62 @@ class SessionScreen(QWidget):
         guide.body.addWidget(self.side_button)
         guide.body.addWidget(self.status)
         guide.body.addStretch()
+        steps_tile = Tile("All steps")
+        steps_tile.setMinimumWidth(320)
+        self.steps_hint = QLabel("The step you are on is highlighted. Click any step to read it without moving.")
+        self.steps_hint.setObjectName("tileHint")
+        self.steps_hint.setWordWrap(True)
+        steps_tile.body.addWidget(self.steps_hint)
+        steps_tile.body.addWidget(self.steps_list, 1)
         grid.addWidget(head, 0, 0, 1, 3)
-        grid.addWidget(step_tile, 1, 0, 2, 2)
-        grid.addWidget(progress_tile, 1, 2)
-        grid.addWidget(controls, 2, 2)
-        grid.addWidget(guide, 3, 0, 1, 3)
+        grid.addWidget(step_tile, 1, 0, 1, 2)
+        grid.addWidget(self.prereq_tile, 2, 0, 1, 2)
+        grid.addWidget(progress_tile, 3, 0)
+        grid.addWidget(controls, 3, 1)
+        grid.addWidget(guide, 4, 0, 1, 2)
+        grid.addWidget(steps_tile, 1, 2, 4, 1)
+        self._grid, self._steps_tile, self._narrow = grid, steps_tile, False
+        self._main_tiles, self._pair = (step_tile, self.prereq_tile, guide), (progress_tile, controls)
+        self.step_tile.setMinimumHeight(210)
+        self.steps_list.setMinimumHeight(360)
         grid.setRowStretch(1, 1)
-        grid.setRowStretch(2, 1)
-        for col in range(3):
-            grid.setColumnStretch(col, 1)
+        grid.setColumnStretch(0, 3)
+        grid.setColumnStretch(1, 3)
+        grid.setColumnStretch(2, 4)
+        scroll = QScrollArea()
+        scroll.setObjectName("pageScroll")
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)           # the tiles hold unwrappable text (checkboxes, buttons): on a computer whose fonts are wide, sideways scrolling keeps all of it reachable
+        scroll.setWidget(content)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(scroll)
+        self.scroll = scroll
+
+    def resizeEvent(self, event) -> None:  # noqa: N802 (Qt override)
+        super().resizeEvent(event)
+        self._arrange(self.width() < self._width_for_side_by_side())
+
+    def _width_for_side_by_side(self) -> int:
+        """The window width at which the list of steps fits BESIDE the other tiles: what those tiles need at least, plus the list's own width, the gaps, the page margins and a scroll bar. It follows the real
+        minimum sizes (fonts, theme, scaling), so no fixed number is ever too small for some computer."""
+        from .bento import GAP, MARGIN
+        main = max(max(t.minimumSizeHint().width() for t in self._main_tiles), sum(t.minimumSizeHint().width() for t in self._pair) + GAP)
+        return main + self._steps_tile.minimumWidth() + GAP + 2 * MARGIN + 24
+
+    def _arrange(self, narrow: bool) -> None:
+        """Beside the other tiles on a wide window, below them (full width) on a narrow one, so the page never needs to scroll sideways."""
+        if narrow == self._narrow:
+            return
+        self._narrow = narrow
+        self._grid.removeWidget(self._steps_tile)
+        if narrow:
+            self._grid.addWidget(self._steps_tile, 5, 0, 1, 3)
+            self._grid.setColumnStretch(2, 0)
+        else:
+            self._grid.addWidget(self._steps_tile, 1, 2, 4, 1)
+            self._grid.setColumnStretch(2, 4)
 
     # ---- screen guidance
     def set_bridge(self, bridge) -> None:
@@ -602,8 +694,13 @@ class SessionScreen(QWidget):
     def watching(self) -> bool:
         return (self.bridge is not None and self.bridge.available and self.watch_box.isChecked() and self.engine is not None and self.engine.state == ACTIVE)
 
+    @property
+    def looking(self) -> bool:
+        """Watching AND not paused: the screen is read, the highlight drawn and a step may be completed by what is seen."""
+        return self.watching and not self.paused
+
     def _sync_timer(self) -> None:
-        if self.watching and not self.sync and (self.isVisible() or self._minimized()):
+        if self.looking and not self.sync and (self.isVisible() or self._minimized()):
             if not self.timer.isActive():
                 self.timer.start()
                 self.track_timer.start()
@@ -664,9 +761,10 @@ class SessionScreen(QWidget):
     def _ensure_panel(self) -> InstructionPanel:
         if self.panel is None:
             self.panel = InstructionPanel()
-            self.panel.done_clicked.connect(lambda: self._do(self.engine.complete))
-            self.panel.skip_clicked.connect(lambda: self._do(self.engine.skip))
-            self.panel.back_clicked.connect(lambda: self._do(self.engine.back))
+            self.panel.done_clicked.connect(lambda: self._advance(self.engine.complete))
+            self.panel.skip_clicked.connect(lambda: self._advance(self.engine.skip))
+            self.panel.back_clicked.connect(self._previous)
+            self.panel.pause_clicked.connect(self.toggle_pause)
             self.panel.closed.connect(self._panel_closed)
         return self.panel
 
@@ -682,7 +780,8 @@ class SessionScreen(QWidget):
                 self.panel.hide()
             return
         p = self._ensure_panel()
-        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], self._last_hint, self._last_keys)
+        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], "Paused: press Resume to continue." if self.paused else self._last_hint, () if self.paused else self._last_keys)
+        p.set_paused(self.paused)
         screen = self.window().screen()
         if screen is None:
             return
@@ -718,7 +817,7 @@ class SessionScreen(QWidget):
 
     def _track(self) -> None:
         """Follow the application window between looks: a move carries the highlight along at once; a resize clears it and asks for a new look."""
-        if not self.watching or self.bridge is None:
+        if not self.looking or self.bridge is None:
             return
         self._pace()
         window = self.bridge.window_rect(self._app)
@@ -731,7 +830,7 @@ class SessionScreen(QWidget):
 
     def poll(self) -> None:
         """One look at the screen for the active step. The look runs off the window's thread; the judging (the database) stays on it."""
-        if not self.watching or self._busy:
+        if not self.looking or self._busy:
             return
         step = self.engine.current_step()
         if step is None:
@@ -742,6 +841,8 @@ class SessionScreen(QWidget):
 
     def _looked(self, look, step_id: str) -> None:
         self._busy = False
+        if self.paused:                                        # the learner paused while the screen was being read: that look must not highlight or complete anything
+            return
         if isinstance(look, Exception):
             self.watch_label.setText(f"Screen guidance hit a problem ({type(look).__name__}); use Done when you have finished the step.")
             self.guide.clear()
@@ -760,9 +861,11 @@ class SessionScreen(QWidget):
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)
+        self._check_prerequisites(look.observed)
         self._refresh_panel()
         if tick.advanced:
             self.status.setText(tick.message)
+            self.viewing = None
             self.refresh()
 
     def _on_step_change(self, step) -> None:
@@ -774,7 +877,11 @@ class SessionScreen(QWidget):
         self._shown_step = sid
         self._last_hint, self._last_keys = "", ()
         self.guide.clear()
-        self.watch_label.setText("Looking at the screen..." if (sid is not None and self.watching) else self._off_text())
+        self.watch_label.setText(self._paused_text() if (sid is not None and self.paused) else "Looking at the screen..." if (sid is not None and self.watching) else self._off_text())
+
+    def _paused_text(self) -> str:
+        e = self.engine
+        return f"Paused on step {e.position if e is not None and e.position else ''}: nothing is checked or highlighted. Press Resume when you want GuideWire to watch again.".replace("step :", "this step:")
 
     def _off_text(self) -> str:
         return "Screen guidance is off in your profile." if (self._profile_off and self.bridge is not None) else ""
@@ -812,6 +919,15 @@ class SessionScreen(QWidget):
         self._dismissed_step = None
         self._shown_step = None
         self._app = engine.app
+        self.paused, self.viewing = False, None
+        self.pause_button.setText("Pause")
+        self.title.setText(f"Session: {engine.title}" if engine.title else "Session")
+        self.prereqs = prerequisites([st for _, st in engine.steps], engine.app, engine.title)
+        self.prereq_missing, self._prereq_checked = [], False
+        self.prereq_button.blockSignals(True)
+        self.prereq_button.setChecked(False)
+        self.prereq_button.blockSignals(False)
+        self.steps_list.set_steps([st.goal for _, st in engine.steps])
         self.watch_box.blockSignals(True)
         self.watch_box.setChecked(guidance)
         self.watch_box.blockSignals(False)
@@ -830,35 +946,152 @@ class SessionScreen(QWidget):
             self.status.setText(str(e))
         else:
             self.status.setText("")
+        self.viewing = None
         self.refresh()
+
+    def _advance(self, action) -> None:
+        """Start, Done or Skip: the learner is moving on, so a pause held on the step they were studying ends."""
+        if self.paused:
+            self.set_paused(False, refresh=False)
+        self._do(action)
+
+    # ---- pause, previous step, looking at a step
+    def toggle_pause(self) -> None:
+        self.set_paused(not self.paused)
+
+    def set_paused(self, on: bool, refresh: bool = True) -> None:
+        """Hold the session on this step (nothing looked at, drawn or completed) or let it watch again."""
+        if on == self.paused:
+            return
+        self.paused = on
+        self.pause_button.setText("Resume" if on else "Pause")
+        if on:
+            self._last_hint, self._last_keys = "", ()
+            self.guide.clear()
+            self.cover_label.setVisible(False)
+            self.watch_label.setText(self._paused_text())
+        else:
+            self.watch_label.setText("Looking at the screen..." if self.watching else self._off_text())
+        if refresh and self.engine is not None:
+            self.refresh()
+        if not on and not self.sync and self.looking:
+            QTimer.singleShot(50, self.poll)                     # look at once: the learner may have changed the application while it was paused
+
+    def _previous(self) -> None:
+        """Back one step, and hold there: the step you went back to would otherwise be completed again at the next look whenever the application is already in the state it ends in (Pose Mode, say)."""
+        e = self.engine
+        if e is None:
+            return
+        self._do(e.back)
+        if not self.status.text() and self.watching:
+            self.set_paused(True, refresh=False)
+            self.status.setText(f"Back on step {e.position}. GuideWire is paused so you can look at it: press Resume when you want it to watch again.")
+            self.refresh()
+
+    def _view(self, number: int) -> None:
+        """Look at a step without moving the session."""
+        e = self.engine
+        if e is None or not 1 <= number <= len(e.steps):
+            return
+        self.viewing = None if (e.state == ACTIVE and number == e.position) else number
+        self.refresh()
+
+    def _unview(self) -> None:
+        self.viewing = None
+        if self.engine is not None:
+            self.refresh()
+
+    def _goto_viewed(self) -> None:
+        e, n = self.engine, self.viewing
+        if e is None or n is None or e.state != ACTIVE:
+            return
+        before = e.position or n
+        if n > before and self.paused:
+            self.set_paused(False, refresh=False)               # moving on
+        self._do(lambda: e.jump_to(n))
+        if not self.status.text():
+            self.status.setText(f"Moved to step {n}.")
+            if n < before and self.watching:
+                self.set_paused(True, refresh=False)             # going back: hold there, as Previous step does
+                self.refresh()
+
+    # ---- what the tutorial assumes
+    def _prereq_html(self) -> str:
+        if not self.prereqs:
+            return ""
+        items = "".join(f"<li>{html.escape(p.text)}</li>" for p in self.prereqs)
+        out = f"<p>This tutorial does not set these up for you. Have them ready before you start:</p><ul style='margin-left:8px; -qt-list-indent:0;'>{items}</ul>"
+        if self.prereq_missing:
+            what = "; ".join(p.text.split(".")[0] for p in self.prereq_missing)
+            out += f"<p><b style='color:{current_palette()['warn']}'>GuideWire did not see this in your scene:</b> {html.escape(what)}. You can carry on, but later steps need it.</p>"
+        return out
+
+    def _check_prerequisites(self, observed) -> None:
+        """Once per session, against the first state the application reports with a list of what is in the scene: what is missing is said, never enforced."""
+        if self._prereq_checked or not self.prereqs or not observed or not observed.get("nodes"):
+            return
+        self._prereq_checked = True
+        self.prereq_missing = unmet_prerequisites(self.prereqs, observed)
+        if self.prereq_missing:
+            self.refresh()
+
+    @staticmethod
+    def _detail_for(step, viewed: bool = False) -> str:
+        """What someone following the step needs: how to do it, how to tell it worked, and whether GuideWire can check it. The validator's notes (where a step's expected state came from, vocabulary warnings) are for the editor and stay on the Review screen."""
+        parts: list[str] = []
+        if step.how_to:
+            parts.append("How to do it\n" + "\n".join(f"• {h.text}" for h in step.how_to))
+        if step.check:
+            parts.append("How you can tell it worked\n" + "\n".join(f"• {h.text}" for h in step.check))
+        check = checkability(step)
+        if check.level != "checkable":
+            parts.append(check.full if viewed else f"{check.full} Press Done when you have finished it.")
+        return "\n\n".join(parts)
 
     def refresh(self) -> None:
         e = self.engine
         assert e is not None
+        if self.viewing is not None and (not 1 <= self.viewing <= len(e.steps) or (e.state == ACTIVE and self.viewing == e.position)):
+            self.viewing = None
         done, total = e.progress()
         self.progress.setText(f"{done} of {total} steps done")
         self.progress_bar.setMaximum(max(total, 1))
         self.progress_bar.setValue(done)
         step = e.current_step()
-        self.step_tile.set_watermark(str(e.position) if e.state == ACTIVE and e.position else "")
-        if e.state == NOT_STARTED:
-            self.step_text.setText("Press Start to begin.")
+        statuses = e.statuses()
+        active = e.state == ACTIVE
+        viewed = None if self.viewing is None else e.steps[self.viewing - 1][1]
+        self.step_tile.set_watermark(str(self.viewing) if viewed is not None else (str(e.position) if active and e.position else ""))
+        if viewed is not None:
+            self.step_pill.setText(f"Looking at step {self.viewing}, not your current step")
+            self.step_text.setText(f"<b>Step {self.viewing}:</b> {html.escape(viewed.goal)}")
+            said = {"done": "You marked this step done.", "skipped": "You skipped this step.", "pending": "This step is still to do."}[statuses[self.viewing - 1]]
+            self.detail.setText(said + "\n" + self._detail_for(viewed, True))
+        elif e.state == NOT_STARTED:
+            self.step_pill.setText("Not started")
+            self.step_text.setText("Check what this tutorial assumes, then press Start." if self.prereqs else "Press Start to begin.")
             self.detail.setText("")
         elif e.state == FINISHED:
+            self.step_pill.setText("Finished")
             self.step_text.setText("Session finished. Well done!")
             self.detail.setText("")
         else:
-            self.step_text.setText(f"<b>Step {e.position}:</b> {step.goal}")
-            lines = [h.text for h in step.how_to]
-            check = checkability(step)
-            if check.level != "checkable":
-                lines.append(f"{check.full} Press Done when you have finished it.")
-            self.detail.setText("\n".join(lines))
+            self.step_pill.setText("Your current step" + (" (paused)" if self.paused else ""))
+            self.step_text.setText(f"<b>Step {e.position}:</b> {html.escape(step.goal)}")
+            self.detail.setText(self._detail_for(step))
+        self.steps_list.show_state(statuses, e.position if active else None, self.viewing)
+        self.goto_button.setVisible(viewed is not None and active)
+        self.unview_button.setVisible(viewed is not None)
+        self.prereq_button.setVisible(bool(self.prereqs) and e.state != NOT_STARTED)
+        self.prereq_tile.setVisible(bool(self.prereqs) and (e.state == NOT_STARTED or self.prereq_button.isChecked() or bool(self.prereq_missing)))
+        self.prereq_label.setText(self._prereq_html())
         self._on_step_change(step)
         self.start_button.setEnabled(e.state == NOT_STARTED)
-        self.done_button.setEnabled(e.state == ACTIVE)
-        self.skip_button.setEnabled(e.state == ACTIVE)
-        self.prev_button.setEnabled(e.state == ACTIVE and (e.position or 1) > 1)
+        self.done_button.setEnabled(active)
+        self.skip_button.setEnabled(active)
+        self.prev_button.setEnabled(active and (e.position or 1) > 1)
+        self.pause_button.setEnabled(active and (self.paused or self.watching))
+        self.pause_button.setToolTip(self.PAUSE_TIP if self.pause_button.isEnabled() or not active else "Pausing holds GuideWire's watching. It is not watching your screen now, so the step already waits for you.")
         self._sync_timer()
         self._refresh_panel()
 

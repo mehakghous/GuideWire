@@ -317,6 +317,9 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
     panel = find_phrase(ctx.words, ref.panel, box, min_score=0.9) if ref.panel else []
     win_screen = ctx.window_to_screen(win.rect)
     if ref.panel and not panel:
+        lone = _lone_field(ctx, ref, box, f"the {tab_name} tab")
+        if lone is not None:
+            return lone
         return Grounded("property", OFFSCREEN, win_screen, 0.6, (f"the panel '{ref.panel}' was not read in the {tab_name} tab",), f"Scroll the Properties editor to find the {ref.panel} panel.", label=ref.label)
     below = Rect(box.x, panel[0][0].y if panel else box.y, box.w, box.h - ((panel[0][0].y - box.y) if panel else 0))
     field_hit = [(r, s) for r, s in find_phrase(ctx.words, ref.prop or ref.label, below, min_score=0.9) if not panel or r.y > panel[0][0].y]
@@ -333,6 +336,21 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
         return Grounded("property", OFFSCREEN, ctx.frame_to_screen(header), 0.6, (f"the header '{ref.panel}' is shown and the panel under it is closed",),
                         f"Click {ref.panel} to open it; {ref.prop} is inside.", label=ref.label, matched=ref.panel or "")
     return Grounded("property", UNKNOWN, win_screen, 0.3, ("the tab is open; its content was not read",), f"Look for {ref.prop} in the {tab_name} tab.", label=ref.label)
+
+
+def _lone_field(ctx: GroundContext, ref: TargetRef, box: Rect, where: str, kind: str = "property") -> Grounded | None:
+    """The field's label when its panel header could not be read. Some panels are not headed by a fixed word: a constraint or a modifier is headed by its NAME, which the learner may have changed, and the
+    OCR reads a header with a field in it unreliably. The label itself is enough when it appears ONCE in the editor (a second place would make pointing at one a guess: nothing is pointed at then). The
+    confidence is lower than with the header, and the evidence says so."""
+    label = ref.prop or ref.label
+    hits = find_phrase(ctx.words, label, box, min_score=0.9)
+    if len(hits) == 1:
+        r, s = hits[0]
+        return Grounded(kind, VISIBLE, ctx.frame_to_screen(widget_rect(ctx.words, r, box)), round(min(s, 0.8), 2),
+                        (f"the label '{label}' was read once in {where}; the header of '{ref.panel}' was not read, so only the label is evidence",), f"Find {label} in the {ref.panel} panel.", complete=True, label=ref.label)
+    if len(hits) > 1:
+        return Grounded(kind, AMBIGUOUS, None, 0.3, (f"'{label}' appears {len(hits)} times in {where} and the header of '{ref.panel}' was not read",), f"Find {label} in the {ref.panel} panel (it appears in more than one place).", ambiguous=True, label=ref.label)
+    return None
 
 
 def _panel_open(ctx: GroundContext, header: Rect, box: Rect, tab: str | None) -> bool:
@@ -361,6 +379,53 @@ def widget_rect(words: list[Word], label: Rect, region: Rect, reach: int = 190) 
     left = max(region.x, label.x - 22)                                   # the box of a checkbox, about as wide as the row is high plus its gap
     x = min(r.x, left) if not any(w.rect.x + w.rect.w <= label.x and label.x - (w.rect.x + w.rect.w) <= 22 and abs(w.rect.y - label.y) <= label.h for w in words) else r.x
     return Rect(x, r.y, r.x + r.w - x, r.h)
+
+
+def ground_sidebar(ctx: GroundContext, ref: TargetRef) -> Grounded:
+    """A field of the 3D view's sidebar (the N panel): is the sidebar shown, is the right panel in it, is the field's label under that panel? The sidebar's tabs (Item, Tool, View) are drawn along its right
+    edge and are not located: the words say which one. Without the add-on the sidebar's place is not known: the panel header and the label are looked for on the whole screen and believed only when they
+    agree (a header with the label under it) and the label is read once."""
+    label = ref.prop or ref.label
+    tab = (ref.tab or "").title()
+    way = f"Open the sidebar (press N with the mouse over the 3D view){', its ' + tab + ' tab' if tab else ''}"
+    path = f"{ref.panel + ' > ' if ref.panel else ''}{label}"
+    ui = ctx.ui
+    area = None if ui is None else ui.area("VIEW_3D")
+    known = ui is not None and area is not None and ctx.mapper is not None
+    region_screen = None
+    if known:
+        shown = area.region("UI")
+        if area.sidebar_shown is False or shown is None:
+            edge = Rect(area.rect.x + max(0, area.rect.w - 24), area.rect.y, min(24, area.rect.w), area.rect.h)          # the right edge of the 3D view, where Blender shows a small arrow to bring the sidebar back
+            return Grounded("sidebar", HIDDEN, ctx.window_to_screen(edge), 1.0, ("the 3D view's sidebar region is hidden",), f"{way}, then {path}. (View > Sidebar also opens it.)", label=ref.label)
+        box = ctx.window_to_frame(shown.rect)
+        if box is None:
+            return Grounded("sidebar", UNKNOWN, None, 0.0, ("the snapshot does not fit this frame",), f"{way}, then {path}.", label=ref.label)
+        region_screen, where = ctx.window_to_screen(shown.rect), "the sidebar"
+    else:
+        box, where = Rect(0, 0, 100000, 100000), "the window"
+    panel = find_phrase(ctx.words, ref.panel, box, min_score=0.9) if ref.panel else []
+    if ref.panel and not panel:
+        lone = _lone_field(ctx, ref, box, where, "sidebar") if known else None
+        if lone is not None:
+            return lone
+        if not known:
+            return Grounded("sidebar", UNKNOWN, None, 0.0, ("no add-on: the sidebar cannot be read",), f"{way}, then {path}.", label=ref.label)
+        return Grounded("sidebar", OFFSCREEN, region_screen, 0.6, (f"the panel '{ref.panel}' was not read in the sidebar",),
+                        f"Look in the sidebar{' (' + tab + ' tab)' if tab else ''} for the {ref.panel} panel, scrolling it if needed, then {label}.", label=ref.label)
+    below = Rect(box.x, panel[0][0].y, box.w, box.y + box.h - panel[0][0].y) if panel else box
+    hits = [(r, s) for r, s in find_phrase(ctx.words, label, below, min_score=0.9) if not panel or r.y > panel[0][0].y]
+    if hits and (known or len(hits) == 1):
+        r, s = hits[0]
+        ev = (f"the panel header '{ref.panel}' and the label '{label}' beneath it were both read in {where}",) if panel else (f"the label '{label}' was read in {where}",)
+        conf = min(s, 0.95 if panel else 0.8) * (1.0 if known else 0.9)
+        return Grounded("sidebar", VISIBLE, ctx.frame_to_screen(widget_rect(ctx.words, r, box)), round(conf, 2), ev, f"Find {label}{' in the ' + ref.panel + ' panel' if ref.panel else ''} in the sidebar.", complete=True, label=ref.label)
+    if hits:
+        return Grounded("sidebar", AMBIGUOUS, None, 0.3, (f"'{label}' appears {len(hits)} times on screen",), "", ambiguous=True, label=ref.label)
+    if panel:
+        return Grounded("sidebar", OFFSCREEN, ctx.frame_to_screen(panel[0][0]), 0.6, (f"the header '{ref.panel}' is shown and '{label}' is not under it",),
+                        f"Click {ref.panel} to open it, or scroll the sidebar: {label} is inside.", label=ref.label, matched=ref.panel or "")
+    return Grounded("sidebar", UNKNOWN, region_screen, 0.3, ("the sidebar is open; the label was not read in it",), f"Look for {label} in the sidebar{' (' + tab + ' tab)' if tab else ''}.", label=ref.label)
 
 
 def ground_operator_panel(ctx: GroundContext, ref: TargetRef) -> Grounded:
@@ -450,6 +515,8 @@ def ground_target(ctx: GroundContext, ref: TargetRef) -> Grounded:
         return ground_mode(ctx, ref)
     if ref.kind == "property":
         return ground_property(ctx, ref)
+    if ref.kind == "sidebar":
+        return ground_sidebar(ctx, ref)
     if ref.kind == "operator_panel":
         return ground_operator_panel(ctx, ref)
     if ref.kind == "context_menu":

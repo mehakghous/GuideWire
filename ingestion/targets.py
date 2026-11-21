@@ -28,7 +28,9 @@ CONTAINERS = {
     "mode selector": "mode", "mode dropdown": "mode", "mode menu": "mode", "mode": "mode", "interaction mode": "mode",
     "properties": "property", "properties editor": "property", "properties panel": "property", "property editor": "property",
     "viewport context menu": "context_menu", "context menu": "context_menu", "right-click menu": "context_menu", "right click menu": "context_menu",
+    "sidebar": "sidebar", "side bar": "sidebar", "side panel": "sidebar", "sidebar panel": "sidebar", "n panel": "sidebar", "n-panel": "sidebar", "npanel": "sidebar", "3d view sidebar": "sidebar",
 }
+SIDEBAR_TABS = {"item": "ITEM", "tool": "TOOL", "view": "VIEW"}      # the tabs along the 3D view sidebar's right edge (add-ons add more)
 _SEP = re.compile(r"\s*(?:>|›|→|‣|->)\s*")
 
 
@@ -160,6 +162,44 @@ def _tool(cat: Catalog, label: str, mode: str | None) -> TargetRef | None:
     return TargetRef(kind="tool", label=label, id=ids[0], mode=first_mode, candidates=ids[1:] + sorted({h[1] for h in hits} - set(ids)), confidence=0.6, catalog_version=cat.version)
 
 
+def _tab_id(cat: Catalog, name: str) -> str | None:
+    """The Properties tab a tutorial's words name: "Bone Constraints", "Bone Constraint properties", "Object tab", "Object Data" (any of them, singular or plural)."""
+    n = _n(name)
+    for cand in (n, n.removesuffix(" properties").strip(), n.removesuffix(" tab").strip(), n.removeprefix("object ").strip()):
+        cand = cand.removesuffix(" properties").removesuffix(" tab").strip()
+        for form in (cand, cand + "s", cand.removesuffix("s")):
+            if form and form in cat.tabs:
+                return cat.tabs[form]
+    return None
+
+
+def _property(cat: Catalog, segs: list[str]) -> TargetRef:
+    """`Properties > <tab> > [<panel> >] <field>`."""
+    leaf = segs[-1]
+    tab = _tab_id(cat, segs[1])
+    panel = segs[2] if len(segs) >= 4 else None
+    ids = cat.panels.get((tab.lower(), _n(panel)), []) if tab and panel else []
+    checks = [tab is not None] + ([bool(ids)] if panel else [])
+    return TargetRef(kind="property", label=leaf, tab=tab, panel=panel, prop=leaf, path=segs[1:], candidates=ids, confidence=round(sum(checks) / len(checks), 2) if checks else 0.0, catalog_version=cat.version)
+
+
+def _sidebar(cat: Catalog, segs: list[str]) -> TargetRef | None:
+    """`Sidebar > [<tab>] > [<panel> >] <field>`: the N panel of the 3D view (Item > Transform > Roll). A tutorial often says "Sidebar > Bone properties > Transform" for what is really the Bone tab of the Properties editor
+    (it has its own Transform panel with Roll): a second word that names a Properties tab, and is not one of the sidebar's own tabs, is looked up there."""
+    rest = segs[1:]
+    head = _n(rest[0]).removesuffix(" tab").strip()
+    if head not in SIDEBAR_TABS and len(rest) >= 2 and _tab_id(cat, rest[0]) is not None and ("propert" in _n(rest[0]) or len(rest) >= 3):
+        return _property(cat, ["Properties", *rest]) if len(rest) >= 2 else None
+    tab = SIDEBAR_TABS.get(head)
+    if tab:
+        rest = rest[1:]
+    if not rest:
+        return None
+    leaf = rest[-1]
+    panel = rest[-2] if len(rest) >= 2 else None
+    return TargetRef(kind="sidebar", label=leaf, tab=tab, panel=panel, prop=leaf, path=segs[1:], confidence=1.0 if (tab or panel) else 0.7, catalog_version=cat.version)
+
+
 def resolve_action(action: Action, mode_hint: str | None = None, cat: Catalog | None = None, context_operator: str | None = None) -> TargetRef | None:
     """The target an action means, or None. `mode_hint` is the interaction mode the step starts in (EDIT_MESH ...): the toolbar and the operators differ per mode. `context_operator` is the operator the
     step's earlier key press or menu item started: its pop-up menu has a title Blender does not list ("Set Parent To" is the popup of Make Parent, Ctrl+P), so a choice in it is looked up in that operator."""
@@ -195,11 +235,9 @@ def resolve_action(action: Action, mode_hint: str | None = None, cat: Catalog | 
         op, cands, conf = _pick_operator(cat, leaf, mode_hint)
         return TargetRef(kind="context_menu", label=leaf, path=segs[1:], operator=op, candidates=cands, confidence=conf if op else 0.4, catalog_version=v)
     if kind == "property" and len(segs) >= 3:
-        tab = cat.tabs.get(_n(segs[1])) or cat.tabs.get(_n(segs[1]).removeprefix("object ").strip())
-        panel = segs[2] if len(segs) >= 4 else None
-        ids = cat.panels.get((tab.lower(), _n(panel)), []) if tab and panel else []
-        checks = [tab is not None] + ([bool(ids)] if panel else [])
-        return TargetRef(kind="property", label=leaf, tab=tab, panel=panel, prop=leaf, path=segs[1:], candidates=ids, confidence=round(sum(checks) / len(checks), 2) if checks else 0.0, catalog_version=v)
+        return _property(cat, segs)
+    if kind == "sidebar" and len(segs) >= 2:
+        return _sidebar(cat, segs)
     if kind is not None:
         return None                                              # a container word with nothing after it: nothing to point at
 

@@ -7,6 +7,7 @@ import pytest
 pytest.importorskip("PyQt6")          # CI installs no Qt: the screen guide needs it
 
 import vision_fakes as vf  # noqa: E402
+from PyQt6.QtCore import Qt  # noqa: E402
 from app import vision_bridge as vb  # noqa: E402
 from app.ui.screen_guide import ScreenGuide  # noqa: E402
 from shared.grounding import Rect  # noqa: E402
@@ -372,3 +373,203 @@ def test_the_window_lookup_walks_every_window_only_now_and_then(monkeypatch):
     winplatform.find_window_cached("Blender", ("blender",))               # hwnd 0 is not a real window, so this one walks again: the walk is only skipped for a window that is still there
     assert len(calls) >= 1
     winplatform._FOUND.clear()
+
+
+# ---- pause, going back, the list of all steps, prerequisites
+def _at_s02_in_edit_mode(env):
+    """s02 ("Enter Edit Mode") ends in EDIT_MESH; the fake application is already there."""
+    screen, engine, svc, overlay = env
+    engine.complete()
+    screen.refresh()
+    svc.observed = {"mode": "EDIT_MESH"}
+    return screen, engine, svc, overlay
+
+
+def test_pause_holds_the_step_even_when_the_application_shows_it_done(env):
+    screen, engine, svc, overlay = _at_s02_in_edit_mode(env)
+    screen.pause_button.click()
+    assert screen.paused and screen.pause_button.text() == "Resume" and "Paused" in screen.watch_label.text()
+    screen.poll()
+    assert engine.current_step().id == "s02" and overlay.shown == 0 and not screen.looking       # nothing was looked at, drawn or completed
+    screen.pause_button.click()
+    assert not screen.paused and screen.pause_button.text() == "Pause"
+    screen.poll()
+    assert engine.current_step().id == "s03"                                                    # watching again: the step it saw done completes
+
+
+def test_a_look_that_was_in_flight_when_the_learner_paused_completes_nothing(env):
+    screen, engine, svc, _o = _at_s02_in_edit_mode(env)
+    step = engine.current_step()
+    look = screen.bridge.look(step, "blender")                                                  # the screen was read ...
+    screen.toggle_pause()                                                                       # ... and then the learner paused
+    screen._busy = True
+    screen._looked(look, step.id)
+    assert engine.current_step().id == "s02" and not screen._busy
+
+
+def test_previous_step_holds_there_instead_of_being_completed_again_at_once(env):
+    screen, engine, svc, _o = _at_s02_in_edit_mode(env)
+    screen.poll()
+    assert engine.current_step().id == "s03"
+    svc.observed = {"mode": "EDIT_MESH"}                                                        # still in Edit Mode: s02's own result holds right now
+    screen.prev_button.click()
+    assert engine.current_step().id == "s02" and screen.paused and "paused" in screen.status.text().lower()
+    for _ in range(3):
+        screen.poll()
+    assert engine.current_step().id == "s02"                                                    # the learner can look at it as long as they like
+    assert "Step 2" in screen.step_text.text() and "(paused)" in screen.step_pill.text()
+    screen.pause_button.click()
+    screen.poll()
+    assert engine.current_step().id == "s03"                                                    # Resume: it sees the step done again and moves on
+
+
+def test_done_and_skip_end_a_pause_because_the_learner_is_moving_on(env):
+    screen, engine, svc, _o = _at_s02_in_edit_mode(env)
+    screen.toggle_pause()
+    screen.done_button.click()
+    assert not screen.paused and engine.current_step().id == "s03"
+    screen.toggle_pause()
+    screen.skip_button.click()
+    assert not screen.paused
+
+
+def test_the_small_guide_has_a_pause_button_that_does_the_same(env):
+    screen, engine, svc, _o = _at_s02_in_edit_mode(env)
+    svc.observed = {"mode": "OBJECT"}
+    screen.poll()
+    p = screen.panel
+    assert p is not None and p.pause_button.text() == "Pause"
+    p.pause_button.click()
+    assert screen.paused and screen.panel.pause_button.text() == "Resume" and "Paused" in screen.panel.hint.text()
+    p.toggle_minimized()
+    assert p.pause_button.isHidden()                                                            # the minimized tab stays small
+    p.toggle_minimized()
+    p.pause_button.click()
+    assert not screen.paused
+
+
+def test_the_list_shows_every_step_and_picks_out_the_one_you_are_on(env):
+    screen, engine, svc, _o = env
+    rows = screen.steps_list.rows
+    assert len(rows) == len(engine.steps) and all(r.text.text().startswith(f"{i}. ") for i, r in enumerate(rows, start=1))
+    assert screen.steps_list.states()[0] == "current" and set(screen.steps_list.states()[1:]) == {"pending"}
+    screen.done_button.click()
+    screen.skip_button.click()
+    st = screen.steps_list.states()
+    assert st[:3] == ["done", "skipped", "current"] and rows[0].word.text() == "Done" and rows[1].word.text() == "Skipped" and rows[2].word.text() == "Now"      # a word as well as a colour
+    screen.prev_button.click()
+    assert screen.steps_list.states()[2] == "pending" and screen.steps_list.states()[1] == "current"
+
+
+def test_clicking_a_step_only_looks_at_it_and_go_to_moves_the_session(env):
+    screen, engine, svc, _o = env
+    for _ in range(3):
+        engine.complete()
+    screen.refresh()
+    assert engine.position == 4
+    screen.steps_list.rows[0].clicked.emit(1)                                                    # what a click on the row does
+    assert engine.position == 4 and screen.viewing == 1
+    assert "Step 1" in screen.step_text.text() and "not your current step" in screen.step_pill.text() and "marked this step done" in screen.detail.text()
+    assert not screen.goto_button.isHidden() and not screen.unview_button.isHidden() and screen.steps_list.rows[0].property("viewing") is True
+    screen.unview_button.click()
+    assert screen.viewing is None and "Step 4" in screen.step_text.text()
+    screen._view(2)
+    screen.goto_button.click()
+    assert engine.position == 2 and screen.viewing is None and screen.paused                    # going back holds there, like Previous step
+    assert engine.statuses()[1:4] == ["pending", "pending", "pending"] and engine.statuses()[0] == "done"
+
+
+def test_a_step_shows_how_to_do_it_and_how_to_tell_it_worked_but_not_the_editors_notes(env):
+    from shared.step_record import HowTo
+    screen, engine, svc, _o = env
+    step = engine.steps[0][1].model_copy(update={"how_to": [HowTo(text="Open the Add menu", support="said")], "check": [HowTo(text="A cube is in the scene", support="shown")],
+                                                 "flags": ["expected/start state (ARMATURE) derived from the knowledge base (blender.add_bones), not read from the tutorial"]})
+    text = screen._detail_for(step)
+    assert "How to do it" in text and "Open the Add menu" in text and "How you can tell it worked" in text and "A cube is in the scene" in text
+    assert "Notes" not in text and "knowledge base" not in text and "vocabulary" not in text
+
+
+def test_a_long_video_title_wraps_and_cannot_make_the_page_wider(env):
+    screen, engine, svc, _o = env
+    short = screen.scroll.widget().minimumSizeHint().width()
+    screen.title.setText("Session: " + "How to Rig a Leg with Inverse Kinematics in Blender " * 6)
+    assert screen.title.wordWrap() and screen.title.minimumSizeHint().width() < 300
+    assert screen.scroll.widget().minimumSizeHint().width() == short                            # the page needs exactly what it needed with a short title
+
+
+def test_a_page_wider_than_the_window_can_still_be_scrolled_sideways(env):
+    screen, engine, svc, _o = env
+    assert screen.scroll.horizontalScrollBarPolicy() != Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+
+
+def test_the_list_of_steps_sits_beside_the_tiles_on_a_wide_window_and_below_them_on_a_narrow_one(env):
+    screen, engine, svc, _o = env
+    screen.resize(1200, 700)
+    screen.show()
+    assert not screen._narrow and screen._grid.getItemPosition(screen._grid.indexOf(screen._steps_tile))[1] == 2
+    screen.resize(700, 700)
+    assert screen._narrow and screen._grid.getItemPosition(screen._grid.indexOf(screen._steps_tile))[:2] == (5, 0)
+    screen.resize(1200, 700)
+    assert not screen._narrow
+    screen.close()
+
+
+@pytest.fixture
+def leg_session():
+    """The real leg-rigging tutorial: it starts with a leg mesh that is already modelled."""
+    import json
+
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+
+    from app.db import Database
+    from app.session_engine import SessionEngine
+    from app.step_loader import load_steps
+    from app.ui.screens import SessionScreen
+    qapp = QApplication.instance() or QApplication([])
+    db = Database(":memory:")
+    uid = db.add_user("p@x.com", b"h")
+    steps = load_steps(json.loads(Path("demo/data/blender_leg_ik_PctSMB-RGsM.json").read_text(encoding="utf-8")))
+    tid = db.save_tutorial(uid, steps.title or "Leg", steps, source_type="youtube")
+    engine = SessionEngine.create(db, uid, tid)
+    svc = FakeService()
+    screen = SessionScreen()
+    screen.sync = True
+    screen.guide = ScreenGuide(lambda: FakeOverlay())
+    screen.set_bridge(vb.VisionBridge(lambda app: svc, window_finder=lambda app: (0, 0, 1920, 1080)))
+    screen.load(engine)
+    yield screen, engine, svc
+    screen.timer.stop()
+    db.close()
+    del qapp
+
+
+def test_the_session_says_what_the_tutorial_assumes_before_it_starts(leg_session):
+    screen, engine, _svc = leg_session
+    assert engine.state == "not_started" and any("leg mesh" in p.text for p in screen.prereqs)
+    assert screen.prereq_tile.isVisibleTo(screen) and "leg mesh" in screen.prereq_label.text() and "assumes" in screen.step_text.text()
+    assert "Session: " in screen.title.text()
+    screen.start_button.click()
+    assert not screen.prereq_tile.isVisibleTo(screen) and screen.prereq_button.isVisibleTo(screen)      # out of the way once started, one click to read it again
+    screen.prereq_button.click()
+    assert screen.prereq_tile.isVisibleTo(screen)
+
+
+def test_a_scene_without_a_mesh_is_said_when_the_application_reports_one(leg_session):
+    screen, engine, svc = leg_session
+    screen.start_button.click()
+    svc.observed = {"mode": "OBJECT", "nodes": ["ARMATURE"]}                                      # the application lists what is in the scene: no mesh
+    screen.poll()
+    assert screen.prereq_missing and screen.prereq_tile.isVisibleTo(screen) and "did not see" in screen.prereq_label.text()
+    assert engine.state == "active"                                                              # said, never enforced
+
+
+def test_a_scene_with_a_mesh_or_one_that_cannot_be_read_gives_no_warning(leg_session):
+    screen, engine, svc = leg_session
+    screen.start_button.click()
+    svc.observed = {"mode": "OBJECT"}                                                            # no list of nodes (no add-on): silence is not a warning
+    screen.poll()
+    assert not screen.prereq_missing and not screen._prereq_checked
+    svc.observed = {"mode": "OBJECT", "nodes": ["MESH", "ARMATURE"]}
+    screen.poll()
+    assert screen._prereq_checked and not screen.prereq_missing

@@ -157,6 +157,28 @@ QPushButton#send:disabled { background: @disabled_bg@; color: @disabled@; border
 QScrollArea#chatScroll, QScrollArea#pageScroll { background: transparent; border: none; }
 QScrollArea#chatScroll > QWidget > QWidget, QScrollArea#pageScroll > QWidget > QWidget { background: transparent; }
 QListWidget#chatList::item { padding: 8px 12px; border-radius: 16px; }
+
+/* ---- the session's list of all steps: the one you are on is picked out, the one you are only looking at has a dashed edge */
+QScrollArea#stepScroll, QScrollArea#resultScroll { background: transparent; border: none; }
+QScrollArea#stepScroll > QWidget > QWidget, QScrollArea#resultScroll > QWidget > QWidget { background: transparent; }
+QFrame#stepRow { background: transparent; border: 2px solid transparent; border-radius: 16px; }
+QFrame#stepRow:hover { background: @accent_soft@; }
+QFrame#stepRow[state="current"] { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @selected_hi@, stop:1 @selected@); border: 2px solid @accent@; }
+QFrame#stepRow[viewing="true"] { border: 2px dashed @kicker@; }
+QFrame#stepRow QLabel#stepMark { color: @accent@; font-weight: 800; }
+QFrame#stepRow[state="current"] QLabel#stepText { font-weight: 700; }
+QFrame#stepRow[state="done"] QLabel#stepText { color: @muted@; }
+QFrame#stepRow QLabel#stepWord { color: @muted@; font-size: 9pt; font-weight: 700; }
+QFrame#stepRow[state="done"] QLabel#stepWord, QFrame#stepRow[state="done"] QLabel#stepMark { color: @ok@; }
+QFrame#stepRow[state="skipped"] QLabel#stepWord, QFrame#stepRow[state="skipped"] QLabel#stepMark { color: @warn@; }
+QFrame#stepRow[state="current"] QLabel#stepWord { color: @accent@; }
+
+/* ---- Find a tutorial: every suggestion is a card you can read in full */
+QFrame#card { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @tile_hi@, stop:1 @tile@); border: 2px solid @hi@; border-radius: 20px; }
+QFrame#card:hover { background: @accent_soft@; }
+QFrame#card[selected="true"] { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @selected_hi@, stop:1 @selected@); border: 2px solid @accent@; }
+QLabel#cardTitle { font-weight: 700; }
+QLabel#cardMeta { color: @muted@; font-size: 9.5pt; }
 QPushButton#linkButton { background: transparent; border: none; color: @accent@; font-weight: 700; padding: 2px 6px; min-height: 0; }
 QPushButton#linkButton:hover { color: @accent_hover@; background: transparent; }
 QToolTip { background: @tile@; color: @text@; border: 1px solid @border@; padding: 4px; }

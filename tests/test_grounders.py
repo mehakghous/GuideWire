@@ -243,3 +243,62 @@ def test_a_neighbour_in_the_same_header_row_is_another_menu_not_an_item_of_the_f
     assert r.matched == "Add" and r.note == "Click Add, then Mesh > Cylinder"
     dropdown = words + [vf.word("Mesh", 252, 60, 44, 16, 5)]                              # once the Add menu is open, its Mesh item is below the header
     assert g.ground_menu(vf.make_context(dropdown), TargetRef(kind="menu", label="Cylinder", path=["Add", "Mesh", "Cylinder"])).matched == "Mesh"
+
+
+# ---- the sidebar (N panel) and fields whose panel header cannot be read
+SIDEBAR = TargetRef(kind="sidebar", label="Roll", panel="Transform", prop="Roll")
+
+
+def sidebar_state(shown=True):
+    st = vf.tool_state("EDIT_ARMATURE", context="BONE", tabs=["TOOL", "OBJECT", "DATA", "BONE", "BONE_CONSTRAINT"])
+    area = st["ui"]["areas"][0]
+    area["sidebar_shown"] = shown
+    if shown:
+        area["regions"].append({"type": "UI", "x": 850, "y": 71, "width": 270, "height": 600})
+    return st
+
+
+def test_a_sidebar_field_is_found_under_its_panel_header_and_passes_the_gate():
+    ctx = vf.make_context(vf.phrase("Transform", 880, 100, 16, 3) + vf.phrase("Roll", 880, 160, 16, 4), sidebar_state(), "EDIT_ARMATURE")
+    r = g.ground_target(ctx, SIDEBAR)
+    assert r.state == g.VISIBLE and r.complete and r.rect.y == 160 and "header" in r.evidence[0] and gate(r).ok
+
+
+def test_a_hidden_sidebar_is_said_with_the_key_that_opens_it_and_its_edge_is_pointed_at():
+    r = g.ground_target(vf.make_context([], sidebar_state(False), "EDIT_ARMATURE"), SIDEBAR)
+    g_ = gate(r)
+    assert r.state == g.HIDDEN and "press N" in r.note and g_.ok and r.rect.x + r.rect.w == 1121          # the right edge of the 3D view
+
+
+def test_a_sidebar_panel_that_is_not_open_or_not_in_view_says_what_to_do():
+    state = sidebar_state()
+    header_only = g.ground_target(vf.make_context(vf.phrase("Transform", 880, 100, 16, 3), state, "EDIT_ARMATURE"), SIDEBAR)
+    assert header_only.state == g.OFFSCREEN and "Click Transform to open it" in header_only.note
+    nothing = g.ground_target(vf.make_context([], state, "EDIT_ARMATURE"), SIDEBAR)
+    assert nothing.state == g.OFFSCREEN and "Transform panel" in nothing.note and nothing.rect is not None
+
+
+def test_the_label_alone_is_enough_for_a_sidebar_field_when_it_is_read_once_but_with_less_confidence():
+    r = g.ground_target(vf.make_context(vf.phrase("Roll", 880, 160, 16, 4), sidebar_state(), "EDIT_ARMATURE"), SIDEBAR)
+    assert r.state == g.VISIBLE and r.confidence == 0.8 and "header" in r.evidence[0] and "not read" in r.evidence[0]
+
+
+def test_without_the_add_on_a_sidebar_field_needs_the_header_and_the_label_agreeing():
+    both = vf.make_context(vf.phrase("Transform", 1000, 100, 16, 3) + vf.phrase("Roll", 1000, 160, 16, 4), None, "EDIT_ARMATURE")
+    assert gate(g.ground_target(both, SIDEBAR)).ok
+    assert not gate(g.ground_target(vf.make_context(vf.phrase("Roll", 1000, 160, 16, 4), None, "EDIT_ARMATURE"), SIDEBAR)).ok       # a label alone could be anywhere
+    twice = vf.make_context(vf.phrase("Transform", 1000, 100, 16, 3) + vf.phrase("Roll", 1000, 160, 16, 4) + vf.phrase("Roll", 1000, 220, 16, 5), None, "EDIT_ARMATURE")
+    assert g.ground_target(twice, SIDEBAR).state == g.AMBIGUOUS
+
+
+HEAD_TAIL = TargetRef(kind="property", label="Head/Tail", tab="BONE_CONSTRAINT", panel="Copy Location", prop="Head/Tail")
+
+
+def test_a_constraint_field_is_pointed_at_when_only_its_label_was_read_because_the_panel_is_headed_by_a_name():
+    state = vf.tool_state("POSE", context="BONE_CONSTRAINT", tabs=["TOOL", "OBJECT", "DATA", "BONE", "BONE_CONSTRAINT"])
+    lone = g.ground_target(vf.make_context(vf.phrase("Head/Tail", 1180, 300, 16, 3), state, "POSE"), HEAD_TAIL)
+    assert lone.state == g.VISIBLE and gate(lone).ok and lone.confidence == 0.8 and "header" in lone.evidence[0]
+    two = g.ground_target(vf.make_context(vf.phrase("Head/Tail", 1180, 300, 16, 3) + vf.phrase("Head/Tail", 1180, 400, 16, 4), state, "POSE"), HEAD_TAIL)
+    assert two.state == g.AMBIGUOUS and not gate(two).ok                                              # two constraints have one: pointing at either would be a guess
+    none = g.ground_target(vf.make_context([], state, "POSE"), HEAD_TAIL)
+    assert none.state == g.OFFSCREEN and "Scroll the Properties editor" in none.note                   # as before

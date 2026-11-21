@@ -1,6 +1,5 @@
 """What a tutorial assumes you already have (app/prerequisites.py): the leg mesh of the leg-rigging tutorial, and no false alarm for the tutorials that build their own model."""
 import json
-from pathlib import Path
 
 import pytest
 

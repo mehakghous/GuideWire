@@ -39,6 +39,24 @@ def test_a_result_that_was_already_true_when_the_step_began_is_not_evidence():
     assert evaluate_step(plain, now).status == "met"
 
 
+def test_a_result_that_was_already_seen_at_entry_is_not_evidence_even_when_the_step_does_not_list_it_as_a_start_state():
+    """The model wrote `node_exists BONE` as the result of "Subdivide" with only the mode as start state; the bone of the earlier step was already there."""
+    s = step(start_state=[P(kind="mode", target="EDIT_ARMATURE")], expected_state=[P(kind="node_exists", target="BONE")], verifiable=True)
+    entry = {"nodes": ["ARMATURE", "BONE"], "node_counts": {"ARMATURE": 1, "BONE": 1}}
+    assert evaluate_step(s, entry, entry=entry).status == "unmet"                                   # was "met" before anything was done
+    assert evaluate_step(s, {"nodes": ["ARMATURE", "BONE"], "node_counts": {"ARMATURE": 1, "BONE": 11}}, entry=entry).status == "met"
+    assert evaluate_step(s, {"nodes": ["ARMATURE", "BONE"]}, entry={"nodes": ["ARMATURE", "BONE"]}).status == "unverifiable"   # no counts: cannot be told
+    fresh = {"nodes": ["ARMATURE"], "node_counts": {"ARMATURE": 1}}
+    assert evaluate_step(s, {"nodes": ["ARMATURE", "BONE"], "node_counts": {"ARMATURE": 1, "BONE": 1}}, entry=fresh).status == "met"   # not there at entry: it appeared, as before
+
+
+def test_a_count_threshold_already_met_at_entry_needs_a_further_increase():
+    s = step(expected_state=[P(kind="node_count", target="BONE", value=2)], verifiable=True)
+    at_entry = {"probe": True, "nodes": ["BONE"], "node_counts": {"BONE": 3}}
+    assert evaluate_step(s, at_entry, entry=at_entry).status == "unmet"
+    assert evaluate_step(s, {**at_entry, "node_counts": {"BONE": 4}}, entry=at_entry).status == "met"
+
+
 def test_a_mode_that_is_both_start_and_result_does_not_block_completion():
     s = step(start_state=[P(kind="mode", target="OBJECT")], expected_state=[P(kind="mode", target="OBJECT"), P(kind="selection_type", target="MESH")], verifiable=True)
     assert evaluate_step(s, {"mode": "OBJECT", "selection_types": ["MESH"]}).status == "met"

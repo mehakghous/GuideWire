@@ -45,3 +45,25 @@ def test_step_9_does_not_complete_just_because_an_armature_exists(eng):
     assert not eng.auto_check(seen, entry=seen) and eng.position == 9        # nothing was added since the step began
     more = {**seen, "nodes": ["ARMATURE", "MESH"], "node_counts": {"ARMATURE": 2, "MESH": 1}}
     assert eng.auto_check(more, entry=seen) and eng.position == 10          # a second armature appeared: the action happened
+
+
+def test_the_subdivide_step_is_not_completed_by_the_bone_that_already_exists(eng):
+    """Step 14 ("Subdivide single bone into bone chain") has `node_exists BONE` as its result and does NOT list it as a start state. The single bone from the step before made it true already, so the
+    step used to complete itself the moment it began and the learner never saw it."""
+    _go_to(eng, 14)
+    step = eng.current_step()
+    assert step.id == "s14" and "ubdivide" in step.goal
+    assert [(p.kind, p.target) for p in step.expected_state] == [("node_exists", "BONE")]
+    assert not [p for p in step.start_state if p.kind == "node_exists"]      # the case the old rule missed
+    entry = {"probe": True, "mode": "EDIT_ARMATURE", "nodes": ["ARMATURE", "BONE", "MESH"], "node_counts": {"ARMATURE": 1, "BONE": 1, "MESH": 1}}
+    assert not eng.auto_check(entry, entry=entry) and eng.position == 14    # nothing done yet: the step stays
+    assert not eng.auto_check({**entry, "node_counts": {"ARMATURE": 1, "BONE": 1, "MESH": 1}}, entry=entry) and eng.position == 14
+    done = {**entry, "node_counts": {"ARMATURE": 1, "BONE": 11, "MESH": 1}}
+    assert eng.auto_check(done, entry=entry) and eng.position == 15         # bones were added: the action happened
+
+
+def test_the_subdivide_step_waits_for_the_learner_when_only_the_screen_is_read(eng):
+    """No node counts (no add-on): the step cannot be told apart from "not done", so it is left to the learner's Done rather than skipped."""
+    _go_to(eng, 14)
+    screen_only = {"mode": "EDIT_ARMATURE", "nodes": ["ARMATURE", "BONE", "MESH"]}
+    assert not eng.auto_check(screen_only, entry=screen_only) and eng.position == 14

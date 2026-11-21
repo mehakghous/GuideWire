@@ -53,12 +53,17 @@ class MainWindow(QMainWindow):
         self.badges_page = achievements()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
-        self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover), sync=sync)
+        video_runner = None
+        if video_provider_factory is not None:
+            from ..pipeline import video_steps
+            video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)      # noqa: E731
+        self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover, video_runner=video_runner), sync=sync)
         self.find_screen = FindScreen(sync=sync)
         self.find_screen.finder = discover
         if sync:
             self.find_screen.thumbnail_fetcher = lambda ids: {}                # tests never reach the network
         self.ask_screen.load_tutorial = self._tutorial_for_ask
+        self.ask_screen.find_saved = self._saved_for_video
         if video_provider_factory is not None:
             from ..pipeline import video_steps
             self.new_tutorial.video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)
@@ -110,6 +115,8 @@ class MainWindow(QMainWindow):
         self.ask_screen.save_steps.connect(self.save_asked_steps)
         self.ask_screen.save_and_start.connect(lambda steps, title: self.save_asked_steps(steps, title, start=True))
         self.ask_screen.start_session.connect(self.open_session)
+        self.ask_screen.save_guide.connect(self.save_chat_guide)
+        self.ask_screen.review_tutorial.connect(self.open_review)
         self.session.ask_about.connect(lambda tid: self.open_ask(tid))
         self.stack.setCurrentWidget(self.login)
 
@@ -175,7 +182,7 @@ class MainWindow(QMainWindow):
         if self.user is None:
             self.stack.setCurrentWidget(self.login)
             return
-        self.find_screen.reset()
+        self.find_screen.set_user(self.db, self.user.id)             # the screen is kept as it was left; a different learner starts clean
         self.stack.setCurrentWidget(self.find_screen)
 
     def steps_from_video(self, url: str, app: str) -> None:
@@ -198,6 +205,31 @@ class MainWindow(QMainWindow):
         row = next(r for r in self.db.list_tutorials(self.user.id) if r["id"] == tutorial_id)
         steps = StepList(source_type=row["source_type"], app=row["app"], title=row["title"], steps=[s for _, s in self.db.get_steps(tutorial_id)])
         return steps, row["title"], row["source_url"]
+
+    def _saved_for_video(self, url: str):
+        """(steps, title, tutorial id) of this user's tutorial made from that video, or None. Called on the window's thread (the database belongs to it)."""
+        if self.user is None:
+            return None
+        row = self.db.tutorial_for_video(self.user.id, url)
+        if row is None:
+            return None
+        steps, title, _url = self._tutorial_for_ask(row["id"])
+        return steps, title, row["id"]
+
+    def save_chat_guide(self, steps, title: str, url: str) -> None:
+        """The chat turned a video into steps: they are saved as one of this user's tutorials (the same ones Home lists), with the video's link, and the chat is told."""
+        if self.user is None:
+            return
+        have = {r["title"] for r in self.db.list_tutorials(self.user.id)}
+        final, n = title, 2
+        while final in have:
+            final, n = f"{title} ({n})", n + 1
+        try:
+            tid = self.db.save_tutorial(self.user.id, final, steps, source_type=steps.source_type, source_url=url or None)
+        except Exception as e:                                                  # the steps are not lost: the chat says it and the card offers to save them again
+            self.ask_screen.guide_not_saved(f"{type(e).__name__}")
+            return
+        self.ask_screen.guide_saved(tid, final)
 
     def save_asked_steps(self, steps, title: str, start: bool = False) -> None:
         """The user saved the steps an answer gave: they become one of their tutorials (and, with `start`, a session on it opens at once)."""
@@ -233,6 +265,9 @@ class MainWindow(QMainWindow):
 
     def on_logout(self) -> None:
         self.user = None
+        self.find_screen.user_id = None                                   # the next learner never sees this one's searches
+        self.find_screen.reset()
+        self.find_screen.goal.clear()
         self.apply_theme()
         self.stack.setCurrentWidget(self.login)
 
@@ -343,7 +378,7 @@ def main() -> int:
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision_bridge=_make_bridge())
+    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app, limit=3, exclude=(), check=True: find_tutorials(goal, app, limit=limit, exclude=exclude, fit_provider=default_fit_provider if check else None), vision_bridge=_make_bridge())
     window.show()
     return app.exec()
 

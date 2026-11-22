@@ -52,24 +52,71 @@ def text_target(a: Action) -> TargetRef | None:
     return TargetRef(kind="menu", label=path[-1], path=path, confidence=0.3)
 
 
+_MODE_OPERATORS = ("object.mode_set", "object.editmode_toggle", "object.posemode_toggle")
+
+
+def _mode_from_keys(step: Step, a: Action) -> TargetRef | None:
+    """A key that switches mode ("Tab" -> object.mode_set) leaves nothing to point at as a key, but its result is a mode the header shows: when the step's expected state names that mode, the
+    mode is the thing to guide to. Without this a step "add an armature, press Tab, ..." never says "go to Edit Mode"."""
+    t = a.target
+    if t is None or t.kind != "keys" or t.operator not in _MODE_OPERATORS:
+        return None
+    want = next((p.target for p in step.expected_state if p.kind == "mode"), None)
+    if not want:
+        return None
+    return TargetRef(kind="mode", label=mode_label(want), id=want.split("_")[0], mode=want, keys=list(t.keys))
+
+
 def needs_of(step: Step) -> list[TargetRef]:
-    """What the step needs found on screen, in the order the actions come: resolved targets of a kind a grounder can locate, and the words of anything the resolver could not resolve."""
+    """What the step needs found on screen, in the order the actions come: resolved targets of a kind a grounder can locate, a mode a key switches to, and the words of anything the resolver
+    could not resolve."""
     out: list[TargetRef] = []
     for a in step.actions:
-        t = a.target if a.target is not None and a.target.kind in GROUNDED_KINDS else text_target(a)
-        if t is not None:
+        t = a.target if a.target is not None and a.target.kind in GROUNDED_KINDS else (_mode_from_keys(step, a) or text_target(a))
+        if t is not None and not any(t.kind == "mode" and o.kind == "mode" and o.mode == t.mode for o in out):
             out.append(t)
     return out
 
 
-def _done(step: Step, ref: TargetRef, observed: dict, prog: Progress) -> bool:
-    """The action this target stands for was already seen performed: the tool is the active one, Blender is already in that mode."""
+def _norm(s: str) -> str:
+    return "".join(ch for ch in s.lower() if ch.isalnum())
+
+
+def _created(step: Step, ref: TargetRef, observed: dict, entry: dict | None) -> bool:
+    """A menu that ADDS something ("Add > Armature > Single Bone") is done once a thing of a type the step expects to exist is there and was not there when the step began. A menu leaves no
+    mark of its own, so without this the guide pointed at Add > Armature for the rest of the step, however many armatures were added."""
+    if ref.kind != "menu":
+        return False
+    path = [_norm(p) for p in (ref.path or [ref.label])]
+    counts = {_norm(k): v for k, v in (observed.get("node_counts") or {}).items()}
+    before = {_norm(k): v for k, v in ((entry or {}).get("node_counts") or {}).items()}
+    for p in step.expected_state:
+        if p.kind not in ("node_exists", "node_count"):
+            continue
+        kind = _norm(p.target)
+        names_it = path[:1] == ["add"] or any(kind and (kind in part or part in kind) for part in path if len(part) > 3)
+        if names_it and counts.get(kind, 0) > before.get(kind, 0):
+            return True
+    return False
+
+
+def _done(step: Step, ref: TargetRef, observed: dict, prog: Progress, entry: dict | None = None) -> bool:
+    """The action this target stands for was already seen performed: the tool is the active one, Blender is already in that mode, the thing an Add menu creates now exists."""
     if ref.kind == "tool" and ref.id:
         return any(p.kind == "active_tool" and p.target == ref.id for p in prog.done)
     if ref.kind == "mode":
         now = observed.get("mode")
         return bool(now and ((ref.mode and now == ref.mode) or (ref.id and (now == ref.id or now.startswith(ref.id + "_")))))
-    return False
+    return _created(step, ref, observed, entry)
+
+
+def pending_needs(step: Step, observed: dict, prog: Progress, entry: dict | None = None) -> tuple[list[TargetRef], bool]:
+    """The targets still to do, in order, and whether any part of the step has been seen done. A target BEFORE one that is done counts as done too: the learner has moved past it (they are in
+    Edit Mode, so the armature they had to add first was added), and the guide must never send them back to an earlier part of the same step."""
+    needs = needs_of(step)
+    done = [_done(step, r, observed, prog, entry) for r in needs]
+    last = max((i for i, d in enumerate(done) if d), default=-1)
+    return [r for i, r in enumerate(needs) if i > last and not done[i]], last >= 0
 
 
 def _unmet_mode_ref(prog: Progress) -> TargetRef | None:
@@ -97,19 +144,20 @@ def keys_text(step: Step) -> tuple[str, ...]:
     return keys_of(step)
 
 
-def assess(step: Step, observed: dict, ground: Callable[[TargetRef], Gated]) -> StepState:
-    """The learner's position in the step. `observed` is what the application reports (the add-on's state merged with what the screen showed); `ground(ref)` locates and GATES one target."""
+def assess(step: Step, observed: dict, ground: Callable[[TargetRef], Gated], entry: dict | None = None) -> StepState:
+    """The learner's position in the step. `observed` is what the application reports (the add-on's state merged with what the screen showed); `ground(ref)` locates and GATES one target.
+    `entry` is the state observed when the step began (what was already there is not progress)."""
     prog = progress(step, observed)
     keys = keys_text(step)
+    pending, started = pending_needs(step, observed, prog, entry)
 
-    fix = _unmet_mode_ref(prog)
+    fix = None if started else _unmet_mode_ref(prog)          # the mode a step STARTS in is checked before it is under way; once part of it is done (it switched to Edit Mode itself), never send the learner back
     if fix is not None:
         g = ground(fix)
         gr = g.result
         label = fix.label
         return StepState("blocked", f"This step starts in {label}", f"Switch to {label} first. {gr.note}".strip(), fix, gr, g.ok, prog, "", ())
 
-    pending = [r for r in needs_of(step) if not _done(step, r, observed, prog)]
     if not pending:
         what = "Do this in the 3D view" if (keys or any(a.target is not None and a.target.kind == "viewport" for a in step.actions)) else "Do the step as described"
         done = bool(prog.done)

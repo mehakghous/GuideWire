@@ -217,7 +217,7 @@ class VisionBridge:
             if ctx is None:
                 return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=step_state.keys_text(step))
             entry = self._entries.setdefault(step.id, {k: observed[k] for k in ENTRY_KEYS if k in observed})
-            state, observed = self._assess(step, svc, observed, ctx, props, attrs, wanted)
+            state, observed = self._assess(step, svc, observed, ctx, props, attrs, wanted, entry)
         except ImportError as e:                         # the OCR packages are missing: this fails the first time the screen is read, not when the service is made
             self._failed[app] = explain(e)
             return Look(target, window_rect=window, problem=self._failed[app], problem_state="unavailable")
@@ -236,7 +236,7 @@ class VisionBridge:
         return Look(label, rect, bool(g and g.complete and rect), bool(g and g.ambiguous), observed, window, state.hint, state.keys,
                     None, "error", state.phase, state.status, state.shortcut, entry)
 
-    def _assess(self, step: Step, svc, observed: dict, ctx, props, attrs, wanted) -> tuple[step_state.StepState, dict]:
+    def _assess(self, step: Step, svc, observed: dict, ctx, props, attrs, wanted, entry: dict | None = None) -> tuple[step_state.StepState, dict]:
         """The step's state, locating each target through the gate and the cache. A result that is nearly good enough earns one fresh read of the whole window (per step and screen state).
         Returns the state and the observed dict that goes with the screen it was judged on (a re-read replaces it)."""
         box = {"ctx": ctx, "observed": observed}
@@ -263,7 +263,7 @@ class VisionBridge:
             if epoch is not None:
                 self._cache.put(key, epoch, g)
             return g
-        state = step_state.assess(step, observed, ground)
+        state = step_state.assess(step, observed, ground, entry)
         return state, box["observed"]
 
     # ---- judging (touches the session: main thread)

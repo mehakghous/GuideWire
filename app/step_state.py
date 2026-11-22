@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 
 from ingestion.evaluator import Progress, progress
 from shared import shortcuts
+from app import key_alternatives
 from shared.step_record import Action, Step, TargetRef
 from vision.grounders import HIDDEN, NOT_OPEN, OFFSCREEN, VISIBLE, WORDS, WRONG, Grounded, mode_label
 from vision.verify import Gated
@@ -39,6 +40,7 @@ class StepState:
     progress: Progress = field(default_factory=Progress)
     shortcut: str = ""                           # "Ctrl R" when a shortcut is advised now
     keys: tuple[str, ...] = ()                   # keys the step says to press (as key caps)
+    alternative: str = ""                        # the other way to do the keyed part: "Without the keyboard: use the Add menu in the 3D view header." (already part of `hint`)
 
 
 def text_target(a: Action) -> TargetRef | None:
@@ -158,24 +160,36 @@ def assess(step: Step, observed: dict, ground: Callable[[TargetRef], Gated], ent
         label = fix.label
         return StepState("blocked", f"This step starts in {label}", f"Switch to {label} first. {gr.note}".strip(), fix, gr, g.ok, prog, "", ())
 
+    here = observed.get("mode")
+    alts = [a for a in key_alternatives.alternatives_of(step, here) if not (a.target.kind == "mode" and a.target.mode == here)]
+    other_way = key_alternatives.sentence(alts)
+
     if not pending:
         what = "Do this in the 3D view" if (keys or any(a.target is not None and a.target.kind == "viewport" for a in step.actions)) else "Do the step as described"
         done = bool(prog.done)
-        return StepState("acting", "Keep going" if done else what, _how(step, keys), None, None, False, prog, "", keys)
+        how = (_how(step, keys) + " " + other_way).strip()
+        if len(alts) == 1 and not done:                           # one key, one other way: point at it (the same gate as any target: no rectangle unless the screen shows it with confidence)
+            g = ground(alts[0].target)
+            if g.ok and g.result.rect is not None:
+                return StepState("acting", what, how, alts[0].target, g.result, True, prog, "", keys, other_way)
+        return StepState("acting", "Keep going" if done else what, how, None, None, False, prog, "", keys, other_way)
 
     ref = pending[0]
     g = ground(ref)
     gr = g.result
     sc = _advice(step, ref, gr, observed)
     tail = f" Or press {sc} with the mouse over the 3D view." if sc else ""
+    if not tail and ref.kind == "menu":                           # the step's own target is a menu and a key of the step opens it: say the key too
+        k = key_alternatives.key_for_menu(step, ref.path or [ref.label], here)
+        tail = f" Or press {k} with the mouse over the 3D view." if k else ""
     if g.ok and gr.state == VISIBLE and gr.rect is not None:
         return StepState("visible", f"Found {gr.label or ref.label}", (gr.note or f"Click {ref.label}.") + tail, ref, gr, True, prog, sc, keys)
     if gr.state in (HIDDEN, OFFSCREEN, WRONG):
         return StepState("hidden", f"Cannot reach {ref.label} yet", gr.note + tail, ref, gr, g.ok, prog, sc, keys)
     if gr.state == WORDS:
-        return StepState("acting", "Do this in the 3D view", _how(step, keys), ref, gr, False, prog, "", keys)
+        return StepState("acting", "Do this in the 3D view", (_how(step, keys) + " " + other_way).strip(), ref, gr, False, prog, "", keys, other_way)
     why = "Several places match" if gr.ambiguous else ("Open it first" if gr.state == NOT_OPEN else "Looking for it")
-    return StepState("locating", f"{why}: {ref.label}", gr.note or f"Open: {' > '.join(ref.path or [ref.label])}", ref, gr, False, prog, sc, keys)
+    return StepState("locating", f"{why}: {ref.label}", (gr.note or f"Open: {' > '.join(ref.path or [ref.label])}") + tail, ref, gr, False, prog, sc, keys)
 
 
 def _how(step: Step, keys: tuple[str, ...]) -> str:

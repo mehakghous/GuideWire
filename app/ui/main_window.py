@@ -281,7 +281,14 @@ def _make_bridge():
     return VisionBridge(default_service_factory)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
+    from shared import paths
+    paths.prepare_runtime()                           # installed app: make the writable folder %LOCALAPPDATA%/GuideWire the working directory (no effect from the repository)
+    if "--selftest" in args:                          # `GuideWire.exe --selftest [--selftest-out report.json]`: prove this copy can work, show no window
+        from .. import selftest
+        out = args[args.index("--selftest-out") + 1] if "--selftest-out" in args and args.index("--selftest-out") + 1 < len(args) else None
+        return selftest.run(out)
     from ..ask import default_model_factory
     from ..discovery import default_fit_provider, find_tutorials
     from ..pipeline import default_video_provider

@@ -35,11 +35,11 @@ MAX_VIDEO_S = 25 * 60                                   # a longer video is refu
 
 def default_video_provider():
     """The real model for turning a video into steps: Gemini 3.6 Flash behind the cost guard (cache, ceilings, log). Raises RuntimeError with a plain message when no key is set."""
-    from dotenv import load_dotenv
+    from shared.paths import load_env
 
     from ingestion.budget import BudgetedProvider, BudgetExceeded, Ceilings, api_key_for
     from ingestion.providers.gemini import GeminiProvider
-    load_dotenv()
+    load_env()
     try:
         return BudgetedProvider(GeminiProvider(api_key=api_key_for("default")), ceilings=Ceilings.from_env(max_usd_run=0.6), label="default")
     except BudgetExceeded as e:

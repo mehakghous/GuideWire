@@ -35,7 +35,7 @@ from .validate import Issue, ValidationFailure, check_structure, refresh_coverag
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds", "v11", "v12")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds", "v11", "v12", "v13")
 
 
 class ExtractionError(RuntimeError):
@@ -142,12 +142,12 @@ class DraftStepListV11(DraftStepList):
 
 
 def _extended(prompt_version: str) -> bool:
-    return prompt_version in ("v10-preds", "v10-houpreds", "v11", "v12")
+    return prompt_version in ("v10-preds", "v10-houpreds", "v11", "v12", "v13")
 
 
 def _draft_model(prompt_version: str) -> type[DraftStepList]:
     """The model-facing step-list shape for a prompt version."""
-    if prompt_version in ("v11", "v12"):
+    if prompt_version in ("v11", "v12", "v13"):
         return DraftStepListV11
     return DraftStepListExt if _extended(prompt_version) else DraftStepList
 
@@ -166,7 +166,7 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
     if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou", "houpreds")):
         raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
-    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10", "v11", "v12")) else ""
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10", "v11", "v12", "v13")) else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
@@ -176,8 +176,8 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
   Predicate JSON looks like {{"kind": "mode", "name": "EDIT_MESH"}} or
   {{"kind": "property_equals", "name": "object.location.x", "expected_value": 2.0}}.
   `name` must be one of the listed strings exactly; do not put the kind in `name`."""
-    if version in ("v11", "v12"):
-        return _v11_system_prompt(profile, vocab, fine=version == "v12")
+    if version in ("v11", "v12", "v13"):
+        return _v11_system_prompt(profile, vocab, fine=version in ("v12", "v13"), houdini_fine=version == "v13")
     if version == "v2":
         return f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
@@ -244,16 +244,16 @@ Rules:
 #   * no place for the instructor's reasons: narration was used only as evidence, so "why" was lost;
 #   * an instructor's on-screen mistake (an undo, a redo) was either turned into steps or dropped along with its lesson.
 # v11 asks for MEANINGFUL steps: one operation a learner would name as one thing to do, with every click, value and name inside it, and the reason the instructor gives.
-def _v11_system_prompt(profile: AppProfile, vocab: str, fine: bool = False) -> str:
+def _v11_system_prompt(profile: AppProfile, vocab: str, fine: bool = False, houdini_fine: bool = False) -> str:
     """v11, or with `fine` v12: the same prompt with smaller steps (`_V12_STEP_RULES` in place of `_V11_STEP_RULES`)."""
     from .features import CRAFT_FEATURES, load_catalog
     feats = "\n".join(f"  {f.id}: {f.name}" for f in load_catalog().supported(profile.name, ("N", "P", "C")))
     node_example = NODE_EXAMPLES[profile.name]
-    houdini = """
+    houdini = (_V13_HOUDINI_RULES if houdini_fine else """
 HOUDINI NODE NETWORKS. A node is usually one step: create it (with the Tab menu or a shelf tool), connect it, and set the parameters the tutorial changes on it, all in that step's how_to, one
 line per parameter with the exact parameter label and value shown in the parameter pane. Start a new step when the instructor moves to another node, or comes back later to change a node for a
 new reason. Read parameter labels from the screen; if a label or value cannot be read, say so instead of guessing a likely name.
-""" if profile.name == "houdini" else ""
+""") if profile.name == "houdini" else ""
     step_rules = _V12_STEP_RULES if fine else _V11_STEP_RULES
     how_lines = "1 to 3" if fine else "ordered,"
     return f"""You turn a software tutorial video for {profile.name} into the steps a learner follows to reproduce it in their own copy of {profile.name}.
@@ -329,6 +329,24 @@ _V12_STEP_RULES = """WHAT ONE STEP IS.
 - Fold only pure preparation into the step it serves: selecting the object or node to act on, opening the menu, panel, dialog or editor that the step uses. They are the first how_to lines.
 - If a step needs more than 3 how_to lines, it is probably two steps. Never merge two results into one step, and never split one operation into several steps.
 - No steps for: intros, outros, recaps, sponsor segments, camera or view navigation that changes nothing, hovering, looking at or checking something, and talk with nothing to do."""
+
+
+# v13 (2026-11-22) = v12 with the Houdini block replaced; for Blender and Maya the prompt is v12's, word for word. v12's Houdini rule ("a node is usually one step: create it, connect it and set the
+# parameters it changes") kept Houdini steps as big as v11's: on the APEX FK tutorial 8 to 9 steps for 51 labelled actions, "Set Shape Override to box, adjust Shape Offset/Size, and assign a color" as one
+# step, and the stretch where the instructor presses F for Modify mode and moves skeleton points left out. v13 gives Houdini the same one-result-per-step size as the other applications.
+_V13_HOUDINI_RULES = """
+HOUDINI NODE NETWORKS AND VIEWPORT STATES. These are steps of their own, in the order they happen:
+- creating a node (with the Tab menu in the network editor, or a shelf tool) together with connecting it: the node's name as the network editor shows it, and what it is connected to (which input,
+  when the video shows it);
+- each parameter the instructor changes: the parameter's label exactly as the parameter pane shows it, and the exact value, expression, pattern or menu choice. A checkbox that only switches on a
+  field the instructor fills in right after may share that field's step ("Turn on <checkbox> and set <field> to <value>"); different parameters are different steps;
+- each key that starts, changes or ends a viewport state or tool (the key, and the state's name as the viewport shows it), and each element placed, moved or selected inside that state when it
+  changes the result;
+- each display, bypass or template flag switched on a node;
+- going back to an earlier node to change it: a new step that names that node.
+Read parameter labels and values from the screen. If a label or value cannot be read, write what was done without it and add "the exact <thing> is not readable in the video" to the step's
+assumptions. Never write a likely-sounding label instead.
+"""
 
 
 _ACTIONABLE_RULES = """
@@ -484,7 +502,9 @@ RIGGING_APPS = ("maya", "houdini")
 # in a step 73 % -> 84 %. v11 is not about rigging alone, so a Blender video that is not about rigging gets it too.
 # Then v12 the same day: v11's steps were too big for the learner ("each step is so many mini steps"). v12 = v11 with one visible result per step (same videos, three repeats): 12.5 steps,
 # 98 % matching something the instructor did, no copied names, every step with its reason; Blender 18 steps, close to the earlier division.
-RECOMMENDED_VIDEO_PROMPT = {"houdini": "v12", "maya": "v12", "blender": "v12"}
+# Houdini then v13 (v12 with Houdini steps as small as the other applications'), with the gap pass in the app: docs/extraction_v11_report_2026-11-22.md, Houdini section.
+RECOMMENDED_VIDEO_PROMPT = {"houdini": "v13", "maya": "v12", "blender": "v12"}
+GAP_PASS_APPS = frozenset({"houdini"})        # the applications whose video extraction gets the gap pass (fill_gaps) in the app
 
 
 def recommended_video_prompt_version(app: str, rigging: bool = False) -> str:
@@ -588,8 +608,9 @@ def _run(
     provider: LLMProvider, *, prompt: str, video_url: str | None,
     source_type: Literal["youtube", "written"], app: str, video_id: str | None,
     video_duration_s: float | None, prompt_version: str, max_attempts: int = 2,
-    on_attempt: Callable[[dict[str, Any]], None] | None = None,
+    on_attempt: Callable[[dict[str, Any]], None] | None = None, allow_empty: bool = False,
 ) -> StepList:
+    """`allow_empty`: an answer with no steps is accepted as "nothing to extract here" (the gap pass asks about a clip that may hold only talk) instead of being re-asked as an error."""
     profile = get_profile(app)
     system = build_system_prompt(profile, prompt_version)
     schema = _schema(prompt_version)
@@ -617,6 +638,11 @@ def _run(
             derive_state(sl)
             sl = sanitize_and_annotate(sl, profile, video_duration_s)
             last_partial = sl
+            if allow_empty and not sl.steps:
+                rec["accepted"] = True
+                if on_attempt:
+                    on_attempt(rec)
+                return sl
             check_structure(sl, video_duration_s)
             flag_order_errors(sl)
             rec["accepted"] = True
@@ -801,13 +827,103 @@ def extract_from_video_windows(
     return out
 
 
+# ---- the gap pass (2026-11-22): a second look at stretches the first pass left without steps
+GAP_MIN_S = 25.0          # a stretch inside the tutorial at least this long with no step gets a second look
+GAP_PAD_S = 3.0           # seconds of context on each side of the stretch
+
+
+def find_gaps(sl: StepList, min_gap_s: float = GAP_MIN_S) -> list[tuple[float, float]]:
+    """Stretches between steps (never before the first or after the last: intros and outros are talk) of at least `min_gap_s` seconds that no step's time span covers."""
+    timed = sorted((s for s in sl.steps if s.video_start_s is not None and s.video_end_s is not None), key=lambda s: s.video_start_s or 0.0)
+    out: list[tuple[float, float]] = []
+    reach: float | None = None
+    for s in timed:
+        start, end = float(s.video_start_s or 0.0), float(s.video_end_s or 0.0)
+        if reach is not None and start - reach >= min_gap_s:
+            out.append((reach, start))
+        reach = end if reach is None else max(reach, end)
+    return out
+
+
+def _repeats(st: Step, kept: list[Step]) -> bool:
+    """The same operation as a step already there: it starts inside that step's span (3 s either side) and shares at least 60 % of the shorter goal's words."""
+    for k in kept:
+        if st.video_start_s is None or k.video_start_s is None:
+            continue
+        if k.video_start_s - 3 <= st.video_start_s <= (k.video_end_s if k.video_end_s is not None else k.video_start_s) + 3:
+            a, b = _words(st.goal), _words(k.goal)
+            if a and b and len(a & b) / min(len(a), len(b)) >= 0.6:
+                return True
+    return False
+
+
+def fill_gaps(provider: LLMProvider, sl: StepList, video_id: str, *, app: str, prompt_version: str, duration_s: float | None = None, title_hint: str | None = None,
+              min_gap_s: float = GAP_MIN_S, on_attempt=None) -> StepList:
+    """A second look at every stretch inside the tutorial that the steps leave uncovered for `min_gap_s` seconds or more. The video model sees only that clip (`...#t=start,end`), is told which steps
+    come just before and after, and may answer with NO steps ("only talk here"), which is accepted, not re-asked: the coverage rule of v9 pushed the model to fill gaps with invented steps, this pass
+    lets it say there is nothing. Steps it finds are put in time order, flagged as found by the second look, and dropped when they repeat a step already there. One paid call per stretch.
+    A stretch whose call fails is reported in `warnings` and left as it was: the first pass is never lost."""
+    from .youtube.metadata import canonical_url
+    gaps = find_gaps(sl, min_gap_s)
+    if not gaps:
+        return sl
+    added: list[Step] = []
+    notes: list[str] = []
+    ordered = sorted((s for s in sl.steps if s.video_start_s is not None), key=lambda s: s.video_start_s or 0.0)
+    for a, b in gaps:
+        a0 = max(0.0, a - GAP_PAD_S)
+        b0 = b + GAP_PAD_S if duration_s is None else min(float(duration_s), b + GAP_PAD_S)
+        before = next((s for s in reversed(ordered) if (s.video_end_s or 0.0) <= a + 0.01), None)
+        after = next((s for s in ordered if (s.video_start_s or 0.0) >= b - 0.01), None)
+        if hasattr(provider, "video_seconds"):
+            provider.video_seconds = b0 - a0
+        prompt = video_prompt(prompt_version, b0 - a0, title_hint) + (
+            f"\nThis video is a clip, seconds {int(a0)} to {int(b0)} of a longer tutorial. Give every timestamp as MM:SS counted from the START OF THIS CLIP. The steps before and after this clip are "
+            f"already written: the one just before is \"{before.goal if before else 'the start of the tutorial'}\", the one just after is \"{after.goal if after else 'the end of the tutorial'}\". "
+            "Write steps ONLY for operations performed inside this clip that are not those two. If nothing is performed in it (only talk, or only the cursor moving), return an empty list of steps: "
+            "that is a correct answer.")
+        try:
+            part = _run(provider, prompt=prompt, video_url=f"{canonical_url(video_id)}#t={int(a0)},{int(b0)}", source_type="youtube", app=app, video_id=video_id,
+                        video_duration_s=b0 - a0, prompt_version=prompt_version, on_attempt=on_attempt, allow_empty=True)
+        except Exception as e:                                       # quota, provider, or an answer that stayed invalid: keep the first pass as it is
+            notes.append(f"a second look at {_mmss(a0)} to {_mmss(b0)} could not be made ({type(e).__name__}); that stretch is as first extracted")
+            continue
+        found = 0
+        for st in part.steps:
+            for attr in ("video_start_s", "video_end_s"):
+                v = getattr(st, attr)
+                if v is not None:
+                    setattr(st, attr, v + a0 if duration_s is None else min(float(duration_s), v + a0))
+            if _repeats(st, [*sl.steps, *added]):
+                continue
+            st.flags.append(f"found by a second look at {_mmss(a0)} to {_mmss(b0)}, a stretch the first pass left without steps: check it against the video")
+            st.depends_on = []
+            added.append(st)
+            found += 1
+        notes.append(f"second look at {_mmss(a0)} to {_mmss(b0)}: {found} step(s) added" if found else f"second look at {_mmss(a0)} to {_mmss(b0)}: nothing performed there")
+    if added:
+        merged = sorted([*sl.steps, *added], key=lambda s: (s.video_start_s if s.video_start_s is not None else 1e9))
+        originals = {id(st) for st in sl.steps}                       # the clip's own ids (s01, s02 ...) collide with the first pass's, so only the first pass's ids are remapped
+        new_id = {st.id: f"s{i:02d}" for i, st in enumerate(merged, start=1) if id(st) in originals}
+        for st in merged:
+            if id(st) in originals:
+                st.depends_on = [new_id[d] for d in st.depends_on if d in new_id]
+        for i, st in enumerate(merged, start=1):
+            st.id, st.order = f"s{i:02d}", i
+        sl.steps = merged
+        flag_order_errors(sl)
+    refresh_coverage_warnings(sl)
+    sl.warnings = [*notes, *sl.warnings]
+    return sl
+
+
 def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str | None = None,
                  transcript_cues=None) -> str:
     """The per-request (user) prompt for a video. Exposed so experiments can hash it for cache keys."""
     from .transcript import transcript_for_prompt
     prompt_version = prompt_version.partition("-")[0]                  # "v10-nokb" and "v10-outline" differ only in the system prompt
 
-    if prompt_version == "v12":
+    if prompt_version in ("v12", "v13"):
         dur_txt = f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to {_mmss(duration_s)}." if duration_s else ""
         return (
             "Watch the whole tutorial, listening to the narration and reading the screen together, and write the steps a learner needs to reproduce it: one step per operation with a "

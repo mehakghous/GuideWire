@@ -24,7 +24,7 @@ def _step(goal, start, end, **kw):
 
 
 def test_v11_is_listed_and_the_schema_version_moved():
-    assert PROMPT_VERSIONS[-2:] == ("v11", "v12")
+    assert PROMPT_VERSIONS[-3:] == ("v11", "v12", "v13")
     assert SCHEMA_VERSION == "0.15"
 
 

@@ -168,3 +168,37 @@ def test_the_leg_tutorial_steps_that_were_not_highlighted_now_have_targets(cat):
     s25, s33 = sl.steps[24], sl.steps[32]
     assert s25.actions[0].target.kind == "sidebar" and s25.actions[0].target.prop == "Roll"
     assert s33.actions[0].target.kind == "property" and s33.actions[0].target.prop == "Head/Tail"
+
+
+# ---- short forms the v12 prompt writes (2026-11-22: unresolved, they fell back to searching the screen for the words and the highlight got worse than with v10)
+@pytest.mark.parametrize("ui, kind", [
+    ("Edit Mode", "mode"), ("Mode Selection > Pose Mode", "mode"),
+    ("Move", "tool"), ("Loop Cut", "tool"), ("Toolbar > Scale Tool", "tool"),
+    ("Properties > Bone Constraints", "property"), ("Bone Constraints", "property"), ("Properties > Object Data Properties", "property"),
+    ("Viewport Display > In Front", "property"), ("Item > Roll", "sidebar"),
+    ("Loop Cut and Slide Panel > Number of Cuts", "operator_panel"), ("Armature Context Menu > Subdivide", "context_menu"),
+])
+def test_short_forms_resolve(cat, ui, kind):
+    t = act(ui, mode="EDIT_MESH" if "Loop" in ui else "EDIT_ARMATURE" if "Subdivide" in ui else None, cat=cat)
+    assert t is not None and t.kind == kind, (ui, t)
+
+
+def test_a_tab_named_alone_is_the_tab_and_a_panel_names_its_tab(cat):
+    assert act("Properties > Bone Constraints", cat=cat).tab == "BONE_CONSTRAINT"
+    t = act("Viewport Display > In Front", cat=cat)
+    assert t.panel == "Viewport Display" and t.prop == "In Front"
+
+
+def test_mode_alone_takes_the_mode_the_step_ends_in(cat):
+    from shared.step_record import StatePredicate
+    step = Step(id="s02", order=2, goal="Switch to Edit Mode", actions=[Action(verb="click", ui_element="Mode")], expected_state=[StatePredicate(kind="mode", target="EDIT_ARMATURE")])
+    t = targets.resolve_step(step, cat).actions[0].target
+    assert t is not None and t.kind == "mode" and t.mode == "EDIT_ARMATURE"
+
+
+def test_a_popup_choice_named_alone_after_its_key_is_found_in_that_popup(cat):
+    from shared.step_record import StatePredicate
+    step = Step(id="s08", order=8, goal="Clear the parent", start_state=[StatePredicate(kind="mode", target="EDIT_ARMATURE")],
+                actions=[Action(verb="press_keys", keys=["Alt", "P"]), Action(verb="click", ui_element="Clear Parent")])
+    t = targets.resolve_step(step, cat).actions[1].target
+    assert t is not None and t.kind == "operator_panel", t

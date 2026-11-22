@@ -129,7 +129,10 @@ def test_the_step_advances_in_the_window_when_the_application_shows_it_done(env)
     engine.complete()                                                 # s01 by hand; s02 expects EDIT_MESH
     screen.refresh()
     assert engine.current_step().id == "s02"
-    svc.observed = {"mode": "EDIT_MESH"}
+    svc.observed = {"mode": "OBJECT"}                                 # the screen first sees Edit Mode NOT entered ...
+    screen.poll()
+    assert engine.current_step().id == "s02"
+    svc.observed = {"mode": "EDIT_MESH"}                              # ... and then sees the learner enter it
     screen.poll()
     assert engine.current_step().id == "s03" and "saw this step done" in screen.status.text() and "Step 3" in screen.step_text.text()
 

@@ -173,3 +173,68 @@ def test_missing_ocr_packages_found_when_the_screen_is_first_read_are_explained_
     n = len(svc.ground_calls)
     b.tick(eng)
     assert len(svc.ground_calls) == n                              # remembered: the screen is not read again until reset()
+
+
+# ---------------------------------------------------------------- "already true" is not evidence: Previous step, Resume, and steps that start satisfied
+def test_a_step_that_is_already_true_when_it_starts_is_not_completed_by_the_screen(eng):
+    eng.complete()                                                 # s01 by hand; s02 "Enter Edit Mode" starts while the application is ALREADY in Edit Mode
+    svc = FakeService(observed={"mode": "EDIT_MESH"})
+    b = bridge_with(svc)
+    for _ in range(3):
+        t = b.tick(eng)
+        assert not t.advanced and t.verdict == "met" and eng.current_step().id == "s02"
+    assert "already" in t.message.lower()                            # the learner is told why nothing happened
+    svc._observed = {"mode": "OBJECT"}                               # they leave Edit Mode ...
+    assert not b.tick(eng).advanced
+    svc._observed = {"mode": "EDIT_MESH"}                            # ... and enter it again: now the screen saw it happen
+    assert b.tick(eng).advanced and eng.current_step().id == "s03"
+
+
+def test_previous_step_does_not_bounce_forward_because_the_old_state_still_holds(eng):
+    eng.complete()
+    svc = FakeService(observed={"mode": "OBJECT"})
+    b = bridge_with(svc)
+    b.tick(eng)
+    svc._observed = {"mode": "EDIT_MESH"}
+    assert b.tick(eng).advanced and eng.current_step().id == "s03"   # s02 done because the screen saw it happen
+    eng.back()                                                       # the learner presses "Previous step"
+    assert eng.current_step().id == "s02" and eng.statuses()[1] == "pending"
+    for _ in range(3):                                               # Edit Mode is still on: this must not complete s02 again by itself
+        t = b.tick(eng)
+        assert not t.advanced and eng.current_step().id == "s02"
+    assert eng.statuses()[1] == "pending"
+    svc._observed = {"mode": "OBJECT"}
+    b.tick(eng)
+    svc._observed = {"mode": "EDIT_MESH"}
+    assert b.tick(eng).advanced and eng.current_step().id == "s03"   # redone for real
+
+
+def test_resuming_a_session_does_not_complete_the_step_it_stopped_on(eng):
+    eng.complete()                                                   # stopped on s02 (Enter Edit Mode)
+    resumed = SessionEngine.load(eng.db, eng.user_id, eng.session_id)
+    assert resumed.current_step().id == "s02"
+    svc = FakeService(observed={"mode": "EDIT_MESH"})                # the application was left in Edit Mode
+    t = bridge_with(svc).tick(resumed)                               # a brand-new bridge, as after restarting GuideWire
+    assert not t.advanced and resumed.current_step().id == "s02" and resumed.statuses()[1] == "pending"
+
+
+def test_the_baseline_belongs_to_the_step_and_visit_not_to_the_bridge(eng):
+    """Skipping and going back must not carry the old 'it was unmet before' over to the next time the step is active."""
+    eng.complete()
+    svc = FakeService(observed={"mode": "OBJECT"})
+    b = bridge_with(svc)
+    b.tick(eng)                                                      # s02 seen unmet
+    svc._observed = {"mode": "EDIT_MESH"}
+    assert b.tick(eng).advanced                                      # completed; now s03
+    eng.back()                                                       # back to s02 with Edit Mode already on
+    assert not b.tick(eng).advanced                                  # the earlier "unmet" does not count for this new visit
+
+
+def test_a_step_seen_unmet_first_still_completes_normally(eng):
+    eng.complete()
+    svc = FakeService(observed={"mode": "OBJECT"})
+    b = bridge_with(svc)
+    assert not b.tick(eng).advanced
+    svc._observed = {"mode": "EDIT_MESH"}
+    t = b.tick(eng)
+    assert t.advanced and t.state == "done_seen" and eng.statuses()[1] == "done" and eng.statuses()[1:2] == ["done"]

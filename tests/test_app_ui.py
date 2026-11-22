@@ -455,9 +455,21 @@ def test_guidance_shows_the_highlight_for_the_active_step(win):
 
 
 def test_guidance_completes_a_step_the_screen_shows_done(win):
-    s, overlay = _guided(win, _FakeVision({"mode": "OBJECT", "selection_types": ["MESH"]}, _pointing()))
+    vision = _FakeVision({"mode": "OBJECT", "selection_types": []}, _pointing())      # first the cube is not in the scene yet ...
+    s, overlay = _guided(win, vision)
+    s.poll()
+    assert s.engine.position == 1
+    vision.observed = {"mode": "OBJECT", "selection_types": ["MESH"]}               # ... then the screen sees it appear
     s.poll()
     assert s.engine.position == 2 and "Step 2" in s.step_text.text()
+
+
+def test_a_step_already_true_when_the_session_opens_is_not_completed_by_the_screen(win):
+    s, overlay = _guided(win, _FakeVision({"mode": "OBJECT", "selection_types": ["MESH"]}, _pointing()))
+    s.poll()
+    assert s.engine.position == 1 and "already" in s.watch_label.text().lower()      # the learner presses Done themselves
+    s.done_button.click()
+    assert s.engine.position == 2
 
 
 def test_a_vision_failure_leaves_the_session_working_by_hand(win):

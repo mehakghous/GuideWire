@@ -35,6 +35,7 @@ class SessionEngine:
         self.db, self.user_id, self.session_id = db, user_id, session_id
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
         self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
+        self.revision = 0      # bumped on every start / complete / skip / back: lets screen guidance tell one VISIT to a step from the next (Previous, Resume)
 
     # ---- creating / resuming
     @classmethod
@@ -88,10 +89,12 @@ class SessionEngine:
         if not self.steps:
             raise EngineError("this tutorial has no steps")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=1, started_at=now())
+        self.revision += 1
 
     def _close_current(self, status: str, by: str) -> None:
         pos = self._need_active()
         self.db.set_step_status(self.session_id, self.steps[pos - 1][0], status, by)
+        self.revision += 1
         if pos >= len(self.steps):
             self.db.update_session(self.session_id, state=FINISHED, current_pos=pos, finished_at=now())
         else:
@@ -110,6 +113,7 @@ class SessionEngine:
             raise EngineError("already at the first step")
         self.db.set_step_status(self.session_id, self.steps[pos - 2][0], PENDING, "user")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos - 1)
+        self.revision += 1
 
     # ---- checking against what the application shows
     def check(self, observed: dict[str, Any]) -> Verdict | None:

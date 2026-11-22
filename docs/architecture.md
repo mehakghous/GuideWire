@@ -56,7 +56,7 @@ The look is claymorphism (docs/design.md): every screen is a grid of soft clay s
 1. `observe()` gives the state dict. If it satisfies the active step's expected state, `SessionEngine.auto_check` completes the step (marked "observed"). Craft steps, steps with nothing to check and kinds the app cannot read are never completed this way.
 2. `ground(ui_element)` for the step's first named UI element gives the rectangle for a highlight; the overlay draws it. If the learner presses Done first, the late reading is dropped.
 
-Vision only observes. If it cannot work (not Windows, OCR missing, Blender not open) the session carries on by hand and says why; a missing component switches guidance off for that session. The SQLite engine is only touched on the UI thread; the worker thread only calls vision.
+A step is completed by the screen only when the screen SAW its state come true during the current visit to the step (not met, then met): a state that was already true when the step started, after "Previous step" or when a session is resumed, is not evidence, so the learner presses Done. Vision only observes. If it cannot work (not Windows, OCR missing, Blender not open) the session carries on by hand and says why; a missing component switches guidance off for that session. The SQLite engine is only touched on the UI thread; the worker thread only calls vision.
 
 ## 6. Open items
 

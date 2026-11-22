@@ -218,6 +218,10 @@ class VisionBridge:
         self.window_finder = window_finder or default_window_finder
         self._services: dict[str, Any] = {}
         self._failed: dict[str, str] = {}
+        # What the screen showed on the first look of each VISIT to a step (session, step, engine revision): "met" there means the step was already true when it
+        # started (after Previous step, after Resume, or simply because the application was already in that state), which is not evidence that the learner did it.
+        self._first_met: dict[tuple[int, str, int], bool] = {}
+        self._seen_unmet: set[tuple[int, str, int]] = set()
 
     @property
     def available(self) -> bool:
@@ -309,10 +313,24 @@ class VisionBridge:
             return Tick(look.problem_state, look.problem, look.target, keys=look.keys, inputs=look.inputs)
         verdict = engine.check(look.observed or {})
         status = verdict.status if verdict is not None else None
-        advanced = bool(self.auto_advance and engine.auto_check(look.observed or {}))
+        step = engine.current_step()
+        key = (engine.session_id, step.id if step is not None else "", getattr(engine, "revision", 0))
+        if status == "unmet":
+            self._seen_unmet.add(key)                       # the screen has seen the step NOT done during this visit
+        self._first_met.setdefault(key, status == "met")
+        already = status == "met" and self._first_met[key] and key not in self._seen_unmet
+        advanced = False
+        if self.auto_advance and status == "met" and verdict is not None and not verdict.unobservable and not already:
+            engine.complete(by="observed")                  # only when the screen saw the state change, never because it was true all along
+            advanced = True
+        if len(self._first_met) > 500:                      # a long session is a few dozen visits; keep the table small
+            self._first_met.clear()
+            self._seen_unmet.clear()
         if advanced:
             return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.pointer, look.keys, look.inputs)
-        if look.rect is None and look.target and not look.keys:
+        if already:
+            msg = "This already looks done on the screen (it was true when the step started), so press Done when you have done it."
+        elif look.rect is None and look.target and not look.keys:
             msg = "Several places on the screen match; open the menu and it will narrow down." if look.ambiguous else "Looking for that on the screen."
         else:
             msg = "Watching the screen."

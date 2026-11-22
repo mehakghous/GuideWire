@@ -28,7 +28,8 @@ def _step_mode(step: Step) -> str | None:
 
 
 def _has_full_path(step: Step) -> bool:
-    return any(a.ui_element and ">" in a.ui_element for a in step.actions) or any(h.text.startswith(_PREFIX) for h in step.how_to)
+    return (any(a.ui_element and ">" in a.ui_element for a in step.actions)
+            or any(h.text.startswith(_PREFIX) or ">" in h.text for h in step.how_to))     # a path already written (by the model or by us)
 
 
 def add_menu_path(step: Step, app: str) -> bool:

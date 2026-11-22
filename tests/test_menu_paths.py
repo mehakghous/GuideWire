@@ -98,6 +98,8 @@ def test_steps_with_a_full_path_are_not_touched():
     assert add_menu_paths(sl) == 0 and not st.how_to
     st2 = _step("Add a cube", how_to=[HowTo(text="Menu: Add > Mesh > Cube", support="catalog")])
     assert add_menu_paths(StepList(source_type="written", app="blender", steps=[st2])) == 0
+    st3 = _step("Orient the joints", how_to=[HowTo(text="Open Skeleton > Orient Joint.", support="shown", evidence="Skeleton > Orient Joint")])
+    assert add_menu_paths(StepList(source_type="written", app="maya", steps=[st3])) == 0 and len(st3.how_to) == 1   # model-written path stays alone
 
 
 def test_the_chat_service_appends_the_exact_path_to_answers():

@@ -153,6 +153,11 @@ class VisionService:
             return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
         from vision.probe_client import read_probe
         probe = read_probe(app=self.profile.key) if self.use_probe else None
+        if self.use_probe and probe is None:
+            from shared.diagnostics import get_logger, log_every
+            import logging
+            log_every(get_logger("vision"), f"probe-missing-{self.profile.key}", 300, logging.INFO,
+                      "no %s probe answered; using the screen alone (the probe gives exact state and tool positions)", self.profile.key)
         if self.profile.key == "maya":
             return self._ground_maya(ui_element, win, frame, pixels, words, probe)
         found = find_target(words, pixels, ui_element, mode_hint or (probe or {}).get("mode"), toolbar=self.profile.toolbar)

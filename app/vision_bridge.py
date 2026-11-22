@@ -15,8 +15,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Callable
 
+import logging
+
 from app.guidance import Plan, describe, plan_for
+from shared.diagnostics import get_logger, log_every
 from shared.step_record import Step
+
+log = get_logger("vision")
 
 WINDOW_NAMES = {"blender": "Blender", "maya": "Maya", "houdini": "Houdini"}
 INSTALL_HINT = "pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections"
@@ -239,6 +244,7 @@ class VisionBridge:
                 self._services[app] = self.factory(app)
             except Exception as e:                       # missing packages, not Windows, no display
                 self._failed[app] = explain(e)
+                log.warning("screen guidance unavailable for %s: %s (%s)", app, self._failed[app], type(e).__name__)
                 return None
         return self._services[app]
 
@@ -293,6 +299,7 @@ class VisionBridge:
                         rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
                     complete, ambiguous = bool(g.complete), bool(g.ambiguous and found is None)
                     if found is None and getattr(g.grounding, "reason", "").startswith("no visible window"):
+                        log_every(log, f"no-window-{app}", 60, logging.INFO, "%s is not visible, so the screen cannot be read", WINDOW_NAMES.get(app, app))
                         return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=keys)
             if rect is None and not ambiguous and plan.region and hasattr(svc, "region_rect"):
                 r = svc.region_rect(plan.region, plan.anchor)        # nothing to find by text: point at where it happens
@@ -302,8 +309,10 @@ class VisionBridge:
             observed = svc.observe(properties=props or None, attributes=attrs or None)
         except ImportError as e:                         # the OCR packages are missing: this fails the first time the screen is read, not when the service is made
             self._failed[app] = explain(e)
+            log.warning("screen guidance stopped for %s: %s", app, self._failed[app])
             return Look(target, window_rect=window, problem=self._failed[app], problem_state="unavailable")
         except Exception as e:                           # a vision failure must never break the session
+            log_every(log, f"look-failed-{type(e).__name__}", 30, logging.WARNING, "a screen look failed: %s: %s", type(e).__name__, e)
             return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.", keys=keys)
         hint = describe(plan, found, matched, complete, step)
         return Look(target, rect, complete, ambiguous, observed, window, hint=hint, pointer=pointer, keys=keys, inputs=plan.inputs)
@@ -321,12 +330,15 @@ class VisionBridge:
         key = (engine.session_id, step.id if step is not None else "", getattr(engine, "revision", 0))
         if status == "unmet":
             self._seen_unmet.add(key)                       # the screen has seen the step NOT done during this visit
+        if key not in self._first_met and status == "met":
+            log.info("step %s was already true when it started, so the screen will not complete it", key[1])
         self._first_met.setdefault(key, status == "met")
         already = status == "met" and self._first_met[key] and key not in self._seen_unmet
         advanced = False
         if self.auto_advance and status == "met" and verdict is not None and not verdict.unobservable and not already:
             engine.complete(by="observed")                  # only when the screen saw the state change, never because it was true all along
             advanced = True
+            log.info("step %s completed because the screen saw it become true", key[1])
         if len(self._first_met) > 500:                      # a long session is a few dozen visits; keep the table small
             self._first_met.clear()
             self._seen_unmet.clear()

@@ -860,9 +860,35 @@ class ProfileScreen(QWidget):
         pw_tile.body.addWidget(self.password_button)
         grid.addWidget(me, 1, 0)
         grid.addWidget(pw_tile, 1, 1)
-        grid.setRowStretch(2, 1)                  # spare height goes below the tiles instead of stretching them
+        # Logs and crash reports: local files only, nothing is ever sent (app/crash_ui.py, shared/diagnostics.py)
+        self.logs_button = QPushButton("Open logs folder")
+        self.report_button = QPushButton("Open last crash report")
+        self.logs_hint = QLabel("GuideWire keeps a log and, if it ever hits a problem, a crash report. They stay on this computer; GuideWire never sends them anywhere.")
+        self.logs_hint.setWordWrap(True)
+        self.logs_hint.setObjectName("hint")
+        diag_tile = Tile("Problems and logs", variant="soft")
+        diag_tile.body.addWidget(self.logs_hint)
+        row = QHBoxLayout()
+        row.addWidget(self.logs_button)
+        row.addWidget(self.report_button)
+        row.addStretch()
+        diag_tile.body.addLayout(row)
+        self.logs_button.clicked.connect(lambda: self._open("logs"))
+        self.report_button.clicked.connect(lambda: self._open("report"))
+        grid.addWidget(diag_tile, 2, 0, 1, 2)
+        grid.setRowStretch(3, 1)                  # spare height goes below the tiles instead of stretching them
         grid.setColumnStretch(0, 1)
         grid.setColumnStretch(1, 1)
+
+    def _open(self, what: str) -> None:
+        from .. import crash_ui
+        from shared import diagnostics
+        if what == "logs":
+            ok = crash_ui.open_log_folder()
+            self.message.setText("" if ok else f"Could not open the folder. The logs are in {diagnostics.log_dir()}")
+        else:
+            ok = crash_ui.open_latest_report()
+            self.message.setText("" if ok else "There is no crash report: GuideWire has not hit a problem.")
 
     def load(self, user: User) -> None:
         self.user = user

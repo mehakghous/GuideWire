@@ -1,8 +1,9 @@
 """What differs between the supported applications. Everything else in `vision` is shared.
 
 Text-based guidance (menus, panels, dialogs) needs only the window title, so it works in any
-application. Blender additionally has icon-toolbar detection and area naming; for Maya and Houdini
-those are not built yet (see `validated`).
+application. Blender has icon-toolbar detection and area naming from pixels and its add-on. Maya has no
+screen-only reading; its probe reports where the tool box, shelf and menu bar are (`vision/mayaui.py`), checked on
+Maya 2027.3. Houdini is not built yet (see `validated`).
 """
 from __future__ import annotations
 
@@ -23,8 +24,8 @@ class AppProfile:
 PROFILES = {
     "blender": AppProfile("blender", "Blender", "5.2", toolbar=True, validated=True,
                           probe="vision/blender_addon/guidewire_probe.py", exe=("blender",)),
-    "maya": AppProfile("maya", "Maya", "2027", toolbar=False, validated=False,
-                       probe="vision/probes/maya_probe.py"),
+    "maya": AppProfile("maya", "Maya", "2027", toolbar=False, validated=True,
+                       probe="vision/probes/maya_probe.py", exe=("maya",)),
     "houdini": AppProfile("houdini", "Houdini", "22.0.466", toolbar=False, validated=False,
                           probe="vision/probes/houdini_probe.py"),
 }

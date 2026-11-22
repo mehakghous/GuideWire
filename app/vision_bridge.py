@@ -114,6 +114,8 @@ def default_service_factory(app: str):
 
     class LiveService(VisionService):
         def ground(self, ui_element: str, mode_hint: str | None = None, prefer_toolbar: bool = False):
+            if self.profile.key != "blender":                            # Maya (and later Houdini) have their own lookup: the probe's interface model, then the screen text
+                return super().ground(ui_element, mode_hint, prefer_toolbar)
             from shared.grounding import GroundingResult
             from vision.probe_client import read_probe
             from vision.service import Guidance, find_target, ground_located
@@ -146,6 +148,8 @@ def default_service_factory(app: str):
         def region_rect(self, name: str, anchor: str = "center"):
             """A screen rectangle in a region of the application (viewport, properties...): where to point when the thing itself has no text to find."""
             from shared.grounding import Rect
+            if self.profile.key != "blender":
+                return super().region_rect(name, anchor)
             win, frame, pixels, words, layout = self._scene()
             if win is None or layout is None or layout.get("viewport" if name == "toolbar" else name) is None:
                 return None

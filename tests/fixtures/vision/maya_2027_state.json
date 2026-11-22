@@ -1,0 +1,974 @@
+{
+ "node_counts": {
+  "time": 1,
+  "sequenceManager": 1,
+  "hardwareRenderingGlobals": 1,
+  "partition": 2,
+  "renderGlobalsList": 1,
+  "defaultLightList": 1,
+  "defaultShaderList": 1,
+  "postProcessList": 1,
+  "defaultRenderUtilityList": 1,
+  "defaultRenderingList": 1,
+  "lightList": 1,
+  "defaultTextureList": 1,
+  "lambert": 1,
+  "standardSurface": 1,
+  "openPBRSurface": 1,
+  "particleCloud": 1,
+  "shadingEngine": 2,
+  "materialInfo": 1,
+  "shaderGlow": 1,
+  "dof": 1,
+  "renderGlobals": 1,
+  "renderQuality": 1,
+  "resolution": 1,
+  "objectSet": 2,
+  "viewColorManager": 1,
+  "colorManagementGlobals": 1,
+  "hardwareRenderGlobals": 1,
+  "hwRenderGlobals": 1,
+  "ikSystem": 1,
+  "hyperGraphInfo": 1,
+  "hyperLayout": 1,
+  "globalCacheControl": 1,
+  "strokeGlobals": 1,
+  "dynController": 1,
+  "lightLinker": 1,
+  "transform": 4,
+  "camera": 4,
+  "UsdDefaultSettings": 1,
+  "shapeEditorManager": 1,
+  "poseInterpolatorManager": 1,
+  "displayLayerManager": 1,
+  "displayLayer": 1,
+  "renderLayerManager": 1,
+  "renderLayer": 1
+ },
+ "nodes": [
+  "UsdDefaultSettings",
+  "camera",
+  "colorManagementGlobals",
+  "defaultLightList",
+  "defaultRenderUtilityList",
+  "defaultRenderingList",
+  "defaultShaderList",
+  "defaultTextureList",
+  "displayLayer",
+  "displayLayerManager",
+  "dof",
+  "dynController",
+  "globalCacheControl",
+  "hardwareRenderGlobals",
+  "hardwareRenderingGlobals",
+  "hwRenderGlobals",
+  "hyperGraphInfo",
+  "hyperLayout",
+  "ikSystem",
+  "lambert",
+  "lightLinker",
+  "lightList",
+  "materialInfo",
+  "objectSet",
+  "openPBRSurface",
+  "particleCloud",
+  "partition",
+  "poseInterpolatorManager",
+  "postProcessList",
+  "renderGlobals",
+  "renderGlobalsList",
+  "renderLayer",
+  "renderLayerManager",
+  "renderQuality",
+  "resolution",
+  "sequenceManager",
+  "shaderGlow",
+  "shadingEngine",
+  "shapeEditorManager",
+  "standardSurface",
+  "strokeGlobals",
+  "time",
+  "transform",
+  "viewColorManager"
+ ],
+ "node_names": [
+  "time1",
+  "sequenceManager1",
+  "hardwareRenderingGlobals",
+  "renderPartition",
+  "renderGlobalsList1",
+  "defaultLightList1",
+  "defaultShaderList1",
+  "postProcessList1",
+  "defaultRenderUtilityList1",
+  "defaultRenderingList1",
+  "lightList1",
+  "defaultTextureList1",
+  "lambert1",
+  "standardSurface1",
+  "openPBR_shader1",
+  "particleCloud1",
+  "initialShadingGroup",
+  "initialParticleSE",
+  "initialMaterialInfo",
+  "shaderGlow1",
+  "dof1",
+  "defaultRenderGlobals",
+  "defaultRenderQuality",
+  "defaultResolution",
+  "defaultLightSet",
+  "defaultObjectSet",
+  "defaultViewColorManager",
+  "defaultColorMgtGlobals",
+  "hardwareRenderGlobals",
+  "characterPartition",
+  "defaultHardwareRenderGlobals",
+  "ikSystem",
+  "hyperGraphInfo",
+  "hyperGraphLayout",
+  "globalCacheControl",
+  "strokeGlobals",
+  "dynController1",
+  "lightLinker1",
+  "persp",
+  "perspShape",
+  "top",
+  "topShape",
+  "front",
+  "frontShape",
+  "side",
+  "sideShape",
+  "UsdDefaultRenderDescription",
+  "shapeEditorManager",
+  "poseInterpolatorManager",
+  "layerManager",
+  "defaultLayer",
+  "renderLayerManager",
+  "defaultRenderLayer"
+ ],
+ "selection_types": [],
+ "history": [],
+ "active_tool": "selectSuperContext",
+ "interface": {
+  "v": 1,
+  "window": {
+   "x": 192,
+   "y": 101,
+   "w": 1536,
+   "h": 806
+  },
+  "regions": {
+   "toolbox": {
+    "x": 194,
+    "y": 293,
+    "w": 62,
+    "h": 420
+   },
+   "shelf": {
+    "x": 194,
+    "y": 189,
+    "w": 1532,
+    "h": 96
+   },
+   "statusline": {
+    "x": 194,
+    "y": 146,
+    "w": 1532,
+    "h": 35
+   },
+   "timeslider": {
+    "x": 192,
+    "y": 719,
+    "w": 1536,
+    "h": 72
+   },
+   "rangeslider": {
+    "x": 192,
+    "y": 795,
+    "w": 1536,
+    "h": 54
+   },
+   "commandline": {
+    "x": 962,
+    "y": 853,
+    "w": 766,
+    "h": 54
+   },
+   "channelbox": {
+    "x": 1312,
+    "y": 324,
+    "w": 388,
+    "h": 161
+   },
+   "viewport": {
+    "x": 662,
+    "y": 294,
+    "w": 640,
+    "h": 418
+   },
+   "outliner": {
+    "x": 264,
+    "y": 318,
+    "w": 389,
+    "h": 395
+   }
+  },
+  "toolbox": [
+   {
+    "name": "selectTool",
+    "tip": "Select Tool",
+    "rect": {
+     "x": 198,
+     "y": 309,
+     "w": 54,
+     "h": 54
+    },
+    "checked": true,
+    "context": "selectSuperContext"
+   },
+   {
+    "name": "lassoTool",
+    "tip": "Lasso Tool",
+    "rect": {
+     "x": 198,
+     "y": 364,
+     "w": 54,
+     "h": 54
+    },
+    "checked": false,
+    "context": "lassoSelectContext"
+   },
+   {
+    "name": "paintSelectTool",
+    "tip": "Paint Selection Tool",
+    "rect": {
+     "x": 198,
+     "y": 419,
+     "w": 54,
+     "h": 54
+    },
+    "checked": false,
+    "context": "artSelectContext"
+   },
+   {
+    "name": "moveTool",
+    "tip": "Move Tool",
+    "rect": {
+     "x": 198,
+     "y": 474,
+     "w": 54,
+     "h": 54
+    },
+    "checked": false,
+    "context": "moveSuperContext"
+   },
+   {
+    "name": "rotateTool",
+    "tip": "Rotate Tool",
+    "rect": {
+     "x": 198,
+     "y": 529,
+     "w": 54,
+     "h": 54
+    },
+    "checked": false,
+    "context": "RotateSuperContext"
+   },
+   {
+    "name": "scaleTool",
+    "tip": "Scale Tool",
+    "rect": {
+     "x": 198,
+     "y": 584,
+     "w": 54,
+     "h": 54
+    },
+    "checked": false,
+    "context": "scaleSuperContext"
+   }
+  ],
+  "menubar": [
+   {
+    "label": "File",
+    "rect": {
+     "x": 239,
+     "y": 102,
+     "w": 44,
+     "h": 41
+    }
+   },
+   {
+    "label": "Edit",
+    "rect": {
+     "x": 288,
+     "y": 102,
+     "w": 46,
+     "h": 41
+    }
+   },
+   {
+    "label": "Create",
+    "rect": {
+     "x": 339,
+     "y": 102,
+     "w": 65,
+     "h": 41
+    }
+   },
+   {
+    "label": "Select",
+    "rect": {
+     "x": 409,
+     "y": 102,
+     "w": 61,
+     "h": 41
+    }
+   },
+   {
+    "label": "Modify",
+    "rect": {
+     "x": 475,
+     "y": 102,
+     "w": 69,
+     "h": 41
+    }
+   },
+   {
+    "label": "Display",
+    "rect": {
+     "x": 549,
+     "y": 102,
+     "w": 71,
+     "h": 41
+    }
+   },
+   {
+    "label": "Windows",
+    "rect": {
+     "x": 625,
+     "y": 102,
+     "w": 85,
+     "h": 41
+    }
+   },
+   {
+    "label": "Mesh",
+    "rect": {
+     "x": 715,
+     "y": 102,
+     "w": 58,
+     "h": 41
+    }
+   },
+   {
+    "label": "Edit Mesh",
+    "rect": {
+     "x": 778,
+     "y": 102,
+     "w": 88,
+     "h": 41
+    }
+   },
+   {
+    "label": "Mesh Tools",
+    "rect": {
+     "x": 871,
+     "y": 102,
+     "w": 97,
+     "h": 41
+    }
+   },
+   {
+    "label": "Mesh Display",
+    "rect": {
+     "x": 973,
+     "y": 102,
+     "w": 113,
+     "h": 41
+    }
+   },
+   {
+    "label": "Curves",
+    "rect": {
+     "x": 1091,
+     "y": 102,
+     "w": 68,
+     "h": 41
+    }
+   },
+   {
+    "label": "Surfaces",
+    "rect": {
+     "x": 1164,
+     "y": 102,
+     "w": 79,
+     "h": 41
+    }
+   },
+   {
+    "label": "Deform",
+    "rect": {
+     "x": 1248,
+     "y": 102,
+     "w": 73,
+     "h": 41
+    }
+   },
+   {
+    "label": "UV",
+    "rect": {
+     "x": 1326,
+     "y": 102,
+     "w": 41,
+     "h": 41
+    }
+   },
+   {
+    "label": "Generate",
+    "rect": {
+     "x": 1372,
+     "y": 102,
+     "w": 83,
+     "h": 41
+    }
+   },
+   {
+    "label": "Cache",
+    "rect": {
+     "x": 1460,
+     "y": 102,
+     "w": 62,
+     "h": 41
+    }
+   },
+   {
+    "label": "Arnold",
+    "rect": {
+     "x": 1527,
+     "y": 102,
+     "w": 67,
+     "h": 41
+    }
+   },
+   {
+    "label": "Help",
+    "rect": {
+     "x": 1599,
+     "y": 102,
+     "w": 56,
+     "h": 41
+    }
+   }
+  ],
+  "menu_set": {
+   "label": "Modeling",
+   "id": "modelingMenuSet",
+   "rect": {
+    "x": 210,
+    "y": 147,
+    "w": 150,
+    "h": 33
+   }
+  },
+  "shelf": {
+   "tab": "Polygons",
+   "buttons": [
+    {
+     "name": "shelfButton1",
+     "annotation": "Polygon Sphere: Create a polygonal sphere on the grid",
+     "label": "Polygon Sphere",
+     "rect": {
+      "x": 256,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton2",
+     "annotation": "Polygon Cube: Create a polygonal cube on the grid",
+     "label": "Polygon Cube",
+     "rect": {
+      "x": 309,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton3",
+     "annotation": "Polygon Cylinder: Create a polygonal cylinder on the grid",
+     "label": "Polygon Cylinder",
+     "rect": {
+      "x": 362,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton4",
+     "annotation": "Polygon Cone: Create a polygonal cone on the grid",
+     "label": "Polygon Cone",
+     "rect": {
+      "x": 415,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton5",
+     "annotation": "Polygon Torus: Create a polygonal torus on the grid",
+     "label": "Polygon Torus",
+     "rect": {
+      "x": 468,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton6",
+     "annotation": "Polygon Plane: Create a polygonal plane on the grid",
+     "label": "Polygon Plane",
+     "rect": {
+      "x": 521,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton7",
+     "annotation": "Polygon Disc: Create a polygon disc on the grid",
+     "label": "Polygon Disc",
+     "rect": {
+      "x": 574,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator25",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 627,
+      "y": 222,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton8",
+     "annotation": "Platonic Solid: Create a polygon polyhedron on the grid. Right-click for more polygon primitive types",
+     "label": "Platonic Solid",
+     "rect": {
+      "x": 679,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator26",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 732,
+      "y": 222,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton9",
+     "annotation": "Super Ellipse: Create a polygon super ellipse shape on the grid.\nRight-click to choose shape type.",
+     "label": "Super Ellipse",
+     "rect": {
+      "x": 784,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton10",
+     "annotation": "Sweep Mesh: Create sweep mesh based on selected curve(s)",
+     "label": "Sweep Mesh",
+     "rect": {
+      "x": 837,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton11",
+     "annotation": "Polygon Type: Create 3D text on the grid",
+     "label": "Polygon Type",
+     "rect": {
+      "x": 890,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton12",
+     "annotation": "SVG: Create polygons using scalable vector graphics from the clipboard or an imported SVG file",
+     "label": "SVG",
+     "rect": {
+      "x": 943,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator27",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 996,
+      "y": 222,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton13",
+     "annotation": "Content Browser: Browse assets and example content and import them into your scene",
+     "label": "Content Browser",
+     "rect": {
+      "x": 1048,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator28",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 1101,
+      "y": 222,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton14",
+     "annotation": "Center Pivot: Resets the selected object's pivot to the center",
+     "label": "Center Pivot",
+     "rect": {
+      "x": 1153,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton15",
+     "annotation": "Delete By Type: History: Delete construction history on the selected object(s)",
+     "label": "Delete By Type: History",
+     "rect": {
+      "x": 1206,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton16",
+     "annotation": "Freeze Transformations: Select an object(s)",
+     "label": "Freeze Transformations",
+     "rect": {
+      "x": 1259,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator29",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 1312,
+      "y": 222,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton17",
+     "annotation": "Difference (A - B): Subtracts the second selected object (B) from the first selected object (A). RMB: More operations. Right-click for more Boolean operations.",
+     "label": "Difference (A - B)",
+     "rect": {
+      "x": 1364,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton18",
+     "annotation": "Combine: Combine the selected polygon objects into one single object to allow operations such as merges or face trims.",
+     "label": "Combine",
+     "rect": {
+      "x": 1417,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton19",
+     "annotation": "Extract: Extract the currently selected faces from their shell and shows a manipulator to adjust their offset.",
+     "label": "Extract",
+     "rect": {
+      "x": 1470,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton20",
+     "annotation": "Mirror: Mirror geometry across an axis.",
+     "label": "Mirror",
+     "rect": {
+      "x": 1523,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton21",
+     "annotation": "Smooth: Add faces to the selected polygon objects to smooth them.",
+     "label": "Smooth",
+     "rect": {
+      "x": 1576,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton22",
+     "annotation": "Reduce: Reduce number of polygonal components for selected objects.",
+     "label": "Reduce",
+     "rect": {
+      "x": 1629,
+      "y": 222,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton23",
+     "annotation": "Remesh: Redefines the topology of a mesh by splitting edges to add detail and/or collapsing edges to reduce detail. Use Remesh to create a uniformly tessellated triangular mesh.",
+     "label": "Remesh",
+     "rect": {
+      "x": 256,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton24",
+     "annotation": "Retopologize: Generates clean, new topology that preserves the shape of the source while converting the mesh into four-sided faces (quads).",
+     "label": "Retopologize",
+     "rect": {
+      "x": 309,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator30",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 362,
+      "y": 275,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton25",
+     "annotation": "Extrude: Extend new vertices/edges/faces from existing spots on a mesh.",
+     "label": "Extrude",
+     "rect": {
+      "x": 414,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton26",
+     "annotation": "Smart Extrude: Perform a Smart Extrude operation on mesh faces to interactively clean up surrounding topology for optimal results.",
+     "label": "Smart Extrude",
+     "rect": {
+      "x": 467,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton27",
+     "annotation": "Bridge: Create a bridge between two sets of edges or faces",
+     "label": "Bridge",
+     "rect": {
+      "x": 520,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton28",
+     "annotation": "Bevel Components: Create a bevel along the selected edges or faces",
+     "label": "Bevel Components",
+     "rect": {
+      "x": 573,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton29",
+     "annotation": "Smart Bevel: Interactively bevel along selected edges for procedural results, regardless of topology.",
+     "label": "Smart Bevel",
+     "rect": {
+      "x": 626,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton30",
+     "annotation": "Merge: Merge vertices / border edges based on selection.",
+     "label": "Merge",
+     "rect": {
+      "x": 679,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton31",
+     "annotation": "Merge to Center: Merge selected components to their center point.",
+     "label": "Merge to Center",
+     "rect": {
+      "x": 732,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton32",
+     "annotation": "Flip Triangle Edge: Flip the edge between two triangles",
+     "label": "Flip Triangle Edge",
+     "rect": {
+      "x": 785,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton33",
+     "annotation": "Duplicate: Duplicate the currently selected faces in a new object.",
+     "label": "Duplicate",
+     "rect": {
+      "x": 838,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton34",
+     "annotation": "Collapse: Removes selected components by merging their adjacent vertices.",
+     "label": "Collapse",
+     "rect": {
+      "x": 891,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton35",
+     "annotation": "Circularize: Organize the vertices of selected components into a circle that aligns to the mesh surface.",
+     "label": "Circularize",
+     "rect": {
+      "x": 944,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "separator31",
+     "annotation": "",
+     "label": "",
+     "rect": {
+      "x": 997,
+      "y": 275,
+      "w": 52,
+      "h": 53
+     }
+    },
+    {
+     "name": "shelfButton36",
+     "annotation": "Multi-Cut: Cut, slice and insert edges on polygons.",
+     "label": "Multi-Cut",
+     "rect": {
+      "x": 1049,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton37",
+     "annotation": "Target Weld: Merges two edges or vertices into a single component.",
+     "label": "Target Weld",
+     "rect": {
+      "x": 1102,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    },
+    {
+     "name": "shelfButton38",
+     "annotation": "Quad Draw: Drop points on Live objects to create new faces for re-topology",
+     "label": "Quad Draw",
+     "rect": {
+      "x": 1155,
+      "y": 275,
+      "w": 53,
+      "h": 52
+     }
+    }
+   ]
+  }
+ }
+}

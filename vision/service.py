@@ -153,8 +153,49 @@ class VisionService:
             return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
         from vision.probe_client import read_probe
         probe = read_probe(app=self.profile.key) if self.use_probe else None
+        if self.profile.key == "maya":
+            return self._ground_maya(ui_element, win, frame, pixels, words, probe)
         found = find_target(words, pixels, ui_element, mode_hint or (probe or {}).get("mode"), toolbar=self.profile.toolbar)
         return ground_located(frame.geometry, win.rect, found)
+
+    # ---- Maya: its own widgets say where the icons and menus are; the screen text finds what opens beneath them
+    def _maya_ui(self, win, probe):
+        """The probe's interface model for Maya, only when it describes the window as it is on screen right now."""
+        from vision import winplatform
+        from vision.mayaui import MayaUi
+        ui = MayaUi.parse(probe)
+        if ui is None or not ui.valid_for(winplatform.client_rect(win.hwnd)):
+            return None
+        return ui
+
+    def _ground_maya(self, ui_element, win, frame, pixels, words, probe) -> Guidance:
+        from vision.locate import locate
+        ui = self._maya_ui(win, probe)
+        found = locate(words, ui_element)
+        if found is not None and found.depth >= 1:                  # a menu is open and its item was read from the screen: that is the most specific answer
+            return ground_located(frame.geometry, win.rect, found)
+        hit = ui.find(ui_element) if ui is not None else None
+        if hit is not None:                                         # icons and the menu bar: exact, from Maya itself
+            r = hit.rect
+            if not (win.rect.x <= r.x and win.rect.y <= r.y and r.x + r.w <= win.rect.x + win.rect.w and r.y + r.h <= win.rect.y + win.rect.h):
+                return Guidance(GroundingResult("outside_target", reason="that part of Maya is outside its window"))
+            point = GroundingResult("ok", r.x + r.w // 2, r.y + r.h // 2)
+            return Guidance(point, r, hit.complete, False, hit.name)
+        return ground_located(frame.geometry, win.rect, found)
+
+    def region_rect(self, region: str, anchor: str = "center") -> Rect | None:
+        """Where a named part of the application is, for pointing at "where it happens" when there is nothing to find by text. Maya only (from the probe)."""
+        if self.profile.key != "maya" or not self.use_probe:
+            return None
+        from vision import winplatform
+        from vision.mayaui import MayaUi
+        from vision.probe_client import read_probe
+        win = winplatform.find_window(self.title, self.profile.exe)
+        ui = MayaUi.parse(read_probe(app="maya")) if win is not None else None
+        if ui is None or win is None or not ui.valid_for(winplatform.client_rect(win.hwnd)):
+            return None
+        name = {"toolbar": "toolbox", "properties": "channelbox"}.get(region, region)
+        return ui.region(name)
 
     def observe(self, properties: list[str] | None = None, attributes: list[str] | None = None) -> dict[str, Any]:
         """State for the evaluator. `properties` / `attributes` are the paths the active step needs read
@@ -164,7 +205,7 @@ class VisionService:
         win, _, pixels, words, layout = self._scene()
         probe = (read_probe(properties=properties, attributes=attributes, app=self.profile.key)
                  if self.use_probe else None)
-        if win is None or not self.profile.validated:      # hidden, or an app whose screen layout is not built yet
-            return merge_observed({}, probe)               # the probe can still answer
+        if win is None or not self.profile.validated or self.profile.key != "blender":   # hidden, or an app with no screen-only reading (Maya, Houdini): the probe answers
+            return merge_observed({}, probe)
         screen = observe_blender(words, pixels, layout, mode_hint=(probe or {}).get("mode"))
         return merge_observed(screen, probe)

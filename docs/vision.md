@@ -37,8 +37,12 @@ input to the application.
 - `history.py` history-based verification: `HistoryTracker` turns the probe's operator list into new
   events; `verify_actions` matches them to a step's UI path (camelCase and prefixes handled, so
   `polyCube` matches "Create > Polygon Primitives > Cube").
-- `probes/` the Maya and Houdini probes plus the shared loopback server (`probe_core.py`). **Prototypes:
-  tested against fake `maya.cmds` / `hou` objects only, never run inside Maya or Houdini.**
+- `probes/` the Maya and Houdini probes plus the shared loopback server (`probe_core.py`). **Maya: run and checked inside
+  Maya 2027.3 (state, active tool, interface model, history). Houdini: prototype, tested against a fake `hou` only.**
+- `mayaui.py` Maya's interface as the probe reports it (tool box with the active tool, current shelf buttons with their
+  tooltips, menu-bar items, menu-set dropdown, panel regions, all in screen pixels, within a pixel of the real screen) and
+  how to find a tool / shelf button / menu in it. `VisionService(app="maya")` uses it first and the screen text for the
+  menu items that open beneath.
 - `verification/oracle.py` oracle scorer: compares a learner scene with a reference end state after
   normalising units, up axis and frame rate (Blender Z-up metres, Maya Y-up centimetres, Houdini Y-up
   metres), and drops parts that have no data instead of penalising them.
@@ -49,7 +53,7 @@ input to the application.
 | App | Probe | How it reads | History source | Status |
 |---|---|---|---|---|
 | Blender | `blender_addon/guidewire_probe.py` | `bpy`, on a timer on the main thread | `window_manager.operators` | Run in the real Blender GUI: state, active tool, requested paths. History not checked live |
-| Maya | `probes/maya_probe.py` | `maya.cmds`, `executeInMainThreadWithResult` | Script Editor echo file | Prototype, not run in Maya |
+| Maya | `probes/maya_probe.py` | `maya.cmds` + Maya's Qt widgets, `executeInMainThreadWithResult` | Script Editor echo file | **Run in Maya 2027.3**: 0.13 s per read, interface snapshot 109 ms. Menu and shelf commands echo to the history file (`polyCube ...;`); commands run from Python scripts do not |
 | Houdini | `probes/houdini_probe.py` | `hou`, `hdefereval.executeInMainThreadWithResult` | `hou.undos.undoLabels()` | Prototype, not run in Houdini |
 
 All three speak protocol v1 and write their connection details (with the app name) to

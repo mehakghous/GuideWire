@@ -23,13 +23,15 @@ application (`vision/blender_addon`, `vision/probes`). The screen sees what is d
 | Other modes' toolbars (Edit, Sculpt, Paint, Pose...) | `toolbars.json` | Designed: tool lists dumped from Blender, never matched against a real capture |
 | Header and panel icons, sliders, node-editor wires | none | not detected |
 
-### Maya 2027 (Designed: not installed on the development machine)
+### Maya 2027.3 Education (Tested: probe and interface model on the real application, default layout, 1920x1080)
 | Thing | Source | Notes |
 |---|---|---|
 | Menu bar, menu items, Script Editor, Attribute Editor labels, Channel Box names | screen (OCR) | same text pipeline; layout naming not built (`apps.py` marks it unvalidated) |
 | Shelf buttons, tool-box icons | none yet | icon-only; a toolbar-style cell detector could be adapted once real frames exist |
 | Outliner and Node Editor / Hypergraph regions | screen (region split, OCR labels) | node boxes carry text labels; connections are not read |
-| Node types, counts, names, selection, current tool, attribute values | probe (`maya.cmds`) | prototype in `vision/probes/maya_probe.py`, tested against a fake `cmds` only |
+| Node types, counts, names, selection, current tool, attribute values | probe (`maya.cmds`) | `vision/probes/maya_probe.py`, run in Maya 2027.3 |
+| Tool-box tools (Select, Lasso, Paint Selection, Move, Rotate, Scale) with the active one, current shelf buttons with tooltips, menu-bar items, menu-set dropdown, panel regions | probe (Maya's Qt widgets) | exact screen rectangles, matching OCR of the same words to within a pixel; `vision/mayaui.py` |
+| Menu items below the menu bar (`Create > Polygon Primitives > Cube`) | screen text + `shared/menus/maya_menus.json` | the real menu dump |
 | What the learner just did | probe (Script Editor echo) | prototype; points Maya's history log at a temp file and switches it off on unregister |
 
 ### Houdini 22.0.466 Apprentice (Designed: not installed on the development machine)
@@ -52,7 +54,10 @@ application (`vision/blender_addon`, `vision/probes`). The screen sees what is d
 | Houdini Apprentice terms | SideFX: non-commercial projects only, may not be used in the same pipeline as commercial Houdini; scenes save as `.hipnc`, assets `.hdanc`, USD as `.usdnc`; opening such files in a commercial build downgrades them to non-commercial; renders other than `.picnc` are watermarked | Checked against SideFX pages (see sources) |
 | Apprentice export formats | One third-party post says FBX export works; a SideFX forum post about the Indie tier says FBX and Alembic were removed. Unresolved: matters for the FBX/USD oracle comparison | **Unverified** |
 | Apprentice render size | SideFX FAQ says 1920x1080; a blog says 1280x720. Trust SideFX; irrelevant to our read-only use | Unverified |
-| `maya.cmds` state access from a probe | `maya.utils.executeInMainThreadWithResult` runs a callable on Maya's main thread and blocks the caller until idle; it needs idle events, so it does not work in batch (`mayapy`) mode. Forum reports of lock-ups when calls are nested or in tight loops. The probe therefore only works in an interactive Maya session | Designed (documentation, not run) |
+| `maya.cmds` state access from a probe | `maya.utils.executeInMainThreadWithResult` runs a callable on Maya's main thread and blocks the caller until idle; it needs idle events, so it does not work in batch (`mayapy`) mode. The probe therefore only works in an interactive Maya session. **Run live in Maya 2027.3:** reads take about 0.13 s, the interface snapshot about 109 ms, and no lock-up was seen with repeated reads. `mayapy` itself starts and is licensed | **Tested** |
+| Maya Script Editor echo as the action history | `cmds.scriptEditorInfo(historyFilename=..., writeHistory=True)` writes menu and shelf commands (e.g. `polyCube -w 1 ...;`) to the file; commands called from Python (`cmds.polyCube()`) are not echoed. Learners use the interface, so this is the signal wanted | **Tested** |
+| Maya window and DPI | Maya's Qt coordinates equal the screen pixels (device pixel ratio 1.0 on this display); its client area equals the probe's window rectangle, which is how a stale snapshot is refused | **Tested** (one display) |
+| Maya start-up | The Autodesk web installer failed with Error 1006 because the router DNS could not resolve `cdn-delivery.autodesk.com`; switching Wi-Fi DNS fixed it. A first launch shows a "Go to Maya" welcome screen that blocks the real window until dismissed | Observed |
 | `hou` state access from a probe | `hdefereval.executeInMainThreadWithResult` is the equivalent; no official SideFX reference found, one forum report of a freeze. Needs a first test in a real session | **Unverified** |
 | FBX / USD oracle normalisation | `verification/oracle.py` normalises units, up axis (Z-up Blender, Y-up Maya and Houdini) and frame rate, and is tested on synthetic scenes; no real exported files compared yet | Tested (synthetic only) |
 

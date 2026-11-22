@@ -41,7 +41,18 @@ PENALTY = {
     "overlap": 0.9,
     "feature_needs_extra": 0.9,
     "ungrounded_how_to": 0.85,
+    "vague_value": 0.9,
 }
+
+# A how-to line that says to change something without saying to what ("Adjust shape scale/offset to enlarge control shapes", "set a custom color"). In the v11 runs no model wrote
+# "not readable" when it could not read a value; it wrote a line like these instead, so the reviewer is told here, deterministically.
+_VAGUE = re.compile(r"\b(adjust\w*|tweak\w*|as needed|as desired|to taste|to suit|some value|a custom|a suitable|appropriate value|enlarge|until it looks)\b", re.I)
+_HAS_VALUE = re.compile(r"\d|'[^']+'|\"[^\"]+\"|\bto (on|off|true|false|[A-Z][\w-]*)\b")
+
+
+def vague_lines(step: Step) -> list[str]:
+    """How-to lines that change a setting without giving the value."""
+    return [h.text for h in step.how_to if _VAGUE.search(h.text) and not _HAS_VALUE.search(h.text)]
 
 
 @dataclass(frozen=True)
@@ -258,6 +269,10 @@ def sanitize_and_annotate(
         loose = [h for h in (*step.how_to, *step.check) if h.support in ("shown", "said") and not (h.evidence or "").strip()]
         if loose:
             flag(step, "ungrounded_how_to", f"{len(loose)} instruction line(s) claim to be {loose[0].support} in the source but give no evidence for it")
+
+        vague = vague_lines(step)
+        if vague:
+            flag(step, "vague_value", f"a value may be missing: \"{vague[0][:80]}\" does not say what to set; check the video before using this step")
 
         if step.support in ("demonstrated", "narrated", "both") and not step.evidence:
             flag(step, "no_evidence", f"claims support='{step.support}' but gives no evidence")

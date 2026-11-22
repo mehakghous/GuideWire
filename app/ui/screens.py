@@ -405,8 +405,11 @@ class StepReviewScreen(QWidget):
         if step.group:
             members = [s for s in self.editor.steps.steps if s.group_id == step.group_id]
             parts.append(f"<p>Part of: {html.escape(step.group)} (step {members.index(step) + 1} of {len(members)} in this group)</p>")
+        if step.why:
+            parts.append(f"<p><b>Why</b> {html.escape(step.why)}</p>")
         parts.append(self._bullets("How to do it", [h.text for h in step.how_to]))
         parts.append(self._bullets("How you can tell it worked", [h.text for h in step.check]))
+        parts.append(self._bullets("Watch out", step.common_mistakes))
         parts.append(self._bullets("Notes", step.flags))
         self.detail.setText("".join(parts))
 
@@ -1039,10 +1042,14 @@ class SessionScreen(QWidget):
     def _detail_for(step, viewed: bool = False) -> str:
         """What someone following the step needs: how to do it, how to tell it worked, and whether GuideWire can check it. The validator's notes (where a step's expected state came from, vocabulary warnings) are for the editor and stay on the Review screen."""
         parts: list[str] = []
+        if step.why:
+            parts.append("Why\n" + step.why)
         if step.how_to:
             parts.append("How to do it\n" + "\n".join(f"• {h.text}" for h in step.how_to))
         if step.check:
             parts.append("How you can tell it worked\n" + "\n".join(f"• {h.text}" for h in step.check))
+        if step.common_mistakes:
+            parts.append("Watch out\n" + "\n".join(f"• {m}" for m in step.common_mistakes))
         check = checkability(step)
         if check.level != "checkable":
             parts.append(check.full if viewed else f"{check.full} Press Done when you have finished it.")

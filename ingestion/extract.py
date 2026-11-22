@@ -35,7 +35,7 @@ from .validate import Issue, ValidationFailure, check_structure, refresh_coverag
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds", "v11", "v12")
 
 
 class ExtractionError(RuntimeError):
@@ -132,8 +132,24 @@ class DraftStepListExt(DraftStepList):
     steps: list[DraftStepExt]
 
 
+class DraftStepV11(DraftStepExt):
+    """v11 adds `why`: the purpose of the step as the instructor explains it. Only v11 sees this field, so the request, cache key and recorded runs of every earlier version are unchanged."""
+    why: str | None = Field(default=None, description="why the learner does this step, in one sentence, ONLY as the instructor says or clearly shows it; null when the video gives no reason")
+
+
+class DraftStepListV11(DraftStepList):
+    steps: list[DraftStepV11]
+
+
 def _extended(prompt_version: str) -> bool:
-    return prompt_version in ("v10-preds", "v10-houpreds")
+    return prompt_version in ("v10-preds", "v10-houpreds", "v11", "v12")
+
+
+def _draft_model(prompt_version: str) -> type[DraftStepList]:
+    """The model-facing step-list shape for a prompt version."""
+    if prompt_version in ("v11", "v12"):
+        return DraftStepListV11
+    return DraftStepListExt if _extended(prompt_version) else DraftStepList
 
 
 _COMMON_RULES = """- One step = one learner goal achievable in a few actions. Keep tutorial order.
@@ -150,7 +166,7 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
     if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou", "houpreds")):
         raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
-    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10")) else ""
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10", "v11", "v12")) else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
@@ -160,6 +176,8 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
   Predicate JSON looks like {{"kind": "mode", "name": "EDIT_MESH"}} or
   {{"kind": "property_equals", "name": "object.location.x", "expected_value": 2.0}}.
   `name` must be one of the listed strings exactly; do not put the kind in `name`."""
+    if version in ("v11", "v12"):
+        return _v11_system_prompt(profile, vocab, fine=version == "v12")
     if version == "v2":
         return f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
@@ -216,6 +234,101 @@ Rules:
 """
         return base + (_rigging_rules(profile, version) if version in ("v4", "v5", "v6", "v7", "v8", "v9", "v10") else "") + (_ACTIONABLE_RULES if version in ("v5", "v6", "v7", "v8", "v9", "v10") else "") + (_knowledge_notes(profile) if version in ("v6", "v7", "v8", "v9", "v10") and kb_mode != "nokb" else "") + (_knowledge_outlines(profile) if kb_mode == "outline" else "") + (_ATOMIC_RULES if version in ("v8", "v9", "v10") else "") + (_COVERAGE_RULES if version in ("v9", "v10") else "") + (_NO_PADDING_RULES if version == "v10" else "") + (_PREDICATE_RULES if kb_mode in ("preds", "houpreds") else "") + (_HOUDINI_RULES if kb_mode in ("hou", "houpreds") and profile.name == "houdini" else "")
     raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
+
+
+# v11 (2026-11-22). A fresh prompt, not v10 plus more rules. Reading the recorded v10 runs against the human labels (docs/extraction_v11_report_2026-11-22.md) showed:
+#   * stacked rules that contradict each other (v3 "one step per operation", v5 "split compound actions", v8 "one step per operation however small ... many dozens", v9 "no 15 s gap
+#     without a step", v10 "never pad"): mode switches, single selections and each of five renames became steps of their own, and the coverage rule pushed the model to fill gaps;
+#   * example names written into the rules were copied into the steps as if the video showed them: "Target Pattern" appears 0 times in runs without the Houdini rules and 19 to 46
+#     times with them, never in what the instructor shows. Every example below is therefore a <placeholder>, never a real-looking name;
+#   * no place for the instructor's reasons: narration was used only as evidence, so "why" was lost;
+#   * an instructor's on-screen mistake (an undo, a redo) was either turned into steps or dropped along with its lesson.
+# v11 asks for MEANINGFUL steps: one operation a learner would name as one thing to do, with every click, value and name inside it, and the reason the instructor gives.
+def _v11_system_prompt(profile: AppProfile, vocab: str, fine: bool = False) -> str:
+    """v11, or with `fine` v12: the same prompt with smaller steps (`_V12_STEP_RULES` in place of `_V11_STEP_RULES`)."""
+    from .features import CRAFT_FEATURES, load_catalog
+    feats = "\n".join(f"  {f.id}: {f.name}" for f in load_catalog().supported(profile.name, ("N", "P", "C")))
+    node_example = NODE_EXAMPLES[profile.name]
+    houdini = """
+HOUDINI NODE NETWORKS. A node is usually one step: create it (with the Tab menu or a shelf tool), connect it, and set the parameters the tutorial changes on it, all in that step's how_to, one
+line per parameter with the exact parameter label and value shown in the parameter pane. Start a new step when the instructor moves to another node, or comes back later to change a node for a
+new reason. Read parameter labels from the screen; if a label or value cannot be read, say so instead of guessing a likely name.
+""" if profile.name == "houdini" else ""
+    step_rules = _V12_STEP_RULES if fine else _V11_STEP_RULES
+    how_lines = "1 to 3" if fine else "ordered,"
+    return f"""You turn a software tutorial video for {profile.name} into the steps a learner follows to reproduce it in their own copy of {profile.name}.
+
+USE BOTH SOURCES, FOR DIFFERENT THINGS.
+- The SCREEN tells you WHAT is done and WHERE: the menus, buttons, panels, tools, modes, fields, the exact values and names typed or chosen, and the result that appears. Read overlay text
+  that some videos draw for key and mouse presses.
+- The NARRATION tells you WHY it is done and WHAT IT SHOULD ACHIEVE, plus details the screen cannot show (a key held down, a value said aloud).
+- Combine them in every step. Never write an operation only because it is plausible or usual; never drop one the screen clearly shows because the narration does not mention it.
+
+{step_rules}
+
+STAY TRUE TO THE TUTORIAL.
+- Keep the instructor's order.
+- Use the tool, menu, panel, field, node and setting names EXACTLY as the screen shows them, and every value and name EXACTLY as typed or chosen. Do not translate between applications.
+- Never invent an action, setting, value, name or technique the tutorial does not demonstrate or explain. If a detail is needed but cannot be read or heard, write the line without it and
+  add "the exact <thing> is not readable in the video" to the step's assumptions. Never write "adjust as needed" when the video shows what was set.
+- Do not skip an action the instructor teaches because it seems obvious; a beginner follows these steps without the video.
+- If the instructor makes a mistake on screen and undoes or corrects it, write only the correct way as the step, and put the pitfall in common_mistakes ("<what went wrong> happens if
+  <cause>; <how the instructor fixed it>"). Do not write steps for the mistake or the undo.
+- If the instructor tests or demonstrates the result (moves a control to show it works), put that in the check lines of the step it tests. Make it a step of its own only when the instructor
+  presents it as a stage of the tutorial ("now let's test the rig").
+
+FIELDS.
+- goal: one short imperative sentence naming the operation and its object ("<Do something> to <thing>").
+- why: the purpose in one sentence, ONLY as the instructor says or clearly shows it; null when no reason is given. Never make up a reason.
+- how_to: {how_lines} short, imperative lines covering everything the learner does in this step: what to select and where, the exact menu path ("<Menu> > <Item>"), button, tool,
+  shortcut or field, every value and name. Give each line support "shown" (visible) or "said" (only narrated) and evidence (a short quote, or what the screen shows).
+- result: one sentence on what the learner has after the step.
+- check: how the learner can tell it worked, only as the video shows or says it.
+- actions: the main UI elements and keys of the step, verbs click, select, press_keys, drag, set_value, open_menu, other. ui_element is the label EXACTLY as shown ("<Menu> > <Item>").
+  Never invent UI names; if you cannot tell what was clicked, use verb "other" with ui_element null.
+- support: "both" when said and shown, "demonstrated" when only shown, "narrated" when only said, "inferred" (rare, low confidence).
+- visual_evidence: when support is "both" or "demonstrated", one sentence on what is visible (the overlay text, the header, the field and its value). evidence: short words actually heard
+  or read. Never fabricate quotes.
+- video_start_s / video_end_s: "MM:SS" (or "H:MM:SS") where the step's first action begins and its last ends, inside the video. Null only if you truly cannot locate it.
+- confidence in [0,1]: your honest estimate that the step is correct and complete.
+- alternatives, version_dependent, common_mistakes: only what the instructor says or shows.
+- app_version_tutorial: only if the tutorial states or clearly shows a version, else null.
+- kind: "craft" when the result is judged by eye (timing, arcs, weight, feel; for example {", ".join(sorted(CRAFT_FEATURES))}); otherwise "mechanics". A craft step has no expected_state.
+- feature_id: when the step teaches one of these features, its id exactly; otherwise null. Never invent an id.
+{feats}
+- expected_state: conditions that are certain AFTER the step and were not true before it, using ONLY these kinds and names:
+{vocab}
+  node_exists: the type of a node or object the step creates ({node_example}).
+  name_exists: the exact name the learner types for a node, object, bone or joint (use it when a step names things).
+  attribute_exists: "<object>.<attribute>" as the editor shows it, when a step adds an attribute or parameter.
+  node_count: a node or object type with expected_value = a whole number: at least that many exist.
+  A setting switched on or off or given a value is property_equals with its path and value. Leave expected_state empty when none of these fits. Never invent a name, count or attribute.
+  start_state follows the same rules and says what must already hold before the step.
+{houdini}"""
+
+
+_V11_STEP_RULES = """WHAT ONE STEP IS.
+- A step is one meaningful operation, decision or milestone: something a learner would name as one thing to do ("create the leg joint chain", "set up the IK handle on the leg",
+  "name the leg joints"). It can contain several clicks, keys, selections and settings. Put those, in order, in how_to.
+- Fold small enabling actions into the step they serve: switching mode or workspace, selecting the object or node to act on, opening the menu, panel, editor or dialog, choosing the tool.
+  They become how_to lines, not steps ("In <Mode>, select <object>, then ...").
+- Group related actions that belong to the same operation: several settings in one dialog or on one node; the same operation repeated on several items (name each item in how_to);
+  creating something and immediately positioning it.
+- Start a NEW step when the learner reaches a result worth checking before going on, when the operation's purpose changes, or when the instructor clearly moves to the next stage.
+- Never split a step only to have more steps, and never merge two different purposes into one step to have fewer. Fewer, complete, accurate steps are better than many small ones.
+- No steps for: intros, outros, recaps, sponsor segments, camera or view navigation that changes nothing, hovering, and talk with nothing to do."""
+
+# v12 (2026-11-22). v11 steps were accurate but too big for a learner: "each step is so many mini steps" (a step of five operations: move, rotate, scale, then three extrudes), and a
+# step checked only by its end result could not guide its middle parts. v12 keeps everything else of v11 and returns to about the earlier division: one operation with one visible result per step.
+_V12_STEP_RULES = """WHAT ONE STEP IS.
+- A step is ONE operation with ONE result the learner can see in the application: something is added, a mode or editor is switched, an option is turned on or off, a value or name is set,
+  one element is moved, rotated, scaled or extruded, two things are connected, parented or constrained. A learner should be able to do it from 1 to 3 short how_to lines.
+- A switch of mode (Edit Mode, Pose Mode, Object Mode, a viewport state) is a step of its own: later steps happen in that mode, and the learner can see that it worked.
+- Each item that gets its own name, value or position is its own step: naming five joints is five steps; extruding three bones is three steps. Identical repeats with nothing that differs
+  (pressing the same key several times) are one step that says how many times.
+- Fold only pure preparation into the step it serves: selecting the object or node to act on, opening the menu, panel, dialog or editor that the step uses. They are the first how_to lines.
+- If a step needs more than 3 how_to lines, it is probably two steps. Never merge two results into one step, and never split one operation into several steps.
+- No steps for: intros, outros, recaps, sponsor segments, camera or view navigation that changes nothing, hovering, looking at or checking something, and talk with nothing to do."""
 
 
 _ACTIONABLE_RULES = """
@@ -366,12 +479,15 @@ RIGGING_APPS = ("maya", "houdini")
 #   houdini: v10-hou    recall 26 % to 33 % and words found 76 % to 84 % against v10 on the two Houdini videos (the state kinds added nothing on Houdini);
 #   maya and blender: v10-preds    steps that can be pointed at AND auto-checked 54 % to 61 % against v10 on the six videos, higher in all three repeats.
 # Measured on rigging videos only, so Blender gets it only for rigging; a Blender video that is not about rigging keeps the modelling baseline. Written text is NOT video: it keeps `default_prompt_version`.
-RECOMMENDED_VIDEO_PROMPT = {"houdini": "v10-hou", "maya": "v10-preds", "blender": "v10-preds"}
+# Replaced on 2026-11-22 by v11 for every application (docs/extraction_v11_report_2026-11-22.md; the same six labelled videos, gemini-3.6-flash, three repeats): steps 17 -> 7, steps that only switch a
+# mode or select something 15 % -> 0 %, example names copied from the prompt 4 to 5.5 per Houdini video -> 0, steps matching something the instructor did 89 % -> 98 %, labelled core actions found
+# in a step 73 % -> 84 %. v11 is not about rigging alone, so a Blender video that is not about rigging gets it too.
+# Then v12 the same day: v11's steps were too big for the learner ("each step is so many mini steps"). v12 = v11 with one visible result per step (same videos, three repeats): 12.5 steps,
+# 98 % matching something the instructor did, no copied names, every step with its reason; Blender 18 steps, close to the earlier division.
+RECOMMENDED_VIDEO_PROMPT = {"houdini": "v12", "maya": "v12", "blender": "v12"}
 
 
 def recommended_video_prompt_version(app: str, rigging: bool = False) -> str:
-    if app == "blender" and not rigging:
-        return DEFAULT_PROMPT_VERSION
     return RECOMMENDED_VIDEO_PROMPT.get(app, DEFAULT_PROMPT_VERSION)
 
 
@@ -407,10 +523,13 @@ MODEL_REQUIRED = ("actions", "expected_state", "video_start_s", "video_end_s", "
 
 
 def _schema(prompt_version: str | None = None) -> dict:
-    ext = bool(prompt_version) and _extended(prompt_version)
-    sch = (DraftStepListExt if ext else DraftStepList).model_json_schema()
-    req = sch["$defs"]["DraftStepExt" if ext else "DraftStep"]["required"]
+    model = _draft_model(prompt_version) if prompt_version else DraftStepList
+    sch = model.model_json_schema()
+    step_def = {DraftStepListV11: "DraftStepV11", DraftStepListExt: "DraftStepExt"}.get(model, "DraftStep")
+    req = sch["$defs"][step_def]["required"]
     req += [f for f in MODEL_REQUIRED if f not in req]
+    if model is DraftStepListV11 and "why" not in req:
+        req.append("why")                                   # an optional field is skipped by the model (see MODEL_REQUIRED); null stays an allowed answer
     return sch
 
 
@@ -489,7 +608,7 @@ def _run(
             usage = getattr(provider, "usage", [])
             if len(usage) > n_usage:
                 rec["usage"] = usage[-1]
-            draft = (DraftStepListExt if _extended(prompt_version) else DraftStepList).model_validate(raw)
+            draft = _draft_model(prompt_version).model_validate(raw)
             sl = _to_steplist(
                 draft, source_type=source_type, app=app, video_id=video_id,
                 model_id=provider.model_id, prompt_version=prompt_version,
@@ -688,6 +807,34 @@ def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str 
     from .transcript import transcript_for_prompt
     prompt_version = prompt_version.partition("-")[0]                  # "v10-nokb" and "v10-outline" differ only in the system prompt
 
+    if prompt_version == "v12":
+        dur_txt = f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to {_mmss(duration_s)}." if duration_s else ""
+        return (
+            "Watch the whole tutorial, listening to the narration and reading the screen together, and write the steps a learner needs to reproduce it: one step per operation with a "
+            "result they can see, each with 1 to 3 short how_to lines (the keys, menu path, values and names) and the instructor's reason in why. Positions are MM:SS (or H:MM:SS) from the "
+            "start of the video. Skip intro, outro and sponsor segments."
+            + (f"\nVideo title: {title_hint}" if title_hint else "")
+            + dur_txt
+            + (
+                "\n\nA reference transcript supplied by the user follows (times in seconds). Treat it as a hint about what is said; the video is the source of truth for what is shown.\n"
+                + transcript_for_prompt(transcript_cues)
+                if transcript_cues else ""
+            )
+        )
+    if prompt_version == "v11":
+        dur_txt = f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to {_mmss(duration_s)}." if duration_s else ""
+        return (
+            "Watch the whole tutorial, listening to the narration and reading the screen together, and write the steps a learner needs to reproduce it. "
+            "Before writing, work out the tutorial's stages from start to finish, then write the meaningful steps of each stage in order, each with every click, value and name it "
+            "needs in how_to and the instructor's reason in why. Positions are MM:SS (or H:MM:SS) from the start of the video. Skip intro, outro and sponsor segments."
+            + (f"\nVideo title: {title_hint}" if title_hint else "")
+            + dur_txt
+            + (
+                "\n\nA reference transcript supplied by the user follows (times in seconds). Treat it as a hint about what is said; the video is the source of truth for what is shown.\n"
+                + transcript_for_prompt(transcript_cues)
+                if transcript_cues else ""
+            )
+        )
     if prompt_version in ("v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"):
         time_fmt = "as MM:SS (or H:MM:SS)"
         dur_txt = (f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to "

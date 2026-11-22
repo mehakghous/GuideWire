@@ -37,6 +37,67 @@
 >
 > The v11 report below stands as the record of what was wrong and what v11 fixed.
 
+## Houdini (22 Nov 2026, after v12): prompt v13, the gap pass and a parameter-label check
+
+**What was wrong.** Almost all of Houdini's weakness is on the APEX FK tutorial (`xWnI7is6e7Q`): v12 misses 13 of its 51 core labelled actions in every run, against 2 of 17 on the APEX IK tutorial. Reading the runs showed:
+- **Steps too big.** v12's Houdini rule ("a node is usually one step") bundles several settings.
+- **A stretch skipped.** 3:40–4:55 (F for Modify mode, moving skeleton points, merging chains) is left out or reduced to one vague step.
+- **Labels and values misread.** No run of any prompt ever reads Control Group, Use Color or the 4.1 offset. Most runs write **Target Pattern**, which Houdini 22 does not have on any node in its parameter list.
+
+**Correction to the v11 report.** "Target Pattern" is not only copied from the v10-hou prompt: v12 and v13 write it with no such name in their prompts, and in `visual_evidence` the model says it sees it. "Component Source" is a real parameter of APEX AutoRig Component, so it was not a leak.
+
+**What changed:**
+- **Prompt v13** (`ingestion/extract.py`). It is v12 with the Houdini block rewritten: creating and connecting a node is one step; each parameter change, viewport-state key (F, Enter) and placed or moved element is its own step, with the exact label and value. For Blender and Maya it is v12 word for word. v11 and v12 are verified unchanged.
+- **Gap pass** (`fill_gaps`, `--fill-gaps`). Every uncovered stretch of 25 s or more inside the tutorial gets one look at just that clip. The model may answer that nothing happens there; that answer is accepted without a retry. Added steps are flagged, repeats are dropped, and a failed call keeps the first pass.
+- **Parameter-label check** (`ingestion/houdini_parms.py`, in the validator for Houdini). A label a step says it sets is checked against Houdini 22.0.466's own parameters for the nodes the step names. An unknown label is flagged for review. It never judges a node the list does not cover (Attribute Wrangle, Merge…), nor APEX AutoRig Component, whose parameters come from the chosen component. On all 618 recorded Houdini steps it flags 36. Read by hand, nearly all are real mislabels ("Folder Name 1" where Houdini says Name, "Target Pattern" where it says Control Group).
+
+**Results.** Both Houdini tutorials, three repeats each, `gemini-3.6-flash`, about $0.60:
+
+| | FK tutorial: steps | FK: words found | IK tutorial: steps | IK: words found | Step support (both) |
+|---|---|---|---|---|---|
+| v12 | 9.3 (8–11) | 58% | 10.0 | 73% | 93–100% |
+| v13 | 12.0 (11–14) | 52% | 11.0 | 77% | 89–98% |
+| v13 + gap pass | 12.3 (11–15) | 54% | 11.0 | 77% | 89–98% |
+
+What the FK runs contain (out of 3):
+
+| | Merge stage covered | F / Modify mode | Control Group, Use Color, 4.1 | "Target Pattern" |
+|---|---|---|---|---|
+| v12 | 2 | 0 | 0 | 2 |
+| v13 | 3 | 0 | 0 | 3 |
+| v13 + gap pass | 3 | 1 | 0 | 3 |
+
+**Reading.**
+- **v13 gives Houdini the step size the other applications have** and covers the merge stage more reliably. The word-overlap numbers do not move beyond the run-to-run spread, so it is not shown to be more accurate.
+- **The gap pass found something in 1 of 6 stretches it looked at.** That was the F / Modify-mode stretch, the main omission. It costs one call per stretch.
+- **The labels are a reading limit, not a prompt problem.** The check is what keeps them from passing silently.
+
+**Not measured:** a held-out Houdini tutorial; whether a second, clip-level pass given the node's real parameter list would correct the labels (the next thing to try).
+
+**Label repair (22 Nov 2026, `ingestion/label_repair.py`).** Each Houdini step whose label Houdini does not have on that node gets one look at its own clip, given that node's real parameter list. A correction is accepted only when all of these hold:
+- it is an exact label from the list;
+- the model says it saw it, with evidence;
+- when the step gives a value, the clip's value for that parameter is the same value.
+
+Otherwise the flag stays, with the reason. A correction replaces only the label words, and the step gets a note saying what changed and where to check.
+
+Tried on all 30 flagged labels of the recorded v10-hou, v10-houpreds, v12 and v13 Houdini runs (`scripts/repair_labels_eval.py`):
+- **First version, no value check ($0.20):** 23 corrected, 7 kept. One correction was clearly wrong: "Target Controls" (set to `point.*`) became Shape Override, a different parameter changed in the same clip.
+- **With the value check ($0.21):** 16 corrected, 14 kept.
+  - "Target Pattern" → **Group** 7 times (where `point*` is typed), "Target Points" → **Control Group** once.
+  - Pack Folder labels → **Name** 6 times.
+  - "Configuration 1 target" → Name.
+  - "Folder Name" → Parent Folder (value matched, unconfirmed).
+  - The wrong correction above is now kept.
+
+Read against the labels, no accepted correction contradicts them. Two caveats:
+- Houdini lists both **Group** and **Control Group** on APEX Configure Controls, and the model chose each at different times. The labeller wrote "Control Group".
+- In 2 cases the value check found the step's **value** wrong as well: the clip shows "joint" where the step says `jnt_*`. The labels agree ("change the Control Group from point to joint"). Those steps stay flagged. Correcting values is a possible next step.
+
+The app runs the repair for Houdini videos after the gap pass, only when a step is flagged.
+
+**Decision (22 Nov 2026).** The app now uses **v13 with the gap pass for Houdini videos** (`RECOMMENDED_VIDEO_PROMPT`, `GAP_PASS_APPS` in `ingestion/extract.py`; `app/pipeline.py`). The reasons are the step size and the recovered Modify-mode stretch, not a measured accuracy gain. Blender and Maya stay on v12. The gateway and the command line use v13 for Houdini as well; the command line runs the gap pass only with `--fill-gaps`.
+
 **Goal.** Steps that accurately reflect what the tutorial shows and explains. Each step is a meaningful operation the learner performs, not every click, built from both the screen (what, where, values) and the narration (why). Quality over quantity.
 
 **Result in one line.** Prompt v11 replaces v10-preds and v10-hou for every video:

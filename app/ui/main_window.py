@@ -379,8 +379,23 @@ def main() -> int:
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
     window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app, limit=3, exclude=(), check=True: find_tutorials(goal, app, limit=limit, exclude=exclude, fit_provider=default_fit_provider if check else None), vision_bridge=_make_bridge())
+    from .. import crash_ui
+    from shared.diagnostics import get_logger
+    from shared.version import APP_VERSION
+
+    def screen() -> str:
+        return type(window.stack.currentWidget()).__name__
+
+    def vision() -> str:
+        bridge = window.session.bridge
+        return "not set up" if bridge is None else ("available" if bridge.available else "unavailable")
+    # logging, crash reports, Qt messages and the "last run ended unexpectedly" notice; context lines go into every crash report (no personal data)
+    notifier = crash_ui.install(app, window, context={"screen": screen, "signed in": lambda: window.user is not None, "screen guidance": vision})
+    get_logger("app").info("GuideWire %s ready (screen guidance: %s)", APP_VERSION, vision())
     window.show()
-    return app.exec()
+    code = app.exec()
+    del notifier
+    return code
 
 
 if __name__ == "__main__":

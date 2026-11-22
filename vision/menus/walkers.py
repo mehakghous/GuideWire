@@ -72,22 +72,24 @@ def _maya_items(cmds: Any, mel: Any, parent: str, depth: int) -> list[dict]:
 
 
 def maya_groups(cmds: Any, mel: Any) -> list[dict]:
-    """One group per menu set (Modeling, Rigging, Animation, FX, Rendering): menu bar entries differ per set."""
+    """One group per menu set. `menuSet(<set>, q=True, menuArray=True)` lists the menus of that set; the Common set holds
+    the menus every set shows (File, Edit, Create, ...), so its items need no menu-set switch."""
     groups: list[dict[str, Any]] = []
-    current = cmds.menuSet(q=True, currentMenuSet=True)
-    try:
-        for ms in cmds.menuSet(q=True, allMenuSets=True) or []:
-            cmds.menuSet(currentMenuSet=ms)
-            label = _clean(cmds.menuSet(ms, q=True, label=True) or ms)
-            tree = []
-            for m in cmds.window("MayaWindow", q=True, menuArray=True) or []:
-                name = _clean(cmds.menu(m, q=True, label=True) or "")
-                if name:
-                    tree.append({"label": name, "children": _maya_items(cmds, mel, m, 1)})
-            groups.append({"id": ms, "label": f"{label} menu set", "where": "Maya main menu bar",
-                           "needs": f"Switch the menu set (top-left dropdown) to {label} first.", "tree": tree})
-    finally:
-        cmds.menuSet(currentMenuSet=current)                       # leave the learner's menu set as it was
+    for ms in cmds.menuSet(q=True, allMenuSets=True) or []:
+        label = _clean(cmds.menuSet(ms, q=True, label=True) or ms)
+        tree = []
+        for m in cmds.menuSet(ms, q=True, menuArray=True) or []:
+            if not cmds.menu(m, exists=True):
+                continue
+            name = _clean(cmds.menu(m, q=True, label=True) or "")
+            if name and not name.startswith("Hotbox") and name != "Recent Commands":
+                tree.append({"label": name, "children": _maya_items(cmds, mel, m, 1)})
+        common = ms == "commonMenuSet"
+        group: dict[str, Any] = {"id": ms, "label": "all menu sets" if common else f"{label} menu set",
+                                 "where": "Maya main menu bar", "tree": tree}
+        if not common:
+            group["needs"] = f"Switch the menu set (top-left dropdown) to {label} first."
+        groups.append(group)
     return groups
 
 

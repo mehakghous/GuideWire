@@ -109,7 +109,31 @@ def test_the_chat_service_appends_the_exact_path_to_answers():
     assert "Where:" not in svc.command("/help")["text"]
 
 
-# ------------------------------------------------------------------------------- Maya / Houdini
+# ------------------------------------------------------------------------------- Maya (real dump from Maya 2027.3)
+@pytest.mark.parametrize("query, path, needs", [
+    ("add a cube", "Create > Polygon Primitives > Cube", None),
+    ("create a sphere", "Create > Polygon Primitives > Sphere", None),
+    ("save the scene as", "File > Save Scene As...", None),
+    ("create joints", "Skeleton > Create Joints", "Rigging"),
+    ("bind skin", "Skin > Bind Skin", "Rigging"),
+    ("create an ik handle", "Skeleton > Create IK Handle", "Rigging"),
+    ("combine objects", "Mesh > Combine", "Modeling"),
+    ("set a keyframe", "Key > Set Key", "Animation"),
+    ("batch render", "Render > Batch Render", "Rendering"),
+])
+def test_maya_questions_resolve_to_real_menu_items_and_the_menu_set_to_switch_to(query, path, needs):
+    hit = _top("maya", query)
+    assert hit is not None and hit.text == path and hit.where == "Maya main menu bar"
+    assert (needs in hit.needs) if needs else hit.needs is None
+
+
+def test_maya_paths_that_exist_in_several_menu_sets_are_listed_once():
+    hit = _top("maya", "parent constraint")
+    assert hit.text == "Constrain > Parent" and len(hit.modes) >= 2 and "menu sets" not in hit.describe().split("(")[0]
+    assert find_menu_paths("maya", "flatten the horizon") == []
+
+
+# ------------------------------------------------------------------------------- Maya / Houdini (synthetic)
 def _write(tmp_path, monkeypatch, app, groups):
     (tmp_path / f"{app}_menus.json").write_text(json.dumps({"app": app, "groups": groups}), encoding="utf-8")
     monkeypatch.setattr(menu_paths, "MENU_DIR", tmp_path)
@@ -135,24 +159,23 @@ def test_groups_from_other_applications_resolve_and_say_where(tmp_path, monkeypa
 
 
 class _FakeMaya:
-    """Menus: File > (New, divider, Open Scene, option box); Create > Polygon Primitives (sub-menu, built on demand) > Cube."""
+    """Common set: File (New, divider, Open Scene, option box), Create > Polygon Primitives (built on demand) > Cube.
+    Modeling set: Mesh. Rigging set: Skeleton."""
 
     def __init__(self):
-        self.built = False
-        self.set = "modelingMenuSet"
-        self.items = {"mFile": ["iNew", "iDiv", "iOpen", "iOpt"], "mCreate": ["iPoly"], "iPoly": []}
-        self.labels = {"mFile": "&File", "mCreate": "Create", "iNew": "New", "iOpen": "Open Scene...", "iPoly": "Polygon Primitives",
-                       "iCube": "Cube", "iOpt": "opt"}
-        self.menus = {"mFile", "mCreate"}
-
-    def _items(self, n):
-        return self.items.get(n, [])
+        self.items = {"mFile": ["iNew", "iDiv", "iOpen", "iOpt"], "mCreate": ["iPoly"], "iPoly": [], "mMesh": ["iCombine"], "mSkel": ["iJoints"],
+                      "mHotbox": []}
+        self.labels = {"mFile": "&File", "mCreate": "Create", "mMesh": "Mesh", "mSkel": "Skeleton", "mHotbox": "Hotbox North 1",
+                       "iNew": "New", "iOpen": "Open Scene...", "iPoly": "Polygon Primitives", "iCube": "Cube", "iOpt": "opt",
+                       "iCombine": "Combine", "iJoints": "Create Joints"}
+        self.menus = {"mFile", "mCreate", "mMesh", "mSkel", "mHotbox"}
+        self.sets = {"commonMenuSet": ["mFile", "mCreate", "mHotbox"], "modelingMenuSet": ["mMesh"], "riggingMenuSet": ["mSkel", "mGone"]}
 
     def menu(self, name, **k):
         if k.get("exists"):
             return name in self.menus
         if k.get("itemArray"):
-            return self._items(name)
+            return self.items.get(name, [])
         if k.get("label"):
             return self.labels[name]
         if k.get("postMenuCommand"):
@@ -168,37 +191,33 @@ class _FakeMaya:
         if k.get("subMenu"):
             return name == "iPoly"
         if k.get("itemArray"):
-            return self._items(name)
+            return self.items.get(name, [])
         if k.get("postMenuCommand"):
             return "buildPoly" if name == "iPoly" else ""
         if k.get("command"):
-            return {"iNew": "NewScene", "iOpen": "OpenScene", "iCube": "polyCube"}.get(name, "")
-
-    def window(self, name, **k):
-        return ["mFile", "mCreate"] if self.set == "modelingMenuSet" else ["mFile"]
+            return {"iNew": "NewScene", "iOpen": "OpenScene", "iCube": "polyCube", "iCombine": "CombinePolygons", "iJoints": "JointTool"}.get(name, "")
 
     def menuSet(self, *a, **k):
         if k.get("allMenuSets"):
-            return ["modelingMenuSet", "riggingMenuSet"]
-        if k.get("currentMenuSet") and not k.get("q"):
-            self.set = k["currentMenuSet"]
-            return None
-        if k.get("currentMenuSet"):
-            return self.set
+            return list(self.sets)
+        if k.get("menuArray"):
+            return self.sets[a[0]]
         if k.get("label"):
-            return {"modelingMenuSet": "Modeling", "riggingMenuSet": "Rigging"}[a[0]]
+            return {"commonMenuSet": "Common", "modelingMenuSet": "Modeling", "riggingMenuSet": "Rigging"}[a[0]]
 
 
-def test_maya_walker_builds_menus_on_demand_and_skips_dividers_and_option_boxes():
+def test_maya_walker_reads_each_menu_set_builds_menus_on_demand_and_skips_dividers_and_option_boxes():
     cmds = _FakeMaya()
     mel = NS(eval=lambda cmd: (cmds.items.__setitem__("iPoly", ["iCube"]) if cmd == "buildPoly" else None))
     groups = walkers.maya_groups(cmds, mel)
-    assert [g["id"] for g in groups] == ["modelingMenuSet", "riggingMenuSet"]
-    modeling = {t["label"]: t for t in groups[0]["tree"]}
-    assert [c["label"] for c in modeling["File"]["children"]] == ["New", "Open Scene..."]          # "&" removed, no divider, no option box
-    assert modeling["Create"]["children"][0] == {"label": "Polygon Primitives", "children": [{"label": "Cube", "op": "polyCube"}]}
-    assert groups[0]["needs"] == "Switch the menu set (top-left dropdown) to Modeling first."
-    assert cmds.set == "modelingMenuSet"                                                          # the learner's menu set is restored
+    assert [g["id"] for g in groups] == ["commonMenuSet", "modelingMenuSet", "riggingMenuSet"]
+    common, modeling, rigging = groups
+    assert [t["label"] for t in common["tree"]] == ["File", "Create"]                              # hotbox dropped, "&" removed
+    assert "needs" not in common and common["label"] == "all menu sets"
+    assert [c["label"] for c in common["tree"][0]["children"]] == ["New", "Open Scene..."]        # no divider, no option box
+    assert common["tree"][1]["children"][0] == {"label": "Polygon Primitives", "children": [{"label": "Cube", "op": "polyCube"}]}
+    assert [t["label"] for t in modeling["tree"]] == ["Mesh"] and [t["label"] for t in rigging["tree"]] == ["Skeleton"]   # a missing menu is skipped
+    assert rigging["needs"] == "Switch the menu set (top-left dropdown) to Rigging first."
 
 
 HOUDINI_XML = """<?xml version="1.0" encoding="UTF-8"?>

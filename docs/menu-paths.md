@@ -15,15 +15,18 @@ dump, GuideWire says it has no menu path (it does not guess).
 | App | Data | Status |
 |---|---|---|
 | Blender 5.2.3 | `shared/menus/blender_menus.json`: top bar (File, Edit, Render, Window, Help) and the 3D Viewport header menus in Object, Edit (mesh) and Sculpt Mode. 596 items that run a command, 130 with their default shortcut | **Real dump, tested** |
-| Maya 2027 | `vision/menus/dump_maya.py` walks the main menus of every menu set (Modeling, Rigging, Animation, FX, Rendering) and records which set each item needs | Script written and tested on a fake Maya; **not yet run in Maya** (not installed) |
+| Maya 2027.3 (Education) | `shared/menus/maya_menus.json`: the Common set (File, Edit, Create, Select, Modify, Display, Windows) plus the menus of the Modeling, Rigging, Animation, FX and Rendering sets, about 2,400 items. Each item says which set it needs ("Switch the menu set to Rigging first") | **Real dump from Maya 2027.3, tested** |
 | Houdini 22.0.466 | `vision/menus/dump_houdini.py` reads Houdini's own menu XML and the Tab-menu node names per network type | Script written and tested on sample XML and a fake `hou`; **not yet run in Houdini** (not installed) |
 
 Regenerate Blender's file (needs the real Blender window for the keymaps; it opens briefly and closes itself):
 
     "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --factory-startup --python vision/menus/dump_blender.py -- shared/menus/blender_menus.json
 
-Maya and Houdini: see the docstring at the top of `dump_maya.py` / `dump_houdini.py` (run once in the app's Script
-Editor / Python Shell, then spot-check a few paths against the application before committing the JSON).
+Maya (opens a Maya window briefly; Maya's menu sets are read with `menuSet(<set>, q=True, menuArray=True)`, which
+lists the menus each set shows): put a `userSetup.py` that calls `dump_maya.run(<out path>)` from `cmds.evalDeferred` on
+`PYTHONPATH`, start `maya.exe`, and quit Maya once the file is written. Or paste the lines in the docstring of
+`dump_maya.py` into Maya's Script Editor. Houdini: see `dump_houdini.py` (Python Shell). Spot-check a few paths
+against the application before committing any JSON.
 
 ## How a question becomes a path
 1. `shared/menu_paths.py` `find_menu_paths(app, question, mode)`: matches the content words of the question

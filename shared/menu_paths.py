@@ -29,9 +29,11 @@ _SYNONYMS = {"make": "add", "create": "add", "new": "add", "insert": "add", "spa
              "remove": "delete", "erase": "delete", "kill": "delete", "move": "move", "translate": "move",
              "duplicate": "duplicate", "clone": "duplicate", "bevel": "bevel", "chamfer": "bevel",
              "merge": "merge", "weld": "merge", "combine": "join", "join": "join", "separate": "separate", "split": "split",
-             "save": "save", "export": "export", "import": "import"}
+             "keyframe": "key", "keyframes": "key", "save": "save", "export": "export", "import": "import"}
+# Nouns a request may mention that no menu needs to contain ("extrude the face", "join the objects"): they help a match but are not required.
+_GENERIC = frozenset({"object", "face", "edge", "vertice", "vertex", "mesh", "model", "shape", "thing", "polygon"})
 # When several menus hold an item of the same name, the common one is listed first (Add > Mesh > Cube before Add > Empty > Cube).
-_PREFERRED_PARENTS = {"blender": ("Mesh",)}
+_PREFERRED_PARENTS = {"blender": ("Mesh",), "maya": ("Polygon Primitives",)}
 _MODE_LABEL = {"OBJECT": "Object Mode", "EDIT_MESH": "Edit Mode (mesh)", "SCULPT": "Sculpt Mode", "TOPBAR": "any mode"}
 
 
@@ -67,7 +69,8 @@ class MenuPath:
         return None
 
     def describe(self) -> str:
-        modes = ", ".join(self.labels or [_MODE_LABEL.get(m, m) for m in self.modes])
+        names = list(self.labels or [_MODE_LABEL.get(m, m) for m in self.modes])
+        modes = ", ".join(names) if len(names) <= 3 else f"{len(names)} menu sets"
         out = f"{self.text}  ({self.where}; {modes})"
         if self.keys:
             out += f". Shortcut: {self.keys}"
@@ -151,9 +154,10 @@ def find_menu_paths(app: str, query: str, mode: str | None = None, limit: int = 
         hit_path = sum(any(_same(w, x) for x in path_words) for w in q)
         if hit_leaf == 0 and hit_path < len(q):
             continue                                       # the final item must matter to the request
-        cover = hit_path / len(q)
-        if cover < MIN_COVER:
-            continue
+        unmatched_generic = sum(1 for w in q if w in _GENERIC and not any(_same(w, x) for x in path_words))
+        if hit_path / max(len(q) - unmatched_generic, 1) < MIN_COVER:
+            continue                                           # eligibility: generic nouns need not match ...
+        cover = hit_path / len(q)                              # ... but a path that matches them still scores higher
         leaf_share = sum(any(_same(x, w) for w in q) for x in leaf) / len(leaf)
         score = 0.6 * cover + 0.3 * leaf_share + 0.1 / len(e.path)
         if e.path[:-1] and e.path[-2] in _PREFERRED_PARENTS.get(app.lower(), ()):

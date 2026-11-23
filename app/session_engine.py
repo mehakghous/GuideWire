@@ -35,6 +35,7 @@ class SessionEngine:
         self.db, self.user_id, self.session_id = db, user_id, session_id
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
         self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
+        self.title: str = db.tutorial_title(row["tutorial_id"]) or ""
         self._resolve_targets(row["tutorial_id"])
 
     def _resolve_targets(self, tutorial_id: int) -> None:
@@ -123,6 +124,24 @@ class SessionEngine:
             raise EngineError("already at the first step")
         self.db.set_step_status(self.session_id, self.steps[pos - 2][0], PENDING, "user")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos - 1)
+
+    def jump_to(self, pos: int) -> None:
+        """Move the session to step `pos` (1-based). Going back makes every step from `pos` on pending again (they are to be looked at or redone); going forward marks the pending steps in between as
+        skipped, exactly as pressing Skip on each would. Nothing is ever marked done by a jump."""
+        cur = self._need_active()
+        if not 1 <= pos <= len(self.steps):
+            raise EngineError(f"there is no step {pos}")
+        if pos == cur:
+            return
+        status = dict(zip((sid for sid, _ in self.steps), self.statuses(), strict=True))
+        if pos < cur:
+            for sid, _ in self.steps[pos - 1:cur]:
+                self.db.set_step_status(self.session_id, sid, PENDING, "user")
+        else:
+            for sid, _ in self.steps[cur - 1:pos - 1]:
+                if status[sid] == PENDING:
+                    self.db.set_step_status(self.session_id, sid, SKIPPED, "user")
+        self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos)
 
     # ---- checking against what the application shows
     def check(self, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> Verdict | None:

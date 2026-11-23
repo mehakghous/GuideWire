@@ -119,3 +119,11 @@ def test_the_five_facts_are_not_interchangeable(armature):
     assert st.phase == "visible" and st.progress.done == [] and st.progress.pending                 # found, nothing performed yet
     done = ss.assess(s06, {"mode": "EDIT_MESH", "active_tool": "builtin.loop_cut"}, fixed(**{"Loop Cut": visible_tool()}))
     assert done.phase == "acting" and [p.target for p in done.progress.done] == ["builtin.loop_cut"]     # performed; the step is still not "verified": that is SessionEngine.auto_check's call
+
+
+def test_a_sidebar_step_is_a_target_the_session_can_guide_to():
+    from app import step_state
+    from shared.step_record import Action, Step, TargetRef
+    ref = TargetRef(kind="sidebar", label="Roll", panel="Transform", prop="Roll")
+    st = Step(id="s25", order=25, goal="Set bone Roll to 90", actions=[Action(verb="set_value", ui_element="Sidebar > Transform > Roll", target=ref)])
+    assert step_state.needs_of(st) == [ref]

@@ -6,9 +6,15 @@ chat, a greeting with things to try. What the chat is about is set with small to
 When an answer is a list of steps (a starter plan, the steps for a topic) it comes as a card inside the chat: save it as a tutorial, save it and start a session on it at once, or map the same question
 onto another application (Blender, Maya, Houdini) and get that application's steps.
 
+When the assistant recommends tutorials, each one is a card with a clickable title, its creator, length, publication date and link, and its own "Turn into steps" button. Turning one into steps runs
+in the background with its status shown on the card; the result is saved as a normal tutorial (the ones Home lists), becomes what the chat is about, and can be asked about at once. A failed one says
+why and offers Retry. What the chat remembers (the videos, the picked one, the guide) is kept with the chat, so opening it again later finds it as it was.
+
 Wraps `app.ask.Asker`; the conversations live in `app.db` (`conversation`, `chat_message`).
 """
 from __future__ import annotations
+
+import html
 
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QActionGroup
@@ -17,6 +23,7 @@ from PyQt6.QtWidgets import QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel,
 from shared.step_record import StepList
 
 from ..ask import Asker
+from ..chat_context import ChatContext, Video
 from ..pipeline import APPS
 from .bento import Tile, page_grid
 from .workers import run_call
@@ -83,14 +90,99 @@ class Composer(QPlainTextEdit):
         super().keyPressEvent(event)
 
 
+class VideoCard(QFrame):
+    """One recommended tutorial inside the chat: a clickable title, who made it, how long it is, when it was published, its link, and what can be done with it. The one action that matters, Turn into
+    steps, is on the card, so it is clear which video it is for (it is not a button on every message)."""
+    turn_into_steps = pyqtSignal(str)          # the video's key
+    pick = pyqtSignal(str)
+    review = pyqtSignal(int)                   # the saved tutorial's id
+    start_session = pyqtSignal(int)
+
+    def __init__(self, video: Video, number: int):
+        super().__init__()
+        self.setObjectName("card")
+        self.setMinimumWidth(480)
+        self.key = video.key
+        self.video = video
+        self.tutorial_id: int | None = None
+        box = QVBoxLayout(self)
+        box.setContentsMargins(16, 12, 16, 12)
+        box.setSpacing(4)
+        self.title = _label("", "cardTitle")
+        self.title.setTextFormat(Qt.TextFormat.RichText)
+        self.title.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        self.title.setOpenExternalLinks(True)                       # a click opens the video in the browser
+        self.title.setText(f"{number}. <a href=\"{html.escape(video.url, quote=True)}\">{html.escape(video.title)}</a>")
+        self.meta = _label(video.details(), "cardMeta")
+        self.link = _label(video.url, "cardMeta")
+        self.status = _label("", "hint")
+        box.addWidget(self.title)
+        box.addWidget(self.meta)
+        box.addWidget(self.link)
+        box.addWidget(self.status)
+        row = QHBoxLayout()
+        row.setSpacing(8)
+        self.steps_button = QPushButton("Turn into steps")
+        self.steps_button.setObjectName("primary")
+        self.retry_button = QPushButton("Retry")
+        self.pick_button = QPushButton("Pick this one")
+        self.pick_button.setObjectName("chip")
+        self.review_button = QPushButton("Review steps")
+        self.session_button = QPushButton("Start session")
+        self.session_button.setObjectName("primary")
+        self.steps_button.clicked.connect(lambda _=False: self.turn_into_steps.emit(self.key))
+        self.retry_button.clicked.connect(lambda _=False: self.turn_into_steps.emit(self.key))
+        self.pick_button.clicked.connect(lambda _=False: self.pick.emit(self.key))
+        self.review_button.clicked.connect(lambda _=False: self.review.emit(int(self.tutorial_id or 0)))
+        self.session_button.clicked.connect(lambda _=False: self.start_session.emit(int(self.tutorial_id or 0)))
+        for b in (self.steps_button, self.retry_button, self.review_button, self.session_button, self.pick_button):
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            row.addWidget(b)
+        row.addStretch()
+        box.addLayout(row)
+        self.refresh(video, False)
+
+    def refresh(self, video: Video, focused: bool) -> None:
+        """Show the video's state: new, being read, failed (with why, and Retry), or done (with its saved tutorial)."""
+        self.video = video
+        self.tutorial_id = video.tutorial_id
+        st = video.status
+        self.setProperty("selected", bool(focused))
+        self.style().unpolish(self)
+        self.style().polish(self)
+        self.steps_button.setVisible(st == "new")
+        self.retry_button.setVisible(st == "failed")
+        self.pick_button.setVisible(st in ("new", "failed") and not focused)
+        saved = st == "done" and video.tutorial_id is not None
+        self.review_button.setVisible(saved)
+        self.session_button.setVisible(saved)
+        self.status.setText({"new": "Picked: say \"turn it into steps\" or press the button." if focused else "",
+                             "processing": "Turning this video into steps... this can take a minute or two.",
+                             "failed": f"Could not make steps: {video.error}" if video.error else "Could not make steps.",
+                             "done": ("Steps ready and saved as a tutorial." if saved else "Steps ready.")}.get(st, ""))
+        self.status.setVisible(bool(self.status.text()))
+
+    def set_working(self) -> None:
+        self.steps_button.setVisible(False)
+        self.retry_button.setVisible(False)
+        self.pick_button.setVisible(False)
+        self.status.setText("Turning this video into steps... this can take a minute or two.")
+        self.status.setVisible(True)
+
+    def set_status(self, text: str) -> None:
+        self.status.setText(text)
+        self.status.setVisible(bool(text))
+
+
 class StepsCard(QFrame):
     """The steps an answer gave, inside the chat: what they are, and what can be done with them."""
     save = pyqtSignal()
     save_and_start = pyqtSignal()
     start = pyqtSignal()
+    review = pyqtSignal()
     map_to = pyqtSignal(str)
 
-    def __init__(self, steps: StepList, app: str, saved_tutorial: int | None = None):
+    def __init__(self, steps: StepList, app: str, saved_tutorial: int | None = None, mapping: bool = True):
         super().__init__()
         self.setObjectName("stepsCard")
         self.setMinimumWidth(480)
@@ -102,7 +194,8 @@ class StepsCard(QFrame):
         n = len(steps.steps)
         title = _label(f"<b>{n} steps</b> for {APP_LABELS.get(app, app)}" + (f" &middot; {steps.title}" if steps.title else ""))
         box.addWidget(title)
-        box.addWidget(_label("Save them as a tutorial to review every step and run a guided session on them."))
+        self.hint = _label("Save them as a tutorial to review every step and run a guided session on them.")
+        box.addWidget(self.hint)
         row = QHBoxLayout()
         row.setSpacing(8)
         self.save_button = QPushButton("Save as tutorial")
@@ -110,10 +203,12 @@ class StepsCard(QFrame):
         self.start_button.setObjectName("primary")
         self.open_button = QPushButton("Start session")
         self.open_button.setObjectName("primary")
+        self.review_button = QPushButton("Review steps")
         self.save_button.clicked.connect(self.save)
         self.start_button.clicked.connect(self.save_and_start)
         self.open_button.clicked.connect(self.start)
-        for b in (self.save_button, self.start_button, self.open_button):
+        self.review_button.clicked.connect(self.review)
+        for b in (self.save_button, self.start_button, self.open_button, self.review_button):
             row.addWidget(b)
         row.addStretch()
         box.addLayout(row)
@@ -125,7 +220,7 @@ class StepsCard(QFrame):
         map_label.setWordWrap(False)
         map_row.addWidget(map_label)
         self.map_buttons: dict[str, QPushButton] = {}
-        for a in APPS:
+        for a in (APPS if mapping else ()):                       # a guide made from one video is for that video's application: mapping it onto another one makes no sense
             if a == app:
                 continue
             b = QPushButton(APP_LABELS.get(a, a))
@@ -135,7 +230,8 @@ class StepsCard(QFrame):
             map_row.addWidget(b)
             self.map_buttons[a] = b
         map_row.addStretch()
-        box.addLayout(map_row)
+        if mapping:
+            box.addLayout(map_row)
         self.set_saved(saved_tutorial)
 
     def set_saved(self, tutorial_id: int | None, title: str = "") -> None:
@@ -144,6 +240,8 @@ class StepsCard(QFrame):
         self.save_button.setVisible(not done)
         self.start_button.setVisible(not done)
         self.open_button.setVisible(done)
+        self.review_button.setVisible(done)
+        self.hint.setText("Review every step, or run a guided session on them." if done else "Save them as a tutorial to review every step and run a guided session on them.")
         self.saved_label.setText((f"Saved as \"{title}\"." if title else "Saved as a tutorial.") if done else "")
         self.saved_label.setVisible(done)
 
@@ -153,6 +251,8 @@ class AskScreen(QWidget):
     save_steps = pyqtSignal(object, str)           # StepList, a title
     save_and_start = pyqtSignal(object, str)       # the same, and then open a session on it
     start_session = pyqtSignal(int)                # an already saved tutorial
+    review_tutorial = pyqtSignal(int)              # open a saved tutorial's steps (the review screen)
+    save_guide = pyqtSignal(object, str, str)      # the steps made from a video in the chat, a title, the video's link: the main window saves them as a tutorial
 
     def __init__(self, asker: Asker | None = None, sync: bool = False):
         super().__init__()
@@ -161,11 +261,14 @@ class AskScreen(QWidget):
         self.db = None
         self.user_id: int | None = None
         self.load_tutorial = None                   # set by the main window: tid -> (StepList, title, url)
+        self.find_saved = None                      # set by the main window: video link -> (StepList, title, tutorial id) of a tutorial already made from it, or None
         self.last_steps: StepList | None = None
         self.conversation_id: int | None = None
         self._cards: list[tuple[StepsCard, int | None, str]] = []          # (card, the chat message it belongs to, the question it answered)
         self._card_saving: StepsCard | None = None
         self._thinking: QWidget | None = None
+        self._video_cards: dict[str, VideoCard] = {}
+        self._last_bot_message: int | None = None
         self._messages: list[tuple[str, str]] = []                          # (who, text) shown now: what tests and "copy" read
         # ---- the toggles (small things to change, like a model picker)
         self.app = QComboBox()                      # the state of the application toggle; the chips drive it
@@ -406,7 +509,7 @@ class AskScreen(QWidget):
 
     def new_chat(self) -> None:
         """An empty chat: the greeting and things to try. Nothing is stored until the first message."""
-        self.asker.reset()
+        self.asker.new_conversation()
         self.conversation_id = None
         self.last_steps = None
         self._clear_messages()
@@ -424,7 +527,7 @@ class AskScreen(QWidget):
         conv = self.db.get_conversation(self.user_id, conversation_id)
         if conv is None:
             return
-        self.asker.reset()
+        self.asker.new_conversation(self._restored_context(conversation_id))
         self.conversation_id = conversation_id
         self.last_steps = None
         self._clear_messages()
@@ -447,9 +550,14 @@ class AskScreen(QWidget):
             else:
                 steps = StepList.model_validate_json(m["steps_json"]) if m["steps_json"] else None
                 self._add_bubble(m["meta"].get("who", "GuideWire"), m["text"], user=False)
+                for n, key in enumerate(m["meta"].get("videos", []), 1):
+                    v = next((x for x in self.asker.context.videos if x.key == key), None)
+                    if v is not None:
+                        self._add_video_card(v, n)
                 if steps is not None:
-                    self._add_card(steps, m["meta"].get("app", conv["app"]), m["id"], m["meta"].get("tutorial_id"), question)
+                    self._add_card(steps, m["meta"].get("app", conv["app"]), m["id"], m["meta"].get("tutorial_id"), question, mapping=not m["meta"].get("guide"))
                     self.last_steps = steps
+                self._last_bot_message = m["id"]
         self.refresh_chats()
         self._scroll_down()
 
@@ -475,6 +583,8 @@ class AskScreen(QWidget):
         self._card_saving = None
         self._thinking = None
         self._messages = []
+        self._video_cards = {}
+        self._last_bot_message = None
 
     def _remove_row(self, widget: QWidget) -> None:
         for i in range(self.messages.count()):
@@ -517,11 +627,57 @@ class AskScreen(QWidget):
         self._scroll_down()
         return bubble
 
-    def _add_card(self, steps: StepList, app: str, message_id: int | None, tutorial_id: int | None, question: str) -> StepsCard:
-        card = StepsCard(steps, app, tutorial_id)
+    def _restored_context(self, conversation_id: int) -> ChatContext:
+        """What the chat remembered when it was last used: the context kept with its newest answer, and the guide's steps reloaded from the tutorial they were saved as."""
+        ctx = ChatContext()
+        if self.db is None:
+            return ctx
+        for m in reversed(self.db.chat_messages(conversation_id)):
+            if isinstance(m["meta"].get("context"), dict):
+                ctx = ChatContext.from_dict(m["meta"]["context"])
+                break
+        if ctx.guide_tutorial_id is not None and self.load_tutorial is not None:
+            try:
+                ctx.guide_steps, loaded_title, _url = self.load_tutorial(ctx.guide_tutorial_id)
+                ctx.guide_title = ctx.guide_title or loaded_title
+            except Exception:                                      # the tutorial was deleted since: the chat goes on without a guide
+                ctx.guide_tutorial_id, ctx.guide_video = None, None
+        return ctx
+
+    def _add_video_card(self, v: Video, number: int) -> VideoCard:
+        card = VideoCard(v, number)
+        card.turn_into_steps.connect(self._turn_into_steps)
+        card.pick.connect(self._pick_video)
+        card.review.connect(self.review_tutorial)
+        card.start_session.connect(self.start_session)
+        self._video_cards[v.key] = card
+        self._add_row(card, False)
+        self._scroll_down()
+        return card
+
+    def _sync_video_cards(self) -> None:
+        ctx = self.asker.context
+        for key, card in self._video_cards.items():
+            v = next((x for x in ctx.videos if x.key == key), None)
+            if v is not None:
+                card.refresh(v, ctx.focus_video is v)
+
+    def _turn_into_steps(self, key: str) -> None:
+        v = next((x for x in self.asker.context.videos if x.key == key), None)
+        if v is not None and self.send_button.isEnabled():
+            self.send(f"Turn \"{v.title}\" into steps", action="steps", video_key=key)
+
+    def _pick_video(self, key: str) -> None:
+        v = next((x for x in self.asker.context.videos if x.key == key), None)
+        if v is not None and self.send_button.isEnabled():
+            self.send(f"Pick \"{v.title}\"", action="select", video_key=key)
+
+    def _add_card(self, steps: StepList, app: str, message_id: int | None, tutorial_id: int | None, question: str, mapping: bool = True) -> StepsCard:
+        card = StepsCard(steps, app, tutorial_id, mapping)
         card.save.connect(lambda c=card: self._save(c, start=False))
         card.save_and_start.connect(lambda c=card: self._save(c, start=True))
         card.start.connect(lambda c=card: self._start_saved(c))
+        card.review.connect(lambda c=card: self.review_tutorial.emit(int(c.tutorial_id)) if c.tutorial_id and c.tutorial_id > 0 else None)
         card.map_to.connect(lambda a, q=question: self._map(q, a))
         self._cards.append((card, message_id, question))
         self._add_row(card, False)
@@ -543,8 +699,8 @@ class AskScreen(QWidget):
             self.composer.clear()
             self.send(text)
 
-    def send(self, text: str) -> None:
-        """Send one message, from the composer, a suggestion or a 'map onto' button."""
+    def send(self, text: str, action: str = "", video_key: str = "") -> None:
+        """Send one message, from the composer, a suggestion, a 'map onto' button or a tutorial card's button (`action` and `video_key` then say which video outright)."""
         text = text.strip()
         if not text or not self.send_button.isEnabled():
             return
@@ -559,29 +715,128 @@ class AskScreen(QWidget):
         if tid is not None and self.load_tutorial is not None:
             tut, title, url = self.load_tutorial(tid)
         app, use_model = self.app.currentText(), self.asker.model_available
+        self._prepare_saved_lookup(text)
         self.send_button.setEnabled(False)
         self.status.setText("")
         self._thinking = self._add_bubble("GuideWire", "Thinking..." if use_model else "Looking that up...", user=False)
         self._messages.pop()                       # the placeholder is not part of the transcript
-        run_call(self, lambda _status: self.asker.ask(text, app, tutorial=tut, title=title, url=url, use_model=use_model), lambda r, t=text, a=app: self._on_result(r, t, a), sync=self.sync)
+        if action == "steps" and video_key in self._video_cards:
+            self._video_cards[video_key].set_working()
+        run_call(self, lambda status: self.asker.ask(text, app, tutorial=tut, title=title, url=url, use_model=use_model, on_status=status, action=action, video_key=video_key),
+                 lambda r, t=text, a=app: self._on_result(r, t, a), on_status=self._on_status, sync=self.sync)
+
+    def _prepare_saved_lookup(self, text: str) -> None:
+        """Tell the asker which videos of this chat already are saved tutorials. Done here because the database belongs to this thread and the asker answers on another one."""
+        if self.find_saved is None:
+            return
+        import re
+        links = {v.url: v.key for v in self.asker.context.videos}
+        for m in re.finditer(r"https?://(?:www\.|m\.)?(?:youtube\.com|youtu\.be)/\S+", text):
+            links.setdefault(m.group(0).rstrip(".,)"), "")
+        found = {}
+        for url in links:
+            try:
+                got = self.find_saved(url)
+            except Exception:
+                got = None
+            if got is not None:
+                from ..chat_context import video_id
+                found[links[url] or video_id(url) or url] = got
+        self.asker.saved_tutorials = found
+
+    def _on_status(self, text: str) -> None:
+        """What the background work is doing now (looking up the video, the AI watching it, grouping the steps): shown in the waiting bubble and on the video's card."""
+        if self._thinking is not None:
+            labels = self._thinking.findChildren(QLabel)
+            if labels:
+                labels[-1].setText(text)
+        for key, card in self._video_cards.items():
+            if card.video.status == "processing":
+                card.set_status(text)
 
     def _on_result(self, result, question: str = "", app: str = "") -> None:
         self.send_button.setEnabled(True)
         if self._thinking is not None:
             self._remove_row(self._thinking)
             self._thinking = None
-        if isinstance(result, Exception):
-            who, text, steps = "GuideWire", f"Sorry, that failed ({type(result).__name__}). Try again.", None
+        failed = isinstance(result, Exception)
+        if failed:
+            who, text, steps, shown = "GuideWire", f"Sorry, that failed ({type(result).__name__}). Try again.", None, []
+            videos, guide = [], None
         else:
-            who, text, steps = "GuideWire" + (" (AI)" if result.used_model else ""), result.text, result.steps
+            who, text, steps = "GuideWire" + (" (AI)" if result.used_model else ""), result.headline or result.text, result.steps
+            videos, guide = result.videos, result.guide
+            shown = videos
         self._add_bubble(who, text, user=False)
+        for n, v in enumerate(shown, 1):
+            self._add_video_card(v, n)
+        card_app = app or self.app.currentText()
+        guide_video = None if failed else result.guide_video
         message_id = None
         if self.db is not None and self.conversation_id is not None:
-            message_id = self.db.add_chat_message(self.conversation_id, "bot", text, steps.model_dump_json() if steps is not None else None, {"who": who, "app": app or self.app.currentText()})
+            meta = {"who": who, "app": card_app, "context": self.asker.context.to_dict(), "videos": [v.key for v in shown]}
+            if guide is not None or (guide_video is not None and guide_video.status == "done" and not failed):
+                meta["guide"] = True
+            shown_steps = guide if guide is not None else steps
+            message_id = self.db.add_chat_message(self.conversation_id, "bot", text, shown_steps.model_dump_json() if shown_steps is not None else None, meta)
+            self._last_bot_message = message_id
         self.last_steps = steps
         if steps is not None:
-            self._add_card(steps, app or self.app.currentText(), message_id, None, question)
+            self._add_card(steps, card_app, message_id, None, question)
+        if guide is not None:
+            tid = None if failed else result.reused_tutorial_id
+            card = self._add_card(guide, guide_video.app or card_app if guide_video else card_app, message_id, tid, question, mapping=False)
+            if tid is None:
+                self._card_saving = card
+                self.save_guide.emit(guide, guide.title or (guide_video.title if guide_video else "Tutorial from a video"), guide_video.url if guide_video else "")
+            else:
+                self._guide_in_use(tid, guide_video.title if guide_video else "", card)
+        self._sync_video_cards()
+        self._persist_context()
         self.refresh_chats()
+
+    # ---- a guide made from a video
+    def guide_saved(self, tutorial_id: int, title: str) -> None:
+        """The main window saved the guide as a tutorial: the card says so, and the chat is now about it (so "explain step 4" and "what does he do in step 3" work at once)."""
+        card = self._card_saving
+        self.saved(title, tutorial_id)
+        self._guide_in_use(tutorial_id, title, card)
+        self._persist_context()
+
+    def guide_not_saved(self, why: str) -> None:
+        card, self._card_saving = self._card_saving, None
+        self._add_bubble("GuideWire", f"I made the steps but could not save them as a tutorial ({why}). They are still here in the chat: press Save as tutorial on the card to try again.", user=False)
+        if card is not None:
+            card.set_saved(None)
+
+    def _guide_in_use(self, tutorial_id: int, title: str, card: StepsCard | None) -> None:
+        ctx = self.asker.context
+        ctx.guide_tutorial_id, ctx.guide_title = tutorial_id, title or ctx.guide_title
+        v = ctx.video_at(ctx.guide_video)
+        if v is not None:
+            v.tutorial_id = tutorial_id
+        if card is not None and card.tutorial_id != tutorial_id:
+            card.set_saved(tutorial_id, title)
+        self.tutorial.blockSignals(True)                          # the new tutorial joins the picker and the chat is about it
+        idx = next((i for i in range(self.tutorial.count()) if self.tutorial.itemData(i) == tutorial_id), -1)
+        if idx < 0:
+            self.tutorial.addItem(title, tutorial_id)
+            idx = self.tutorial.count() - 1
+        self.tutorial.setCurrentIndex(idx)
+        self.tutorial.blockSignals(False)
+        self._sync_about_picker()
+        self.asker.reset()
+        if self.db is not None and self.conversation_id is not None:
+            self.db.update_conversation(self.conversation_id, tutorial_id=tutorial_id)
+        self._sync_video_cards()
+
+    def _persist_context(self) -> None:
+        """Keep the chat's memory (videos, the picked one, the guide's tutorial) with its newest answer, so opening the chat later finds it as it was."""
+        if self.db is None or self.conversation_id is None or self._last_bot_message is None:
+            return
+        row = next((m for m in self.db.chat_messages(self.conversation_id) if m["id"] == self._last_bot_message), None)
+        if row is not None:
+            self.db.set_chat_message_meta(self._last_bot_message, {**row["meta"], "context": self.asker.context.to_dict()})
 
     # ---- what can be done with an answer's steps
     def _save(self, card: StepsCard, start: bool) -> None:

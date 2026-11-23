@@ -156,6 +156,7 @@ class InstructionPanel(QWidget):
     done_clicked = pyqtSignal()
     back_clicked = pyqtSignal()
     skip_clicked = pyqtSignal()
+    pause_clicked = pyqtSignal()
     closed = pyqtSignal()
 
     NORMAL_SIZE = (320, 190)
@@ -201,7 +202,10 @@ class InstructionPanel(QWidget):
         self.done_button.setObjectName("primary")
         self.skip_button = QPushButton("Skip")
         self.back_button = QPushButton("Back")
-        self.back_button.setToolTip("Go back to the previous step")
+        self.back_button.setToolTip("Go back to the previous step (GuideWire holds there so you can look at it)")
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.setObjectName("tool")
+        self.pause_button.setToolTip("Hold GuideWire on this step: nothing is highlighted or completed until you press Resume")
         self.grip = QSizeGrip(self)
         self.minimize_button.clicked.connect(self.toggle_minimized)
         self.close_button.clicked.connect(self._close)
@@ -209,8 +213,10 @@ class InstructionPanel(QWidget):
         self.done_button.clicked.connect(self.done_clicked.emit)
         self.skip_button.clicked.connect(self.skip_clicked.emit)
         self.back_button.clicked.connect(self.back_clicked.emit)
+        self.pause_button.clicked.connect(self.pause_clicked.emit)
         top = QHBoxLayout()
         top.addWidget(self.header, 1)
+        top.addWidget(self.pause_button)
         top.addWidget(self.minimize_button)
         top.addWidget(self.close_button)
         row = QHBoxLayout()
@@ -257,6 +263,9 @@ class InstructionPanel(QWidget):
         self.hint.setText(text)
         self.hint.setVisible(bool(text))
 
+    def set_paused(self, on: bool) -> None:
+        self.pause_button.setText("Resume" if on else "Pause")
+
     def _tab_text(self) -> str:
         """The short words on the minimized tab: "GuideWire 3/18 ▸"."""
         return getattr(self, "_title", "GuideWire").replace("GuideWire · step ", "GuideWire ").replace(" of ", "/") + " ▸"
@@ -274,6 +283,7 @@ class InstructionPanel(QWidget):
             self.body.setVisible(True)
             self.minimize_button.setVisible(True)
             self.close_button.setVisible(True)
+            self.pause_button.setVisible(True)
             self.setMinimumSize(*self.MIN_SIZE)
             self.resize(*self._normal_size)
             self.header.setText(title)
@@ -283,6 +293,7 @@ class InstructionPanel(QWidget):
             self.body.setVisible(False)
             self.minimize_button.setVisible(False)
             self.close_button.setVisible(False)
+            self.pause_button.setVisible(False)
             self.setMinimumSize(0, 0)
             self.resize(*self.TAB_SIZE)
             self.header.setText(self._tab_text())

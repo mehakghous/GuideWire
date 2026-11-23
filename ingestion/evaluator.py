@@ -107,14 +107,26 @@ def _shows_change(p: StatePredicate, obs: dict[str, Any], entry: dict[str, Any] 
     return _MISSING
 
 
+def _held_at_entry(p: StatePredicate, entry: dict[str, Any] | None) -> bool:
+    """Whether an existence or count predicate was already true in the state observed when the step began. This is read from what was SEEN, not from the step's own `start_state`: a model that
+    writes `node_exists BONE` as the result of "Subdivide" does not list it as a start state, yet the single bone from the step before is already there (the step completed itself before the learner did anything)."""
+    if not entry:
+        return False
+    if p.kind == "node_exists":
+        return p.target in (entry.get("nodes") or []) or any(_norm(k) == _norm(p.target) and n > 0 for k, n in (entry.get("node_counts") or {}).items())
+    if p.kind == "node_count" and p.value is not None:
+        return any(_norm(k) == _norm(p.target) and float(n) >= float(p.value) for k, n in (entry.get("node_counts") or {}).items())
+    return False
+
+
 def evaluate_step(step: Step, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> Verdict:
     if not step.expected_state or not step.verifiable:
         return Verdict("unverifiable")
     v = Verdict("unverifiable")
     for p in step.expected_state:
         r = _observe(p, observed)
-        if r is True and p.kind in ("node_exists", "node_count") and any(_same(p, q) for q in step.start_state):
-            r = _shows_change(p, observed, entry)             # true before the step began: not evidence that the step did anything
+        if r is True and p.kind in ("node_exists", "node_count") and (any(_same(p, q) for q in step.start_state) or _held_at_entry(p, entry)):
+            r = _shows_change(p, observed, entry)             # true before the step began (declared, or seen at entry): not evidence that the step did anything
         if r is _MISSING:
             v.unobservable.append(p)
         elif r:

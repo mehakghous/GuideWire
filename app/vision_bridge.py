@@ -156,6 +156,15 @@ def explain(exc: BaseException) -> str:
     return f"Screen guidance is not available ({name})."
 
 
+def _screen_checked(app: str) -> bool:
+    """Whether the screen of this application is read at all (vision/apps.py `validated`)."""
+    try:
+        from vision.apps import profile
+        return bool(profile(app).validated)
+    except Exception:
+        return True
+
+
 class VisionBridge:
     def __init__(self, service_factory: Callable[[str], Any] | None = None, auto_advance: bool = True, window_finder: Callable[[str], Rect4 | None] | None = None):
         """`service_factory(app)` returns an object with `look(properties, attributes, keys) -> (observed, GroundContext | None)` and `reset()`. None means vision is not installed on this computer.
@@ -168,6 +177,11 @@ class VisionBridge:
         self._cache = GroundCache()
         self._entries: dict[str, dict] = {}
         self._rechecked: set[Any] = set()
+        # The first look of each VISIT to a step (session, step, engine revision): a step that is already "met" there was true when it started (after Previous, Resume, or because the
+        # application was already in that state), which is not evidence the learner did it. Applies to every kind of predicate: mode, tool, selection, property, node.
+        self._first_met: dict[tuple, bool] = {}
+        self._seen_unmet: set[tuple] = set()
+        self._visit: tuple | None = None
         self.stats = Stats()
 
     @property
@@ -192,6 +206,9 @@ class VisionBridge:
         self._cache.forget()
         self._entries.clear()
         self._rechecked.clear()
+        self._first_met.clear()
+        self._seen_unmet.clear()
+        self._visit = None
 
     def window_rect(self, app: str) -> Rect4 | None:
         try:
@@ -214,6 +231,8 @@ class VisionBridge:
             wanted = keys_wanted(step)
             observed, ctx = svc.look(props or None, attrs or None, wanted or None)
             t_look = time.perf_counter()
+            if ctx is None and not _screen_checked(app):         # not "open it in front": the window may well be in front; this application is not read from the screen (yet)
+                return Look(target, window_rect=window, problem=f"Screen checking is available for Blender only. In {WINDOW_NAMES.get(app, app)} you follow the steps and press Done.", problem_state="unavailable", keys=step_state.keys_text(step))
             if ctx is None:
                 return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=step_state.keys_text(step))
             entry = self._entries.setdefault(step.id, {k: observed[k] for k in ENTRY_KEYS if k in observed})
@@ -273,13 +292,33 @@ class VisionBridge:
             return Tick("idle", "No step is active.")
         if look.problem is not None:
             return Tick(look.problem_state, look.problem, look.target, keys=look.keys)
-        verdict = engine.check(look.observed or {}, look.entry)
+        step = engine.current_step()
+        key = (engine.session_id, step.id if step is not None else "", getattr(engine, "revision", 0))
+        entry = look.entry
+        if key != self._visit:                           # a new visit to a step (Previous, jump, Resume, next session): what was recorded for it before is stale
+            self._visit = key
+            if step is not None:
+                self._entries.pop(step.id, None)
+            self._rechecked.clear()
+            entry = None
+        verdict = engine.check(look.observed or {}, entry)
         status = verdict.status if verdict is not None else None
-        advanced = bool(self.auto_advance and engine.auto_check(look.observed or {}, look.entry))
+        if status == "unmet":
+            self._seen_unmet.add(key)                    # the screen has seen the step NOT done during this visit
+        self._first_met.setdefault(key, status == "met")
+        already = status == "met" and self._first_met[key] and key not in self._seen_unmet
+        advanced = False
+        if self.auto_advance and status == "met" and verdict is not None and not verdict.unobservable and not already:
+            engine.complete(by="observed")               # only when the screen saw the state change, never because it was true all along
+            advanced = True
+        if len(self._first_met) > 500:
+            self._first_met.clear()
+            self._seen_unmet.clear()
         if advanced:
             self._cache.forget()
             return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.keys, "verified", look.shortcut)
-        return Tick("watching", look.status or "Watching the screen.", look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.keys, look.phase, look.shortcut)
+        note = "This already looks done on the screen (it was true when the step started), so press Done when you have done it." if already else None
+        return Tick("watching", note or look.status or "Watching the screen.", look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.keys, look.phase, look.shortcut)
 
     def tick(self, engine, app: str | None = None) -> Tick:
         """Look and judge in one call (tests, the live check script). Never raises."""

@@ -99,7 +99,14 @@ class SupabaseCloud:
 
     # ---- plumbing
     def _headers(self, session: CloudSession | None = None) -> dict[str, str]:
-        return {"apikey": self.key, "Authorization": f"Bearer {session.access_token if session else self.key}", "Content-Type": "application/json"}
+        """The `apikey` header always carries the project's public key. `Authorization` carries the learner's token once logged in; before that it carries the key only when it is
+        a JWT (the older "anon" key). A newer "publishable" key (sb_publishable_...) is not a JWT and must go in `apikey` alone."""
+        headers = {"apikey": self.key, "Content-Type": "application/json"}
+        if session is not None:
+            headers["Authorization"] = f"Bearer {session.access_token}"
+        elif self.key.startswith("eyJ"):
+            headers["Authorization"] = f"Bearer {self.key}"
+        return headers
 
     def _send(self, method: str, path: str, *, session: CloudSession | None = None, json: Any = None, params: dict | None = None, extra: dict | None = None) -> httpx.Response:
         try:

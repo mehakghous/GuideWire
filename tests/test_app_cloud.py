@@ -63,7 +63,7 @@ def test_password_reset_asks_for_a_code_then_verifies_it_and_sets_the_new_passwo
     calls = []
 
     def handler(req):
-        calls.append((req.method, req.url.path, json.loads(req.content) if req.content else None, req.headers["authorization"]))
+        calls.append((req.method, req.url.path, json.loads(req.content) if req.content else None, req.headers.get("authorization")))
         if req.url.path == "/auth/v1/verify":
             return httpx.Response(200, json=ok_session())
         return httpx.Response(200, json={})
@@ -278,3 +278,19 @@ def test_without_the_service_everything_is_local_as_before():
     u = a.register("a@x.com", "correct horse", "Ann")
     assert a.login("a@x.com", "correct horse").id == u.id and a.cloud_session is None and not a.offline_login
     a.change_password(u.id, "correct horse", "another password")
+
+
+def test_a_publishable_key_goes_in_apikey_alone_and_an_anon_jwt_also_as_bearer_before_login():
+    seen = []
+
+    def handler(req):
+        seen.append(dict(req.headers))
+        return httpx.Response(200, json=ok_session())
+    new = SupabaseCloud(URL, "sb_publishable_abc", client=httpx.Client(transport=httpx.MockTransport(handler)))
+    new.sign_in("a@x.com", "pw-secret-1")
+    assert seen[0]["apikey"] == "sb_publishable_abc" and "authorization" not in seen[0]
+    old = SupabaseCloud(URL, "eyJhbGciOi.payload.sig", client=httpx.Client(transport=httpx.MockTransport(handler)))
+    old.sign_in("a@x.com", "pw-secret-1")
+    assert seen[1]["authorization"] == "Bearer eyJhbGciOi.payload.sig"
+    new.fetch_items(CloudSession("uuid-1", "a@x.com", "Ann", "AT", "RT"), None)
+    assert seen[2]["authorization"] == "Bearer AT" and seen[2]["apikey"] == "sb_publishable_abc"      # once logged in, always the learner's token

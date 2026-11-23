@@ -42,6 +42,11 @@ class SessionEngine:
         """Give every action of a Blender tutorial its resolved `target` (what the words mean in Blender: tool, mode, panel, operator) when it was saved without one. Done here, on every load, so tutorials saved
         before targets existed get them too; the stored steps are not touched. A failure leaves the steps as they were."""
         try:
+            if self.app == "houdini":                              # nodes, parameters and panes (ingestion/targets_houdini.py)
+                from ingestion.targets_houdini import resolve_steps as resolve_houdini
+                resolved = resolve_houdini([s for _, s in self.steps])
+                self.steps = [(sid, new) for (sid, _), new in zip(self.steps, resolved, strict=True)]
+                return
             if self.app != "blender":
                 return
             from ingestion.targets import resolve_steps

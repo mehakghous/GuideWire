@@ -26,7 +26,7 @@ PROFILES = {
     "maya": AppProfile("maya", "Maya", "2027", toolbar=False, validated=False,
                        probe="vision/probes/maya_probe.py"),
     "houdini": AppProfile("houdini", "Houdini", "22.0.466", toolbar=False, validated=False,
-                          probe="vision/probes/houdini_probe.py"),
+                          probe="vision/probes/houdini_probe.py", exe=("houdini", "happrentice", "hindie")),      # the window must belong to Houdini: a browser tab titled "Houdini" is not it
 }
 
 

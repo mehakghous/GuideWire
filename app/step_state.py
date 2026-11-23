@@ -26,7 +26,7 @@ from shared.step_record import Action, Step, TargetRef
 from vision.grounders import HIDDEN, NOT_OPEN, OFFSCREEN, VISIBLE, WORDS, WRONG, Grounded, mode_label
 from vision.verify import Gated
 
-GROUNDED_KINDS = ("tool", "menu", "mode", "property", "sidebar", "operator_panel", "context_menu")      # kinds a grounder can locate on screen
+GROUNDED_KINDS = ("tool", "menu", "mode", "property", "sidebar", "operator_panel", "context_menu", "node", "parm", "pane")      # node, parm, pane: Houdini      # kinds a grounder can locate on screen
 
 
 @dataclass(frozen=True)
@@ -87,9 +87,12 @@ def _norm(s: str) -> str:
 def _created(step: Step, ref: TargetRef, observed: dict, entry: dict | None) -> bool:
     """A menu that ADDS something ("Add > Armature > Single Bone") is done once a thing of a type the step expects to exist is there and was not there when the step began. A menu leaves no
     mark of its own, so without this the guide pointed at Add > Armature for the rest of the step, however many armatures were added."""
-    if ref.kind != "menu":
+    if ref.kind == "pane" and ref.id == "NetworkEditor" and ref.keys:     # Houdini: "press Tab in the network editor" is done once the node the step creates is there
+        path = ["add"]
+    elif ref.kind != "menu":
         return False
-    path = [_norm(p) for p in (ref.path or [ref.label])]
+    else:
+        path = [_norm(p) for p in (ref.path or [ref.label])]
     counts = {_norm(k): v for k, v in (observed.get("node_counts") or {}).items()}
     before = {_norm(k): v for k, v in ((entry or {}).get("node_counts") or {}).items()}
     for p in step.expected_state:
@@ -109,7 +112,20 @@ def _done(step: Step, ref: TargetRef, observed: dict, prog: Progress, entry: dic
     if ref.kind == "mode":
         now = observed.get("mode")
         return bool(now and ((ref.mode and now == ref.mode) or (ref.id and (now == ref.id or now.startswith(ref.id + "_")))))
+    if ref.kind == "node":                                                  # Houdini: "select this node" is done once the probe reports it selected
+        return _houdini_selected(ref, observed)
     return _created(step, ref, observed, entry)
+
+
+def _houdini_selected(ref: TargetRef, observed: dict) -> bool:
+    nodes = (((observed.get("ui") or {}).get("network") or {}).get("nodes")) or []
+    key = (lambda s: "".join(ch for ch in (s or "").lower() if ch.isalnum()).removeprefix("apex"))      # noqa: E731
+    for n in nodes:
+        if not n.get("selected"):
+            continue
+        if (ref.path and n.get("name") == ref.path[0]) or (not ref.path and key(n.get("label")) == key(ref.label)):
+            return True
+    return False
 
 
 def pending_needs(step: Step, observed: dict, prog: Progress, entry: dict | None = None) -> tuple[list[TargetRef], bool]:

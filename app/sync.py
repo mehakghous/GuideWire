@@ -25,7 +25,7 @@ from typing import Any
 
 from shared.step_record import Step
 
-from .cloud import Cloud, CloudAuthError, CloudSession, CloudUnavailable
+from .cloud import Cloud, CloudAuthError, CloudSession, CloudSetupError, CloudUnavailable
 from .db import Database, now
 
 KIND_ORDER = {"tutorial": 0, "session": 1, "pref": 2}        # apply in this order: sessions need their tutorial
@@ -115,6 +115,8 @@ class SyncService:
             result.offline = True
         except CloudAuthError:
             result.signed_out = True
+        except CloudSetupError as e:
+            result.error = str(e)                                    # a setup problem the owner can fix: say what it is
         except Exception as e:                                       # a bug or a bad answer must never close the app
             result.error = f"Sync failed ({type(e).__name__})."
         return result

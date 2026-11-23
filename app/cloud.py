@@ -29,6 +29,10 @@ class CloudUnavailable(CloudError):
     """No connection, or the service did not answer in time. The app goes on offline."""
 
 
+class CloudSetupError(CloudError):
+    """The project is reachable and the learner is signed in, but the table refused the request: its permissions or security rules are not set up as docs/supabase.md says."""
+
+
 class CloudAuthError(CloudError):
     """The service refused: wrong password, unknown email, a wrong or expired code."""
 
@@ -187,9 +191,15 @@ class SupabaseCloud:
             return
         rows = [{"user_id": session.user_id, "kind": i["kind"], "id": i["id"], "data": i.get("data") or {}, "updated_at": i["updated_at"], "deleted": bool(i.get("deleted"))} for i in items]
         r = self._send("POST", "/rest/v1/sync_item", session=session, json=rows, params={"on_conflict": "user_id,kind,id"}, extra={"Prefer": "resolution=merge-duplicates,return=minimal"})
-        if r.status_code in (401, 403):
-            raise CloudAuthError("Your online sign-in has expired. Log in again.")
+        self._check_table(r)
         r.raise_for_status()
+
+    def _check_table(self, r: httpx.Response) -> None:
+        """401 = the sign-in expired. 403 / permission denied = the table's grants or row level security are not set up (the SQL in docs/supabase.md)."""
+        if r.status_code == 403 or "42501" in r.text:                # "permission denied" can arrive as 401 or 403
+            raise CloudSetupError("The online table refused the request: its permissions are not set up. Run the SQL in docs/supabase.md (the grant lines) in the Supabase SQL editor.")
+        if r.status_code == 401:
+            raise CloudAuthError("Your online sign-in has expired. Log in again.")
 
     def fetch_items(self, session: CloudSession, since: str | None) -> list[dict[str, Any]]:
         # the cursor is `synced_at`, stamped by the SERVER when a row arrives, so a device whose clock is wrong cannot hide its changes from the others
@@ -197,7 +207,6 @@ class SupabaseCloud:
         if since:
             params["synced_at"] = f"gt.{since}"
         r = self._send("GET", "/rest/v1/sync_item", session=session, params=params)
-        if r.status_code in (401, 403):
-            raise CloudAuthError("Your online sign-in has expired. Log in again.")
+        self._check_table(r)
         r.raise_for_status()
         return list(r.json())

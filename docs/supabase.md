@@ -56,6 +56,10 @@ create policy "read own rows"   on public.sync_item for select using (auth.uid()
 create policy "insert own rows" on public.sync_item for insert with check (auth.uid() = user_id);
 create policy "update own rows" on public.sync_item for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 -- no delete policy on purpose: rows are never removed by the app, they are marked `deleted`
+
+-- logged-in learners may use the table (newer Supabase projects do not grant this by default; without it the app gets "permission denied")
+grant usage on schema public to authenticated;
+grant select, insert, update on public.sync_item to authenticated;
 ```
 Every request carries the learner's own token, so these policies are what keep one learner from reading or writing another's rows. The app never sends a user id it trusts: the policy compares it with the token.
 

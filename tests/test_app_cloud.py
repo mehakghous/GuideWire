@@ -294,3 +294,34 @@ def test_a_publishable_key_goes_in_apikey_alone_and_an_anon_jwt_also_as_bearer_b
     assert seen[1]["authorization"] == "Bearer eyJhbGciOi.payload.sig"
     new.fetch_items(CloudSession("uuid-1", "a@x.com", "Ann", "AT", "RT"), None)
     assert seen[2]["authorization"] == "Bearer AT" and seen[2]["apikey"] == "sb_publishable_abc"      # once logged in, always the learner's token
+
+
+def test_a_refused_table_is_a_setup_problem_and_only_401_means_the_sign_in_expired():
+    from app.cloud import CloudSetupError
+    s = CloudSession("uuid-1", "a@x.com", "Ann", "AT", "RT")
+    with pytest.raises(CloudSetupError, match="permissions are not set up"):
+        make(lambda req: httpx.Response(403, json={"message": "permission denied for table sync_item", "code": "42501"})).push_items(s, [{"kind": "pref", "id": "x", "updated_at": "t"}])
+    with pytest.raises(CloudSetupError):
+        make(lambda req: httpx.Response(401, json={"code": "42501", "message": "permission denied"})).fetch_items(s, None)
+    with pytest.raises(CloudAuthError, match="expired"):
+        make(lambda req: httpx.Response(401, json={"message": "JWT expired"})).fetch_items(s, None)
+
+
+def test_sync_reports_a_setup_problem_in_words(tmp_path):
+    from app.cloud import CloudSetupError
+    from app.step_editor import StepEditor
+    from app.sync import SyncService
+
+    class Refusing:
+        configured = True
+
+        def push_items(self, session, items):
+            raise CloudSetupError("The online table refused the request: its permissions are not set up.")
+
+        def fetch_items(self, session, since):
+            return []
+    db = Database(tmp_path / "a.sqlite")
+    uid = db.add_user("a@x.com", b"h")
+    StepEditor.from_json_file("shared/examples/blender_cube_extrude.json").save(db, uid)
+    report = SyncService(db, Refusing(), uid).sync_once(CloudSession("u", "a@x.com", "A", "AT", "RT"))
+    assert "permissions are not set up" in report.error and not report.signed_out and SyncService(db, Refusing(), uid).pending == 1

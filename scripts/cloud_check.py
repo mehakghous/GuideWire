@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.cloud import CloudAuthError, CloudUnavailable, SupabaseCloud  # noqa: E402
+from app.cloud import CloudAuthError, CloudError, CloudUnavailable, SupabaseCloud  # noqa: E402
 
 
 def main() -> int:
@@ -46,6 +46,9 @@ def main() -> int:
         return 1
     except CloudAuthError as e:
         print("The service said no:", e)
+        return 1
+    except CloudError as e:
+        print("Problem:", e)
         return 1
 
 

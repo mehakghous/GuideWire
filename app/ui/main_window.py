@@ -4,7 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import QEasingCurve, QPropertyAnimation
+from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, QTimer
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QApplication, QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
 
@@ -14,10 +14,14 @@ from ..ask import Asker
 from ..db import Database
 from ..session_engine import EngineError, SessionEngine
 from ..step_editor import StepEditor
+from ..sync import Report, Result, SyncService
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
 from .backdrop import Backdrop
+from .onboarding import DEFAULTS as PRIVACY_DEFAULTS
+from .onboarding import OnboardingScreen, PrivacyScreen
 from .sidebar import Sidebar
+from .workers import run_call
 from .style import THEMES, build_style, current_palette, set_theme
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
@@ -27,13 +31,19 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None, vision_bridge=None):
-        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision_bridge` (app.vision_bridge.VisionBridge) is the screen guidance for sessions; `vision` is the older form, a vision service that is wrapped in a bridge. None of them means sessions run by hand."""
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None, vision_bridge=None, cloud=None, show_welcome: bool = False):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision_bridge` (app.vision_bridge.VisionBridge) is the screen guidance for sessions; `vision` is the older form, a vision service that is wrapped in a bridge. None of them means sessions run by hand. `cloud` (app.cloud: Supabase) is the online account and sync; None means everything stays on this computer. `show_welcome` shows the first-run welcome after a learner's first login (the real app turns it on; tests leave it off)."""
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(1260, 800)
         self.db = db
-        self.accounts = Accounts(db)
+        self.accounts = Accounts(db, cloud)
+        self.sync_service: SyncService | None = None
+        self._sync_inline = sync                  # tests run the sync right here
+        self.show_welcome = show_welcome
+        self._syncing = False
+        self._sync_again = False
+        self._last_report: Report | None = None
         self.user: User | None = None
         self.login = LoginScreen(self.accounts)
         self.home = HomeScreen()
@@ -47,6 +57,8 @@ class MainWindow(QMainWindow):
         self.history = HistoryScreen()
         self.new_tutorial = NewTutorialScreen()
         self.profile = ProfileScreen(self.accounts)
+        self.onboarding = OnboardingScreen()
+        self.privacy = PrivacyScreen()
         self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover), sync=sync)
         self.find_screen = FindScreen(sync=sync)
         self.find_screen.finder = discover
@@ -56,12 +68,13 @@ class MainWindow(QMainWindow):
             self.new_tutorial.video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)
         self.new_tutorial.sync = sync
         self.stack = QStackedWidget()
-        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen):
+        for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen, self.onboarding, self.privacy):
             self.stack.addWidget(screen)
         self.sidebar = Sidebar()
         self.sidebar.set_companion(vision_bridge is not None)
         self.sidebar.chosen.connect(self.on_nav)
         self.sidebar.logout.connect(self.on_logout)
+        self.sidebar.sync_requested.connect(self.request_sync)
         self.sidebar.hide()                       # only once someone is signed in
         shell = Backdrop()
         row = QHBoxLayout(shell)
@@ -97,7 +110,16 @@ class MainWindow(QMainWindow):
         self.ask_screen.back.connect(self.show_home)
         self.ask_screen.save_steps.connect(self.save_asked_steps)
         self.session.ask_about.connect(lambda tid: self.open_ask(tid))
+        self.onboarding.finished.connect(self.finish_onboarding)
+        self.privacy.back.connect(self.show_home)
+        self.privacy.changed.connect(self.change_privacy)
+        for signal in (self.session.back, self.review.saved, self.new_tutorial.created, self.profile.profile_changed):
+            signal.connect(lambda *_a: self.request_sync())       # a moment when something worth keeping has changed
+        self.sync_timer = QTimer(self)
+        self.sync_timer.setInterval(60_000)
+        self.sync_timer.timeout.connect(self.request_sync)
         self.stack.setCurrentWidget(self.login)
+        self.refresh_connection()
 
     def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
         self.session.pause_if_active()
@@ -107,14 +129,14 @@ class MainWindow(QMainWindow):
     def on_nav(self, key: str) -> None:
         """A sidebar item was clicked."""
         {"home": self.show_home, "find": self.open_find, "ask": self.open_ask, "import": self.open_new_tutorial,
-         "history": self.open_history, "settings": self.open_profile}[key]()
+         "history": self.open_history, "privacy": self.open_privacy, "settings": self.open_profile}[key]()
 
     def _sync_sidebar(self, _index: int = 0) -> None:
         """Show the panel on every screen except the sign-in, and mark the screen the user is on."""
         screen = self.stack.currentWidget()
-        self.sidebar.setVisible(self.user is not None and screen is not self.login)
+        self.sidebar.setVisible(self.user is not None and screen not in (self.login, self.onboarding))
         self.sidebar.set_user(self.user.display_name if self.user else "")
-        keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.profile: "settings"}
+        keys = {self.home: "home", self.find_screen: "find", self.ask_screen: "ask", self.new_tutorial: "import", self.history: "history", self.privacy: "privacy", self.profile: "settings"}
         self.sidebar.set_active(keys.get(screen))
 
     def _fade_in(self, _index: int = 0) -> None:
@@ -197,13 +219,124 @@ class MainWindow(QMainWindow):
 
     def on_logged_in(self, user: User) -> None:
         self.user = user
+        self.sync_service = SyncService(self.db, self.accounts.cloud, user.id) if self.accounts.online_enabled else None
+        self._last_report = None
         self.apply_theme()
-        self.show_home()
+        self._apply_privacy()
+        self.sync_timer.start() if self.sync_service else self.sync_timer.stop()
+        if self._prefs().get("onboarded") or not self.show_welcome:
+            self.show_home()
+        else:
+            self.onboarding.load(self._prefs(), self.accounts.online_enabled)
+            self.stack.setCurrentWidget(self.onboarding)               # the welcome, once
+        self.request_sync()
 
     def on_logout(self) -> None:
+        self.session.pause_if_active()
+        self.sync_timer.stop()
+        self.sync_service = None
+        self.accounts.sign_out()
         self.user = None
         self.apply_theme()
         self.stack.setCurrentWidget(self.login)
+        self.login.show_reset(False)
+        self.refresh_connection()
+
+    # ---- privacy choices and the welcome
+    def _prefs(self) -> dict:
+        return self.accounts.preferences(self.user.id) if self.user else {}
+
+    def _apply_privacy(self) -> None:
+        """Make the features obey the learner's choices: the AI model, and (in open_session) the screen highlight."""
+        prefs = {**PRIVACY_DEFAULTS, **self._prefs()}
+        self.new_tutorial.ai_allowed = bool(prefs["ai"])
+        model_ok = self.ask_screen.asker.model_available and bool(prefs["ai"])
+        self.ask_screen.use_model.setEnabled(model_ok)
+        self.ask_screen.use_model.setChecked(model_ok)
+        if not prefs["ai"]:
+            self.ask_screen.use_model.setToolTip("The AI model is turned off in Privacy.")
+
+    def finish_onboarding(self, choices: dict) -> None:
+        if self.user is None:
+            return
+        self.accounts.set_preferences(self.user.id, **choices)
+        self._apply_privacy()
+        self.request_sync()
+        self.show_home()
+
+    def change_privacy(self, changed: dict) -> None:
+        if self.user is None:
+            return
+        self.accounts.set_preferences(self.user.id, **changed)
+        self._apply_privacy()
+        self.request_sync()
+
+    def open_privacy(self) -> None:
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        self.privacy.load(self._prefs(), self.accounts.online_enabled)
+        self.stack.setCurrentWidget(self.privacy)
+
+    # ---- connection status and sync (the database is only touched here, on the window's thread; the internet part runs on a worker)
+    def _can_sync(self) -> bool:
+        return bool(self.sync_service and self.accounts.cloud_session and self._prefs().get("sync", True))
+
+    def request_sync(self) -> None:
+        if not self._can_sync():
+            self.refresh_connection()
+            return
+        if self._syncing:
+            self._sync_again = True
+            return
+        svc, session = self.sync_service, self.accounts.cloud_session
+        self._syncing = True
+        plan = svc.plan()
+        self.refresh_connection()
+        run_call(self, lambda _status: svc.network(session, plan), lambda res, svc=svc, plan=plan: self._sync_done(svc, plan, res), sync=self._sync_inline)
+
+    def _sync_done(self, svc: SyncService, plan, result) -> None:
+        self._syncing = False
+        if svc is not self.sync_service:                       # the learner logged out meanwhile: nothing to apply
+            return
+        if isinstance(result, Exception):
+            result = Result(error=f"Sync failed ({type(result).__name__}).")
+        if result.session is not None:
+            self.accounts.cloud_session = result.session
+        self._last_report = svc.finish(plan, result)
+        if self._last_report.signed_out:
+            self.accounts.cloud_session = None
+        if self._last_report.pulled and self.stack.currentWidget() is self.home:
+            self.show_home()                                  # tutorials that arrived from another computer
+        self.refresh_connection()
+        if self._sync_again:
+            self._sync_again = False
+            self.request_sync()
+
+    def refresh_connection(self) -> None:
+        """The sidebar's Connection card: whether the work is saved only here, offline, syncing or online."""
+        a, n = self.accounts, (self.sync_service.pending if self.sync_service else 0)
+        waiting = f"{n} change{'s' if n != 1 else ''} waiting to sync." if n else "Everything is saved online."
+        r = self._last_report
+        if not a.online_enabled:
+            card = ("Saved on this computer", "The online service is not set up, so nothing leaves this computer.", False, "ok")
+        elif self.user is None:
+            card = ("Online sync", "Log in to sync your tutorials and progress.", False, "ok")
+        elif a.cloud_session is None and a.offline_login:
+            card = ("Offline", "You logged in without a connection. Your work is saved here; log in again when online to sync it.", False, "offline")
+        elif not self._prefs().get("sync", True):
+            card = ("Online sync is off", "Your work stays on this computer. Turn it on in Privacy.", False, "ok")
+        elif r is not None and r.signed_out or a.cloud_session is None:
+            card = ("Sign-in expired", "Log out and log in again to keep syncing. Your work is saved here.", False, "problem")
+        elif self._syncing:
+            card = ("Syncing...", "", False, "busy")
+        elif r is not None and r.offline:
+            card = ("Offline", f"{n} change{'s' if n != 1 else ''} will sync when you are back online." if n else "Will sync when you are back online.", True, "offline")
+        elif r is not None and r.error:
+            card = ("Sync problem", r.error, True, "problem")
+        else:
+            card = ("Online", waiting, True, "ok")
+        self.sidebar.set_connection(*card)
 
     def show_home(self) -> None:
         if self.user is None:                      # never show user data without a login
@@ -296,12 +429,13 @@ def _make_bridge():
 
 
 def main() -> int:
+    from ..cloud import SupabaseCloud
     from ..ask import default_model_factory
     from ..discovery import default_fit_provider, find_tutorials
     from ..pipeline import default_video_provider
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision_bridge=_make_bridge())
+    window = MainWindow(Database(), cloud=SupabaseCloud.from_env(), show_welcome=True, video_provider_factory=default_video_provider, ask_model_factory=default_model_factory, discover=lambda goal, app: find_tutorials(goal, app, fit_provider=default_fit_provider), vision_bridge=_make_bridge())
     window.show()
     return app.exec()
 

@@ -129,6 +129,12 @@ QPushButton#navItem:hover { background: @accent_soft@; color: @text@; }
 QPushButton#navItem[on="true"] { background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border: 2px solid @accent_hi@; color: @accent_text@; font-weight: 700; }
 QPushButton#navLogout { background: transparent; border: none; color: @accent@; text-align: left; padding: 6px 6px; font-weight: 700; }
 QPushButton#navLogout:hover { color: @accent_hover@; }
+QFrame#connCard { background: @field@; border: 2px solid @hi@; border-radius: 18px; }
+QFrame#connCard[kind="offline"] { background: @amber@; }
+QFrame#connCard[kind="problem"] { background: @danger_soft@; }
+QFrame#connCard[kind="busy"] { background: @mint@; }
+QFrame#connCard QLabel#sideSmall { color: @muted@; }
+QFrame#connCard QLabel#sideStatus { color: @text@; }
 QToolTip { background: @tile@; color: @text@; border: 1px solid @border@; padding: 4px; }
 """
 

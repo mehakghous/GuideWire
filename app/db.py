@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import uuid
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -64,6 +65,18 @@ CREATE TABLE IF NOT EXISTS session_step (
     updated_at TEXT NOT NULL,
     PRIMARY KEY (session_id, step_id)
 );
+CREATE TABLE IF NOT EXISTS outbox (
+    user_id   INTEGER NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+    kind      TEXT NOT NULL,
+    item_id   TEXT NOT NULL,
+    op        TEXT NOT NULL DEFAULT 'upsert',
+    queued_at TEXT NOT NULL,
+    PRIMARY KEY (user_id, kind, item_id)
+);
+CREATE TABLE IF NOT EXISTS sync_state (
+    user_id INTEGER PRIMARY KEY REFERENCES user(id) ON DELETE CASCADE,
+    cursor  TEXT
+);
 CREATE INDEX IF NOT EXISTS idx_tutorial_user ON tutorial(user_id);
 CREATE INDEX IF NOT EXISTS idx_session_user ON session(user_id);
 """
@@ -82,6 +95,48 @@ class Database:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
         self.conn.executescript(SCHEMA)
+        self._migrate()
+
+    def _add_column(self, table: str, column: str, definition: str) -> None:
+        if column not in {r["name"] for r in self.conn.execute(f"PRAGMA table_info({table})")}:
+            self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+
+    def _migrate(self) -> None:
+        """Databases created by earlier versions get the columns added since (sync ids, update times, the online account id). Nothing is ever dropped."""
+        self._add_column("user", "remote_id", "TEXT")
+        self._add_column("tutorial", "sync_id", "TEXT")
+        self._add_column("session", "sync_id", "TEXT")
+        self._add_column("session", "updated_at", "TEXT")
+        self._add_column("preferences", "updated_at", "TEXT")
+        for table in ("tutorial", "session"):
+            for r in self.conn.execute(f"SELECT id FROM {table} WHERE sync_id IS NULL").fetchall():
+                self.conn.execute(f"UPDATE {table} SET sync_id = ? WHERE id = ?", (str(uuid.uuid4()), r["id"]))
+        self.conn.execute("UPDATE session SET updated_at = COALESCE(finished_at, started_at, ?) WHERE updated_at IS NULL", (now(),))
+        self.conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_tutorial_sync ON tutorial(sync_id)")
+        self.conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_session_sync ON session(sync_id)")
+        self.conn.commit()
+
+    # ---- what changed since the last sync (the outbox): every write below that the online copy must hear about leaves a note here
+    def mark_changed(self, user_id: int, kind: str, item_id: str, op: str = "upsert") -> None:
+        self.conn.execute("INSERT INTO outbox (user_id, kind, item_id, op, queued_at) VALUES (?, ?, ?, ?, ?) "
+                          "ON CONFLICT(user_id, kind, item_id) DO UPDATE SET op = excluded.op, queued_at = excluded.queued_at", (user_id, kind, item_id, op, now()))
+
+    def pending_changes(self, user_id: int) -> list[sqlite3.Row]:
+        return self.conn.execute("SELECT * FROM outbox WHERE user_id = ? ORDER BY queued_at, kind, item_id", (user_id,)).fetchall()
+
+    def clear_changes(self, user_id: int, sent: list[tuple[str, str, str]]) -> None:
+        """Forget changes that reached the online copy. `sent` holds (kind, item_id, queued_at); a change made again after it was sent stays queued."""
+        with self.tx() as c:
+            for kind, item_id, queued_at in sent:
+                c.execute("DELETE FROM outbox WHERE user_id = ? AND kind = ? AND item_id = ? AND queued_at = ?", (user_id, kind, item_id, queued_at))
+
+    def sync_cursor(self, user_id: int) -> str | None:
+        row = self.conn.execute("SELECT cursor FROM sync_state WHERE user_id = ?", (user_id,)).fetchone()
+        return None if row is None else row["cursor"]
+
+    def set_sync_cursor(self, user_id: int, cursor: str | None) -> None:
+        with self.tx() as c:
+            c.execute("INSERT INTO sync_state (user_id, cursor) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET cursor = excluded.cursor", (user_id, cursor))
 
     def close(self) -> None:
         self.conn.close()
@@ -109,6 +164,10 @@ class Database:
     def get_user(self, user_id: int) -> sqlite3.Row | None:
         return self.conn.execute("SELECT * FROM user WHERE id = ?", (user_id,)).fetchone()
 
+    def set_remote_id(self, user_id: int, remote_id: str | None) -> None:
+        with self.tx() as c:
+            c.execute("UPDATE user SET remote_id = ? WHERE id = ?", (remote_id, user_id))
+
     def update_user(self, user_id: int, *, display_name: str | None = None, password_hash: bytes | None = None) -> None:
         with self.tx() as c:
             if display_name is not None:
@@ -123,8 +182,9 @@ class Database:
 
     def set_preferences(self, user_id: int, data: dict[str, Any]) -> None:
         with self.tx() as c:
-            c.execute("INSERT INTO preferences (user_id, data) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data",
-                      (user_id, json.dumps(data, sort_keys=True)))
+            c.execute("INSERT INTO preferences (user_id, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
+                      (user_id, json.dumps(data, sort_keys=True), now()))
+            self.mark_changed(user_id, "pref", "prefs")
 
     # ---- tutorials and steps
     def save_tutorial(self, user_id: int, title: str, steps: StepList, *, source_type: str = "manual", source_url: str | None = None,
@@ -132,8 +192,8 @@ class Database:
         """Create a tutorial, or replace the steps of an existing one (`tutorial_id`), in one transaction."""
         with self.tx() as c:
             if tutorial_id is None:
-                cur = c.execute("INSERT INTO tutorial (user_id, title, app, source_type, source_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                                (user_id, title, steps.app, source_type, source_url, now(), now()))
+                cur = c.execute("INSERT INTO tutorial (user_id, title, app, source_type, source_url, created_at, updated_at, sync_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                (user_id, title, steps.app, source_type, source_url, now(), now(), str(uuid.uuid4())))
                 tutorial_id = int(cur.lastrowid)
             else:
                 if not c.execute("SELECT 1 FROM tutorial WHERE id = ? AND user_id = ?", (tutorial_id, user_id)).fetchone():
@@ -142,6 +202,7 @@ class Database:
                 c.execute("DELETE FROM step WHERE tutorial_id = ?", (tutorial_id,))
             for pos, step in enumerate(steps.steps, start=1):
                 c.execute("INSERT INTO step (tutorial_id, position, record) VALUES (?, ?, ?)", (tutorial_id, pos, step.model_dump_json()))
+            self.mark_changed(user_id, "tutorial", c.execute("SELECT sync_id FROM tutorial WHERE id = ?", (tutorial_id,)).fetchone()["sync_id"])
             return tutorial_id
 
     def list_tutorials(self, user_id: int) -> list[sqlite3.Row]:
@@ -154,17 +215,26 @@ class Database:
 
     def delete_tutorial(self, user_id: int, tutorial_id: int) -> bool:
         with self.tx() as c:
-            return c.execute("DELETE FROM tutorial WHERE id = ? AND user_id = ?", (tutorial_id, user_id)).rowcount > 0
+            row = c.execute("SELECT sync_id FROM tutorial WHERE id = ? AND user_id = ?", (tutorial_id, user_id)).fetchone()
+            if row is None:
+                return False
+            for sess in c.execute("SELECT sync_id FROM session WHERE tutorial_id = ?", (tutorial_id,)).fetchall():
+                self.mark_changed(user_id, "session", sess["sync_id"], "delete")           # its sessions go with it (ON DELETE CASCADE), online too
+            c.execute("DELETE FROM tutorial WHERE id = ? AND user_id = ?", (tutorial_id, user_id))
+            self.mark_changed(user_id, "tutorial", row["sync_id"], "delete")
+            return True
 
     # ---- sessions
     def start_session(self, user_id: int, tutorial_id: int) -> int:
         with self.tx() as c:
             if not c.execute("SELECT 1 FROM tutorial WHERE id = ? AND user_id = ?", (tutorial_id, user_id)).fetchone():
                 raise KeyError(f"tutorial {tutorial_id} not found for this user")
-            cur = c.execute("INSERT INTO session (user_id, tutorial_id) VALUES (?, ?)", (user_id, tutorial_id))
+            sync_id = str(uuid.uuid4())
+            cur = c.execute("INSERT INTO session (user_id, tutorial_id, sync_id, updated_at) VALUES (?, ?, ?, ?)", (user_id, tutorial_id, sync_id, now()))
             sid = int(cur.lastrowid)
             for r in c.execute("SELECT id FROM step WHERE tutorial_id = ?", (tutorial_id,)).fetchall():
                 c.execute("INSERT INTO session_step (session_id, step_id, updated_at) VALUES (?, ?, ?)", (sid, r["id"], now()))
+            self.mark_changed(user_id, "session", sync_id)
             return sid
 
     def tutorial_app(self, tutorial_id: int) -> str | None:
@@ -177,13 +247,21 @@ class Database:
 
     def update_session(self, session_id: int, *, state: str, current_pos: int | None, started_at: str | None = None, finished_at: str | None = None) -> None:
         with self.tx() as c:
-            c.execute("UPDATE session SET state = ?, current_pos = ?, started_at = COALESCE(?, started_at), finished_at = COALESCE(?, finished_at) WHERE id = ?",
-                      (state, current_pos, started_at, finished_at, session_id))
+            c.execute("UPDATE session SET state = ?, current_pos = ?, started_at = COALESCE(?, started_at), finished_at = COALESCE(?, finished_at), updated_at = ? WHERE id = ?",
+                      (state, current_pos, started_at, finished_at, now(), session_id))
+            self._mark_session(c, session_id)
 
     def set_step_status(self, session_id: int, step_id: int, status: str, by: str = "user") -> None:
         with self.tx() as c:
             c.execute("UPDATE session_step SET status = ?, status_by = ?, updated_at = ? WHERE session_id = ? AND step_id = ?",
                       (status, by, now(), session_id, step_id))
+            c.execute("UPDATE session SET updated_at = ? WHERE id = ?", (now(), session_id))
+            self._mark_session(c, session_id)
+
+    def _mark_session(self, c: sqlite3.Connection, session_id: int) -> None:
+        row = c.execute("SELECT user_id, sync_id FROM session WHERE id = ?", (session_id,)).fetchone()
+        if row is not None:
+            self.mark_changed(row["user_id"], "session", row["sync_id"])
 
     def session_steps(self, session_id: int) -> list[sqlite3.Row]:
         return self.conn.execute("SELECT ss.*, s.position FROM session_step ss JOIN step s ON s.id = ss.step_id WHERE ss.session_id = ? ORDER BY s.position",

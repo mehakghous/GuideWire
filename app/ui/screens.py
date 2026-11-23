@@ -9,7 +9,7 @@ import html
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QVBoxLayout, QWidget
 
-from ..accounts import AccountError, Accounts, User
+from ..accounts import AccountError, AccountNotice, Accounts, User
 from ..db import Database
 from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, PAUSED, EngineError, SessionEngine
@@ -43,6 +43,26 @@ class LoginScreen(QWidget):
         self.register_button.clicked.connect(self.do_register)
         self.password.returnPressed.connect(self.do_login)
         self.message.setObjectName("error")
+        self.notice = QLabel("")                                   # something to do next (check your email), not an error
+        self.notice.setObjectName("hint")
+        self.notice.setWordWrap(True)
+        self.forgot_button = QPushButton("Forgot your password?")
+        self.forgot_button.setObjectName("navLogout")              # a quiet text button
+        self.forgot_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.forgot_button.clicked.connect(lambda: self.show_reset(True))
+        self.reset_code = QLineEdit()
+        self.reset_code.setPlaceholderText("Code from the email")
+        self.reset_password = QLineEdit()
+        self.reset_password.setPlaceholderText("New password (8 characters or more)")
+        self.reset_password.setEchoMode(QLineEdit.EchoMode.Password)
+        self.send_code_button = QPushButton("Send me a code")
+        self.send_code_button.clicked.connect(self.do_send_code)
+        self.set_password_button = QPushButton("Set new password")
+        self.set_password_button.setObjectName("primary")
+        self.set_password_button.clicked.connect(self.do_set_password)
+        self.cancel_reset_button = QPushButton("Back to log in")
+        self.cancel_reset_button.clicked.connect(lambda: self.show_reset(False))
+        self.reset_mode = False
         self.login_button.setObjectName("primary")
         grid = page_grid(self)
         brand = HeroTile(padding=32)
@@ -65,13 +85,24 @@ class LoginScreen(QWidget):
         form.addRow("Email", self.email)
         form.addRow("Password", self.password)
         form.addRow("Name", self.name)
+        form.addRow("Code", self.reset_code)
+        form.addRow("New password", self.reset_password)
+        self.form = form
         form_tile.body.addLayout(form)
         buttons = QHBoxLayout()
         buttons.addWidget(self.login_button)
         buttons.addWidget(self.register_button)
         form_tile.body.addLayout(buttons)
+        reset_buttons = QHBoxLayout()
+        reset_buttons.addWidget(self.send_code_button)
+        reset_buttons.addWidget(self.set_password_button)
+        form_tile.body.addLayout(reset_buttons)
+        form_tile.body.addWidget(self.forgot_button, 0, Qt.AlignmentFlag.AlignLeft)
+        form_tile.body.addWidget(self.cancel_reset_button, 0, Qt.AlignmentFlag.AlignLeft)
+        form_tile.body.addWidget(self.notice)
         form_tile.body.addWidget(self.message)
         form_tile.body.addStretch()
+        self.show_reset(False)
         grid.setRowStretch(0, 1)
         grid.addWidget(brand, 1, 0)
         grid.addWidget(form_tile, 1, 1)
@@ -79,14 +110,50 @@ class LoginScreen(QWidget):
         grid.setColumnStretch(0, 5)
         grid.setColumnStretch(1, 4)
 
-    def _run(self, action) -> None:
+    def show_reset(self, on: bool) -> None:
+        """Forgotten password: ask for a code by email, then type it with a new password. Only offered when the online service is set up."""
+        self.reset_mode = on
+        self.message.setText("")
+        self.notice.setText("")
+        self.form.setRowVisible(self.password, not on)
+        self.form.setRowVisible(self.name, not on)
+        self.form.setRowVisible(self.reset_code, on)
+        self.form.setRowVisible(self.reset_password, on)
+        for w in (self.login_button, self.register_button):
+            w.setVisible(not on)
+        for w in (self.send_code_button, self.set_password_button, self.cancel_reset_button):
+            w.setVisible(on)
+        self.forgot_button.setVisible(not on and self.accounts.online_enabled)
+
+    def do_send_code(self) -> None:
         try:
-            user = action()
+            self.accounts.request_password_reset(self.email.text())
         except AccountError as e:
             self.message.setText(str(e))
             return
         self.message.setText("")
+        self.notice.setText("If that address has an account, a code is on its way. Type it below with your new password.")     # the same words whether or not it has one
+
+    def do_set_password(self) -> None:
+        self._run(lambda: self.accounts.finish_password_reset(self.email.text(), self.reset_code.text(), self.reset_password.text()))
+
+    def _run(self, action) -> None:
+        try:
+            user = action()
+        except AccountNotice as e:
+            self.message.setText("")
+            self.notice.setText(str(e))
+            return
+        except AccountError as e:
+            self.notice.setText("")
+            self.message.setText(str(e))
+            return
+        self.message.setText("")
+        self.notice.setText("")
         self.password.clear()
+        self.reset_code.clear()
+        self.reset_password.clear()
+        self.show_reset(False)
         self.logged_in.emit(user)
 
     def do_login(self) -> None:
@@ -971,6 +1038,7 @@ class NewTutorialScreen(QWidget):
         self.text = QPlainTextEdit()
         self.text.setPlaceholderText("One instruction per line, e.g.\nPress Tab to enter Edit Mode\nSelect the cube\n\nor paste a timed transcript, or a YouTube link to a rigging tutorial")
         self.video_runner = None      # set by the main window: (url, app, on_status) -> PipelineResult; None = no AI model on this computer
+        self.ai_allowed = True        # the learner's Privacy choice: when off, nothing is sent to the AI model
         self.sync = False             # tests run the call inline
         self.message = QLabel("")
         self.message.setWordWrap(True)
@@ -1027,6 +1095,9 @@ class NewTutorialScreen(QWidget):
     def create(self) -> None:
         text, app = self.text.toPlainText(), self.app.currentText()
         link = _YOUTUBE.search(text)
+        if link and not self.ai_allowed:
+            self.message.setText("The AI model is turned off in Privacy, so a video link cannot be turned into steps. Paste the instructions as text instead, or turn it on in Privacy.")
+            return
         if link and self.video_runner is not None:
             self.create_button.setEnabled(False)
             self.message.setText("Starting...")

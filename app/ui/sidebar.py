@@ -9,12 +9,13 @@ from PyQt6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
 from .bento import soft_shadow
 
-ITEMS = (("home", "Home"), ("find", "Find a Tutorial"), ("ask", "Ask GuideWire"), ("import", "New Tutorial"), ("history", "History"), ("settings", "Settings"))
+ITEMS = (("home", "Home"), ("find", "Find a Tutorial"), ("ask", "Ask GuideWire"), ("import", "New Tutorial"), ("history", "History"), ("privacy", "Privacy"), ("settings", "Settings"))
 
 
 class Sidebar(QFrame):
     chosen = pyqtSignal(str)          # one of the keys in ITEMS
     logout = pyqtSignal()
+    sync_requested = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -39,6 +40,26 @@ class Sidebar(QFrame):
             box.addWidget(b)
             self.buttons[key] = b
         box.addStretch()
+        self.conn_card = QFrame()
+        self.conn_card.setObjectName("connCard")
+        ccbox = QVBoxLayout(self.conn_card)
+        ccbox.setContentsMargins(14, 10, 14, 10)
+        ccbox.setSpacing(2)
+        ctitle = QLabel("Connection")
+        ctitle.setObjectName("sideSmall")
+        self.conn_status = QLabel("")
+        self.conn_status.setObjectName("sideStatus")
+        self.conn_hint = QLabel("")
+        self.conn_hint.setObjectName("sideSmall")
+        self.conn_hint.setWordWrap(True)
+        self.sync_button = QPushButton("Sync now")
+        self.sync_button.setObjectName("navLogout")
+        self.sync_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.sync_button.clicked.connect(self.sync_requested)
+        for w in (ctitle, self.conn_status, self.conn_hint, self.sync_button):
+            ccbox.addWidget(w)
+        box.addWidget(self.conn_card)
+        box.addSpacing(6)
         card = QFrame()
         card.setObjectName("sideCard")
         soft_shadow(card, 18, 6, 3)
@@ -77,3 +98,12 @@ class Sidebar(QFrame):
     def set_companion(self, watching: bool) -> None:
         self.status.setText("Watching Your 3D App" if watching else "Guidance Is Off")
         self.status_hint.setText("It points at the next step on your screen." if watching else "Steps are done by hand here.")
+
+    def set_connection(self, status: str, hint: str, can_sync: bool, kind: str = "ok") -> None:
+        """The Connection card: `kind` is ok, busy, offline or problem (it marks the card so the style sheet can colour it)."""
+        self.conn_status.setText(status)
+        self.conn_hint.setText(hint)
+        self.sync_button.setVisible(can_sync)
+        self.conn_card.setProperty("kind", kind)
+        self.conn_card.style().unpolish(self.conn_card)
+        self.conn_card.style().polish(self.conn_card)

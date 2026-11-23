@@ -257,3 +257,61 @@ def test_every_resolved_target_of_the_demo_tutorial_gets_a_state_without_a_crash
         assert t.state == "watching" and t.hint and t.rect is None
         arm.complete()
     assert len(seen) == 18 and {p for _, p in seen} <= {"locating", "acting", "hidden", "blocked"}
+
+
+# ---- audit S-1, S-2, S-3, G-1: "already true" is never evidence, on any kind of predicate, in any visit
+def test_a_mode_that_was_already_true_when_the_step_started_does_not_complete_it(eng):          # S-3
+    eng.complete()                                                  # s02 expects EDIT_MESH
+    b = bridge_with(FakeService(observed={"mode": "EDIT_MESH"}))
+    t = b.tick(eng)
+    assert not t.advanced and eng.current_step().id == "s02" and "already looks done" in t.message
+    assert not b.tick(eng).advanced                                 # still true on the next look: still not evidence
+
+
+def test_a_step_seen_unmet_and_then_met_in_the_same_visit_completes(eng):
+    eng.complete()
+    svc = FakeService(observed={"mode": "OBJECT"})
+    b = bridge_with(svc)
+    b.tick(eng)
+    svc.observed = {"mode": "EDIT_MESH"}
+    assert b.tick(eng).advanced
+
+
+def test_previous_then_resume_does_not_complete_the_step_again(eng):                            # S-1
+    eng.complete()
+    svc = FakeService(observed={"mode": "OBJECT"})
+    b = bridge_with(svc)
+    b.tick(eng)
+    svc.observed = {"mode": "EDIT_MESH"}
+    assert b.tick(eng).advanced and eng.current_step().id == "s03"
+    eng.back()                                                      # Previous: s02 again, and the application is still in Edit Mode
+    assert not b.tick(eng).advanced and eng.current_step().id == "s02"
+    resumed = SessionEngine.load(eng.db, eng.user_id, eng.session_id)                           # Resume: a new engine on the same session
+    assert not b.tick(resumed).advanced and resumed.current_step().id == "s02"
+
+
+def test_a_jump_back_starts_a_new_visit(eng):
+    go_to(eng, 3)
+    b = bridge_with(FakeService(observed={"mode": "EDIT_MESH"}))
+    eng.jump_to(2)
+    assert not b.tick(eng).advanced and eng.current_step().id == "s02"
+
+
+def test_what_one_session_saw_does_not_leak_into_the_next(eng):                                 # S-2
+    eng.complete()
+    svc = FakeService(observed={"mode": "OBJECT"})
+    b = bridge_with(svc)
+    b.tick(eng)
+    other = SessionEngine.create(eng.db, eng.user_id, eng.db.get_session(eng.session_id)["tutorial_id"])
+    other.start()
+    other.complete()
+    svc.observed = {"mode": "EDIT_MESH"}
+    assert not b.tick(other).advanced                               # the other session never saw the step unmet
+
+
+def test_maya_and_houdini_are_not_called_out_of_view_when_they_are_simply_not_read(eng):         # G-1
+    from vision import apps
+    if apps.profile("maya").validated:
+        pytest.skip("Maya is read from the screen in this build")
+    t = bridge_with(FakeService(found=False)).look(eng.current_step(), "maya")
+    assert "Blender only" in t.problem and "in front" not in t.problem and t.problem_state == "unavailable"

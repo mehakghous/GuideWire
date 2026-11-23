@@ -12,6 +12,7 @@ Rules:
 """
 from __future__ import annotations
 
+import itertools
 from typing import Any
 
 from ingestion.evaluator import Verdict, evaluate_step
@@ -27,12 +28,15 @@ class EngineError(Exception):
     pass
 
 
+_VISITS = itertools.count(1)
+
 class SessionEngine:
     def __init__(self, db: Database, user_id: int, session_id: int):
         row = db.get_session(session_id)
         if row is None or row["user_id"] != user_id:
             raise EngineError("session not found")
         self.db, self.user_id, self.session_id = db, user_id, session_id
+        self.revision = next(_VISITS)      # process-wide, so a reloaded engine (Resume) never repeats a number; bumped on every start / complete / skip / back / jump: tells one VISIT to a step from the next (Previous, Resume)
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
         self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
         self.title: str = db.tutorial_title(row["tutorial_id"]) or ""
@@ -107,10 +111,12 @@ class SessionEngine:
         if not self.steps:
             raise EngineError("this tutorial has no steps")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=1, started_at=now())
+        self.revision = next(_VISITS)
 
     def _close_current(self, status: str, by: str) -> None:
         pos = self._need_active()
         self.db.set_step_status(self.session_id, self.steps[pos - 1][0], status, by)
+        self.revision = next(_VISITS)
         if pos >= len(self.steps):
             self.db.update_session(self.session_id, state=FINISHED, current_pos=pos, finished_at=now())
         else:
@@ -129,6 +135,7 @@ class SessionEngine:
             raise EngineError("already at the first step")
         self.db.set_step_status(self.session_id, self.steps[pos - 2][0], PENDING, "user")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos - 1)
+        self.revision = next(_VISITS)
 
     def jump_to(self, pos: int) -> None:
         """Move the session to step `pos` (1-based). Going back makes every step from `pos` on pending again (they are to be looked at or redone); going forward marks the pending steps in between as
@@ -147,6 +154,7 @@ class SessionEngine:
                 if status[sid] == PENDING:
                     self.db.set_step_status(self.session_id, sid, SKIPPED, "user")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos)
+        self.revision = next(_VISITS)
 
     # ---- checking against what the application shows
     def check(self, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> Verdict | None:

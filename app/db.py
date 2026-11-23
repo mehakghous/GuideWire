@@ -189,6 +189,16 @@ class Database:
         return self.conn.execute("SELECT ss.*, s.position FROM session_step ss JOIN step s ON s.id = ss.step_id WHERE ss.session_id = ? ORDER BY s.position",
                                  (session_id,)).fetchall()
 
+    def open_session_for(self, user_id: int, tutorial_id: int) -> sqlite3.Row | None:
+        """The newest session of this tutorial that is not finished (not started, active or paused), so coming back to a tutorial continues it."""
+        return self.conn.execute("SELECT * FROM session WHERE user_id = ? AND tutorial_id = ? AND state != 'finished' ORDER BY id DESC LIMIT 1",
+                                 (user_id, tutorial_id)).fetchone()
+
+    def open_session_tutorials(self, user_id: int) -> set[int]:
+        """Ids of the tutorials that have a session in progress (started or paused), for the Home screen's Continue label."""
+        rows = self.conn.execute("SELECT DISTINCT tutorial_id FROM session WHERE user_id = ? AND state IN ('active', 'paused')", (user_id,)).fetchall()
+        return {r["tutorial_id"] for r in rows}
+
     def list_sessions(self, user_id: int) -> list[sqlite3.Row]:
         return self.conn.execute("SELECT * FROM session WHERE user_id = ? ORDER BY id DESC", (user_id,)).fetchall()
 

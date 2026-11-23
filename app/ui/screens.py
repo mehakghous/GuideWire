@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInp
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
 from ..pipeline import _YOUTUBE, APPS, request_steps
-from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, EngineError, SessionEngine
+from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, PAUSED, EngineError, SessionEngine
 from ..step_checks import checkability
 from ..step_editor import EditError, StepEditor
 from ..vision_bridge import app_of, overlaps
@@ -200,6 +200,8 @@ class HomeScreen(QWidget):
         self.tutorials.currentRowChanged.connect(lambda _row: self._show_hero())
 
     def _show_hero(self) -> None:
+        tid = self.selected_tutorial()
+        self.session_button.setText("Continue session" if tid in getattr(self, "in_progress", ()) else "Start session")
         item = self.tutorials.currentItem()
         if item is None:
             self.hero_title.setText("Nothing here yet")
@@ -208,7 +210,8 @@ class HomeScreen(QWidget):
             self.hero_title.setText(item.text())
             self.hero_hint.setText("Start a guided session, or review the steps first.")
 
-    def show_user(self, user: User, tutorials: list[tuple[int, str]]) -> None:
+    def show_user(self, user: User, tutorials: list[tuple[int, str]], in_progress: frozenset[int] | set[int] = frozenset()) -> None:
+        self.in_progress = set(in_progress)
         self.greeting.setText(f"Welcome, {html.escape(user.display_name or user.email)}")
         self.count.setText(str(len(tutorials)))
         self.tutorials.clear()
@@ -512,6 +515,9 @@ class SessionScreen(QWidget):
         self.done_button.setObjectName("primary")
         self.skip_button = QPushButton("Skip")
         self.prev_button = QPushButton("Previous step")
+        self.pause_button = QPushButton("Pause")
+        self.restart_button = QPushButton("Start over")
+        self.confirm_restart = self._ask_restart             # replaced in tests so no dialog opens
         self.back_button = QPushButton("Back")
         self.ask_button = QPushButton("Ask about this tutorial")
         self.ask_button.clicked.connect(lambda: self.tutorial_id is not None and self.ask_about.emit(self.tutorial_id))
@@ -519,7 +525,9 @@ class SessionScreen(QWidget):
         self.done_button.clicked.connect(lambda: self._do(self.engine.complete))
         self.skip_button.clicked.connect(lambda: self._do(self.engine.skip))
         self.prev_button.clicked.connect(lambda: self._do(self.engine.back))
-        self.back_button.clicked.connect(self.back.emit)
+        self.pause_button.clicked.connect(self.toggle_pause)
+        self.restart_button.clicked.connect(self.restart)
+        self.back_button.clicked.connect(self._leave)
         grid = page_grid(self)
         head = Head()
         top = QHBoxLayout()
@@ -541,8 +549,12 @@ class SessionScreen(QWidget):
         row2 = QHBoxLayout()
         row2.addWidget(self.prev_button)
         row2.addWidget(self.skip_button)
+        row3 = QHBoxLayout()
+        row3.addWidget(self.pause_button)
+        row3.addWidget(self.restart_button)
         controls.body.addLayout(row1)
         controls.body.addLayout(row2)
+        controls.body.addLayout(row3)
         controls.body.addWidget(self.ask_button)
         controls.body.addStretch()
         guide = Tile("On your screen", variant="slate")
@@ -605,6 +617,7 @@ class SessionScreen(QWidget):
         super().hideEvent(event)
         if self._minimized():
             return                                           # GuideWire minimized on purpose: the small guide and the highlight stay and keep watching
+        self.pause_if_active()
         self.timer.stop()
         self.track_timer.stop()
         self.guide.clear()
@@ -719,6 +732,40 @@ class SessionScreen(QWidget):
     def tutorial_id(self) -> int | None:
         return None if self.engine is None else self.engine.db.get_session(self.engine.session_id)["tutorial_id"]
 
+    # ---- leaving, pausing and starting over: progress is never lost by leaving
+    def pause_if_active(self) -> None:
+        """Leaving the session (Back, another screen, closing the app) pauses it where it is; coming back continues from that step."""
+        e = self.engine
+        if e is not None and e.state == ACTIVE:
+            e.pause()
+
+    def _leave(self) -> None:
+        self.pause_if_active()
+        self.back.emit()
+
+    def toggle_pause(self) -> None:
+        e = self.engine
+        if e is None:
+            return
+        self._do(e.resume if e.state == PAUSED else e.pause)
+
+    def _ask_restart(self) -> bool:
+        box = QMessageBox(self)
+        box.setWindowTitle("Start over")
+        box.setText("Start this tutorial again from step 1? Your progress so far stays in History.")
+        go = box.addButton("Start over", QMessageBox.ButtonRole.DestructiveRole)
+        box.addButton("Keep going", QMessageBox.ButtonRole.RejectRole)
+        box.exec()
+        return box.clickedButton() is go
+
+    def restart(self) -> None:
+        """A brand-new session of the same tutorial. The old one is kept (History shows it); it is never overwritten."""
+        e = self.engine
+        if e is None or e.state == NOT_STARTED or not self.confirm_restart():
+            return
+        self.pause_if_active()
+        self.load(SessionEngine.create(e.db, e.user_id, e.tutorial_id), guidance=self.watch_box.isChecked())
+
     def load(self, engine: SessionEngine, *, guidance: bool = True) -> None:
         """Open a session. `guidance` is the learner's profile preference (\"Highlight the target on screen during a session\"): when it is off the screen is not watched."""
         self.engine = engine
@@ -753,13 +800,17 @@ class SessionScreen(QWidget):
         self.progress_bar.setMaximum(max(total, 1))
         self.progress_bar.setValue(done)
         step = e.current_step()
-        self.step_tile.set_watermark(str(e.position) if e.state == ACTIVE and e.position else "")
+        self.step_tile.set_watermark(str(e.position or e.paused_at) if e.state in (ACTIVE, PAUSED) else "")
         if e.state == NOT_STARTED:
             self.step_text.setText("Press Start to begin.")
             self.detail.setText("")
         elif e.state == FINISHED:
             self.step_text.setText("Session finished. Well done!")
             self.detail.setText("")
+        elif e.state == PAUSED:
+            waiting = e.steps[(e.paused_at or 1) - 1][1]
+            self.step_text.setText(f"<b>Paused at step {e.paused_at}:</b> {waiting.goal}")
+            self.detail.setText("Your progress is saved. Press Resume to continue from this step.")
         else:
             self.step_text.setText(f"<b>Step {e.position}:</b> {step.goal}")
             lines = [h.text for h in step.how_to]
@@ -771,18 +822,23 @@ class SessionScreen(QWidget):
         self.done_button.setEnabled(e.state == ACTIVE)
         self.skip_button.setEnabled(e.state == ACTIVE)
         self.prev_button.setEnabled(e.state == ACTIVE and (e.position or 1) > 1)
+        self.pause_button.setEnabled(e.state in (ACTIVE, PAUSED))
+        self.pause_button.setText("Resume" if e.state == PAUSED else "Pause")
+        self.restart_button.setEnabled(e.state != NOT_STARTED)
         self._sync_timer()
         self._refresh_panel()
 
 
 class HistoryScreen(QWidget):
-    """The user's past and current sessions, newest first."""
+    """The user's past and current sessions, newest first. Double-click one to continue it."""
     back = pyqtSignal()
+    open_session = pyqtSignal(int)     # session id
 
     def __init__(self):
         super().__init__()
         self.list = QListWidget()
         tidy_list(self.list)
+        self.list.itemDoubleClicked.connect(self._open)
         self.empty = QLabel("")
         self.back_button = QPushButton("Back")
         self.back_button.clicked.connect(self.back.emit)
@@ -797,7 +853,7 @@ class HistoryScreen(QWidget):
 
     @staticmethod
     def describe(row: dict) -> str:
-        state = {"not_started": "not started", "active": "in progress", "finished": "finished"}.get(row["state"], row["state"])
+        state = {"not_started": "not started", "active": "in progress", "paused": "paused", "finished": "finished"}.get(row["state"], row["state"])
         when = (row["finished_at"] or row["started_at"] or "")[:16].replace("T", " ")
         return f"{row['title']} - {state} - {row['dealt']}/{row['total']} steps" + (f" - {when}" if when else "")
 
@@ -806,6 +862,14 @@ class HistoryScreen(QWidget):
         self.empty.setText("" if rows else "No sessions yet. Start one from Home.")
         for r in rows:
             self.list.addItem(self.describe(r))
+            item = self.list.item(self.list.count() - 1)
+            item.setData(0x0100, r["id"])
+            item.setToolTip("Double-click to continue this session")
+
+    def _open(self, item) -> None:
+        sid = item.data(0x0100)
+        if sid is not None:
+            self.open_session.emit(int(sid))
 
 
 class ProfileScreen(QWidget):

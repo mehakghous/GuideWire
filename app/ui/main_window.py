@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
         self.history.back.connect(self.show_home)
+        self.history.open_session.connect(self.resume_session)
         self.new_tutorial.back.connect(self.show_home)
         self.new_tutorial.created.connect(self.open_editor)
         self.home.new_tutorial.connect(self.open_new_tutorial)
@@ -99,6 +100,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.login)
 
     def closeEvent(self, event) -> None:  # noqa: N802 (Qt override)
+        self.session.pause_if_active()
         self.session.close_guides()                # the screen overlay and the instruction box must not outlive the window
         super().closeEvent(event)
 
@@ -208,7 +210,7 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentWidget(self.login)
             return
         rows = [(r["id"], r["title"]) for r in self.db.list_tutorials(self.user.id)]
-        self.home.show_user(self.user, rows)
+        self.home.show_user(self.user, rows, self.db.open_session_tutorials(self.user.id))
         self.stack.setCurrentWidget(self.home)
 
     def on_profile_changed(self, user: User) -> None:
@@ -260,12 +262,24 @@ class MainWindow(QMainWindow):
         self.review.load(StepEditor.from_json_file(path), self.db, self.user.id)
         self.stack.setCurrentWidget(self.review)
 
+    def resume_session(self, session_id: int) -> None:
+        """History: continue a session exactly where it stopped."""
+        if self.user is None:
+            self.stack.setCurrentWidget(self.login)
+            return
+        try:
+            engine = SessionEngine.load(self.db, self.user.id, session_id)
+        except EngineError:
+            return
+        self.session.load(engine, guidance=bool(self.accounts.preferences(self.user.id).get("overlay", True)))
+        self.stack.setCurrentWidget(self.session)
+
     def open_session(self, tutorial_id: int) -> None:
         if self.user is None:
             self.stack.setCurrentWidget(self.login)
             return
         try:
-            engine = SessionEngine.create(self.db, self.user.id, tutorial_id)
+            engine = SessionEngine.resume_or_create(self.db, self.user.id, tutorial_id)      # coming back continues; Start over is the only way to begin again
         except EngineError:
             self.show_home()
             return

@@ -216,3 +216,8 @@ def test_a_maya_step_through_the_app_bridge_gets_the_exact_rectangle(monkeypatch
     assert look.problem is None and look.rect == (198, 474, 54, 54) and look.complete
     shelf = bridge.look(Step(id="m2", order=2, goal="Make a cube", actions=[Action(verb="click", ui_element="Shelf > Polygon Cube")]), "maya")
     assert shelf.rect is not None and shelf.hint.startswith("Click Polygon Cube")
+
+
+def test_history_lines_without_a_command_word_are_skipped_not_fatal():
+    from vision.probes import maya_probe
+    assert maya_probe.history_events(["(", "  (x)", "polyCube -w 1;", "cmds.polySphere(r=1)"]) == [{"id": "polyCube", "name": "polyCube"}, {"id": "polySphere", "name": "polySphere"}]

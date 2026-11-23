@@ -50,7 +50,8 @@ def history_events(lines: list[str]) -> list[dict]:
         line = line.strip().rstrip(";")
         if not line or line.startswith(("//", "#")):            # results and comments are not commands
             continue
-        head = line.split("(")[0].split()[0] if line else ""
+        words = line.split("(")[0].split()                        # a line that starts with "(" has no command word: that used to raise IndexError and spoil the whole probe read
+        head = words[0] if words else ""
         head = head.split(".")[-1]                                # cmds.polyCube -> polyCube
         if head:
             out.append({"id": head, "name": head})

@@ -49,6 +49,7 @@ class Sidebar(QFrame):
         ctitle.setObjectName("sideSmall")
         self.conn_status = QLabel("")
         self.conn_status.setObjectName("sideStatus")
+        self.conn_status.setWordWrap(True)
         self.conn_hint = QLabel("")
         self.conn_hint.setObjectName("sideSmall")
         self.conn_hint.setWordWrap(True)

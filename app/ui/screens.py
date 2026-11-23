@@ -14,12 +14,20 @@ from ..db import Database
 from ..pipeline import _YOUTUBE, APPS, request_steps
 from ..session_engine import ACTIVE, FINISHED, NOT_STARTED, PAUSED, EngineError, SessionEngine
 from ..step_checks import checkability
+from ..video_link import watch_url
 from ..step_editor import EditError, StepEditor
 from ..vision_bridge import app_of, overlaps
 from .bento import ActionTile, Head, HeroTile, IconTile, Tile, header, page_grid, pill, tidy_list
 from .screen_guide import InstructionPanel, ScreenGuide, panel_position
 from .style import current_palette
 from .workers import run_call
+
+
+
+def _open_in_browser(url: str) -> None:
+    from PyQt6.QtCore import QUrl
+    from PyQt6.QtGui import QDesktopServices
+    QDesktopServices.openUrl(QUrl(url))
 
 
 class LoginScreen(QWidget):
@@ -65,9 +73,10 @@ class LoginScreen(QWidget):
         self.reset_mode = False
         self.login_button.setObjectName("primary")
         grid = page_grid(self)
-        brand = HeroTile(padding=32)
+        brand = HeroTile(padding=40)
         name = QLabel("GuideWire")
         name.setObjectName("brand")
+        name.setStyleSheet("font-size: 40pt; font-weight: 800;")
         tagline = QLabel("Learn Blender, Maya and Houdini one step at a time, right on your own screen.")
         tagline.setObjectName("tileHint")
         tagline.setWordWrap(True)
@@ -79,7 +88,14 @@ class LoginScreen(QWidget):
             chip.setObjectName("tileHint")
             chip.setWordWrap(True)
             brand.body.addWidget(chip)
-        form_tile = Tile("Log in or create an account")
+        form_tile = Head()                                          # no box: the sign-in form sits directly on the page
+        form_tile.setMinimumWidth(400)
+        form_tile.setMaximumWidth(460)
+        form_heading = QLabel("Log in or create an account")
+        form_heading.setObjectName("pageTitle")
+        form_heading.setWordWrap(True)
+        form_tile.body.addWidget(form_heading)
+        form_tile.body.addSpacing(14)
         form = QFormLayout()
         form.setSpacing(10)
         form.addRow("Email", self.email)
@@ -101,12 +117,10 @@ class LoginScreen(QWidget):
         form_tile.body.addWidget(self.cancel_reset_button, 0, Qt.AlignmentFlag.AlignLeft)
         form_tile.body.addWidget(self.notice)
         form_tile.body.addWidget(self.message)
-        form_tile.body.addStretch()
         self.show_reset(False)
+        grid.addWidget(brand, 0, 0)                                  # full height, edge to edge
+        grid.addWidget(form_tile, 0, 1, Qt.AlignmentFlag.AlignCenter)
         grid.setRowStretch(0, 1)
-        grid.addWidget(brand, 1, 0)
-        grid.addWidget(form_tile, 1, 1)
-        grid.setRowStretch(2, 1)
         grid.setColumnStretch(0, 5)
         grid.setColumnStretch(1, 4)
 
@@ -166,6 +180,7 @@ class LoginScreen(QWidget):
 class HomeScreen(QWidget):
     open_review = pyqtSignal(int)      # tutorial id
     open_session = pyqtSignal(int)     # tutorial id
+    delete_tutorial = pyqtSignal(int)  # tutorial id (already confirmed)
     import_sample = pyqtSignal()
     new_tutorial = pyqtSignal()
     ask = pyqtSignal()
@@ -185,6 +200,11 @@ class HomeScreen(QWidget):
         self.review_button = QPushButton("Review steps")
         self.session_button = QPushButton("Start session")
         self.session_button.setObjectName("primary")
+        self.delete_button = QPushButton("Delete")
+        self.delete_button.setObjectName("danger")
+        self.delete_button.setToolTip("Delete the selected tutorial, with its sessions")
+        self.confirm_delete = self._ask_delete             # replaced in tests so no dialog opens
+        self.delete_button.clicked.connect(self._delete)
         self.sample_button = IconTile("Import sample steps", "A small Blender example to try the editor", "star")
         self.new_button = IconTile("New from text or video link", "Paste instructions or a YouTube link", "plus")
         self.new_button.clicked.connect(self.new_tutorial.emit)
@@ -244,6 +264,7 @@ class HomeScreen(QWidget):
         hero_row.addWidget(self.session_button)
         hero_row.addWidget(self.review_button)
         hero_row.addStretch()
+        hero_row.addWidget(self.delete_button)
         hero.body.addLayout(hero_row)
         stat = Tile(variant="mint", padding=20)
         stat.body.addWidget(self.count)
@@ -288,6 +309,7 @@ class HomeScreen(QWidget):
             self.tutorials.item(self.tutorials.count() - 1).setToolTip(title)
         self.empty.setVisible(not tutorials)
         self.review_button.setEnabled(bool(tutorials))
+        self.delete_button.setEnabled(bool(tutorials))
         self.session_button.setEnabled(bool(tutorials))
         self.tutorials.setVisible(bool(tutorials))
         if tutorials:
@@ -297,6 +319,20 @@ class HomeScreen(QWidget):
     def selected_tutorial(self) -> int | None:
         item = self.tutorials.currentItem()
         return None if item is None else int(item.data(0x0100))
+
+    def _ask_delete(self, title: str) -> bool:
+        box = QMessageBox(self)
+        box.setWindowTitle("Delete tutorial")
+        box.setText(f"Delete \"{title}\" and every session of it? This cannot be undone.")
+        go = box.addButton("Delete", QMessageBox.ButtonRole.DestructiveRole)
+        box.addButton("Keep it", QMessageBox.ButtonRole.RejectRole)
+        box.exec()
+        return box.clickedButton() is go
+
+    def _delete(self) -> None:
+        tid, item = self.selected_tutorial(), self.tutorials.currentItem()
+        if tid is not None and item is not None and self.confirm_delete(item.text()):
+            self.delete_tutorial.emit(tid)
 
     def _emit(self, signal) -> None:
         tid = self.selected_tutorial()
@@ -356,6 +392,8 @@ class StepReviewScreen(QWidget):
         self.delete_button = QPushButton("Delete")
         self.delete_button.setObjectName("danger")
         self.add_button = QPushButton("Add step")
+        self.undo_button = QPushButton("Undo")
+        self.rename_button = QPushButton("Rename")
         self.save_button = QPushButton("Save")
         self.save_button.setObjectName("primary")
         self.back_button = QPushButton("Back")
@@ -364,6 +402,8 @@ class StepReviewScreen(QWidget):
         self.down_button.clicked.connect(lambda: self.move_selected(1))
         self.delete_button.clicked.connect(self.delete_selected)
         self.add_button.clicked.connect(self.add_step)
+        self.undo_button.clicked.connect(self.undo)
+        self.rename_button.clicked.connect(self.rename_tutorial)
         self.save_button.clicked.connect(self.save)
         self.back_button.clicked.connect(self._leave)
         self.list.itemDoubleClicked.connect(lambda _: self.edit_selected())
@@ -387,6 +427,11 @@ class StepReviewScreen(QWidget):
         row.addStretch()
         row.addWidget(self.delete_button)
         steps_tile.body.addLayout(row)
+        row2 = QHBoxLayout()
+        row2.addWidget(self.undo_button)
+        row2.addWidget(self.rename_button)
+        row2.addStretch()
+        steps_tile.body.addLayout(row2)
         steps_tile.body.addWidget(self.status)
         card = Tile("This step")
         card.setMinimumWidth(320)
@@ -427,6 +472,7 @@ class StepReviewScreen(QWidget):
     def refresh(self, select: str | None = None) -> None:
         assert self.editor is not None
         self.title.setText(html.escape(self.editor.title))
+        self.undo_button.setEnabled(self.editor.can_undo)
         self.list.clear()
         for s in self.editor.steps.steps:
             self.list.addItem(f"{s.order}. {s.goal}" + self.TAGS[checkability(s).level])
@@ -497,6 +543,23 @@ class StepReviewScreen(QWidget):
         sid = self.selected_id()
         if sid is not None and self._try(lambda: self.editor.delete(sid)):
             self.refresh()
+
+    def undo(self) -> None:
+        """Take back the last change (adding, editing, moving, deleting or renaming)."""
+        if self.editor is not None and self.editor.undo():
+            self.status.setText("Unsaved changes" if self.editor.dirty else "")
+            self.refresh(self.selected_id())
+
+    def apply_rename(self, text: str) -> None:
+        if self._try(lambda: self.editor.set_title(text)):
+            self.refresh(self.selected_id())
+
+    def rename_tutorial(self) -> None:
+        if self.editor is None:
+            return
+        text, ok = QInputDialog.getText(self, "Rename tutorial", "Tutorial title:", text=self.editor.title)
+        if ok:
+            self.apply_rename(text)
 
     def apply_add(self, text: str) -> None:
         sid = self.selected_id()
@@ -582,6 +645,22 @@ class SessionScreen(QWidget):
         self.done_button.setObjectName("primary")
         self.skip_button = QPushButton("Skip")
         self.prev_button = QPushButton("Previous step")
+        self.open_url = _open_in_browser                   # replaced in tests so no browser opens
+        self.video_button = QPushButton("Watch this step in the video")
+        self.video_button.setVisible(False)
+        self.video_button.clicked.connect(self.watch_video)
+        self.asker = None                                  # set by the main window: app.ask.Asker; None = no questions in sessions
+        self.load_tutorial = None                          # (tutorial id) -> (steps, title, video link): set by the main window
+        self.ai_allowed = True                             # the learner's Privacy choice
+        self.question = QLineEdit()
+        self.question.setPlaceholderText("Ask about this step, e.g. why do I press Tab?")
+        self.question.returnPressed.connect(self.ask_question)
+        self.question_button = QPushButton("Ask")
+        self.question_button.clicked.connect(self.ask_question)
+        self.answer = QLabel("")
+        self.answer.setWordWrap(True)
+        self.answer.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.answer.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         self.pause_button = QPushButton("Pause")
         self.restart_button = QPushButton("Start over")
         self.confirm_restart = self._ask_restart             # replaced in tests so no dialog opens
@@ -605,6 +684,7 @@ class SessionScreen(QWidget):
         step_tile.body.addWidget(pill("Your current step"), 0, Qt.AlignmentFlag.AlignLeft)
         step_tile.body.addWidget(self.step_text)
         step_tile.body.addWidget(self.detail, 1)
+        step_tile.body.addWidget(self.video_button, 0, Qt.AlignmentFlag.AlignLeft)
         progress_tile = Tile("Progress", variant="mint")
         progress_tile.body.addWidget(self.progress)
         progress_tile.body.addWidget(self.progress_bar)
@@ -640,7 +720,14 @@ class SessionScreen(QWidget):
         grid.addWidget(step_tile, 1, 0, 2, 2)
         grid.addWidget(progress_tile, 1, 2)
         grid.addWidget(controls, 2, 2)
-        grid.addWidget(guide, 3, 0, 1, 3)
+        self.question_tile = Tile("Ask about this step")
+        q_row = QHBoxLayout()
+        q_row.addWidget(self.question, 1)
+        q_row.addWidget(self.question_button)
+        self.question_tile.body.addLayout(q_row)
+        self.question_tile.body.addWidget(self.answer, 1)
+        grid.addWidget(guide, 3, 0, 1, 2)
+        grid.addWidget(self.question_tile, 3, 2)
         grid.setRowStretch(1, 1)
         grid.setRowStretch(2, 1)
         for col in range(3):
@@ -799,6 +886,53 @@ class SessionScreen(QWidget):
     def tutorial_id(self) -> int | None:
         return None if self.engine is None else self.engine.db.get_session(self.engine.session_id)["tutorial_id"]
 
+    # ---- the tutorial's video, and questions about the step
+    def watch_video(self) -> None:
+        """Open the tutorial's video at the moment this step is shown in it (in the web browser; GuideWire only opens a normal web link)."""
+        url = self._video_url()
+        if url:
+            self.open_url(url)
+
+    def _video_url(self) -> str | None:
+        e = self.engine
+        if e is None:
+            return None
+        pos = e.position or e.paused_at
+        step = e.steps[pos - 1][1] if pos else None
+        return watch_url(e.source_url, None if step is None else step.video_start_s)
+
+    def ask_question(self) -> None:
+        """Answer a question about the tutorial, knowing which step the learner is on. The AI model is only used if the learner allows it (Privacy)."""
+        text = self.question.text().strip()
+        e = self.engine
+        if not text or e is None:
+            return
+        if self.asker is None or self.load_tutorial is None:
+            self.answer.setText("Questions are not available on this computer.")
+            return
+        try:
+            steps, title, url = self.load_tutorial(e.tutorial_id)
+        except Exception:                                      # a tutorial that cannot be loaded must never take the window down (PyQt aborts on an exception in a slot)
+            self.answer.setText("This tutorial could not be read for a question. Try the Ask screen from Home.")
+            return
+        pos = e.position or e.paused_at
+        goal = e.steps[pos - 1][1].goal if pos else ""
+        context = f"I am on step {pos} of this tutorial: {goal}. {text}" if pos else text
+        use_model = bool(self.ai_allowed and self.asker.model_available)
+        self.question_button.setEnabled(False)
+        self.answer.setText("Thinking..." if use_model else "")
+        app, asker = self._app, self.asker
+        from .workers import run_call
+        run_call(self, lambda _s: asker.ask(context, app, tutorial=steps, title=title, url=url, use_model=use_model), self._answered, sync=self.sync)
+
+    def _answered(self, result) -> None:
+        self.question_button.setEnabled(True)
+        if isinstance(result, Exception):
+            self.answer.setText(f"Sorry, that failed ({type(result).__name__}). Try again.")
+            return
+        self.answer.setText(result.text)
+        self.question.clear()
+
     # ---- leaving, pausing and starting over: progress is never lost by leaving
     def pause_if_active(self) -> None:
         """Leaving the session (Back, another screen, closing the app) pauses it where it is; coming back continues from that step."""
@@ -892,6 +1026,8 @@ class SessionScreen(QWidget):
         self.pause_button.setEnabled(e.state in (ACTIVE, PAUSED))
         self.pause_button.setText("Resume" if e.state == PAUSED else "Pause")
         self.restart_button.setEnabled(e.state != NOT_STARTED)
+        self.video_button.setVisible(e.state in (ACTIVE, PAUSED) and self._video_url() is not None)
+        self.question_button.setEnabled(True)
         self._sync_timer()
         self._refresh_panel()
 

@@ -82,6 +82,12 @@ class SessionEngine:
     def tutorial_id(self) -> int:
         return int(self._row["tutorial_id"])
 
+    @property
+    def source_url(self) -> str | None:
+        """The link the tutorial was made from (a video), or None."""
+        row = self.db.conn.execute("SELECT source_url FROM tutorial WHERE id = ?", (self.tutorial_id,)).fetchone()
+        return None if row is None else row["source_url"]
+
     def current_step(self) -> Step | None:
         p = self.position
         return None if p is None else self.steps[p - 1][1]

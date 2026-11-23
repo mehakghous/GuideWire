@@ -8,6 +8,8 @@ A `Tile` is a rounded box with an optional heading; `ActionTile` is a whole tile
 """
 from __future__ import annotations
 
+import weakref
+
 from PyQt6.QtCore import QEasingCurve, QEvent, QObject, QPointF, QPropertyAnimation, QRectF, Qt, QVariantAnimation
 from PyQt6.QtGui import QBrush, QColor, QPainter, QPainterPath, QPen, QRadialGradient
 from PyQt6.QtWidgets import QFrame, QGraphicsDropShadowEffect, QGridLayout, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
@@ -28,9 +30,23 @@ def page_grid(widget: QWidget) -> QGridLayout:
     return grid
 
 
+_SHADOWS: "weakref.WeakSet[QGraphicsDropShadowEffect]" = weakref.WeakSet()      # every soft shadow made, so a theme change can recolour them without searching the widgets
+
+
+def recolour_shadows() -> None:
+    """After a theme change: the soft shadows are not in the style sheet, so give each its new colour."""
+    colour = QColor(current_palette()["shadow"])
+    for fx in list(_SHADOWS):
+        try:
+            fx.setColor(colour)
+        except RuntimeError:                                   # its widget is already gone
+            pass
+
+
 def soft_shadow(widget: QWidget, blur: int = 32, dy: int = 10, dx: int = 6) -> QGraphicsDropShadowEffect:
     """The soft outer shadow of a clay shape (a style sheet cannot draw one). Warm brown, offset to the bottom right."""
     fx = QGraphicsDropShadowEffect(widget)
+    _SHADOWS.add(fx)
     fx.setBlurRadius(blur)
     fx.setOffset(dx, dy)
     fx.setColor(QColor(current_palette()["shadow"]))

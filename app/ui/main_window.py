@@ -5,8 +5,7 @@ import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, QTimer
-from PyQt6.QtGui import QColor
-from PyQt6.QtWidgets import QApplication, QGraphicsDropShadowEffect, QGraphicsOpacityEffect, QHBoxLayout, QMainWindow, QStackedWidget, QWidget
+from PyQt6.QtWidgets import QApplication, QGraphicsOpacityEffect, QHBoxLayout, QMainWindow, QStackedWidget
 
 from .. import demo_content
 from ..accounts import Accounts, User
@@ -18,11 +17,12 @@ from ..sync import Report, Result, SyncService
 from .ask_screen import AskScreen
 from .find_screen import FindScreen
 from .backdrop import Backdrop
+from .bento import recolour_shadows
 from .onboarding import DEFAULTS as PRIVACY_DEFAULTS
 from .onboarding import OnboardingScreen, PrivacyScreen
 from .sidebar import Sidebar
 from .workers import run_call
-from .style import THEMES, build_style, current_palette, set_theme
+from .style import THEMES, build_style, set_theme
 from .screens import HistoryScreen, HomeScreen, LoginScreen, NewTutorialScreen, ProfileScreen, SessionScreen, StepReviewScreen
 from .style import STYLE
 
@@ -63,6 +63,8 @@ class MainWindow(QMainWindow):
         self.find_screen = FindScreen(sync=sync)
         self.find_screen.finder = discover
         self.ask_screen.load_tutorial = self._tutorial_for_ask
+        self.session.asker = self.ask_screen.asker               # the same answers as the Ask screen, asked from inside a session
+        self.session.load_tutorial = self._tutorial_for_ask
         if video_provider_factory is not None:
             from ..pipeline import video_steps
             self.new_tutorial.video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)
@@ -91,6 +93,7 @@ class MainWindow(QMainWindow):
         self.home.import_sample.connect(self.import_sample)
         self.review.saved.connect(lambda _tid: self.show_home())
         self.home.open_session.connect(self.open_session)
+        self.home.delete_tutorial.connect(self.delete_tutorial)
         self.review.back.connect(self.show_home)
         self.session.back.connect(self.show_home)
         self.history.back.connect(self.show_home)
@@ -144,6 +147,11 @@ class MainWindow(QMainWindow):
         screen = self.stack.currentWidget()
         if screen is None or not screen.isVisibleTo(self):
             return
+        previous = getattr(screen, "_fade_anim", None)
+        if previous is not None:
+            previous.stop()                                       # a screen shown again while its last fade runs: that fade must not remove the new one's effect
+        gen = getattr(screen, "_fade_gen", 0) + 1
+        screen._fade_gen = gen
         fx = QGraphicsOpacityEffect(screen)
         screen.setGraphicsEffect(fx)
         anim = QPropertyAnimation(fx, b"opacity", screen)
@@ -151,7 +159,8 @@ class MainWindow(QMainWindow):
         anim.setStartValue(0.0)
         anim.setEndValue(1.0)
         anim.setEasingCurve(QEasingCurve.Type.OutCubic)
-        anim.finished.connect(lambda: screen.setGraphicsEffect(None))
+        anim.finished.connect(lambda: screen.setGraphicsEffect(None) if getattr(screen, "_fade_gen", 0) == gen else None)
+        screen._fade_anim = anim
         anim.start()
 
     def current_screen(self):
@@ -211,10 +220,7 @@ class MainWindow(QMainWindow):
         theme = self.accounts.preferences(self.user.id).get("theme") if self.user else "light"
         theme = set_theme(theme if theme in THEMES else "light")
         app.setStyleSheet(build_style(theme))
-        for w in self.findChildren(QWidget):                       # the soft shadows are not in the style sheet: recolour them for the theme
-            fx = w.graphicsEffect()
-            if isinstance(fx, QGraphicsDropShadowEffect):
-                fx.setColor(QColor(current_palette()["shadow"]))
+        recolour_shadows()                                         # the soft shadows are not in the style sheet
         self.centralWidget().update()
 
     def on_logged_in(self, user: User) -> None:
@@ -249,7 +255,7 @@ class MainWindow(QMainWindow):
     def _apply_privacy(self) -> None:
         """Make the features obey the learner's choices: the AI model, and (in open_session) the screen highlight."""
         prefs = {**PRIVACY_DEFAULTS, **self._prefs()}
-        self.new_tutorial.ai_allowed = bool(prefs["ai"])
+        self.new_tutorial.ai_allowed = self.session.ai_allowed = bool(prefs["ai"])
         model_ok = self.ask_screen.asker.model_available and bool(prefs["ai"])
         self.ask_screen.use_model.setEnabled(model_ok)
         self.ask_screen.use_model.setChecked(model_ok)
@@ -394,6 +400,14 @@ class MainWindow(QMainWindow):
         path = Path(path) if path else sorted(SAMPLE_DIR.glob("*.json"))[0]
         self.review.load(StepEditor.from_json_file(path), self.db, self.user.id)
         self.stack.setCurrentWidget(self.review)
+
+    def delete_tutorial(self, tutorial_id: int) -> None:
+        """Home: the learner confirmed. The tutorial goes with its sessions; the online copy hears about it at the next sync."""
+        if self.user is None:
+            return
+        self.db.delete_tutorial(self.user.id, tutorial_id)
+        self.show_home()
+        self.request_sync()
 
     def resume_session(self, session_id: int) -> None:
         """History: continue a session exactly where it stopped."""

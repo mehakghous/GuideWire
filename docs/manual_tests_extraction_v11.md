@@ -26,3 +26,17 @@ Needs `GEMINI_API_KEY` in `.env` (each video costs about $0.06). Start the app w
 | 7 | In the Blender tutorial from row 0, read the steps. | Exact values appear (R 90, Roll 90, Head/Tail 1.0, Keep Offset), and a "Clear Transform > All" step is there. |
 | 8 | Open a tutorial saved **before** this change (Home → an older tutorial → Review steps). | It opens and works as before, with no Why line (the field is empty for old steps). |
 | 9 | Paste written instructions (one per line) in New Tutorial → Create steps. | Same behaviour as before: written text does not use the video prompt. |
+
+## Houdini highlighting (23 Nov 2026)
+
+Start Houdini, then in its Python Shell: `import sys; sys.path.append(r"C:\dev\GuideWire\vision\probes"); import houdini_probe; houdini_probe.register()`. Then in GuideWire start a session on a Houdini tutorial (for example the APEX FK one from row 5).
+
+| # | Do this | Expect |
+|---|---|---|
+| H1 | On a step that adds a node ("Press Tab … add a Pack Folder"), with the network editor visible. | A box around the network editor and "Press Tab with the mouse over the network editor." |
+| H2 | Add the node. | The guide moves on: the next part (selecting it, or its parameter) is pointed at. It does not keep asking for Tab. |
+| H3 | On a step that selects a node by name (for example packfolder1). | A box exactly on that node's tile in the network editor. |
+| H4 | On a step that sets a parameter, with that node selected. | A box on that parameter's row in the parameter pane (label to the right edge). |
+| H5 | Same step, but select a different node first. | No box on a parameter. The guide says to select the step's node first and points at it when it is in view. |
+| H6 | A step whose parameter label the node does not have (flagged on the Review screen). | No box; only words. |
+| H7 | Run `python scripts/houdini_live_check.py runs/houdini_live` with a Pack Folder selected. | It prints a decision per target, and `runs/houdini_live/houdini_live.png` shows boxes only on the right places. |

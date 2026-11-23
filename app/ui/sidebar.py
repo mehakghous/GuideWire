@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout
 
 from .bento import soft_shadow
 
-ITEMS = (("home", "Home"), ("find", "Find a Tutorial"), ("ask", "Ask GuideWire"), ("import", "New Tutorial"), ("history", "History"), ("privacy", "Privacy"), ("settings", "Settings"))
+ITEMS = (("home", "Home"), ("find", "Find a Tutorial"), ("ask", "Ask GuideWire"), ("import", "New Tutorial"), ("history", "History"), ("progress", "Progress"), ("paths", "Learning Paths"), ("badges", "Achievements"), ("privacy", "Privacy"), ("settings", "Settings"))
 
 
 class Sidebar(QFrame):

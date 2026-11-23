@@ -129,3 +129,35 @@ def test_unknown_predicate_kind_is_not_auto_completed(env):
     e.start()
     assert not e.auto_check({"mode": "OBJECT", "selection_types": ["MESH"], "nodes": ["joint"] * 9})
     assert e.position == 1
+
+
+def test_jump_back_makes_the_steps_from_there_pending_again(eng):
+    eng.start()
+    eng.complete()
+    eng.skip()
+    eng.complete()
+    assert eng.position == 4 and eng.statuses()[:3] == ["done", "skipped", "done"]
+    eng.jump_to(2)
+    assert eng.position == 2 and eng.statuses()[:4] == ["done", "pending", "pending", "pending"]
+
+
+def test_jump_forward_skips_the_steps_in_between_and_never_marks_one_done(eng):
+    eng.start()
+    eng.jump_to(3)
+    assert eng.position == 3 and eng.statuses() == ["skipped", "skipped", "pending", "pending"]
+    eng.jump_to(3)                                                           # already there: nothing changes
+    assert eng.position == 3
+
+
+def test_jump_refuses_a_step_that_does_not_exist_and_a_session_that_is_not_active(eng):
+    with pytest.raises(EngineError):
+        eng.jump_to(2)                                                       # not started
+    eng.start()
+    for bad in (0, 5, -1):
+        with pytest.raises(EngineError):
+            eng.jump_to(bad)
+    assert eng.position == 1
+
+
+def test_the_engine_knows_the_tutorials_title(eng):
+    assert eng.title

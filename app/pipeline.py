@@ -49,7 +49,7 @@ def default_video_provider():
 def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_meta=None, group: bool = True, on_status=None) -> PipelineResult:
     """A YouTube link in, a step list out: read the video's title and length, have the model watch it (the prompt chosen by measurement for this application), then give the steps display groups.
     Never raises: every failure comes back as a plain message and no steps. `provider_factory` and `fetch_meta` are injected so tests need no network."""
-    from ingestion.extract import ExtractionError, extract_from_video, recommended_video_prompt_version
+    from ingestion.extract import GAP_PASS_APPS, ExtractionError, extract_from_video, fill_gaps, recommended_video_prompt_version
     from ingestion.grouping import group_steps
     from ingestion.youtube.metadata import fetch_metadata, parse_video_id
     say = on_status or (lambda _m: None)
@@ -81,7 +81,15 @@ def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_
         provider.video_seconds = duration
     say("The AI is watching the video. This takes about one to two minutes...")
     try:
-        sl = extract_from_video(provider, vid, app=app, duration_s=duration, title_hint=title, prompt_version=recommended_video_prompt_version(app, True))
+        version = recommended_video_prompt_version(app, True)
+        sl = extract_from_video(provider, vid, app=app, duration_s=duration, title_hint=title, prompt_version=version)
+        if app in GAP_PASS_APPS:
+            say("Taking a second look at the parts of the video without steps...")
+            sl = fill_gaps(provider, sl, vid, app=app, prompt_version=version, duration_s=duration, title_hint=title)      # never raises: a failed look keeps the first pass, with a warning
+            from ingestion.label_repair import repair_labels
+            if any("is not a parameter of" in f for s in sl.steps for f in s.flags):
+                say("Checking the parameter names against Houdini...")
+                repair_labels(provider, sl, vid, duration)                     # one look per step whose label Houdini does not have on that node; never raises
     except ExtractionError as e:
         return PipelineResult(None, f"The AI could not turn that video into valid steps ({str(e)[:160]}). Try another video.")
     except Exception as e:                                   # quota, network, budget stop

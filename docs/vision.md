@@ -21,6 +21,7 @@ input to the application.
   (`active_tool_candidates`); `active_tool` is set only when the group has one tool.
 - `scene.py` the ONE reader of the screen (since Part A4; it replaced three copies of "compare a thumbnail, read what changed"). Nothing changed: no OCR; a menu opened: only that area; most of the window or a moved window: all of it; a full read at least every 30 s. A busy region (the 3D viewport) that mostly changed is a redraw, not text, and is ignored. `layout_from_model` builds the area layout from what Blender reported. `stats` counts looks by kind for the latency harness.
 - `uimodel.py` the interface as the add-on reports it (areas, regions, toolbar scroll, ordered tool list, Properties tabs, keymap entries, `ui_rev` / `scene_rev`) and `FrameMapper`: Blender window pixels (origin bottom-left) -> screen -> captured frame, refusing (`valid` False) when the snapshot and the capture are not the same window size.
+- `toolbar_align.py`, `grounders.py`, `verify.py` (Part C): which toolbar cells are on screen (the add-on's ordered tool list and scroll distance against the detected cells), one grounder per target kind that says visible / scrolled out (with direction) / hidden / wrong mode / not open / ambiguous, and the gate that decides what may be pointed at. `app/step_state.py` turns the results into the learner's phase and next move. See `docs/vision_grounding.md`, which also lists the manual tests.
 - `overlay.py` PyQt6 click-through highlight that follows the window.
 - `guide.py` live guidance: re-reads only the changed screen area, ends when the destination is clicked.
 - `blender_addon/guidewire_probe.py` + `probe_client.py` read-only state over loopback with a
@@ -60,6 +61,8 @@ wakes its timers only about every 10 seconds; while someone is working in it the
     python scripts/vision_bench.py --front --json before.json   # time every stage; --diag also checks PrintWindow and the capture-exclusion flag
     python scripts/vision_uicheck.py --out ui_check.png         # the add-on's regions must land on the right pixels; draws them on the capture
 
+    python scripts/vision_live_suite.py                         # Part C: toolbar, header menus, mode dropdown and the step through the bridge, against a Blender it starts itself (about 2.5 minutes, no input simulated)
+
 ## Run the manual checks (Blender open and in front)
     python -m vision.demo                                  # detect areas and draw them
     python -m vision.demo --follow --seconds 30            # overlay follows a moved/resized window
@@ -70,8 +73,7 @@ wakes its timers only about every 10 seconds; while someone is working in it the
 own marks are never read back).
 
 ## Limits (known)
-- Toolbar tools are found by position, so a toolbar scrolled out of place can be misread. Other icon-only
-  controls (header icons, panel icons) are still not found.
+- Toolbar tools are placed by their index in Blender's own tool list and the add-on's scroll distance (Part C); without the add-on they are pointed at only when nothing can be scrolled off. Other icon-only controls (header icons, panel tab icons) are still not located.
 - Edit Mode and other modes' toolbars come from Blender's own tool list but were not checked on a real
   frame; only Object Mode was. Detection was also checked at a sharp 2x enlargement, not on a real 2560x1440 capture.
 - Tested on Blender 5.2.3, English UI, default theme, 1920x1080 at 150% scaling.

@@ -121,19 +121,18 @@ def _first_tutorial(win):
     return win.db.list_tutorials(win.user.id)[0]["id"]
 
 
-def test_going_back_and_returning_continues_the_same_session(win):
+def test_going_back_and_returning_continues_the_same_session_at_the_same_step(win):
     tid = _first_tutorial(win)
     win.open_session(tid)
     sid = win.session.engine.session_id
     win.session.start_button.click()
     win.session.done_button.click()
-    win.session.back_button.click()                                     # leaves for Home
+    win.session.back_button.click()                                     # leaves for Home: the place is saved
     assert win.current_screen() is win.home and win.session.engine.state == PAUSED
     win.open_session(tid)
-    assert win.session.engine.session_id == sid and win.session.engine.paused_at == 2
-    assert "Paused at step 2" in win.session.step_text.text() and win.session.pause_button.text() == "Resume"
-    win.session.pause_button.click()
-    assert win.session.engine.state == ACTIVE and win.session.engine.position == 2 and win.session.progress.text().startswith("1 of")
+    e = win.session.engine
+    assert e.session_id == sid and e.state == ACTIVE and e.position == 2           # carried on from exactly where it was left
+    assert win.session.progress.text().startswith("1 of") and win.session.done_button.isEnabled()
 
 
 def test_leaving_through_the_sidebar_also_pauses(win):
@@ -144,21 +143,27 @@ def test_leaving_through_the_sidebar_also_pauses(win):
     assert win.session.engine.state == PAUSED
 
 
-def test_the_pause_button_toggles_and_start_over_keeps_the_old_session(win):
+def test_the_sessions_pause_button_still_holds_the_watching_and_does_not_change_the_saved_place(win):
     win.open_session(_first_tutorial(win))
     s = win.session
-    assert not s.pause_button.isEnabled() and not s.restart_button.isEnabled()          # not started yet
     s.start_button.click()
     s.done_button.click()
-    s.pause_button.click()
-    assert s.engine.state == PAUSED and not s.done_button.isEnabled() and s.pause_button.text() == "Resume"
-    old = s.engine.session_id
-    s.confirm_restart = lambda: False
-    s.restart_button.click()
-    assert s.engine.session_id == old                                   # declined
-    s.confirm_restart = lambda: True
-    s.restart_button.click()
-    assert s.engine.session_id != old and s.engine.state == NOT_STARTED
+    s.set_paused(True)                                                  # the screen's own Pause (hold the watching on this step); its button is only live while the screen is watched
+    assert s.paused and s.engine.state == ACTIVE and s.engine.position == 2
+
+
+def test_start_again_from_history_begins_a_new_session_and_keeps_the_old_one(win):
+    tid = _first_tutorial(win)
+    win.open_session(tid)
+    old = win.session.engine.session_id
+    win.session.start_button.click()
+    win.session.done_button.click()
+    win.session.back_button.click()
+    win.open_history()
+    win.history.list.setCurrentRow(0)
+    win.history.again_button.click()
+    e = win.session.engine
+    assert win.current_screen() is win.session and e.session_id != old and e.state == NOT_STARTED
     kept = win.db.get_session(old)
     assert kept["state"] == PAUSED and kept["current_pos"] == 2         # the old session is still there, untouched
 
@@ -173,16 +178,17 @@ def test_home_says_continue_for_a_tutorial_with_a_session_in_progress(win):
     assert win.home.session_button.text() == "Continue session"
 
 
-def test_history_continues_a_session_on_double_click(win):
+def test_history_shows_a_left_session_as_paused_and_continues_it(win):
     tid = _first_tutorial(win)
     win.open_session(tid)
     win.session.start_button.click()
     win.session.done_button.click()
     win.session.back_button.click()
     win.open_history()
-    assert "paused" in win.history.list.item(0).text()
-    win.history.list.itemDoubleClicked.emit(win.history.list.item(0))
-    assert win.current_screen() is win.session and win.session.engine.paused_at == 2
+    win.history.list.setCurrentRow(0)
+    assert "paused" in win.history.list.item(0).text() and win.history.resume_button.isEnabled()
+    win.history.resume_button.click()
+    assert win.current_screen() is win.session and win.session.engine.state == ACTIVE and win.session.engine.position == 2
 
 
 def test_closing_the_window_pauses_an_active_session(win):

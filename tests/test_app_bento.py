@@ -240,14 +240,13 @@ def test_the_step_badge_colours_come_from_the_current_theme(win, qapp):
     assert PALETTES["dark"]["ok"] in win.review.detail.text() and PALETTES["light"]["ok"] not in win.review.detail.text()
 
 
-def test_the_ask_conversation_follows_the_theme(win, qapp):
+def test_the_chat_bubbles_follow_the_theme(win, qapp):
     _login(win)
     win.accounts.set_preferences(win.user.id, theme="dark")
     win.apply_theme()
-    win.ask_screen._append("You", "hello")
-    win.ask_screen._append("GuideWire", "hi")
-    page = win.ask_screen.transcript.toHtml()
-    assert PALETTES["dark"]["accent"].lstrip("#") in page.lower() and "#222" not in page.lower() and "#1f4e79" not in page.lower()
+    sheet = qapp.styleSheet()
+    assert "QFrame#bubbleUser" in sheet and PALETTES["dark"]["accent_hi"] in sheet.split("QFrame#bubbleUser", 1)[1].split("}", 1)[0]
+    assert PALETTES["light"]["accent_hi"] not in sheet.split("QFrame#bubbleUser", 1)[1].split("}", 1)[0]
 
 
 def test_the_sidebar_shows_after_sign_in_marks_the_screen_and_navigates(win):

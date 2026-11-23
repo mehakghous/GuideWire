@@ -102,3 +102,10 @@ def test_service_shares_one_read_between_ground_and_observe(monkeypatch):
     monkeypatch.setattr(svc, "_frame", lambda: (win, (NS(pixels=px2, geometry=frame.geometry), px2)))
     svc.observe()
     assert len(reads) == 2
+
+
+def test_an_empty_selection_from_the_probe_is_an_answer_not_a_missing_value():
+    from vision.probe_client import merge_observed
+    out = merge_observed({"selection_types": ["MESH"]}, {"selection_types": [], "mode": "OBJECT"})
+    assert out["selection_types"] == [] and out["mode"] == "OBJECT"      # a stale screen reading must not win over "nothing is selected"
+    assert merge_observed({"mode": "OBJECT"}, {"mode": None, "x": ""})["mode"] == "OBJECT"

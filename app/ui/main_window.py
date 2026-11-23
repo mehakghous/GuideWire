@@ -393,7 +393,7 @@ class MainWindow(QMainWindow):
         waiting = f"{n} change{'s' if n != 1 else ''} waiting to sync." if n else "Everything is saved online."
         r = self._last_report
         if not a.online_enabled:
-            card = ("Saved on this computer", "The online service is not set up, so nothing leaves this computer.", False, "ok")
+            card = ("Saved on this computer", "Nothing leaves this computer.", False, "ok")
         elif self.user is None:
             card = ("Online sync", "Log in to sync your tutorials and progress.", False, "ok")
         elif a.cloud_session is None and a.offline_login:

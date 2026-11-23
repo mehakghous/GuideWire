@@ -410,7 +410,10 @@ def test_guidance_shows_the_highlight_for_the_active_step(win):
 
 
 def test_guidance_completes_a_step_the_screen_shows_done(win):
-    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT", "selection_types": ["MESH"]}))
+    svc = vf.FakeService({"mode": "OBJECT", "selection_types": []})
+    s, overlay = _guided(win, svc)
+    s.poll()                                                        # nothing is selected yet: not done
+    svc.observed = {"mode": "OBJECT", "selection_types": ["MESH"]}
     s.poll()
     assert s.engine.position == 2 and "Step 2" in s.step_text.text()
     assert "saw this step done" in s.status.text()

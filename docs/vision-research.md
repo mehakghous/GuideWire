@@ -127,3 +127,24 @@ A look that has to read the whole screen costs about 0.5 s, a small changed area
 | Old toolbar lookup with the toolbar scrolled (reproduced, NOT fixed in Part A) | `locate_tool("Loop Cut")` names visible cell 12 of 14, but 3 cells were scrolled off, so the highlight lands about 3 cells below the real Loop Cut (true index 12 of 21 in all) | fixed in Part C with the live tool list and the reported scroll |
 
 Not verified in Part A: the redo-panel (HUD) region size and `window_manager.operators` after real clicks (no way to inject real input into Blender found), 150% display scaling, a second monitor, and `mypy` locally (the PyQt6 stubs installed here do not parse under this mypy; CI is unchanged by this part).
+
+## Live tutorial run on Blender 5.2.3 (2026-11-23)
+`scripts/live_session_check.py` runs a whole tutorial (the sample "Add a cube and extrude", 4 steps) through the REAL vision bridge and session engine on REAL Blender,
+while `scripts/blender_test_harness.py` (inside Blender) makes the learner's changes. What happened:
+
+| Moment | Result |
+|---|---|
+| Step 1 starts with a cube already selected | Not completed by the screen; the learner is told "this already looks done, press Done" |
+| The cube is deleted, then a cube is added | Step 1 reads not done, then done: **completed by the screen** |
+| Step 2 (Enter Edit Mode) | Not done in Object Mode; completed when Edit Mode is entered. Screen-only reading said OBJECT, then EDIT_MESH |
+| Previous step with Edit Mode still on | **No bounce forward**; the old state is shown as "already true" |
+| Leave Edit Mode, enter it again | Completed again, because the screen saw it happen |
+| Step 3 (Extrude Region tool) | Not done with Select Box; completed when the tool is chosen; the highlight is on the toolbar cell |
+| Resume (new bridge, session loaded from the database) on a step whose state already holds | Not completed |
+
+Found by this run and fixed: the probe's **empty selection** was thrown away when merging state (`merge_observed` dropped `[]`), so deleting the cube read as "cannot tell"
+and step 1 never read as not done. An empty list from the probe is now an answer (`tests/test_vision.py`).
+Two traps for anyone writing similar checks: Blender only redraws and runs its timers while it receives input (an idle window shows stale pixels and a stale probe, so keep the
+mouse moving), and the harness cannot rename onto an old file name.
+Timing per look on this laptop: median about 0.9 s, 0.5 s when nothing changed, 1.4 to 2.9 s when the screen changed and had to be read again.
+Not covered: a real click-driven learner (the changes were made by the harness), other layouts, other modes, other display scales.

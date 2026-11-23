@@ -78,6 +78,8 @@ def merge_observed(screen: dict[str, Any], probe: dict[str, Any] | None) -> dict
     """Probe values win (they are exact); screen values fill what the probe lacks."""
     out = dict(screen)
     if probe:
-        out.update({k: v for k, v in probe.items() if v not in (None, [], "")})
+        # Only "no value" (None, "") is skipped. An EMPTY list or dict is an answer: selection_types [] means nothing is selected, and dropping it made
+        # "the learner deleted the cube" look like "cannot tell", so a step that needs a selection never read as not done.
+        out.update({k: v for k, v in probe.items() if v is not None and v != ""})
         out["probe"] = True                                 # the evaluator may judge node_count / name_exists / attribute_exists
     return out

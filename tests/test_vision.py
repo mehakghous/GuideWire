@@ -445,3 +445,15 @@ def test_a_hover_tooltip_over_the_header_does_not_change_the_mode_read_from_a_re
     except OcrUnavailable:
         pytest.skip("no OCR language pack")
     assert observe_blender(words, img, default_layout(img.shape[1], img.shape[0])).get("mode") == "EDIT_MESH"
+
+
+def test_an_empty_selection_from_the_probe_is_an_answer_not_a_missing_value():
+    from ingestion.evaluator import evaluate_step
+    from shared.step_record import StatePredicate as P
+    from shared.step_record import Step
+    from vision.probe_client import merge_observed
+    obs = merge_observed({"mode": "OBJECT"}, {"mode": "OBJECT", "selection_types": [], "active_tool": None, "workspace": ""})
+    assert obs["selection_types"] == [] and "active_tool" not in obs and "workspace" not in obs      # empty list kept; None and "" still skipped
+    step = Step(id="s01", order=1, goal="Add a cube", expected_state=[P(kind="selection_type", target="MESH"), P(kind="mode", target="OBJECT")], confidence=1.0, verifiable=True)
+    assert evaluate_step(step, obs).status == "unmet"                                                 # nothing selected: not done (it used to read as "met")
+    assert evaluate_step(step, merge_observed({"mode": "OBJECT"}, {"mode": "OBJECT", "selection_types": ["MESH"]})).status == "met"

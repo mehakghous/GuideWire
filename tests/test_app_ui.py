@@ -405,7 +405,7 @@ def test_session_without_vision_has_no_guidance(win):
 def test_guidance_shows_the_highlight_for_the_active_step(win):
     s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
     s.poll()
-    assert overlay.shown >= 1 and len(overlay.marks) == 1 and s.watch_label.text() == "Found Cube"
+    assert overlay.shown >= 1 and len(overlay.marks) == 1 and "already looks done" in s.watch_label.text()   # the cube was there from the start: not evidence
     assert s.engine.position == 1
 
 

@@ -109,19 +109,24 @@ def find_cells(bgr, viewport: Rect) -> list[Cell]:
         runs = _longest_chain([r for r in _runs((col < dark) | blue) if MIN_CELL <= r[1] - r[0] <= MAX_CELL])
         if len(runs) > len(best):
             best, best_x = runs, x
-    widths = []
+    starts, widths = [], []
     for a, _ in best:
         row = y0 + a + 4                                         # near the cell's top, clear of the icon
-        x_end = best_x
+        x_start = best_x
+        while x_start < best_x + 12 and not (gray[row, x_start] < dark or sat[row, x_start] > BLUE_SATURATION):
+            x_start += 1                                         # the column that won sits on the cell's edge: its 3-pixel mean passed while its first pixel is still the toolbar's own grey (seen on a real window: width 1)
+        x_end = x_start
         while x_end < bgr.shape[1] - 1 and (gray[row, x_end] < dark or sat[row, x_end] > BLUE_SATURATION):
             x_end += 1
-        widths.append(x_end - best_x)
+        starts.append(x_start)
+        widths.append(x_end - x_start)
+    left = int(np.median(starts)) if starts else best_x
     width = max(int(np.median(widths)), 1) if widths else 1      # icon pixels can cut a scan short
     cells = []
     for a, b in best:
         mid = (y0 + a + y0 + b) // 2
-        active = float((sat[mid - 3: mid + 3, best_x: best_x + 3] > BLUE_SATURATION).mean()) > 0.5
-        cells.append(Cell(Rect(best_x, y0 + a, width, b - a), active))
+        active = float((sat[mid - 3: mid + 3, left: left + 3] > BLUE_SATURATION).mean()) > 0.5
+        cells.append(Cell(Rect(left, y0 + a, width, b - a), active))
     return cells
 
 

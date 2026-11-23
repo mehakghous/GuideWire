@@ -63,7 +63,7 @@ def show_box(panel, engine, t, look, qapp, dismissed) -> None:
         if panel is not None:
             panel.hide()
         return
-    panel.set_content(f"GuideWire \u00b7 step {engine.position} of {len(engine.steps)}", step.goal, [h.text for h in step.how_to], t.hint, t.keys, t.inputs)
+    panel.set_content(f"GuideWire \u00b7 step {engine.position} of {len(engine.steps)}", step.goal, [h.text for h in step.how_to], t.hint, t.keys)
     scr = qapp.primaryScreen()
     a = scr.availableGeometry()
     x, y, _where = panel_position(look.window_rect, (a.x(), a.y(), a.width(), a.height()), (panel.width(), panel.height()), scr.devicePixelRatio())
@@ -72,7 +72,7 @@ def show_box(panel, engine, t, look, qapp, dismissed) -> None:
 
 def format_tick(t0: float, t) -> str:
     rect = "-" if t.rect is None else f"{t.rect[0]},{t.rect[1]} {t.rect[2]}x{t.rect[3]}"
-    return f"{time.monotonic() - t0:5.1f}s  {t.state:11s} verdict={t.verdict or '-':12s} highlight={rect:22s} advanced={'YES' if t.advanced else 'no ':3s} {t.hint or t.message}"
+    return f"{time.monotonic() - t0:5.1f}s  {t.state:11s} phase={t.phase or '-':9s} verdict={t.verdict or '-':12s} highlight={rect:22s} advanced={'YES' if t.advanced else 'no ':3s} {t.hint or t.message}"
 
 
 def need_the_project_python() -> None:
@@ -171,7 +171,9 @@ def main(argv=None) -> int:
         if panel is not None:
             panel.close()
         db.close()
-    print("\ndone")
+    st = bridge.stats
+    print(f"\nlooks={st.looks} located-again-avoided={st.cache_hits} rechecks={st.rechecks}  per look: read the screen {st.ms_look / max(st.looks, 1):.0f} ms, find the targets {st.ms_ground / max(st.looks, 1):.0f} ms, total {st.ms_total / max(st.looks, 1):.0f} ms")
+    print("done")
     return 0
 
 

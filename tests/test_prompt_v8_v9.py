@@ -9,8 +9,7 @@ APPS = ("blender", "maya", "houdini")
 
 def test_the_video_default_is_the_measured_choice_and_written_text_keeps_the_older_default():
     from ingestion.extract import recommended_video_prompt_version as rec
-    assert rec("houdini") == "v10-hou" and rec("maya") == "v10-preds" and rec("blender", rigging=True) == "v10-preds"
-    assert rec("blender") == "v2"                                                                  # measured on rigging videos only: a plain Blender video keeps the modelling baseline
+    assert rec("maya") == rec("blender", rigging=True) == rec("blender") == "v12" and rec("houdini") == "v13"     # 2026-11-22 (docs/extraction_v11_report_2026-11-22.md)
     assert default_prompt_version("maya") == default_prompt_version("houdini") == "v7"                # text extraction is not video: unchanged
     assert all(rec(a, r) in PROMPT_VERSIONS for a in ("blender", "maya", "houdini") for r in (False, True))
 
@@ -20,7 +19,7 @@ def test_the_cli_uses_the_recommended_prompt_for_a_video_and_the_old_default_for
 
     from ingestion.cli import main
     url = "https://www.youtube.com/watch?v=AAAAAAAAAAA"
-    for app, want in (("houdini", "v10-hou"), ("maya", "v10-preds")):
+    for app, want in (("houdini", "v13"), ("maya", "v12")):
         assert main(["video", url, "--app", app, "--duration", "100", "--dry-run", "--no-metadata"]) == 0
         assert json.loads(capsys.readouterr().out)["prompt_version"] == want
     assert main(["video", url, "--app", "houdini", "--duration", "100", "--dry-run", "--no-metadata", "--prompt-version", "v7"]) == 0      # an explicit choice still wins
@@ -28,7 +27,7 @@ def test_the_cli_uses_the_recommended_prompt_for_a_video_and_the_old_default_for
 
 
 def test_versions_and_defaults_are_unchanged():
-    assert PROMPT_VERSIONS[-8:] == ("v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds")
+    assert PROMPT_VERSIONS[-11:-3] == ("v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds")     # v11, v12 and v13 (2026-11-22) were added after them
     assert default_prompt_version("maya") == default_prompt_version("houdini") == "v7"
     assert default_prompt_version("blender") == "v2" and default_prompt_version("blender", rigging=True) == "v7"
 

@@ -15,7 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from .extract import (PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows,
+from .extract import (PROMPT_VERSIONS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, extract_from_video_windows, fill_gaps,
                       recommended_video_prompt_version)
 from .providers.gemini import GeminiProvider
 from .youtube.metadata import fetch_metadata, parse_video_id
@@ -409,6 +409,7 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--fresh", action="store_true", help="ask the model again even if this exact request is cached (it is still cached afterwards)")
         p.add_argument("--dry-run", action="store_true", help="print the worst-case cost and whether the answer is cached, then stop; calls nothing")
         p.add_argument("--window-s", type=float, help="extract in overlapping clips of this many seconds (for example 60) instead of one pass; needs the video length; one paid call per clip")
+        p.add_argument("--fill-gaps", action="store_true", help="after one pass, take a second look at every stretch of 25 s or more inside the tutorial that no step covers (one paid call per stretch; the model may answer that nothing happens there)")
         p.add_argument("--duration", type=float, help="video length in seconds (skips the metadata call; used for the cost estimate)")
         p.add_argument("--max-usd-run", type=float, help="stop before a call that could pass this many dollars in this run (default GW_MAX_USD_RUN or 5)")
         p.add_argument("--rigging", action="store_true", help="the tutorial is about character rigging or animation (selects the rigging prompt for Blender too)")
@@ -465,6 +466,8 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 sl = extract_from_video(provider, vid, app=args.app, duration_s=duration, title_hint=title,
                                         prompt_version=args.prompt_version, on_attempt=hook)
+                if getattr(args, "fill_gaps", False):
+                    sl = fill_gaps(provider, sl, vid, app=args.app, prompt_version=args.prompt_version, duration_s=duration, title_hint=title, on_attempt=hook)
         print(f"model {provider.model_id}: {provider.calls} paid call(s), {provider.hits} cache hit(s), about ${provider.run_usd:.4f} this run (log: runs/budget/cost_log.jsonl)", file=sys.stderr)
     except BudgetExceeded as e:
         print(f"stopped by the budget guard, nothing further was called: {e}", file=sys.stderr)

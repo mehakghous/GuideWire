@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Callable, Iterable
 
 from shared.answer import TutorialRecommendation
 
@@ -192,7 +192,7 @@ def search_queries(goal: RiggingGoal, max_queries: int = MAX_QUERIES) -> list[st
     if goal.app is None:
         return []
     words = list(dict.fromkeys(([goal.part] if goal.narrow and goal.part else []) + list(goal.search_words)))      # plain words, not the user's phrasing; no repeats
-    base = " ".join(words) if goal.narrow and words else " ".join(goal.topic[:6]) or " ".join(words) or "character rigging"
+    base = " ".join(words) if goal.narrow and words else " ".join([w for w in goal.topic if w not in CHATTER][:6]) or " ".join(words) or "character rigging"
     out = [f"{goal.app} {base} tutorial"]
     if goal.stages:                                                                                # a second, broader wording that still keeps the body part
         out.append(f"{goal.app} {_APP_SEARCH_TERM.get(goal.app, '')} {goal.part if goal.narrow and goal.part else 'character'} {goal.stages[0].split(' / ')[0]} tutorial".replace("  ", " "))
@@ -225,10 +225,33 @@ def entry_from_metadata(m: dict, app: str) -> dict:
     return {**m, "source_tier": "official" if official else "community", "app_hint": in_title or in_desc, "hint_source": "title" if in_title else ("description" if in_desc else None)}
 
 
+_VIDEO_ID = re.compile(r"(?:v=|youtu\.be/|embed/|shorts/)([A-Za-z0-9_-]{11})")
+_BEGINNER_ASK = re.compile(r"\b(?:beginners?|new to|first time|never (?:used|rigged)|just starting|starting out|total newbie|complete newbie)\b", re.I)
+_BEGINNER_TITLE = re.compile(r"\b(?:beginners?|basics?|basic|intro(?:duction)?|getting started|for dummies|easy|simple|101|crash course|from scratch|first)\b", re.I)
+_ADVANCED_TITLE = re.compile(r"\b(?:advanced|expert|pro(?:duction)?|masterclass|deep dive|studio|complex|in[- ]depth)\b", re.I)
+_LEVEL_WORDS = frozenset("beginner beginners basics basic intro introduction easy simple quick fast advanced new first time never used just starting out".split())
+# words of ordinary conversation: they are never the TOPIC of a request ("can you give 10 tutorials for X after which I can make whatever I want"), so a video is not asked to mention them
+CHATTER = frozenset("""give giving show get can could would should you your please after before which whichever whatever whoever what who when where why how be able do does did really just some any all anything everything
+something want wanted wants make making made like then so that this these those there here out about into from have has had will with without need needs best top good great nice one ones more other another way ways
+help helps let lets going go see know tell find look looking""".split())
+_PART_WORDS = {"leg": r"legs?|foot|feet|knee|hip|thigh|ankle|toe|reverse foot", "arm": r"arms?|hands?|fingers?|wrist|elbow|shoulder", "hand": r"hands?|fingers?|wrist", "spine": r"spine|back|torso",
+               "neck": r"neck|head", "head": r"head|neck|face", "tail": r"tails?"}
+
+
+def video_id_of(url_or_id: str | None) -> str:
+    """The 11-character YouTube id of a link (or the id itself); '' when there is none. One way to say 'the same video' everywhere."""
+    t = (url_or_id or "").strip()
+    m = _VIDEO_ID.search(t)
+    if m:
+        return m.group(1)
+    return t if re.fullmatch(r"[A-Za-z0-9_-]{11}", t) else ""
+
+
 def discover_rigging(query: str, *, app: str | None = None, version: str | None = None, limit: int = 3,
                      search: Callable[[str, int], list[dict]] | None = None, metadata: Callable[[list[str]], list[dict]] | None = None,
-                     local: list[dict] | None = None, config: RankingConfig | None = None) -> RiggingDiscovery:
-    """`search(query, max_results) -> [{video_id, title, channel}]` and `metadata(ids) -> [video dicts]` are the live calls (None = no live search)."""
+                     local: list[dict] | None = None, config: RankingConfig | None = None, exclude: Iterable[str] = ()) -> RiggingDiscovery:
+    """`search(query, max_results) -> [{video_id, title, channel}]` and `metadata(ids) -> [video dicts]` are the live calls (None = no live search).
+    `limit` is how many at most; fewer come back when fewer are relevant (an unrelated video never fills the list). A video is listed once, and `exclude` (video ids or links already shown) are left out."""
     cfg = config or RankingConfig()
     today = cfg.today or date.today()
     goal = parse_goal(query, app, version)
@@ -246,14 +269,25 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
         out.queries = search_queries(goal)
         ids: dict[str, dict] = {}
         for qy in out.queries:
-            for r in search(qy, 10):
+            for r in search(qy, max(10, min(limit, 25))):                # one search call costs the same up to 50 results: ask for enough to fill the requested count
                 ids.setdefault(r["video_id"], r)
             out.quota_units += 100
         if ids:
             entries += [entry_from_metadata(m, goal.app) for m in metadata(list(ids))]
             out.quota_units += 1
-    elif not entries:
+    seen_ids = {video_id_of(x) or x for x in exclude}
+    unique = []
+    for e in entries:                                                  # one video once, whether it came from the local list, the search or both; and never one the person already has
+        vid = video_id_of(e.get("id")) or video_id_of(e.get("url")) or f'{e.get("url")}|{e.get("title")}'      # a real video id when there is one; a malformed link only matches the same link AND title
+        if vid in seen_ids:
+            continue
+        seen_ids.add(vid)
+        unique.append(e)
+    entries = unique
+    if not entries and not (search is not None and metadata is not None):
         out.notes.append("No local tutorial covers this and live search was not requested, so there is nothing to recommend yet.")
+    distinct = [w for w in goal.topic if w not in _LEVEL_WORDS and w not in CHATTER and len(w) > 2 and w not in ("tutorial", "tutorials", "video", "videos", "give", "show", "get", "some", "more", "another", "other")]
+    part_words = re.compile(r"\b(?:" + _PART_WORDS[goal.part] + r")\b", re.I) if goal.narrow and goal.part in _PART_WORDS else None
     scored = []
     for e in entries:
         title = e.get("title") or ""
@@ -270,6 +304,12 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
             out.excluded.append(f"{title} (nothing in its title or chapters is about {', '.join(goal.stages)})")
             continue
         hit_areas = touched_areas(e, goal)
+        if not goal.stages and not hit_areas and distinct and not any(re.search(r"\b" + re.escape(w[:max(4, len(w) - 2)]), text, re.I) for w in distinct):
+            out.excluded.append(f"{title} (nothing in its title or chapters mentions {', '.join(distinct[:3])})")      # a goal with no recognised stage still needs a video that is about SOMETHING in it
+            continue
+        if part_words is not None and not part_words.search(text) and len(hit_areas) < 2:
+            out.excluded.append(f"{title} (it is not about the {goal.part}: nothing in its title or chapters mentions it)")
+            continue
         score = 4.0 * (len(hit_areas) / len(goal.areas) if goal.areas else 0.0)
         notes = []
         if _APP_WORDS[goal.app].search(title):
@@ -319,6 +359,14 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
             else:
                 score -= 0.5
                 notes.append("uses an automatic rigging tool: it teaches the tool, not how a rig is built, and has few manual steps to follow")
+        level_bonus = 0.0
+        if _BEGINNER_ASK.search(query):                                       # the learner said they are new: a title that says beginner helps, one that says advanced does not (a title claim, not a check of the video)
+            if _BEGINNER_TITLE.search(title) and not _ADVANCED_TITLE.search(title):
+                level_bonus = 0.7                                          # orders the list only: the score stays what it was, so nothing else that compares scores moves
+                notes.append("its title says it is for beginners")
+            elif _ADVANCED_TITLE.search(title):
+                score -= 1.0
+                notes.append("its title says advanced, and you said you are new to this")
         part = _SERIES.search(title)
         if part:
             notes.append(f"part {part.group(1)} of a series: the other parts cover the rest")
@@ -327,7 +375,7 @@ def discover_rigging(query: str, *, app: str | None = None, version: str | None 
             miss = [names[a] for a in goal.areas if a not in hit_areas]
             notes.append(f"title/chapters touch {len(hit_areas)} of {len(goal.areas)} areas you need ({', '.join(names[a] for a in hit_areas) or 'none'})" + (f"; not mentioned: {', '.join(miss)}" if miss else ""))
         notes.append("Judged from metadata only: what it actually shows is unknown until its steps are extracted.")
-        scored.append((-round(score, 2), title, age, TutorialRecommendation(
+        scored.append((-round(score + level_bonus, 2), title, age, TutorialRecommendation(
             title=title, url=e["url"], channel=e.get("channel"), source_tier=e.get("source_tier", "unknown"), duration_s=dur, blender_version_hint=hint,
             licence=e.get("licence"), captions_available=e.get("captions_flag"), chapters=e.get("chapters") or None, published=e.get("published"),
             matched_terms=cov, score=round(score, 2), note=" ".join(n[0].upper() + n[1:] + ("" if n.endswith(".") else ".") for n in notes))))

@@ -8,8 +8,9 @@ import math
 
 from PyQt6.QtCore import QPointF, Qt, QVariantAnimation
 from PyQt6.QtGui import QColor, QPainter, QRadialGradient
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QApplication, QWidget
 
+from .bento import MIN_STEP, _MOVING, is_calm, should_move
 from .style import current_palette
 
 # (x, y as fractions of the window, radius in pixels, palette colour, phase offset)
@@ -27,14 +28,31 @@ class Backdrop(QWidget):
         self._anim.setDuration(14000)
         self._anim.setLoopCount(-1)
         self._anim.valueChanged.connect(self._tick)
+        QApplication.instance().applicationStateChanged.connect(self._app_state)
+        _MOVING.add(self)
 
     def _tick(self, value) -> None:
-        self._phase = float(value)
-        self.update()
+        value = float(value)
+        if abs(value - self._phase) >= MIN_STEP:          # a slow drift needs no more than about ten repaints a second
+            self._phase = value
+            self.update()
+
+    def sync_animation(self) -> None:
+        """Run only when it can be seen and costs nothing that matters: visible, GuideWire in use, and not in calm mode."""
+        running = self._anim.state() == self._anim.State.Running
+        if should_move(self) and not running:
+            self._anim.start()
+        elif not should_move(self) and running:
+            self._anim.stop()
+
+    def _app_state(self, _state) -> None:
+        self.sync_animation()
 
     def showEvent(self, event) -> None:  # noqa: N802 (Qt override)
         self._anim.start()
         super().showEvent(event)
+        if is_calm():
+            self._anim.stop()
 
     def hideEvent(self, event) -> None:  # noqa: N802 (Qt override)
         self._anim.stop()

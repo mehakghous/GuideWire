@@ -35,6 +35,7 @@ def main() -> int:
     ap.add_argument("--meaning", choices=["iterate", "report"], help="score words-found and support by MEANING with a model (one text-only call per video, cached) instead of shared words")
     ap.add_argument("--repeats", type=int, default=1, help="run each setting this many times (repeats 2 and up get their own cache slot via GW_REPEAT, so the first answer is never overwritten) and report the mean and the range, so run-to-run spread is visible")
     ap.add_argument("--apps", help="comma list of applications to run (blender,maya,houdini); default all three")
+    ap.add_argument("--fill-gaps", action="store_true", help="add the gap pass (a second look at uncovered stretches) after each one-pass extraction; outputs go to <version>_w0_g")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
     videos = [v for v in VIDEOS if not a.apps or v[0] in a.apps.split(",")]
@@ -44,7 +45,7 @@ def main() -> int:
     table = []
     for ver, w, rep_no in ((v, float(x), r) for v in a.versions.split(",") for x in a.windows.split(",") for r in range(1, max(1, a.repeats) + 1)):
         if True:
-            out_dir = ROOT / "runs" / "compare" / tier_dir / (f"{ver}_w{w:g}" + (f"_r{rep_no}" if rep_no > 1 else ""))
+            out_dir = ROOT / "runs" / "compare" / tier_dir / (f"{ver}_w{w:g}" + ("_g" if a.fill_gaps else "") + (f"_r{rep_no}" if rep_no > 1 else ""))
             out_dir.mkdir(parents=True, exist_ok=True)
             files = []
             for app, vid, dur in videos:
@@ -52,7 +53,7 @@ def main() -> int:
                     continue
                 out = out_dir / f"{app}_{vid}.json"
                 cmd = [sys.executable, "-m", "ingestion.cli", "video", f"https://www.youtube.com/watch?v={vid}", "--app", app, "--prompt-version", ver, *(["--model", a.model] if a.model else ["--tier", a.tier]),
-                       "--duration", str(dur), "-o", str(out)] + (["--window-s", f"{w:g}"] if w else []) + (["--dry-run"] if a.dry_run else [])
+                       "--duration", str(dur), "-o", str(out)] + (["--window-s", f"{w:g}"] if w else []) + (["--fill-gaps"] if a.fill_gaps and not w else []) + (["--dry-run"] if a.dry_run else [])
                 r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env={**os.environ, "GW_REPEAT": str(rep_no)})
                 if a.dry_run:
                     print(ver, w, vid, r.stdout.replace("\n", " ")[:160])

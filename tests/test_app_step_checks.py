@@ -16,6 +16,7 @@ EXAMPLES = {
     "name_exists": (StatePredicate(kind="name_exists", target="hip_jnt"), {"names": ["hip_jnt"]}),
     "attribute_exists": (StatePredicate(kind="attribute_exists", target="a.b"), {"attributes": {"a.b": True}}),
     "node_count": (StatePredicate(kind="node_count", target="joint", value=3), {"nodes": ["joint"] * 3}),
+    "operator_ran": (StatePredicate(kind="operator_ran", target="mesh.loopcut_slide"), {"history": [{"id": "mesh.loopcut_slide"}]}),
 }
 
 
@@ -59,7 +60,7 @@ def test_a_mixed_step_is_partly_checkable():
     assert c.level == "partial" and "that an attribute was added" in c.text and c.badge == "Partly checkable"
 
 
-@pytest.mark.parametrize("kind", ["name_exists", "attribute_exists", "node_count"])
+@pytest.mark.parametrize("kind", ["name_exists", "attribute_exists", "node_count", "operator_ran"])
 def test_the_text_never_shows_an_internal_kind_name(kind):
     c = checkability(step(EXAMPLES["mode"][0], EXAMPLES[kind][0]))
     assert kind not in c.text and kind not in c.full

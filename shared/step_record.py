@@ -14,8 +14,9 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+from pydantic.json_schema import SkipJsonSchema
 
-SCHEMA_VERSION = "0.12"  # 0.12 (additive): Step.group_id and Step.group (display group: consecutive steps share one group_id and one short label; steps stay atomic, a UI may fold a group into one line). 0.11 (additive): PredicateKind name_exists, attribute_exists, node_count (node_count: value = at least that many). 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
+SCHEMA_VERSION = "0.16"  # 0.16 (additive): TargetKind node, parm and pane (Houdini guidance; resolved at session time, never stored). 0.15 (additive): Step.why (the purpose of the step as the instructor explains it; null when no reason is given). 0.14 (additive): TargetKind sidebar (a field of the 3D view's sidebar, the N panel: tab, panel, prop). It is only ever resolved at session time, never stored. 0.13 (additive): Action.target (a typed, resolved reference to the interface element or operator the action means; see TargetRef) and PredicateKind operator_ran. 0.12 (additive): Step.group_id and Step.group (display group: consecutive steps share one group_id and one short label; steps stay atomic, a UI may fold a group into one line). 0.11 (additive): PredicateKind name_exists, attribute_exists, node_count (node_count: value = at least that many). 0.10 (additive): Step.how_to / check (HowTo lines: what to do and how to check, each labelled shown / said / catalog) and Step.result. 0.9: PredicateKind node_exists (a node/object of a given type exists: Maya joints, Houdini SOP nodes). 0.8: Step.feature_id (rigging feature catalog id, optional, additive). 0.7: app may be blender|maya|houdini; Step.kind mechanics|craft (additive). 0.6 (additive): Step.depends_on, Step.verification (StepVerification); AnswerBundle.request/source_section. 0.5 (additive): provenance doc_reference; AnswerBundle trust/recommendations/pointers/conflicts. 0.4: 0.4 (additive): Step.provenance/source_refs/assumptions, source types transcript/catalog/manual. 0.3 (additive): support "both", Step.visual_evidence. 0.2 (additive): Step.support, model_confidence, StepList.warnings/video_duration_s/prompt_version. 0.3 (additive): support "both", Step.visual_evidence
 
 PredicateKind = Literal[
     "mode",            # target: interaction mode, e.g. OBJECT, EDIT_MESH, SCULPT
@@ -28,6 +29,7 @@ PredicateKind = Literal[
     "name_exists",     # target: the name of a node/object the learner gave, e.g. "left_hip_IK_jnt" (Outliner)
     "attribute_exists",  # target: "object.attribute", e.g. "l_switch_GEO.FK_IK_Switch" (Channel Box / Attribute Editor)
     "node_count",      # target: node/object type; value: AT LEAST this many exist, e.g. joint = 9
+    "operator_ran",    # target: operator id, e.g. mesh.loopcut_slide: it appears in the application's own operator history (evidence that an action was DONE; only an add-on can read it)
 ]
 
 ActionVerb = Literal[
@@ -76,11 +78,46 @@ class StatePredicate(BaseModel):
         return self
 
 
+TargetKind = Literal[
+    "tool",            # a toolbar tool: id = tool id (builtin.loop_cut), mode = the mode whose toolbar holds it
+    "menu",            # a menu path: path = ["Add", "Mesh", "Cylinder"]; id = the first menu's class when known
+    "mode",            # the mode selector: id = the mode enum (EDIT, OBJECT, POSE, ...)
+    "property",        # a Properties editor field: tab = tab id (DATA), panel = panel label, prop = field label
+    "sidebar",         # a field of the 3D view's sidebar (the N panel): tab = Item | Tool | View, panel = panel label (Transform), prop = field label (Roll)
+    "operator_panel",  # a field of the panel an operator leaves after it ran (Loop Cut and Slide > Number of Cuts): operator = id, prop = property id
+    "context_menu",    # an item of the right-click menu in the viewport: path = [item], operator when known
+    "viewport",        # a thing in the 3D viewport that has no text on screen (a handle, a joint, a bone): label only
+    "keys",            # a key press: keys = ["Ctrl", "P"]; operator = what it runs in that mode when the keymap says so
+    "node",            # 0.16, Houdini: a node in the network editor: id = node type name (packfolder), label = its label (Pack Folder); path = [instance name] when the step names one (packfolder1)
+    "parm",            # 0.16, Houdini: a parameter in the parameter pane: prop = its label (Control Group), id = the node type it belongs to, panel = that node's label
+    "pane",            # 0.16, Houdini: a pane to act in: id = NetworkEditor | SceneViewer | Parm; keys = the key to press there (Tab in the network editor, F in the viewport)
+]
+
+
+class TargetRef(BaseModel):
+    """What an action's `ui_element` text MEANS in the application: resolved once against the application's own interface catalog (ingestion/targets.py), so guidance can look for the real element
+    instead of matching words. Absent on an action = not resolved: the text stays the only thing known. `candidates` lists the other ids that matched equally well when `id` is not certain."""
+    kind: TargetKind
+    label: str                                              # as the tutorial says it (the leaf, e.g. "Loop Cut")
+    id: str | None = None
+    path: list[str] = Field(default_factory=list)
+    mode: str | None = None
+    tab: str | None = None
+    panel: str | None = None
+    prop: str | None = None
+    operator: str | None = None
+    keys: list[str] = Field(default_factory=list)
+    candidates: list[str] = Field(default_factory=list)
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)  # 1.0 = exact catalog match in the step's own mode; lower = matched in another mode, ambiguous, or only partly
+    catalog_version: str | None = None                      # the application version the catalog came from
+
+
 class Action(BaseModel):
     verb: ActionVerb
     ui_element: str | None = None  # name as shown in the UI, e.g. "Add > Mesh > Cube"
     keys: list[str] = Field(default_factory=list)  # e.g. ["Shift", "A"]
     value: str | None = None       # typed/dragged value, e.g. "2.5 m"
+    target: SkipJsonSchema[TargetRef | None] = None  # 0.13: what ui_element means in the application. RESOLVED by ingestion/targets.py, never written by a model: kept out of the JSON schema the model is shown (that schema is pinned by a test)
 
 
 class StepVerification(BaseModel):
@@ -130,6 +167,7 @@ class Step(BaseModel):
     source_refs: list[str] = Field(default_factory=list)  # e.g. "catalog:object.join@main", "transcript:154.9-166.0s"
     assumptions: list[str] = Field(default_factory=list)  # prerequisites assumed but NOT established by the input
     result: str | None = None            # the intended result of the step, in the learner's terms
+    why: str | None = None               # 0.15: why the learner does this step, as the source explains it (never made up); None = the source gives no reason
     how_to: list[HowTo] = Field(default_factory=list)   # ordered sub-actions: what to select, open, set, enter
     check: list[HowTo] = Field(default_factory=list)    # how the learner can tell it worked
     visual_evidence: str | None = None  # what is visible on screen at that moment (cursor target, key overlay, mode, shape)

@@ -35,6 +35,25 @@ class SessionEngine:
         self.db, self.user_id, self.session_id = db, user_id, session_id
         self.steps: list[tuple[int, Step]] = db.get_steps(row["tutorial_id"])     # (step row id, Step), in order
         self.app: str = db.tutorial_app(row["tutorial_id"]) or "blender"          # which application this tutorial is for
+        self.title: str = db.tutorial_title(row["tutorial_id"]) or ""
+        self._resolve_targets(row["tutorial_id"])
+
+    def _resolve_targets(self, tutorial_id: int) -> None:
+        """Give every action of a Blender tutorial its resolved `target` (what the words mean in Blender: tool, mode, panel, operator) when it was saved without one. Done here, on every load, so tutorials saved
+        before targets existed get them too; the stored steps are not touched. A failure leaves the steps as they were."""
+        try:
+            if self.app == "houdini":                              # nodes, parameters and panes (ingestion/targets_houdini.py)
+                from ingestion.targets_houdini import resolve_steps as resolve_houdini
+                resolved = resolve_houdini([s for _, s in self.steps])
+                self.steps = [(sid, new) for (sid, _), new in zip(self.steps, resolved, strict=True)]
+                return
+            if self.app != "blender":
+                return
+            from ingestion.targets import resolve_steps
+            resolved = resolve_steps([s for _, s in self.steps])
+            self.steps = [(sid, new) for (sid, _), new in zip(self.steps, resolved, strict=True)]
+        except Exception:
+            pass
 
     # ---- creating / resuming
     @classmethod
@@ -111,15 +130,33 @@ class SessionEngine:
         self.db.set_step_status(self.session_id, self.steps[pos - 2][0], PENDING, "user")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos - 1)
 
-    # ---- checking against what the application shows
-    def check(self, observed: dict[str, Any]) -> Verdict | None:
-        """Compare the active step with an observed application state. Changes nothing."""
-        step = self.current_step()
-        return None if step is None else evaluate_step(step, observed)
+    def jump_to(self, pos: int) -> None:
+        """Move the session to step `pos` (1-based). Going back makes every step from `pos` on pending again (they are to be looked at or redone); going forward marks the pending steps in between as
+        skipped, exactly as pressing Skip on each would. Nothing is ever marked done by a jump."""
+        cur = self._need_active()
+        if not 1 <= pos <= len(self.steps):
+            raise EngineError(f"there is no step {pos}")
+        if pos == cur:
+            return
+        status = dict(zip((sid for sid, _ in self.steps), self.statuses(), strict=True))
+        if pos < cur:
+            for sid, _ in self.steps[pos - 1:cur]:
+                self.db.set_step_status(self.session_id, sid, PENDING, "user")
+        else:
+            for sid, _ in self.steps[cur - 1:pos - 1]:
+                if status[sid] == PENDING:
+                    self.db.set_step_status(self.session_id, sid, SKIPPED, "user")
+        self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos)
 
-    def auto_check(self, observed: dict[str, Any]) -> bool:
+    # ---- checking against what the application shows
+    def check(self, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> Verdict | None:
+        """Compare the active step with an observed application state. Changes nothing. `entry` is the state observed when the step began: a result that was already true then is not evidence (see ingestion.evaluator)."""
+        step = self.current_step()
+        return None if step is None else evaluate_step(step, observed, entry)
+
+    def auto_check(self, observed: dict[str, Any], entry: dict[str, Any] | None = None) -> bool:
         """Complete the active step if (and only if) every part of its expected state is observed to hold. Returns True if it advanced."""
-        v = self.check(observed)
+        v = self.check(observed, entry)
         if v is None or v.status != "met" or v.unobservable:
             return False
         self.complete(by="observed")

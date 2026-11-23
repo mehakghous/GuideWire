@@ -78,6 +78,6 @@ def merge_observed(screen: dict[str, Any], probe: dict[str, Any] | None) -> dict
     """Probe values win (they are exact); screen values fill what the probe lacks."""
     out = dict(screen)
     if probe:
-        out.update({k: v for k, v in probe.items() if v not in (None, [], "")})
+        out.update({k: v for k, v in probe.items() if v is not None and v != ""})   # an empty list or dict is an answer ("nothing is selected"), not a missing value
         out["probe"] = True                                 # the evaluator may judge node_count / name_exists / attribute_exists
     return out

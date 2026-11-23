@@ -151,6 +151,33 @@ class VisionService:
         scene = self._reader.read(pixels, win.rect, busy=busy or None)
         return win, frame, pixels, scene.words, scene.layout
 
+    def _look_probe_app(self, win, frame, pixels, words, probe):
+        """(observed, context) for an application whose interface the probe describes (Maya). The Maya model is used only while it matches the window as it is on screen."""
+        from vision import winplatform
+        from vision.grounders import GroundContext
+        from vision.mayaui import MayaUi
+        from vision.probe_client import merge_observed
+        observed = merge_observed({}, probe)
+        maya = MayaUi.parse(probe) if self.profile.key == "maya" else None
+        if maya is not None and not maya.valid_for(winplatform.client_rect(win.hwnd)):
+            maya = None                                                                  # the window moved or was resized since the probe looked: its rectangles mean nothing now
+        last = self._reader.last
+        epoch = (observed.get("ui_rev"), (win.rect.x, win.rect.y, win.rect.w, win.rect.h), last.serial if last is not None else 0, True)
+        return observed, GroundContext(None, None, frame.geometry, pixels, words, None, observed.get("mode"), last.box if last is not None and last.how == "area" else None, epoch, True, maya)
+
+    def region_rect(self, region: str, anchor: str = "center"):
+        """Where a named part of the application is, for pointing at "where it happens". Maya only (from the probe)."""
+        if self.profile.key != "maya" or not self.use_probe:
+            return None
+        from vision import winplatform
+        from vision.mayaui import MayaUi
+        from vision.probe_client import read_probe
+        win = winplatform.find_window(self.title, self.profile.exe)
+        ui = MayaUi.parse(read_probe(app="maya")) if win is not None else None
+        if ui is None or win is None or not ui.valid_for(winplatform.client_rect(win.hwnd)):
+            return None
+        return ui.region({"toolbar": "toolbox", "properties": "channelbox"}.get(region, region))
+
     def reset(self) -> None:
         """Forget what was read, so the next look reads the whole window."""
         self._reader.reset()
@@ -178,6 +205,8 @@ class VisionService:
         probe = self._probe if self.use_probe else None                     # read once, in `_scene`, for this very frame
         if win is None or not self.profile.validated:      # hidden, or an app whose screen layout is not built yet
             return merge_observed({}, probe), None
+        if self.profile.key != "blender":                  # Maya: its own widgets say where things are; no screen-only reading, so the probe answers
+            return self._look_probe_app(win, frame, pixels, words, probe)
         have = probe is not None and all(k in probe for k in ("mode", "workspace", "active_tool"))
         screen = {} if have else observe_blender(words, pixels, layout, mode_hint=(probe or {}).get("mode"))      # the add-on knows exactly: the screen is only read for what it cannot say
         observed = merge_observed(screen, probe)

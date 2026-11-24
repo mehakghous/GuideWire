@@ -112,6 +112,8 @@ def test_the_step_advances_in_the_window_when_the_application_shows_it_done(env)
     engine.complete()                                                 # s01 by hand; s02 expects EDIT_MESH
     screen.refresh()
     assert engine.current_step().id == "s02"
+    svc.observed = {"mode": "OBJECT"}
+    screen.poll()
     svc.observed = {"mode": "EDIT_MESH"}
     screen.poll()
     assert engine.current_step().id == "s03" and "saw this step done" in screen.status.text() and "Step 3" in screen.step_text.text()
@@ -381,7 +383,9 @@ def _at_s02_in_edit_mode(env):
     screen, engine, svc, overlay = env
     engine.complete()
     screen.refresh()
-    svc.observed = {"mode": "EDIT_MESH"}
+    svc.observed = {"mode": "OBJECT"}
+    screen.poll()                                                     # the learner is seen NOT done first ...
+    svc.observed = {"mode": "EDIT_MESH"}                              # ... then does it
     return screen, engine, svc, overlay
 
 
@@ -420,7 +424,7 @@ def test_previous_step_holds_there_instead_of_being_completed_again_at_once(env)
     assert "Step 2" in screen.step_text.text() and "(paused)" in screen.step_pill.text()
     screen.pause_button.click()
     screen.poll()
-    assert engine.current_step().id == "s03"                                                    # Resume: it sees the step done again and moves on
+    assert engine.current_step().id == "s02" and "already looks done" in screen.watch_label.text()   # Resume: true before the visit began is not evidence (audit S-1)
 
 
 def test_done_and_skip_end_a_pause_because_the_learner_is_moving_on(env):

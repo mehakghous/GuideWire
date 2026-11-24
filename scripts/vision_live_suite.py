@@ -42,7 +42,7 @@ class Results:
         return sum(1 for r in self.rows if r[1] == "FAIL")
 
 
-def launch(tmp: Path, size: str = "1366x700"):
+def launch(tmp: Path, size: str = "1366x700", display: str = "windowed", pos: str = "0,40", ui_scale: float = 0.0):
     from verification.runner import find_app
     inst = find_app("blender")
     if inst is None:
@@ -50,8 +50,11 @@ def launch(tmp: Path, size: str = "1366x700"):
     blend = tmp / "empty.blend"
     subprocess.run([inst.exe, "-b", "--factory-startup", "--python-expr", f"import bpy; bpy.ops.wm.save_as_mainfile(filepath=r'{blend}')"], capture_output=True, timeout=120)
     scenario, quit_flag = tmp / "scenario.json", tmp / "quit.flag"
-    proc = subprocess.Popen([inst.exe, "--factory-startup", "--window-geometry", "0", "40", *size.split("x"), str(blend), "--python", str(ROOT / "scripts" / "live_driver_blender.py"), "--", str(scenario), str(quit_flag)],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+    x, y = pos.split(",")
+    flag = {"fullscreen": ["-W"], "borderless": ["-w"]}.get(display, [])                  # Blender's own full screen and borderless windows
+    env = {**os.environ, "GW_UI_SCALE": str(ui_scale)}
+    proc = subprocess.Popen([inst.exe, "--factory-startup", *flag, "--window-geometry", x, y, *size.split("x"), str(blend), "--python", str(ROOT / "scripts" / "live_driver_blender.py"), "--", str(scenario), str(quit_flag)],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, env=env)
     return proc, scenario, quit_flag
 
 
@@ -61,7 +64,15 @@ def bring_to_front(pid: int) -> None:
     from vision import winplatform
     win = winplatform.find_window("Blender", ("blender",), pid)
     if win is not None:
-        ctypes.windll.user32.SetForegroundWindow(win.hwnd)
+        u = ctypes.windll.user32
+        u.keybd_event(0x12, 0, 0, 0); u.keybd_event(0x12, 0, 2, 0)       # an Alt press lets this process take the foreground (Windows refuses a plain SetForegroundWindow from a background process: another window then covers Blender)
+        u.ShowWindow(win.hwnd, 9)
+        u.SetForegroundWindow(win.hwnd)
+        for _ in range(10):                                                # and check that it really is on top before judging anything
+            if u.GetForegroundWindow() == win.hwnd:
+                break
+            time.sleep(0.3)
+            u.SetForegroundWindow(win.hwnd)
 
 
 def read_scenario(path: Path):
@@ -199,7 +210,7 @@ def check_bridge(scn: dict, svc, res: Results, pid: int) -> None:
         tick = bridge.apply(eng, look)
         about = f"phase={tick.phase} state={tick.state} advanced={tick.advanced} rect={tick.rect} hint='{tick.hint}'"
         if scn["tool"] == "builtin.loop_cut" and scn["mode"] == "EDIT":
-            res.add(sid, tick.advanced and tick.phase == "verified", f"Loop Cut is already the active tool: the step is seen done by the application, not before ({about})")
+            res.add(sid, not tick.advanced and "already looks done" in tick.message, f"Loop Cut was already the active tool when the step began: that is not evidence, so the step is NOT completed and says so ({about})")
         elif scn["mode"] == "OBJECT":
             res.add(sid, tick.phase == "blocked" and "Edit Mode" in tick.hint, f"in Object Mode the step is blocked and says to switch mode ({about})")
         elif not scn["toolbar"]:
@@ -231,6 +242,9 @@ def main() -> int:
     ap.add_argument("--keep", action="store_true", help="leave the Blender window open at the end")
     ap.add_argument("--save-fixtures", type=Path, help="keep, for every scenario, the left strip of the frame and the add-on's snapshot in this folder")
     ap.add_argument("--size", default="1366x700", help="the Blender window size: a shorter window (for example 1366x520) shows fewer tools, so more of them are out of view")
+    ap.add_argument("--display", default="windowed", choices=["windowed", "maximized", "fullscreen", "borderless"], help="how the Blender window is shown (docs/display-matrix.md)")
+    ap.add_argument("--pos", default="0,40", help="where the window starts, 'x,y' in screen pixels (for example one placed on a second monitor)")
+    ap.add_argument("--ui-scale", type=float, default=0.0, help="Blender's Resolution Scale (Preferences > Interface), for example 1.25 or 1.5; 0 leaves it alone")
     ap.add_argument("--only", help="comma-separated scenario ids to check (the others still run in Blender but are not judged)")
     a = ap.parse_args()
     if sys.platform != "win32":
@@ -240,9 +254,17 @@ def main() -> int:
     winplatform.enable_dpi_awareness()
     res = Results()
     with tempfile.TemporaryDirectory() as d:
-        proc, scenario, quit_flag = launch(Path(d), a.size)
+        proc, scenario, quit_flag = launch(Path(d), a.size, a.display, a.pos, a.ui_scale)
         try:
             svc = VisionService(app="blender")
+            if a.display == "maximized":
+                import ctypes
+                for _ in range(60):
+                    w = winplatform.find_window("Blender", ("blender",), proc.pid)
+                    if w is not None:
+                        ctypes.windll.user32.ShowWindow(w.hwnd, 3)           # SW_MAXIMIZE
+                        break
+                    time.sleep(1)
             seen = -1
             deadline = time.time() + 240
             while time.time() < deadline:

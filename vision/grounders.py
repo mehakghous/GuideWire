@@ -67,6 +67,7 @@ class GroundContext:
     changed: Rect | None = None                # frame area re-read at this look (a menu that just opened), if any
     epoch: Any = None                          # (interface revision, scene revision, window, words serial, settled): a result stays valid while it is unchanged
     settled: bool = True                       # the interface has not changed for a moment: Blender scrolls smoothly, so for about a second after a change the picture lags what the add-on reports
+    maya: Any = None                           # Maya only: vision.mayaui.MayaUi built from the probe, when it describes the window as it is on screen now (then `ui` and `mapper` stay None)
     houdini: dict | None = None                # Houdini: the probe's interface snapshot (vision/probes/houdini_probe.py `ui`): panes, node tiles, the parameter pane's node and labels; screen pixels
 
     def screen_to_frame(self, r: Rect) -> Rect | None:
@@ -516,8 +517,29 @@ def ground_context_menu(ctx: GroundContext, ref: TargetRef) -> Grounded:
     return Grounded("context_menu", NOT_OPEN, None, 0.0, ("the context menu is not open",), f"Right-click in the 3D view, then choose {ref.label}.", label=ref.label)
 
 
+def ground_maya(ctx: GroundContext, ref: TargetRef) -> Grounded:
+    """A target in Maya: a menu opened on screen is read from its text (the most specific answer); the tool box, shelf buttons and the menu bar are exact, from Maya's own widgets (`ctx.maya`)."""
+    path = " > ".join(ref.path or [ref.label])
+    found = locate(ctx.words, path)
+    if found is not None and found.depth >= 1:                                           # a menu is open and its item was read from the screen
+        return _from_located("menu", found, ctx, "", path)
+    hit = ctx.maya.find(path if ref.kind == "menu" else (ref.label or path))
+    if hit is None and ref.kind == "tool" and ref.id:
+        hit = ctx.maya.find(ref.id)
+    if hit is None:
+        if found is not None:
+            return _from_located("menu", found, ctx, "", path)
+        return Grounded(ref.kind, NOT_FOUND, None, 0.0, ("Maya does not list that control",), "Open: " + path, label=ref.label)
+    w = ctx.maya.window
+    if not (w.x <= hit.rect.x and w.y <= hit.rect.y and hit.rect.x + hit.rect.w <= w.x + w.w and hit.rect.y + hit.rect.h <= w.y + w.h):
+        return Grounded(ref.kind, HIDDEN, None, 0.6, ("that part of Maya is outside its window",), "That part of Maya is not visible.", label=ref.label)
+    return Grounded(ref.kind, VISIBLE, hit.rect, 0.95, (f"Maya reports the {hit.kind} '{hit.name}' here",), hint_for(path, hit.name, hit.complete), matched=hit.name, complete=hit.complete, label=ref.label)
+
+
 def ground_target(ctx: GroundContext, ref: TargetRef) -> Grounded:
     """The grounder for this kind of target. Keys and viewport items have nothing on screen to find: the answer is `words_only`."""
+    if ctx.maya is not None and ref.kind in ("tool", "menu", "mode", "property"):
+        return ground_maya(ctx, ref)
     if ref.kind == "tool":
         return ground_tool(ctx, ref)
     if ref.kind == "menu":

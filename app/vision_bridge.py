@@ -14,6 +14,7 @@ Work per look is kept to what changed (the scheduler):
 """
 from __future__ import annotations
 
+import logging
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -21,9 +22,12 @@ from typing import Any
 
 from app import step_state
 from shared import shortcuts
+from shared.diagnostics import get_logger, log_every
 from shared.step_record import Step, TargetRef
 from vision.grounders import ground_target, hint_for  # noqa: F401  (hint_for is re-exported: the menu wording)
 from vision.verify import Gated, GroundCache, gate
+
+log = get_logger("vision")
 
 WINDOW_NAMES = {"blender": "Blender", "maya": "Maya", "houdini": "Houdini"}
 INSTALL_HINT = "pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections"
@@ -196,6 +200,7 @@ class VisionBridge:
                 self._services[app] = self.factory(app)
             except Exception as e:                       # missing packages, not Windows, no display
                 self._failed[app] = explain(e)
+                log.warning("screen guidance unavailable for %s: %s (%s)", app, self._failed[app], type(e).__name__)
                 return None
         return self._services[app]
 
@@ -234,13 +239,16 @@ class VisionBridge:
             if ctx is None and not _screen_checked(app):         # not "open it in front": the window may well be in front; this application is not read from the screen (yet)
                 return Look(target, window_rect=window, problem=f"Screen checking is available for Blender only. In {WINDOW_NAMES.get(app, app)} you follow the steps and press Done.", problem_state="unavailable", keys=step_state.keys_text(step))
             if ctx is None:
+                log_every(log, f"no-window-{app}", 60, logging.INFO, "%s is not visible, so the screen cannot be read", WINDOW_NAMES.get(app, app))
                 return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=step_state.keys_text(step))
             entry = self._entries.setdefault(step.id, {k: observed[k] for k in ENTRY_KEYS if k in observed})
             state, observed = self._assess(step, svc, observed, ctx, props, attrs, wanted, entry)
         except ImportError as e:                         # the OCR packages are missing: this fails the first time the screen is read, not when the service is made
             self._failed[app] = explain(e)
+            log.warning("screen guidance stopped for %s: %s", app, self._failed[app])
             return Look(target, window_rect=window, problem=self._failed[app], problem_state="unavailable")
         except Exception as e:                           # a vision failure must never break the session
+            log_every(log, f"look-failed-{type(e).__name__}", 30, logging.WARNING, "a screen look failed: %s: %s", type(e).__name__, e)
             return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.", keys=step_state.keys_text(step))
         t_end = time.perf_counter()
         self.stats.looks += 1
@@ -305,12 +313,15 @@ class VisionBridge:
         status = verdict.status if verdict is not None else None
         if status == "unmet":
             self._seen_unmet.add(key)                    # the screen has seen the step NOT done during this visit
+        if key not in self._first_met and status == "met":
+            log.info("step %s was already true when it started, so the screen will not complete it", key[1])
         self._first_met.setdefault(key, status == "met")
         already = status == "met" and self._first_met[key] and key not in self._seen_unmet
         advanced = False
         if self.auto_advance and status == "met" and verdict is not None and not verdict.unobservable and not already:
             engine.complete(by="observed")               # only when the screen saw the state change, never because it was true all along
             advanced = True
+            log.info("step %s completed because the screen saw it become true", key[1])
         if len(self._first_met) > 500:
             self._first_met.clear()
             self._seen_unmet.clear()

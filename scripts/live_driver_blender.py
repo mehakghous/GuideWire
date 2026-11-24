@@ -17,6 +17,12 @@ spec = importlib.util.spec_from_file_location("guidewire_probe", os.path.join(RO
 probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 probe.register()
+try:
+    _scale = float(os.environ.get("GW_UI_SCALE", "0"))
+    if _scale > 0:
+        bpy.context.preferences.view.ui_scale = _scale          # Blender's own Resolution Scale (Preferences > Interface): a different layout, like a different display scaling
+except Exception:
+    pass
 
 SETTLE = 8.0            # seconds each scenario is held (Blender scrolls smoothly: the picture lags the add-on for about a second)
 SCENARIOS = [

@@ -16,9 +16,12 @@ import itertools
 from typing import Any
 
 from ingestion.evaluator import Verdict, evaluate_step
+from shared.diagnostics import get_logger
 from shared.step_record import Step
 
 from .db import Database, now
+
+log = get_logger("session")
 
 NOT_STARTED, ACTIVE, FINISHED = "not_started", "active", "finished"
 PENDING, DONE, SKIPPED = "pending", "done", "skipped"
@@ -112,11 +115,13 @@ class SessionEngine:
             raise EngineError("this tutorial has no steps")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=1, started_at=now())
         self.revision = next(_VISITS)
+        log.info("session %d started (%s, %d steps)", self.session_id, self.app, len(self.steps))
 
     def _close_current(self, status: str, by: str) -> None:
         pos = self._need_active()
         self.db.set_step_status(self.session_id, self.steps[pos - 1][0], status, by)
         self.revision = next(_VISITS)
+        log.info("session %d: step %d/%d %s by %s", self.session_id, pos, len(self.steps), status, by)
         if pos >= len(self.steps):
             self.db.update_session(self.session_id, state=FINISHED, current_pos=pos, finished_at=now())
         else:
@@ -136,6 +141,7 @@ class SessionEngine:
         self.db.set_step_status(self.session_id, self.steps[pos - 2][0], PENDING, "user")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=pos - 1)
         self.revision = next(_VISITS)
+        log.info("session %d: back to step %d/%d", self.session_id, pos - 1, len(self.steps))
 
     def jump_to(self, pos: int) -> None:
         """Move the session to step `pos` (1-based). Going back makes every step from `pos` on pending again (they are to be looked at or redone); going forward marks the pending steps in between as

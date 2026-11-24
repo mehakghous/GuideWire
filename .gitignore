@@ -195,3 +195,6 @@ knowledge/*.sqlite
 # vision demo output
 frame.png
 frame_annotated.png
+
+# The installer build recipe is source, not a generated file
+!installer/guidewire.spec

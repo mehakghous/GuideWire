@@ -101,7 +101,11 @@ class LoginScreen(QWidget):
         form_tile.body.addWidget(form_heading)
         form_tile.body.addSpacing(14)
         form = QFormLayout()
-        form.setSpacing(10)
+        form.setRowWrapPolicy(QFormLayout.RowWrapPolicy.WrapAllRows)       # each label sits above its box, so nothing is out of line
+        form.setVerticalSpacing(6)
+        form.setContentsMargins(0, 0, 0, 0)
+        for box in (self.email, self.password, self.name, self.reset_code, self.reset_password):
+            box.setMinimumHeight(40)
         form.addRow("Email", self.email)
         form.addRow("Password", self.password)
         form.addRow("Name", self.name)
@@ -109,14 +113,20 @@ class LoginScreen(QWidget):
         form.addRow("New password", self.reset_password)
         self.form = form
         form_tile.body.addLayout(form)
+        form_tile.body.addSpacing(14)
         buttons = QHBoxLayout()
+        buttons.setSpacing(12)
+        for b in (self.login_button, self.register_button, self.send_code_button, self.set_password_button):
+            b.setMinimumHeight(42)
         buttons.addWidget(self.login_button)
         buttons.addWidget(self.register_button)
         form_tile.body.addLayout(buttons)
         reset_buttons = QHBoxLayout()
+        reset_buttons.setSpacing(12)
         reset_buttons.addWidget(self.send_code_button)
         reset_buttons.addWidget(self.set_password_button)
         form_tile.body.addLayout(reset_buttons)
+        form_tile.body.addSpacing(6)
         form_tile.body.addWidget(self.forgot_button, 0, Qt.AlignmentFlag.AlignLeft)
         form_tile.body.addWidget(self.cancel_reset_button, 0, Qt.AlignmentFlag.AlignLeft)
         form_tile.body.addWidget(self.notice)

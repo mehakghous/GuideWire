@@ -405,12 +405,15 @@ def test_session_without_vision_has_no_guidance(win):
 def test_guidance_shows_the_highlight_for_the_active_step(win):
     s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
     s.poll()
-    assert overlay.shown >= 1 and len(overlay.marks) == 1 and s.watch_label.text() == "Found Cube"
+    assert overlay.shown >= 1 and len(overlay.marks) == 1 and "already looks done" in s.watch_label.text()   # the cube was there from the start: not evidence
     assert s.engine.position == 1
 
 
 def test_guidance_completes_a_step_the_screen_shows_done(win):
-    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT", "selection_types": ["MESH"]}))
+    svc = vf.FakeService({"mode": "OBJECT", "selection_types": []})
+    s, overlay = _guided(win, svc)
+    s.poll()                                                        # nothing is selected yet: not done
+    svc.observed = {"mode": "OBJECT", "selection_types": ["MESH"]}
     s.poll()
     assert s.engine.position == 2 and "Step 2" in s.step_text.text()
     assert "saw this step done" in s.status.text()

@@ -325,13 +325,79 @@ def _start_mode(step: Step, carried: str | None = None) -> str | None:
     return next((p.target for p in step.start_state if p.kind == "mode"), carried)
 
 
-def resolve_step(step: Step, cat: Catalog | None = None, report: Report | None = None, carried_mode: str | None = None) -> Step:
-    """A copy of the step with `target` set on every action that could be resolved. The step's own text and the rest of the step are untouched."""
+# Scene things a tutorial names in the 3D view ("Foot bone", "Leg mesh", "Z axis handle"): never fields of a Properties panel, whatever the step said before them
+_SCENE_WORDS = frozenset("bone bones joint joints mesh object armature handle gizmo vertex vertices edge edges face faces cylinder cube controller".split())
+_FIELD_VERBS = ("set_value", "click", "select")
+
+
+def _looks_like_field(label: str) -> bool:
+    words = re.findall(r"[A-Za-z][A-Za-z/]*", label)
+    return 1 <= len(words) <= 4 and not any(w.lower() in _SCENE_WORDS for w in words)
+
+
+def _header_routes(leaf: str, before: list[str], mode: str | None) -> list[tuple[str, ...]]:
+    """The header-menu routes Blender itself reports (shared.menu_routes) that END in `leaf` and pass through the names the tutorial gave before it, in order, in the step's mode (any dumped mode
+    when the mode is unknown). A tutorial writes "Armature > Single Bone" for Add > Armature > Single Bone: the root is what the learner has to find first."""
+    from shared import menu_routes
+    want, pre = _n(leaf), [_n(b) for b in before]
+    modes = [mode] if mode in menu_routes.modes() else menu_routes.modes()
+    found: list[tuple[str, ...]] = []
+    for m in modes:
+        for routes in menu_routes._data()["modes"][m].get("ops", {}).values():
+            for r in routes:
+                if _n(r[-1]) != want or len(r) < 2:
+                    continue
+                inner = iter(_n(x) for x in r[:-1])
+                if all(any(p == x for x in inner) for p in pre) and tuple(r) not in found:
+                    found.append(tuple(r))
+    return sorted(found, key=lambda r: (len(r), r))
+
+
+def _complete_menu(a: Action, t: TargetRef | None, mode: str | None, cat: Catalog) -> TargetRef | None:
+    """The header-menu path for an action that names a menu item without its menu ("Single Bone", "Armature > Single Bone", "Clear Parent"): `Add > Armature > Single Bone`. Only when the words are not
+    already a path that starts at a header menu, and only when Blender's own menu dump has such an item, in the step's mode."""
+    if a.verb not in ("open_menu", "select", "click") or not a.ui_element:
+        return None
+    segs = [s for s in _SEP.split(a.ui_element.strip()) if s]
+    if not segs or (t is not None and t.kind not in ("viewport", "menu")):
+        return None
+    routes = _header_routes(segs[-1], segs[:-1], mode)
+    if not routes and len(segs) >= 2:
+        routes = _header_routes(segs[-2], segs[:-2], mode)    # an older tutorial's "Armature > Single Bone" is Add > Armature in today's Blender: the menu the learner can find is the one before it
+    if not routes:
+        return None
+    if t is not None and t.kind == "menu" and t.path and _n(t.path[0]) == _n(routes[0][0]) and len(t.path) >= len(routes[0]):
+        return None                                           # already a full path from a header menu
+    unique = len({r[0] for r in routes}) == 1 or len(routes) == 1
+    return TargetRef(kind="menu", label=segs[-1], path=list(routes[0]), confidence=0.9 if unique else 0.6, catalog_version=cat.version)
+
+
+def _property_context(a: Action, t: TargetRef | None, ctx: dict, cat: Catalog) -> TargetRef | None:
+    """A field the tutorial names on its own ("In Front", "Axes", "Head/Tail") right after it opened a Properties tab or panel belongs to that panel: the tab and panel the step (or the step before it) named are
+    carried over, so the guide can walk tab -> panel -> field. Without this the field resolved to "a thing in the 3D view" and nothing was pointed at."""
+    if a.verb not in _FIELD_VERBS or not a.ui_element or ctx.get("tab") is None:
+        return None
+    if t is not None and t.kind != "viewport":
+        return None
+    label = a.ui_element.strip()
+    if _SEP.search(label) or not _looks_like_field(label):
+        return None
+    return TargetRef(kind="property", label=label, tab=ctx["tab"], panel=ctx.get("panel"), prop=label, path=[x for x in (ctx.get("tab_name"), ctx.get("panel"), label) if x],
+                     confidence=0.7, catalog_version=cat.version)
+
+
+def resolve_step(step: Step, cat: Catalog | None = None, report: Report | None = None, carried_mode: str | None = None, ctx: dict | None = None) -> Step:
+    """A copy of the step with `target` set on every action that could be resolved. The step's own text and the rest of the step are untouched.
+    `ctx` carries what an earlier action or step opened (`tab`, `panel`, `edit_kind`) so a bare field name or a mode word is read in that context; resolve_steps supplies it."""
     cat = cat or load_catalog()
     if cat is None:
         return step
     mode = _start_mode(step, carried_mode)
     expected_mode = next((p.target for p in step.expected_state if p.kind == "mode"), None)
+    if ctx is not None:
+        for p in [*step.start_state, *step.expected_state]:
+            if p.kind == "mode" and p.target.startswith("EDIT_"):
+                ctx["edit_kind"] = p.target
     actions = []
     context_op = None
     for a in step.actions:
@@ -342,6 +408,27 @@ def resolve_step(step: Step, cat: Catalog | None = None, report: Report | None =
             context_op = t.operator                                  # the pop-up menu that follows belongs to this operator
         if t is not None and t.kind == "mode" and t.id and expected_mode and (expected_mode == t.id or expected_mode.startswith(t.id + "_")):
             t = t.model_copy(update={"mode": expected_mode})        # the mode selector says "Edit Mode"; the step's own check says which one (EDIT_ARMATURE)
+        if ctx is not None:
+            if t is None or t.kind in ("viewport", "menu"):
+                better = _complete_menu(a, t, mode, cat)
+                if better is not None:
+                    t = better
+            if t is None and context_op and a.verb in ("open_menu", "select", "click") and a.ui_element and not _SEP.search(a.ui_element):
+                t = TargetRef(kind="operator_panel", label=a.ui_element.strip(), operator=context_op, id="POPUP", confidence=0.5, catalog_version=cat.version)      # a choice in the pop-up the key before it opened ("Shift+I", then "To Active Bone")
+            from_context = False
+            if t is None or t.kind == "viewport":
+                better = _property_context(a, t, ctx, cat)
+                if better is not None:
+                    t, from_context = better, True
+            if t is not None and t.kind == "property" and t.tab and not from_context:      # a field read in the context does not open a new panel: the tab and panel stay what the tutorial named
+                same_tab = t.tab == ctx.get("tab")
+                ctx["panel"] = t.panel or (t.prop if t.prop and _panel_tab(cat, t.prop) is not None else (ctx.get("panel") if same_tab else None))
+                ctx["tab"], ctx["tab_name"] = t.tab, (t.path[0] if t.path else None)
+                ctx["age"] = 0
+            if t is not None and t.kind == "mode" and t.id:           # "Edit Mode" with no more said: the kind of editing the tutorial has been doing (Edit Armature), and what is carried changes with it
+                if t.id == "EDIT" and t.mode in (None, "EDIT") and ctx.get("edit_kind"):
+                    t = t.model_copy(update={"mode": ctx["edit_kind"]})
+                mode = t.mode or t.id
         if report is not None:
             report.actions += 1
             if a.ui_element or a.keys:
@@ -358,12 +445,24 @@ def resolve_step(step: Step, cat: Catalog | None = None, report: Report | None =
 
 
 def resolve_steps(steps: list[Step], cat: Catalog | None = None, report: Report | None = None) -> list[Step]:
-    """Resolve a tutorial's steps in order, carrying the interaction mode from one step to the next (a tutorial does not repeat it)."""
+    """Resolve a tutorial's steps in order, carrying the interaction mode from one step to the next (a tutorial does not repeat it), and the Properties tab and panel the last step opened to the
+    step right after it (a field named on its own there is in that panel)."""
     out: list[Step] = []
     mode: str | None = None
+    ctx: dict = {}
     for st in steps:
-        out.append(resolve_step(st, cat, report, mode))
-        mode = next((p.target for p in st.expected_state if p.kind == "mode"), _start_mode(st, mode))      # what the next step starts in
+        if ctx.get("age", 0) >= 1 and "tab" in ctx:               # a tab opened two steps ago is no longer where the tutorial is
+            for k in ("tab", "tab_name", "panel"):
+                ctx.pop(k, None)
+        ctx["age"] = ctx.get("age", 0) + 1
+        r = resolve_step(st, cat, report, mode, ctx)
+        out.append(r)
+        end_mode = next((p.target for p in st.expected_state if p.kind == "mode"), None)
+        if end_mode is None:
+            end_mode = next((a.target.mode or a.target.id for a in reversed(r.actions) if a.target is not None and a.target.kind == "mode"), None)
+            if end_mode == "EDIT" and ctx.get("edit_kind"):
+                end_mode = ctx["edit_kind"]
+        mode = end_mode or _start_mode(st, mode)                  # what the next step starts in
     return out
 
 

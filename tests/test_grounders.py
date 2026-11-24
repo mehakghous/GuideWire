@@ -302,3 +302,81 @@ def test_a_constraint_field_is_pointed_at_when_only_its_label_was_read_because_t
     assert two.state == g.AMBIGUOUS and not gate(two).ok                                              # two constraints have one: pointing at either would be a guess
     none = g.ground_target(vf.make_context([], state, "POSE"), HEAD_TAIL)
     assert none.state == g.OFFSCREEN and "Scroll the Properties editor" in none.note                   # as before
+
+
+def test_a_popup_headed_with_the_choice_s_own_name_points_at_the_choice_below_the_title():
+    """2026-11-23, real Blender 5.2: Alt+P in Edit Mode opens a popup titled "Clear Parent" whose first choice is "Clear Parent", and a tooltip further right repeats the words. Three hits made it ambiguous, so
+    nothing was pointed at. The title and the choice are one column: the lower is the choice; the tooltip elsewhere is not part of it."""
+    ref = TargetRef(kind="operator_panel", label="Clear Parent", operator="armature.parent_clear", prop="type", id="CLEAR")
+    words = vf.phrase("Clear Parent", 478, 296, 9) + vf.phrase("Clear Parent", 502, 324, 8) + vf.phrase("Remove the parent-child relationship Clear Parent", 700, 358, 8)
+    got = g.ground_operator_panel(vf.make_context(words, None, "EDIT_ARMATURE"), ref)
+    assert got.state == g.VISIBLE and got.rect.y == 324 and got.complete
+    lone = g.ground_operator_panel(vf.make_context(vf.phrase("Keep Offset", 502, 324, 8), None, "EDIT_ARMATURE"), TargetRef(kind="operator_panel", label="Keep Offset", id="OFFSET", prop="type"))
+    assert lone.state == g.VISIBLE and lone.rect.y == 324
+    two_columns = g.ground_operator_panel(vf.make_context(vf.phrase("Clear Parent", 100, 300, 9) + vf.phrase("Clear Parent", 700, 400, 9), None, "EDIT_ARMATURE"), ref)
+    assert two_columns.state == g.AMBIGUOUS                          # two places far apart: still a guess, still not pointed at
+
+
+def test_the_object_menu_is_not_confused_with_the_object_mode_dropdown_in_the_same_header():
+    """2026-11-23: in Object Mode the header reads "Object Mode ... View Select Add Object". A path starting at the Object menu found "Object" twice and was never pointed at."""
+    from vision.locate import locate
+    words = vf.phrase("Object Mode", 60, 60) + vf.phrase("View", 170, 60) + vf.phrase("Select", 220, 60) + vf.phrase("Add", 270, 60) + vf.phrase("Object", 310, 60)
+    found = locate(words, "Object > Parent > Armature Deform > With Automatic Weights")
+    assert found is not None and found.rect.x == 310 and found.alternatives == 0
+    only_mode = locate(vf.phrase("Object Mode", 60, 60), "Object")
+    assert only_mode is not None                                    # when nothing else matches, the word is still used rather than losing the target
+
+
+def test_a_menu_item_is_a_whole_label_not_the_first_word_of_a_longer_one():
+    """2026-11-23, real Blender 5.2, found by clicking through the guide's own highlights: with the Armature menu open, "Extrude" is also the first word of "Extrude to Cursor" and "Parent" is also a word of
+    "Clear Parent" and "Make Parent without Inverse". Those ties made the guide draw nothing inside the menu."""
+    from vision.locate import locate
+    menu = vf.phrase("Armature", 306, 60) + vf.phrase("Extrude", 308, 179) + vf.phrase("E", 510, 179) + vf.phrase("Extrude to Cursor", 308, 199) + vf.phrase("Duplicate", 308, 219)
+    found = locate(menu, "Armature > Extrude")
+    assert found is not None and found.complete and found.rect.y == 179 and found.alternatives == 0
+    parents = vf.phrase("Object", 297, 60) + vf.phrase("Parent", 321, 420) + vf.phrase("Clear Parent", 520, 375) + vf.phrase("Make Parent without Inverse", 520, 328) + vf.phrase("Clear Parent Inverse", 520, 419)
+    got = locate(parents, "Object > Parent")
+    assert got is not None and got.complete and got.rect.y == 420 and got.alternatives == 0
+
+
+def test_a_submenu_that_opens_upward_from_its_item_is_still_followed():
+    """Object > Parent > Armature Deform > With Automatic Weights: the submenu of the Parent item is long, so its first rows are far ABOVE the item."""
+    from vision.locate import locate
+    words = (vf.phrase("Object", 297, 60) + vf.phrase("Parent", 321, 420) + vf.phrase("Armature Deform", 520, 59) + vf.phrase("With Automatic Weights", 530, 103) + vf.phrase("With Empty Groups", 530, 81))
+    found = locate(words, "Object > Parent > Armature Deform > With Automatic Weights")
+    assert found is not None and found.complete and found.rect.y == 103
+
+
+def test_a_panel_header_at_the_bottom_edge_of_the_properties_editor_says_to_scroll_not_to_click():
+    """2026-11-23, real Blender: after the learner opened Viewport Display it sat on the last row of a short editor with nothing under it, and the guide kept saying "Click Viewport Display to open it"."""
+    ref = TargetRef(kind="property", label="In Front", tab="OBJECT", panel="Viewport Display", prop="In Front")
+    state = vf.tool_state("OBJECT")
+    probe = vf.make_context([], state, "OBJECT")
+    box = probe.window_to_frame(probe.ui.area("PROPERTIES").region("WINDOW").rect)
+    header = vf.phrase("Viewport Display", box.x + 20, box.y + box.h - 28)
+    got = g.ground_property(vf.make_context(header, state, "OBJECT"), ref)
+    assert got.state in (g.OFFSCREEN, g.WRONG, g.UNKNOWN, g.NOT_FOUND) and "Click Viewport Display to open it" not in got.note
+
+
+def test_a_tooltip_that_ends_in_the_choice_s_words_is_not_the_choice():
+    """2026-11-23, learner report: hovering Clear Parent in the pop-up shows a tooltip ("Remove the parent-child relationship ...: Clear Parent"); the guide highlighted the words inside the tooltip as well. A hit with
+    another word right beside it on the row is part of a longer sentence, not a label."""
+    ref = TargetRef(kind="operator_panel", label="Clear Parent", operator="armature.parent_clear", prop="type", id="CLEAR")
+    words = (vf.phrase("Clear Parent", 478, 296, 9) + vf.phrase("Clear Parent", 502, 324, 8)
+             + vf.phrase("Remove the parent-child relationship between selected bones and their parents: Clear Parent", 520, 358, 8))
+    got = g.ground_operator_panel(vf.make_context(words, None, "EDIT_ARMATURE"), ref)
+    assert got.state == g.VISIBLE and got.rect.y == 324 and got.rect.x == 502          # the choice, not the tooltip (which sits at the end of a sentence, on a lower row)
+
+
+def test_the_settings_panel_that_keeps_the_choice_s_name_after_the_choice_is_not_the_popup():
+    """2026-11-24, learner report: after Clear Parent was done, Blender shows "> Clear Parent" in the collapsed settings panel at the bottom left, and the guide highlighted it as if the pop-up were still open."""
+    ref = TargetRef(kind="operator_panel", label="Clear Parent", operator="armature.parent_clear", prop="type", id="CLEAR")
+    state = vf.tool_state("EDIT_ARMATURE", hud=True)
+    probe = vf.make_context([], state, "EDIT_ARMATURE")
+    box = probe.window_to_frame(probe.ui.area("VIEW_3D").region("HUD").rect)
+    in_panel = vf.phrase("Clear Parent", box.x + 14, box.y + 8, 12)
+    got = g.ground_operator_panel(vf.make_context(in_panel, state, "EDIT_ARMATURE"), ref)
+    assert got.state == g.NOT_OPEN and got.rect is None
+    popup = vf.phrase("Clear Parent", 478, 296, 9) + vf.phrase("Clear Parent", 502, 324, 8)
+    still = g.ground_operator_panel(vf.make_context(in_panel + popup, state, "EDIT_ARMATURE"), ref)
+    assert still.state == g.VISIBLE and still.rect.y == 324          # a real pop-up elsewhere on screen is still found

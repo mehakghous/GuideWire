@@ -525,7 +525,10 @@ class SessionScreen(QWidget):
         self._dismissed_step: str | None = None
         self._last_window = None
         self._last_hint = ""
+        self._last_route = ""
         self._last_keys: tuple[str, ...] = ()
+        self._steady: tuple | None = None                 # what the guide last SHOWED for this step: (phase, message, hint, keys, rect). A different phase must be seen on two looks in a row before it replaces this
+        self._candidate: tuple[str, int] = ("", 0)
         self._shown_step: str | None = None              # the step the guide (highlight, box, status line) is showing: everything is cleared together when it changes
         self._app = "blender"
         self._profile_off = False                        # the learner's profile preference switched screen guidance off for sessions
@@ -784,7 +787,8 @@ class SessionScreen(QWidget):
                 self.panel.hide()
             return
         p = self._ensure_panel()
-        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], "Paused: press Resume to continue." if self.paused else self._last_hint, () if self.paused else self._last_keys)
+        p.set_content(f"GuideWire · step {e.position} of {len(e.steps)}", step.goal, [h.text for h in step.how_to], "Paused: press Resume to continue." if self.paused else self._last_hint, () if self.paused else self._last_keys,
+                      "" if self.paused else self._last_route, [h.text for h in step.check])
         p.set_paused(self.paused)
         screen = self.window().screen()
         if screen is None:
@@ -858,10 +862,12 @@ class SessionScreen(QWidget):
                 self.poll()
             return
         tick = self.bridge.apply(e, look)
-        self.watch_label.setText(tick.message)
-        self._last_window, self._last_hint, self._last_keys = look.window_rect, tick.hint, tick.keys
-        if tick.rect is not None:
-            self.guide.show(tick.rect, look.window_rect)           # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
+        message, hint, keys, rect = self._steady_view(tick, look)
+        self.watch_label.setText(message)
+        self._last_window, self._last_hint, self._last_keys = look.window_rect, hint, keys
+        self._last_route = look.target or ""
+        if rect is not None:
+            self.guide.show(rect, look.window_rect)                # a box only: text drawn over the application is read back by the OCR (see docs/vision_integration.md)
         else:
             self.guide.clear()
         self._warn_if_covering(look.window_rect)
@@ -872,6 +878,23 @@ class SessionScreen(QWidget):
             self.viewing = None
             self.refresh()
 
+    def _steady_view(self, tick, look):
+        """What to show for this look: the message, the hint, the keys and the rectangle. The screen read flickers (a menu that was read on one look is missed on the next), and the words under the heading then
+        flipped between "Click the mode dropdown, then Pose Mode", "Open it first" and "Looking for it", too fast to read. A look whose PHASE differs from what is shown must be seen twice in a row before it
+        replaces it; a look in the same phase updates at once (the rectangle follows a moving window). A finished step (advanced) and a first look are shown immediately."""
+        now = (look.phase or "", tick.message, tick.hint, tick.keys, tick.rect)
+        shown = self._steady
+        if tick.advanced or look.problem is not None or shown is None or now[0] == shown[0]:
+            self._steady, self._candidate = now, ("", 0)
+            return now[1], now[2], now[3], now[4]
+        phase, n = self._candidate
+        n = n + 1 if phase == now[0] else 1
+        self._candidate = (now[0], n)
+        if n >= 2:
+            self._steady, self._candidate = now, ("", 0)
+            return now[1], now[2], now[3], now[4]
+        return shown[1], shown[2], shown[3], shown[4]                  # keep showing what was there for one look
+
     def _on_step_change(self, step) -> None:
         """One step, one guide: when the step changes, the previous step's highlight, hint, keys and animation are cleared in the same call that shows the new goal. Nothing of the old step can
         stay under the new one while the first look of the new step is being read."""
@@ -879,7 +902,8 @@ class SessionScreen(QWidget):
         if sid == self._shown_step:
             return
         self._shown_step = sid
-        self._last_hint, self._last_keys = "", ()
+        self._last_hint, self._last_keys, self._last_route = "", (), ""
+        self._steady, self._candidate = None, ("", 0)
         self.guide.clear()
         self.watch_label.setText(self._paused_text() if (sid is not None and self.paused) else "Looking at the screen..." if (sid is not None and self.watching) else self._off_text())
 

@@ -46,7 +46,7 @@ def default_video_provider():
         raise RuntimeError("The AI model is not set up on this computer: put GEMINI_API_KEY in the .env file.") from e
 
 
-def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_meta=None, group: bool = True, on_status=None) -> PipelineResult:
+def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_meta=None, group: bool = True, split: bool = True, on_status=None) -> PipelineResult:
     """A YouTube link in, a step list out: read the video's title and length, have the model watch it (the prompt chosen by measurement for this application), then give the steps display groups.
     Never raises: every failure comes back as a plain message and no steps. `provider_factory` and `fetch_meta` are injected so tests need no network."""
     from ingestion.extract import GAP_PASS_APPS, ExtractionError, extract_from_video, fill_gaps, recommended_video_prompt_version
@@ -97,7 +97,10 @@ def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_
     if title and not sl.title:
         sl = sl.model_copy(update={"title": title})
     notes = [f"Drafted automatically by {sl.model_id} ({sl.prompt_version}) from the video; review the steps before you use them."]
-    if group:
+    if split:
+        from ingestion.split import split_steps
+        sl = split_steps(sl)                                    # one step per how-to line, the original goal as the group label; no model call, no new words
+    if group and not any(s.group_id for s in sl.steps):         # split already gave every step a display group (its original goal): a model call to regroup would only coarsen them again
         say("Grouping the steps...")
         try:
             sl = group_steps(sl, provider_factory())

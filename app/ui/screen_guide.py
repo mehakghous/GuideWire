@@ -140,6 +140,7 @@ def panel_style() -> str:
             f"QLabel {{ background: transparent; color: {c['text']}; font-family: 'Segoe UI'; font-size: 10pt; }} "
             f"QLabel#kicker {{ color: {c['kicker']}; font-weight: 700; font-size: 9pt; }} "
             f"QLabel#goal {{ font-weight: 700; font-size: 11pt; }} "
+            f"QLabel#route {{ color: {c['text']}; font-weight: 700; font-size: 10pt; }} "
             f"QLabel#hint {{ color: {c['accent']}; font-weight: 700; }} "
             f"QLabel#lines {{ color: {c['muted']}; font-size: 9.5pt; }} "
             f"QPushButton {{ background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1, stop:0 {c['tile_hi']}, stop:1 {c['field']}); border: 2px solid {c['hi']}; border-radius: 14px; padding: 3px 14px; font-weight: 600; color: {c['text']}; }} "
@@ -153,6 +154,8 @@ class InstructionPanel(QWidget):
     """A small guide that sits at the side like a browser extension: the step's goal and the next move in words, in a box you can
     DRAG (by its header), RESIZE (by the corner grip), MINIMIZE (the dash: it becomes a thin tab that is still draggable; click the tab to open it again) and close (the cross).
     It is placed once, outside the application when there is room; as soon as you move or resize it yourself it stays where you put it."""
+    _check_open = False             # "How you can tell it worked" starts closed; opening it is remembered
+    _details_open = True            # the how-to lines start open: they are easier to follow than the heading
     done_clicked = pyqtSignal()
     back_clicked = pyqtSignal()
     skip_clicked = pyqtSignal()
@@ -189,6 +192,9 @@ class InstructionPanel(QWidget):
         self.goal = QLabel("")
         self.goal.setObjectName("goal")
         self.goal.setWordWrap(True)
+        self.route = QLabel("")                      # WHERE the thing is, written once and not rewritten while the step goes on ("Add > Armature"); the line under it says what to do now
+        self.route.setObjectName("route")
+        self.route.setWordWrap(True)
         self.hint = QLabel("")
         self.hint.setObjectName("hint")
         self.hint.setWordWrap(True)
@@ -198,6 +204,12 @@ class InstructionPanel(QWidget):
         self.lines.setVisible(False)
         self.more_button = QPushButton("Details ▾")
         self.more_button.setObjectName("tool")
+        self.check_lines = QLabel("")
+        self.check_lines.setObjectName("lines")
+        self.check_lines.setWordWrap(True)
+        self.check_lines.setVisible(False)
+        self.check_button = QPushButton("How you can tell it worked ▾")
+        self.check_button.setObjectName("tool")
         self.done_button = QPushButton("Done")
         self.done_button.setObjectName("primary")
         self.skip_button = QPushButton("Skip")
@@ -210,6 +222,7 @@ class InstructionPanel(QWidget):
         self.minimize_button.clicked.connect(self.toggle_minimized)
         self.close_button.clicked.connect(self._close)
         self.more_button.clicked.connect(self._toggle_details)
+        self.check_button.clicked.connect(self._toggle_check)
         self.done_button.clicked.connect(self.done_clicked.emit)
         self.skip_button.clicked.connect(self.skip_clicked.emit)
         self.back_button.clicked.connect(self.back_clicked.emit)
@@ -224,6 +237,7 @@ class InstructionPanel(QWidget):
         row.addWidget(self.back_button)
         row.addWidget(self.skip_button)
         row.addWidget(self.more_button)
+        row.addWidget(self.check_button)
         row.addStretch()
         row.addWidget(self.grip, 0, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight)
         self.body = QWidget()
@@ -231,8 +245,10 @@ class InstructionPanel(QWidget):
         body.setContentsMargins(0, 0, 0, 0)
         body.setSpacing(5)
         body.addWidget(self.goal)
+        body.addWidget(self.route)
         body.addWidget(self.hint)
         body.addWidget(self.lines)
+        body.addWidget(self.check_lines)
         body.addStretch(1)
         body.addLayout(row)
         root = QVBoxLayout(self)
@@ -248,20 +264,31 @@ class InstructionPanel(QWidget):
         self.setStyleSheet(panel_style())
 
     # ---- content
-    def set_content(self, header: str, goal: str, lines: list[str], hint: str, keys: tuple[str, ...] = ()) -> None:
+    def set_content(self, header: str, goal: str, lines: list[str], hint: str, keys: tuple[str, ...] = (), route: str = "", check: list[str] | tuple[str, ...] = ()) -> None:
         """Words only: the goal, the next move (the hint, with the keys to press said in it), and the how-to lines under "Details"."""
         self._title = header
         self.header.setText(self._tab_text() if self.minimized else header)
         self.goal.setText(goal)
-        self.lines.setText("\n".join(f"• {x}" for x in lines))
-        self.more_button.setVisible(bool(lines))
-        if not lines:
-            self.lines.setVisible(False)
+        same = lambda a, b: "".join(ch for ch in a.lower() if ch.isalnum()) == "".join(ch for ch in b.lower() if ch.isalnum())      # noqa: E731
+        shown = [] if len(lines) == 1 and same(lines[0], goal) else lines          # a step that is one line says it once, not as a heading and again as a detail
+        self.lines.setText("\n".join(f"• {x}" for x in shown))
+        self.more_button.setVisible(bool(shown))
+        open_ = bool(shown) and self._details_open
+        self.lines.setVisible(open_)                   # the details are easier to follow than the heading, so they start open; the learner's choice to fold them is kept
+        self.more_button.setText("Details ▴" if open_ else "Details ▾")
         text = hint
         if keys and not any(k.lower() in hint.lower() for k in keys):
             text = (hint + " " if hint else "") + "Press " + " then ".join(keys) + "."
         self.hint.setText(text)
         self.hint.setVisible(bool(text))
+        shown_route = route if route and route.strip().lower() != goal.strip().lower() else ""
+        self.route.setText(f"Where: {shown_route}" if shown_route else "")
+        self.route.setVisible(bool(shown_route))
+        self.check_lines.setText(chr(10).join(f"• {x}" for x in check))
+        self.check_button.setVisible(bool(check))
+        check_open = bool(check) and self._check_open                           # how you can tell it worked: there, closed, until the learner opens it
+        self.check_lines.setVisible(check_open)
+        self.check_button.setText("How you can tell it worked ▴" if check_open else "How you can tell it worked ▾")
 
     def set_paused(self, on: bool) -> None:
         self.pause_button.setText("Resume" if on else "Pause")
@@ -270,8 +297,15 @@ class InstructionPanel(QWidget):
         """The short words on the minimized tab: "GuideWire 3/18 ▸"."""
         return getattr(self, "_title", "GuideWire").replace("GuideWire · step ", "GuideWire ").replace(" of ", "/") + " ▸"
 
+    def _toggle_check(self) -> None:
+        on = not self._check_open
+        self._check_open = on
+        self.check_lines.setVisible(on)
+        self.check_button.setText("How you can tell it worked ▴" if on else "How you can tell it worked ▾")
+
     def _toggle_details(self) -> None:
-        on = not self.lines.isVisible()
+        on = not self._details_open
+        self._details_open = on
         self.lines.setVisible(on)
         self.more_button.setText("Details ▴" if on else "Details ▾")
 

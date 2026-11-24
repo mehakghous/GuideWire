@@ -577,3 +577,61 @@ def test_a_scene_with_a_mesh_or_one_that_cannot_be_read_gives_no_warning(leg_ses
     svc.observed = {"mode": "OBJECT", "nodes": ["MESH", "ARMATURE"]}
     screen.poll()
     assert screen._prereq_checked and not screen.prereq_missing
+
+
+def test_the_small_guide_opens_the_details_by_default_and_does_not_say_a_one_line_step_twice():
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+
+    from app.ui.screen_guide import InstructionPanel
+    qapp = QApplication.instance() or QApplication([])
+    p = InstructionPanel()
+    p.set_content("GuideWire · step 2 of 5", "Add a bone", ["Click Add.", "Choose Armature > Single Bone."], "")
+    assert p.lines.isHidden() is False and "Armature > Single Bone" in p.lines.text() and p.more_button.text() == "Details ▴"
+    p.set_content("GuideWire · step 3 of 5", "Select Armature > Single Bone.", ["Select Armature > Single Bone"], "")
+    assert p.lines.text() == "" and p.more_button.isHidden()
+    p.set_content("GuideWire · step 4 of 5", "Add a bone", ["Click Add.", "Choose it."], "")
+    p._toggle_details()
+    p.set_content("GuideWire · step 4 of 5", "Add a bone", ["Click Add.", "Choose it."], "a new hint")
+    assert p.lines.isHidden()                                       # folding them is remembered when the hint changes
+    del qapp
+
+
+def test_a_different_phase_must_be_seen_twice_before_the_text_under_the_heading_changes(env):
+    """2026-11-23: on a step like "Switch to Pose Mode" the message flipped between "Click the mode dropdown...", "Open it first" and "Looking for it" as single looks missed a word, too fast to read."""
+    from types import SimpleNamespace as NS
+    screen = env[0]
+
+    def view(phase, message, rect=None, advanced=False, problem=None):
+        return screen._steady_view(NS(message=message, hint=message, keys=(), rect=rect, advanced=advanced), NS(phase=phase, problem=problem))
+    assert view("visible", "Click Pose Mode", (1, 2, 3, 4))[0] == "Click Pose Mode"               # the first look is shown at once
+    assert view("visible", "Click Pose Mode now", (5, 6, 3, 4))[0] == "Click Pose Mode now"        # the same phase updates at once: the box follows a moving window
+    assert view("locating", "Looking for it", None) == ("Click Pose Mode now", "Click Pose Mode now", (), (5, 6, 3, 4))   # one look of another phase: what was shown stays, box included
+    assert view("locating", "Looking for it", None)[0] == "Looking for it"                         # the second look in a row: it replaces it
+    assert view("visible", "Click Pose Mode", (1, 2, 3, 4))[0] == "Looking for it"
+    assert view("visible", "Done", None, advanced=True)[0] == "Done"                               # a finished step is shown at once
+    assert view("", "Open Blender", None, problem="no window")[0] == "Open Blender"                # no window to look at: said at once
+
+
+def test_the_small_guide_writes_where_and_what_to_do_now_and_keeps_how_you_can_tell_it_worked_closed_until_opened():
+    """2026-11-24, learner request: the text under the heading flipped between variants. The route ("Add > Armature") is written once and stays; the line under it says what to do now. The check lines are
+    there but closed, and opening them is remembered."""
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PyQt6.QtWidgets import QApplication
+
+    from app.ui.screen_guide import InstructionPanel
+    qapp = QApplication.instance() or QApplication([])
+    p = InstructionPanel()
+    check = ["The foot does not move: that is expected.", "The Armature object now shows in the Outliner."]
+    p.set_content("GuideWire · step 1 of 5", "Add a bone", ["Click Add.", "Choose Armature."], "Click Add, then Armature", route="Add > Armature", check=check)
+    assert p.route.text() == "Where: Add > Armature" and not p.route.isHidden() and "Click Add" in p.hint.text()
+    p.set_content("GuideWire · step 1 of 5", "Add a bone", ["Click Add.", "Choose Armature."], "Click Armature", route="Add > Armature", check=check)
+    assert p.route.text() == "Where: Add > Armature" and p.hint.text() == "Click Armature"      # the route did not change while the step went on
+    assert not p.check_button.isHidden() and p.check_lines.isHidden() and "▾" in p.check_button.text() and "expected" in p.check_lines.text()
+    p._toggle_check()
+    assert not p.check_lines.isHidden() and "▴" in p.check_button.text()
+    p.set_content("GuideWire · step 1 of 5", "Add a bone", ["Click Add."], "Click Armature", route="Add > Armature", check=check)
+    assert not p.check_lines.isHidden()                                                         # opened once, stays open
+    p.set_content("GuideWire · step 2 of 5", "Switch to Edit Mode", [], "", route="Switch to Edit Mode", check=[])
+    assert p.route.isHidden() and p.check_button.isHidden()                                     # nothing to say twice, nothing to check
+    del qapp

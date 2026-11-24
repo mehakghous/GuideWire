@@ -119,3 +119,25 @@ def test_session_history_newest_first_with_progress(db):
     assert [r["id"] for r in rows] == [s2, s1]
     assert rows[1]["dealt"] == 2 and rows[1]["total"] == 4 and rows[1]["title"] == "Cube" and rows[0]["dealt"] == 0
     assert db.session_history(other) == []
+
+
+def test_searches_are_kept_per_user_newest_first_and_the_same_question_replaces_the_old(db):
+    a, b = db.add_user("a@x.com", b"h"), db.add_user("b@x.com", b"h")
+    db.save_search(a, "rig a leg", "maya", "{}")
+    db.save_search(a, "skin a hand", None, "{}")
+    db.save_search(b, "rig a leg", "maya", "{}")
+    db.save_search(a, "RIG A LEG", "maya", "{}")
+    assert [r["goal"] for r in db.list_searches(a)] == ["RIG A LEG", "skin a hand"] and len(db.list_searches(b)) == 1
+    assert db.save_search(a, "rig a leg", "blender", "{}") and len(db.list_searches(a)) == 3          # another application is another search
+
+
+def test_only_the_newest_fifty_searches_are_kept_and_one_can_be_removed_or_all_cleared(db):
+    u = db.add_user("a@x.com", b"h")
+    for i in range(55):
+        db.save_search(u, f"goal {i}", None, "{}")
+    rows = db.list_searches(u)
+    assert len(rows) == 50 and rows[0]["goal"] == "goal 54" and rows[-1]["goal"] == "goal 5"
+    assert db.delete_search(u, rows[0]["id"]) and len(db.list_searches(u)) == 49
+    other = db.add_user("b@x.com", b"h")
+    assert not db.delete_search(other, rows[1]["id"])                                                 # never another user's
+    assert db.clear_searches(u) == 49 and db.list_searches(u) == []

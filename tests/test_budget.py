@@ -142,7 +142,7 @@ def test_cli_dry_run_and_budget_stop_make_no_model_call(monkeypatch, capsys, tmp
     monkeypatch.setattr(c, "GeminiProvider", Never)
     assert c.main(["video", "https://www.youtube.com/watch?v=dc3iRo0hb3g", "--no-metadata", "--duration", "1151", "--app", "houdini", "--dry-run", "--tier", "report"]) == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["model"] == "gemini-3.8-flash" and out["prompt_version"] == "v10-hou" and out["video_seconds"] == 1151 and out["cached"] is False      # the measured default for a Houdini video (was v7)
+    assert out["model"] == "gemini-3.8-flash" and out["prompt_version"] == "v13" and out["video_seconds"] == 1151 and out["cached"] is False      # the measured default for a Houdini video (v7, then v10-hou, v12, then v13 since 2026-11-22)
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     assert c.main(["video", "https://www.youtube.com/watch?v=dc3iRo0hb3g", "--no-metadata", "--duration", "1151", "--app", "maya", "--max-usd-run", "0.01"]) == 3
     assert "stopped by the budget guard" in capsys.readouterr().err

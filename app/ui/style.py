@@ -129,6 +129,58 @@ QPushButton#navItem:hover { background: @accent_soft@; color: @text@; }
 QPushButton#navItem[on="true"] { background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border: 2px solid @accent_hi@; color: @accent_text@; font-weight: 700; }
 QPushButton#navLogout { background: transparent; border: none; color: @accent@; text-align: left; padding: 6px 6px; font-weight: 700; }
 QPushButton#navLogout:hover { color: @accent_hover@; }
+/* ---- chat: bubbles, chips, the composer */
+QFrame#bubbleUser { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border-radius: 22px; border-bottom-right-radius: 6px; border: 2px solid @accent_hi@; }
+QFrame#bubbleUser QLabel { color: @accent_text@; }
+QFrame#bubbleBot { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @tile_hi@, stop:1 @tile@); border-radius: 22px; border-bottom-left-radius: 6px; border: 2px solid @hi@; }
+QFrame#stepsCard { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @mint_hi@, stop:1 @mint@); border-radius: 22px; border: 2px solid @hi@; }
+QFrame#stepsCard QLabel { color: @teal_text@; }
+QLabel#who { font-size: 9pt; font-weight: 700; color: @muted@; }
+QLabel#greet { font-size: 22pt; font-weight: 800; }
+QPushButton#chip { background: @field@; border: 2px solid @field_border@; border-radius: 15px; padding: 3px 12px; font-size: 9.5pt; font-weight: 600; min-height: 18px; color: @text@; }
+QPushButton#chip:hover { background: @accent_soft@; }
+QPushButton#chip:checked { background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border-color: @accent_hi@; color: @accent_text@; }
+QPushButton#chip:disabled { color: @disabled@; background: @disabled_bg@; }
+QToolButton#picker { background: transparent; border: 2px solid transparent; border-radius: 14px; padding: 4px 10px; font-size: 9.5pt; font-weight: 600; color: @muted@; }
+QToolButton#picker:hover, QToolButton#picker:pressed { background: @accent_soft@; color: @text@; }
+QToolButton#picker::menu-indicator { image: none; width: 0; }
+QMenu { background: @tile_hi@; border: 2px solid @hi@; border-radius: 14px; padding: 6px; }
+QMenu::item { padding: 7px 22px 7px 14px; border-radius: 10px; }
+QMenu::item:selected { background: @selected@; color: @text@; }
+QPushButton#suggest { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @tile_hi@, stop:1 @tile@); border: 2px solid @hi@; border-radius: 20px; padding: 12px 16px; text-align: left; font-weight: 600; }
+QPushButton#suggest:hover { background: @accent_soft@; }
+QFrame#composer { background: @field@; border: 2px solid @field_border@; border-radius: 26px; }
+QFrame#composer:focus-within { border-color: @accent@; }
+QPlainTextEdit#composerEdit { background: transparent; border: none; padding: 6px 8px; }
+QPushButton#send { background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border: 2px solid @accent_hi@; border-radius: 20px; min-width: 40px; max-width: 40px; min-height: 40px; max-height: 40px; padding: 0; color: @accent_text@; font-size: 14pt; font-weight: 800; }
+QPushButton#send:disabled { background: @disabled_bg@; color: @disabled@; border: 2px solid @border@; }
+QScrollArea#chatScroll, QScrollArea#pageScroll { background: transparent; border: none; }
+QScrollArea#chatScroll > QWidget > QWidget, QScrollArea#pageScroll > QWidget > QWidget { background: transparent; }
+QListWidget#chatList::item { padding: 8px 12px; border-radius: 16px; }
+
+/* ---- the session's list of all steps: the one you are on is picked out, the one you are only looking at has a dashed edge */
+QScrollArea#stepScroll, QScrollArea#resultScroll { background: transparent; border: none; }
+QScrollArea#stepScroll > QWidget > QWidget, QScrollArea#resultScroll > QWidget > QWidget { background: transparent; }
+QFrame#stepRow { background: transparent; border: 2px solid transparent; border-radius: 16px; }
+QFrame#stepRow:hover { background: @accent_soft@; }
+QFrame#stepRow[state="current"] { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @selected_hi@, stop:1 @selected@); border: 2px solid @accent@; }
+QFrame#stepRow[viewing="true"] { border: 2px dashed @kicker@; }
+QFrame#stepRow QLabel#stepMark { color: @accent@; font-weight: 800; }
+QFrame#stepRow[state="current"] QLabel#stepText { font-weight: 700; }
+QFrame#stepRow[state="done"] QLabel#stepText { color: @muted@; }
+QFrame#stepRow QLabel#stepWord { color: @muted@; font-size: 9pt; font-weight: 700; }
+QFrame#stepRow[state="done"] QLabel#stepWord, QFrame#stepRow[state="done"] QLabel#stepMark { color: @ok@; }
+QFrame#stepRow[state="skipped"] QLabel#stepWord, QFrame#stepRow[state="skipped"] QLabel#stepMark { color: @warn@; }
+QFrame#stepRow[state="current"] QLabel#stepWord { color: @accent@; }
+
+/* ---- Find a tutorial: every suggestion is a card you can read in full */
+QFrame#card { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @tile_hi@, stop:1 @tile@); border: 2px solid @hi@; border-radius: 20px; }
+QFrame#card:hover { background: @accent_soft@; }
+QFrame#card[selected="true"] { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @selected_hi@, stop:1 @selected@); border: 2px solid @accent@; }
+QLabel#cardTitle { font-weight: 700; }
+QLabel#cardMeta { color: @muted@; font-size: 9.5pt; }
+QPushButton#linkButton { background: transparent; border: none; color: @accent@; font-weight: 700; padding: 2px 6px; min-height: 0; }
+QPushButton#linkButton:hover { color: @accent_hover@; background: transparent; }
 QToolTip { background: @tile@; color: @text@; border: 1px solid @border@; padding: 4px; }
 """
 

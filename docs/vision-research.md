@@ -122,3 +122,15 @@ A look that has to read the whole screen costs about 0.5 s, a small changed area
 | Old toolbar lookup with the toolbar scrolled (reproduced, NOT fixed in Part A) | `locate_tool("Loop Cut")` names visible cell 12 of 14, but 3 cells were scrolled off, so the highlight lands about 3 cells below the real Loop Cut (true index 12 of 21 in all) | fixed in Part C with the live tool list and the reported scroll |
 
 Not verified in Part A: the redo-panel (HUD) region size and `window_manager.operators` after real clicks (no way to inject real input into Blender found), 150% display scaling, a second monitor, and `mypy` locally (the PyQt6 stubs installed here do not parse under this mypy; CI is unchanged by this part).
+
+## 5. Part C measurements: how Blender lays out the toolbar (5.2.2, default theme, UI scale 1.0)
+Measured on a real window with the toolbar read from pixels and the add-on's scroll distance (`vision/toolbar_align.py` uses them as priors only; the pitch is re-measured from the cells every time):
+| What | Measured |
+|---|---|
+| Cell height | 33-34 px, 37 px wide, 1 px between neighbours |
+| Pitch (top of one cell to the top of the next) | 34.5 px (34 and 35 alternate) |
+| Across a separator | 41 px, i.e. 6.5 px extra |
+| Margin above the first cell | 9 px |
+| One mouse-wheel step over the toolbar | 40 px of scroll (view_top 1 -> -39 -> -79 -> ...) |
+| Smooth scrolling | the picture lags the add-on's `view_top` for about a second after a scroll: a frame taken at that moment shows cells in between positions. The alignment compares the pixels with the scroll distance and refuses (confidence 0.5) when they disagree |
+| Edit Mesh separators | after cells 2, 6, 8 and 9 (flags at index 1, 5, 7, 8) |

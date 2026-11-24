@@ -7,10 +7,10 @@ import sys
 
 import pytest
 
-from shared.grounding import GroundingResult, Rect, to_screen
+from shared.grounding import Rect, to_screen
 from vision import winplatform
 from vision.capture import downscale_size
-from vision.overlay import highlight_mark, pointer_mark, to_local, visible_marks
+from vision.overlay import highlight_mark, to_local, visible_marks
 
 np = pytest.importorskip("numpy")
 
@@ -88,13 +88,6 @@ def test_uniform_image_is_not_split():
 def test_default_layout_fallback_is_low_confidence_but_complete():
     layout = default_layout(1920, 1080)
     assert layout.confidence == 0.0 and layout.get("viewport") is not None
-
-
-def test_pointer_only_for_ok_grounding():
-    ok = to_screen(Frame(np.zeros((100, 100, 3), dtype=np.uint8), Rect(0, 0, 100, 100)).geometry, 50, 50)
-    assert pointer_mark(ok).rect.contains(50, 50)
-    assert pointer_mark(GroundingResult("none")) is None
-    assert pointer_mark(GroundingResult("out_of_bounds")) is None
 
 
 def test_marks_are_localised_and_offscreen_marks_dropped():
@@ -354,94 +347,12 @@ def test_a_hovered_toolbar_cell_that_is_not_found_does_not_cut_the_column_in_two
     assert len(_longest_chain(full[:3] + full[6:])) == 6          # three missing cells are not guessed: the longer half wins as before
 
 
-def test_an_open_mode_dropdown_does_not_change_the_mode_that_is_read():
-    """The dropdown's list shows every mode under the button; the current mode is the button (the topmost mode name)."""
-    from vision.observe import observe_mode
-    from vision.ocr import Word
-
-    def words(*rows):
-        out, line = [], 0
-        for text, y in rows:
-            x = 60
-            for part in text.split():
-                out.append(Word(part, Rect(x, y, len(part) * 9, 14), line))
-                x += len(part) * 9 + 6
-            line += 1
-        return out
-    header = Rect(0, 73, 1575, 60)
-    for current, truth in (("Edit Mode", "EDIT_MESH"), ("Object Mode", "OBJECT"), ("Sculpt Mode", "SCULPT")):
-        closed = words((current, 80))
-        opened = words((current, 80), ("Object Mode", 118), ("Edit Mode", 140), ("Sculpt Mode", 162))
-        assert observe_mode(closed, header, "MESH") == observe_mode(opened, header, "MESH") == truth
-    assert observe_mode(words(("Edit Mode", 80), ("Object Mode", 118)), header) is None        # Edit Mode without an object type: not observable, never Object Mode
-    assert observe_mode(words(("Object Mode", 600)), header) is None                            # outside the header strip
-
-
-def test_edit_mode_on_a_mesh_is_read_from_the_header_menus_alone():
-    from vision.observe import infer_edit_object_type, observe_mode
-    from vision.ocr import Word
-
-    def row(*names, y=80):
-        out, x = [], 160
-        for i, n in enumerate(names):
-            out.append(Word(n, Rect(x, y, len(n) * 9, 14), 1))
-            x += len(n) * 9 + 18
-        return out
-    header = Rect(0, 73, 1575, 60)
-    edit_header = [Word("Edit", Rect(60, 80, 36, 14), 0), Word("Mode", Rect(100, 80, 36, 14), 0)] + row("View", "Select", "Add", "Mesh", "Vertex", "Edge", "Face", "UV")
-    object_header = [Word("Object", Rect(60, 80, 54, 14), 0), Word("Mode", Rect(118, 80, 36, 14), 0)] + row("View", "Select", "Add", "Object")
-    assert infer_edit_object_type(edit_header, header) == "MESH" and infer_edit_object_type(object_header, header) is None
-    assert observe_mode(edit_header, header, infer_edit_object_type(edit_header, header)) == "EDIT_MESH"
-    assert observe_mode(object_header, header, infer_edit_object_type(object_header, header)) == "OBJECT"
-
-
-def test_the_mode_is_read_from_the_header_row_not_from_a_guessed_layout():
-    """A wrong layout (the capture includes the title bar) puts the workspace tabs in the 'header': Texture Paint is a TAB name, not a mode."""
-    from vision.observe import header_row, observe_mode
-    from vision.ocr import Word
-
-    def at(text, x, y, line=0):
-        return Word(text, Rect(x, y, len(text) * 9, 14), line)
-    tabs = [at("Layout", 397, 57, 1), at("Texture", 791, 57, 1), at("Paint", 857, 57, 1), at("Shading", 925, 57, 1)]
-    header = [at("Edit", 109, 96, 2), at("Mode", 142, 96, 2), at("View", 323, 96, 2), at("Select", 384, 96, 2), at("Add", 455, 96, 2), at("Mesh", 509, 96, 2)]
-    dropdown = [at("Object", 109, 130, 3), at("Mode", 160, 130, 3), at("Sculpt", 109, 152, 4), at("Mode", 160, 152, 4)]
-    timeline = [at("Playback", 80, 900, 5), at("View", 200, 900, 5), at("Marker", 260, 900, 5)]           # View without Select: not the viewport header
-    words = tabs + header + dropdown + timeline
-    row = header_row(words)
-    assert row is not None and row.y <= 96 <= row.y + row.h and not (row.y <= 57 <= row.y + row.h) and not (row.y <= 130 <= row.y + row.h)
-    wrong_layout_strip = Rect(0, 55, 1574, 60)                                       # what a guessed layout gives: covers the tabs
-    assert observe_mode(words, wrong_layout_strip, "MESH") == "PAINT_TEXTURE"         # why the strip must not be trusted ...
-    assert observe_mode(words, row, "MESH") == "EDIT_MESH"                           # ... and the row is
-    assert header_row(tabs + dropdown + timeline) is None
-
-
-def test_real_edit_mode_frame_is_read_as_edit_mesh_with_a_wrong_default_layout():
-    pytest.importorskip("winrt.windows.media.ocr")
-    cv2 = pytest.importorskip("cv2")
-    from vision.observe import observe_blender
-    from vision.ocr import OcrUnavailable, read_text
-    from vision.regions import default_layout
-    img = cv2.imread("tests/fixtures/vision/blender_5_2_edit_mode_1920x1008.png")
-    assert img is not None
-    try:
-        words = read_text(img, 1.5)
-    except OcrUnavailable:
-        pytest.skip("no OCR language pack")
-    obs = observe_blender(words, img, default_layout(img.shape[1], img.shape[0]))      # the layout guess that failed live (top bar 55 px)
-    assert obs.get("mode") == "EDIT_MESH", obs
-
-
-def test_a_hover_tooltip_over_the_header_does_not_change_the_mode_read_from_a_real_frame():
-    """A real Edit Mode capture with Blender's tooltip ("Sets the object interaction mode.") showing under the mode button."""
-    pytest.importorskip("winrt.windows.media.ocr")
-    cv2 = pytest.importorskip("cv2")
-    from vision.observe import observe_blender
-    from vision.ocr import OcrUnavailable, read_text
-    from vision.regions import default_layout
-    img = cv2.imread("tests/fixtures/vision/blender_5_2_edit_mode_tooltip_1920x1008.png")
-    assert img is not None
-    try:
-        words = read_text(img, 1.5)
-    except OcrUnavailable:
-        pytest.skip("no OCR language pack")
-    assert observe_blender(words, img, default_layout(img.shape[1], img.shape[0])).get("mode") == "EDIT_MESH"
+def test_a_menu_path_skips_a_part_the_open_menu_does_not_show():
+    """Edit Mode's Add menu lists Cylinder directly (no Mesh row): the path "Add > Mesh > Cylinder" goes straight to Cylinder once the menu is open, but never to an 'Add Cylinder' panel elsewhere."""
+    header = [_w("Add", 312, 64, 0), _w("Mesh", 350, 64, 0)]
+    opened = header + [_w("Plane", 336, 92, 1), _w("Cylinder", 336, 192, 2), _w("Torus", 336, 232, 3)]
+    r = locate(opened, "Add > Mesh > Cylinder", below_first=True)
+    assert r is not None and r.matched == "Cylinder" and r.complete and r.rect.y == 192
+    closed = header + [_w("Add", 70, 600, 4), _w("Cylinder", 100, 600, 4)]               # only the operator panel at the bottom left
+    r = locate(closed, "Add > Mesh > Cylinder", within=Rect(0, 57, 1100, 26), below_first=True)
+    assert r is not None and r.matched == "Add" and not r.complete

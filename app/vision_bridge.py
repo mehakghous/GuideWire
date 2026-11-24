@@ -1,41 +1,49 @@
-"""The bridge between the session and the vision part (Umaima's `vision/`). No Qt, so it is testable without a screen.
+"""The bridge between the session and the vision part. No Qt, so it is testable without a screen.
 
-Vision OBSERVES only: it never clicks or types. Once per tick the bridge asks it two questions about the active step and does nothing else with the application:
-  1. "where on screen is the thing to click?"  -> `VisionService.ground(ui_element)`: a screen rectangle the session screen can highlight;
-  2. "what state is the application in?"       -> `VisionService.observe(properties, attributes)`: the dict `ingestion.evaluator` reads. It goes to `SessionEngine.auto_check`,
-     which completes the step ONLY when every part of the step's expected state is seen to hold. Anything vision cannot read stays unobservable, and an unobservable step is never advanced.
+Vision OBSERVES only: it never clicks or types. Once per look the bridge asks it for what the application reports and what the screen shows, finds the targets of the active step, and turns that into ONE
+`StepState` (app/step_state.py): blocked / hidden / locating / visible / acting, with the words and, only when the gate (vision/verify.py) passed, the rectangle to highlight. A step advances only through
+`SessionEngine.auto_check` (every part of its expected state seen to hold); anything vision cannot read stays unobservable, and an unobservable step is never advanced.
 
 Every failure is a state to show, never an exception: no vision installed, the application window not found, the screen not readable. The learner can always press Done by hand.
 
-    bridge = VisionBridge(default_service_factory)        # in tests: a fake factory
-    t = bridge.tick(engine, "blender")                    # Tick: state, message, rect to highlight, advanced
+Work per look is kept to what changed (the scheduler):
+  * capture is cheap and runs every look; OCR runs only on what changed (vision/scene.py);
+  * a located target is reused while the add-on's interface revision, its scene revision, the window and the words read from the screen are the same (`GroundCache`): a still screen costs a capture and a probe read;
+  * a result that is nearly good enough earns ONE fresh read of the whole window per (step, state), then falls back to words.
+`bridge.stats` counts looks, cache hits, rechecks and the time spent in each stage, for the live check script.
 """
 from __future__ import annotations
 
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
-from app.guidance import Plan, describe, plan_for
-from shared.step_record import Step
+from app import step_state
+from shared import shortcuts
+from shared.step_record import Step, TargetRef
+from vision.grounders import ground_target, hint_for  # noqa: F401  (hint_for is re-exported: the menu wording)
+from vision.verify import Gated, GroundCache, gate
 
 WINDOW_NAMES = {"blender": "Blender", "maya": "Maya", "houdini": "Houdini"}
 INSTALL_HINT = "pip install winrt-runtime winrt-Windows.Media.Ocr winrt-Windows.Graphics.Imaging winrt-Windows.Storage.Streams winrt-Windows.Globalization winrt-Windows.Foundation winrt-Windows.Foundation.Collections"
+ENTRY_KEYS = ("node_counts", "nodes", "node_names", "mode")         # what is remembered of the state when a step begins (see SessionEngine.check)
 
 
 @dataclass(frozen=True)
 class Tick:
     state: str                                   # idle | unavailable | no_window | watching | done_seen | error
-    message: str = ""                            # one line for the learner, in plain words
+    message: str = ""                            # one short line for the learner (the status line)
     target: str | None = None                    # the UI path the highlight is for
-    rect: tuple[int, int, int, int] | None = None   # (x, y, w, h) in screen pixels, only when the element was found
+    rect: tuple[int, int, int, int] | None = None   # (x, y, w, h) in screen pixels, only when the gate passed
     complete: bool = False                       # the highlighted part is the LAST part of the path (the thing to click now)
     ambiguous: bool = False                      # several equally good matches: point at none rather than guess
     verdict: str | None = None                   # met | unmet | unverifiable, for the active step
     advanced: bool = False                       # the step was completed because the application showed it done
-    hint: str = ""                               # "Click Add, then Mesh > Cylinder": what to do next, for the highlight's label and the instruction box
-    pointer: bool = False                        # rect is only WHERE to look (a region of the screen), not a found element: draw a pulsing pointer, not a box
-    keys: tuple[str, ...] = ()                   # keys to press, shown as key caps
-    inputs: tuple[tuple[str, str], ...] = ()     # mouse and keyboard events in order, for the animated hint
+    hint: str = ""                               # what to do next, for the guide box
+    keys: tuple[str, ...] = ()                   # keys to press, said in the step's text
+    phase: str = ""                              # blocked | hidden | locating | visible | acting | verified: where the learner is in the step
+    shortcut: str = ""                           # a shortcut advised now ("Ctrl R"), already included in `hint`
 
 
 Rect4 = tuple[int, int, int, int]               # (x, y, width, height) in physical screen pixels
@@ -61,7 +69,7 @@ def default_window_finder(app: str) -> Rect4 | None:
         from vision import winplatform
         from vision.apps import profile
         winplatform.enable_dpi_awareness()
-        w = winplatform.find_window(WINDOW_NAMES.get(app, app), profile(app).exe if app in WINDOW_NAMES else ())
+        w = winplatform.find_window_cached(WINDOW_NAMES.get(app, app), profile(app).exe if app in WINDOW_NAMES else ())
     except Exception:
         return None
     return None if w is None else (w.rect.x, w.rect.y, w.rect.w, w.rect.h)
@@ -77,11 +85,24 @@ class Look:
     observed: dict | None = None
     window_rect: Rect4 | None = None             # the application's window, for the overlay and the "are we covering it" check
     hint: str = ""
-    pointer: bool = False
     keys: tuple[str, ...] = ()
-    inputs: tuple[tuple[str, str], ...] = ()
     problem: str | None = None                   # a plain-words reason nothing could be seen
     problem_state: str = "error"                 # unavailable | no_window | error
+    phase: str = ""
+    status: str = ""
+    shortcut: str = ""
+    entry: dict | None = None                    # the observed state when this step began
+
+
+@dataclass
+class Stats:
+    """What the scheduler did: for the live check script and for tests that a still screen costs nothing."""
+    looks: int = 0
+    cache_hits: int = 0
+    rechecks: int = 0
+    ms_look: float = 0.0                          # capture + OCR of what changed + probe read
+    ms_ground: float = 0.0                        # locating the step's targets
+    ms_total: float = 0.0
 
 
 def target_of(step: Step) -> str | None:
@@ -92,11 +113,22 @@ def target_of(step: Step) -> str | None:
     return None
 
 
-def needs_of(step: Step) -> tuple[list[str], list[str]]:
+def probe_paths_of(step: Step) -> tuple[list[str], list[str]]:
     """(properties, attributes) the probe must read for this step: the targets of its property_equals and attribute_exists predicates."""
     props = [p.target for p in step.expected_state if p.kind == "property_equals"]
     attrs = [p.target for p in step.expected_state if p.kind == "attribute_exists"]
     return props, attrs
+
+
+def keys_wanted(step: Step) -> list[str]:
+    """Operators whose keymap entries the probe should report for this step: the ones its tools and key presses run (the learner's own keymap decides which key to show)."""
+    out: list[str] = []
+    for a in step.actions:
+        t = a.target
+        op = None if t is None else (shortcuts.tool_operator(t.id) if t.kind == "tool" and t.id else t.operator)
+        if op and op not in out:
+            out.append(op)
+    return out
 
 
 def app_of(engine) -> str:
@@ -106,94 +138,9 @@ def app_of(engine) -> str:
 
 
 def default_service_factory(app: str):
-    """The real vision service for an application. Imports are lazy: the app starts without OpenCV, the Windows OCR packages or Windows itself, and says what is missing instead.
-
-    Reading only what CHANGED (nothing: no OCR; a menu: that area; most of the window or a moved window: all of it) is `vision/scene.py`'s job, shared by every caller since Part A4.
-    This subclass adds the toolbar lookup and the region pointers, which Part C replaces with grounders."""
+    """The real vision service for an application. Imports are lazy: the app starts without OpenCV, the Windows OCR packages or Windows itself, and says what is missing instead."""
     from vision.service import VisionService
-
-    class LiveService(VisionService):
-        def ground(self, ui_element: str, mode_hint: str | None = None, prefer_toolbar: bool = False):
-            from shared.grounding import GroundingResult
-            from vision.probe_client import read_probe
-            from vision.service import Guidance, find_target, ground_located
-            win, frame, pixels, words, _ = self._scene()
-            if win is None:
-                return Guidance(GroundingResult("none", reason=f"no visible window titled '{self.title}'"))
-            mode = mode_hint or ((read_probe(app=self.profile.key) or {}).get("mode") if self.use_probe else None)
-            found = self._tool(pixels, ui_element, mode) if prefer_toolbar and self.profile.toolbar else None
-            if found is None:
-                found = find_target(words, pixels, ui_element, mode, toolbar=self.profile.toolbar)
-            return ground_located(frame.geometry, win.rect, found)
-
-        def _tool(self, pixels, ui_element, mode):
-            """A toolbar tool by name, looked up in the toolbar of the step's own mode first (a tool name exists in several modes at different places)."""
-            from vision.locate import Located, parse_path
-            from vision.regions import default_layout, detect_layout
-            from vision.toolbar import find_cells, locate_tool, modes_matching
-            layout = detect_layout(pixels)
-            viewport = (layout if layout.confidence >= 0.5 else default_layout(pixels.shape[1], pixels.shape[0])).get("viewport")
-            path = parse_path(ui_element)
-            if viewport is None or not path:
-                return None
-            cells = find_cells(pixels, viewport)
-            for m in modes_matching(cells, mode):
-                rect = locate_tool(cells, m, path[-1])
-                if rect is not None:
-                    return Located(rect, path[-1], len(path) - 1, len(path), 1.0)
-            return None
-
-        def region_rect(self, name: str, anchor: str = "center"):
-            """A screen rectangle in a region of the application (viewport, properties...): where to point when the thing itself has no text to find."""
-            from shared.grounding import Rect
-            win, frame, pixels, words, layout = self._scene()
-            if win is None or layout is None or layout.get("viewport" if name == "toolbar" else name) is None:
-                return None
-            if name == "toolbar":                                        # the left toolbar: point at its last visible cell (a tool below it needs a scroll)
-                from vision.toolbar import find_cells
-                cells = find_cells(pixels, layout.get("viewport"))
-                if not cells:
-                    return None
-                c = cells[-1].rect
-                m = frame.geometry.monitor
-                sx, sy = m.w / frame.geometry.image_w, m.h / frame.geometry.image_h
-                return Rect(round(m.x + c.x * sx), round(m.y + c.y * sy), round(c.w * sx), round(c.h * sy))
-            r = layout.get(name)
-            size = max(40, min(r.w, r.h) // 6)
-            if anchor == "tabs":                                         # the column of tab icons at the left edge of the Properties editor
-                size = 34
-                x, y = r.x + 4, r.y + int(r.h * 0.6)
-            else:
-                x = r.x + (r.w - size) // 2 if anchor == "center" else r.x + 12
-                y = r.y + (r.h - size) // 2 if anchor == "center" else r.y + r.h - size - 12
-            m = frame.geometry.monitor
-            sx, sy = m.w / frame.geometry.image_w, m.h / frame.geometry.image_h
-            return Rect(round(m.x + x * sx), round(m.y + y * sy), round(size * sx), round(size * sy))
-    return LiveService(app=app)
-
-
-MODE_LABELS = {"OBJECT": "Object Mode", "EDIT_MESH": "Edit Mode", "EDIT_ARMATURE": "Edit Mode", "EDIT_CURVE": "Edit Mode", "POSE": "Pose Mode", "SCULPT": "Sculpt Mode",
-               "PAINT_WEIGHT": "Weight Paint", "PAINT_VERTEX": "Vertex Paint", "PAINT_TEXTURE": "Texture Paint"}
-
-
-def _as_dropdown(g):
-    """The guidance of the mode dropdown itself (found by the name of the mode it shows now): not 'the last part of the path'."""
-    from dataclasses import replace
-    return replace(g, complete=False)
-
-
-def hint_for(target: str | None, matched: str, complete: bool = False) -> str:
-    """Words for the learner about the next click, from the step's UI path and the part of it that was found on screen:
-    "Click Add, then Mesh > Cylinder"; "Open: Add > Mesh > Cylinder" when nothing of the path is visible yet."""
-    parts = [p.strip() for p in (target or "").split(">") if p.strip()]
-    if not parts:
-        return ""
-    low = [p.lower() for p in parts]
-    i = max((n for n, p in enumerate(low) if p == (matched or "").strip().lower()), default=None)
-    if i is None:
-        return "Open: " + " > ".join(parts)
-    rest = parts[i + 1:]
-    return f"Click {parts[i]}" if complete or not rest else f"Click {parts[i]}, then " + " > ".join(rest)
+    return VisionService(app=app)
 
 
 def explain(exc: BaseException) -> str:
@@ -209,19 +156,33 @@ def explain(exc: BaseException) -> str:
     return f"Screen guidance is not available ({name})."
 
 
+def _screen_checked(app: str) -> bool:
+    """Whether the screen of this application is read at all (vision/apps.py `validated`)."""
+    try:
+        from vision.apps import profile
+        return bool(profile(app).validated)
+    except Exception:
+        return True
+
+
 class VisionBridge:
     def __init__(self, service_factory: Callable[[str], Any] | None = None, auto_advance: bool = True, window_finder: Callable[[str], Rect4 | None] | None = None):
-        """`service_factory(app)` returns an object with `ground(ui_element)` and `observe(properties=, attributes=)`. None means vision is not installed on this computer.
+        """`service_factory(app)` returns an object with `look(properties, attributes, keys) -> (observed, GroundContext | None)` and `reset()`. None means vision is not installed on this computer.
         `window_finder(app)` returns the application's window rectangle (default: Umaima's Windows lookup)."""
         self.factory = service_factory
         self.auto_advance = auto_advance
         self.window_finder = window_finder or default_window_finder
         self._services: dict[str, Any] = {}
         self._failed: dict[str, str] = {}
-        # What the screen showed on the first look of each VISIT to a step (session, step, engine revision): "met" there means the step was already true when it
-        # started (after Previous step, after Resume, or simply because the application was already in that state), which is not evidence that the learner did it.
-        self._first_met: dict[tuple[int, str, int], bool] = {}
-        self._seen_unmet: set[tuple[int, str, int]] = set()
+        self._cache = GroundCache()
+        self._entries: dict[str, dict] = {}
+        self._rechecked: set[Any] = set()
+        # The first look of each VISIT to a step (session, step, engine revision): a step that is already "met" there was true when it started (after Previous, Resume, or because the
+        # application was already in that state), which is not evidence the learner did it. Applies to every kind of predicate: mode, tool, selection, property, node.
+        self._first_met: dict[tuple, bool] = {}
+        self._seen_unmet: set[tuple] = set()
+        self._visit: tuple | None = None
+        self.stats = Stats()
 
     @property
     def available(self) -> bool:
@@ -239,9 +200,15 @@ class VisionBridge:
         return self._services[app]
 
     def reset(self) -> None:
-        """Forget a failure (after the learner installed the missing package, say)."""
+        """Forget a failure (after the learner installed the missing package, say) and everything located."""
         self._services.clear()
         self._failed.clear()
+        self._cache.forget()
+        self._entries.clear()
+        self._rechecked.clear()
+        self._first_met.clear()
+        self._seen_unmet.clear()
+        self._visit = None
 
     def window_rect(self, app: str) -> Rect4 | None:
         try:
@@ -250,59 +217,73 @@ class VisionBridge:
             return None
 
     # ---- looking (vision only: safe on a worker thread, touches no database)
-    def _find(self, svc, plan: Plan):
-        """The first target of the plan that is on screen right now: (target, guidance), or (None, the guidance worth reporting)."""
-        last, saw = None, None
-        for t in plan.targets:
-            hints = {"mode_hint": plan.mode_hint, "prefer_toolbar": t.kind == "tool"} if getattr(svc, "takes_hints", False) else {}
-            names = [t.path]
-            if t.kind == "mode":                           # the item once the dropdown is open, else the dropdown itself (it shows the current mode)
-                names = [t.path.split(">", 1)[-1].strip(), MODE_LABELS.get(plan.mode_hint or "", "Object Mode")]
-            for i, name in enumerate(names):
-                g = svc.ground(name, **hints)
-                last = last or g
-                if getattr(g.grounding, "status", None) == "ok" and g.rect is not None and not g.ambiguous:
-                    if t.kind == "mode" and i == 1:
-                        g = _as_dropdown(g)
-                    return t, g
-                if g.ambiguous and saw is None:
-                    saw = g
-        return None, saw or last
-
     def look(self, step: Step, app: str) -> Look:
-        plan = plan_for(step)
         target = target_of(step)
-        keys = plan.keys
         if self.factory is None:
             return Look(target, problem="Screen guidance is not set up on this computer.", problem_state="unavailable")
         svc = self._service(app)
         if svc is None:
             return Look(target, problem=self._failed.get(app, "Screen guidance is not available."), problem_state="unavailable")
         window = self.window_rect(app)
-        rect, complete, ambiguous, matched, pointer, found = None, False, False, "", False, None
+        t_start = time.perf_counter()
         try:
-            if plan.targets:
-                found, g = self._find(svc, plan)
-                if g is not None:
-                    matched = getattr(g, "matched", "") or ""
-                    if found is not None and g.rect is not None:
-                        rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
-                    complete, ambiguous = bool(g.complete), bool(g.ambiguous and found is None)
-                    if found is None and getattr(g.grounding, "reason", "").startswith("no visible window"):
-                        return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=keys)
-            if rect is None and not ambiguous and plan.region and hasattr(svc, "region_rect"):
-                r = svc.region_rect(plan.region, plan.anchor)        # nothing to find by text: point at where it happens
-                if r is not None:
-                    rect, pointer = (r.x, r.y, r.w, r.h), True
-            props, attrs = needs_of(step)
-            observed = svc.observe(properties=props or None, attributes=attrs or None)
+            props, attrs = probe_paths_of(step)
+            wanted = keys_wanted(step)
+            observed, ctx = svc.look(props or None, attrs or None, wanted or None)
+            t_look = time.perf_counter()
+            if ctx is None and not _screen_checked(app):         # not "open it in front": the window may well be in front; this application is not read from the screen (yet)
+                return Look(target, window_rect=window, problem=f"Screen checking is available for Blender only. In {WINDOW_NAMES.get(app, app)} you follow the steps and press Done.", problem_state="unavailable", keys=step_state.keys_text(step))
+            if ctx is None:
+                return Look(target, window_rect=window, problem=f"Open {WINDOW_NAMES.get(app, app)} in front so GuideWire can see it.", problem_state="no_window", keys=step_state.keys_text(step))
+            entry = self._entries.setdefault(step.id, {k: observed[k] for k in ENTRY_KEYS if k in observed})
+            state, observed = self._assess(step, svc, observed, ctx, props, attrs, wanted, entry)
         except ImportError as e:                         # the OCR packages are missing: this fails the first time the screen is read, not when the service is made
             self._failed[app] = explain(e)
             return Look(target, window_rect=window, problem=self._failed[app], problem_state="unavailable")
         except Exception as e:                           # a vision failure must never break the session
-            return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.", keys=keys)
-        hint = describe(plan, found, matched, complete, step)
-        return Look(target, rect, complete, ambiguous, observed, window, hint=hint, pointer=pointer, keys=keys, inputs=plan.inputs)
+            return Look(target, window_rect=window, problem=f"Screen guidance hit a problem ({type(e).__name__}); use Done when you have finished the step.", keys=step_state.keys_text(step))
+        t_end = time.perf_counter()
+        self.stats.looks += 1
+        self.stats.ms_look += (t_look - t_start) * 1000
+        self.stats.ms_ground += (t_end - t_look) * 1000
+        self.stats.ms_total += (t_end - t_start) * 1000
+        g = state.grounded
+        rect = None
+        if state.show_rect and g is not None and g.rect is not None:
+            rect = (g.rect.x, g.rect.y, g.rect.w, g.rect.h)
+        label = " > ".join(state.target.path or [state.target.label]) if state.target is not None else target
+        return Look(label, rect, bool(g and g.complete and rect), bool(g and g.ambiguous), observed, window, state.hint, state.keys,
+                    None, "error", state.phase, state.status, state.shortcut, entry)
+
+    def _assess(self, step: Step, svc, observed: dict, ctx, props, attrs, wanted, entry: dict | None = None) -> tuple[step_state.StepState, dict]:
+        """The step's state, locating each target through the gate and the cache. A result that is nearly good enough earns one fresh read of the whole window (per step and screen state).
+        Returns the state and the observed dict that goes with the screen it was judged on (a re-read replaces it)."""
+        box = {"ctx": ctx, "observed": observed}
+
+        def ground(ref: TargetRef) -> Gated:
+            key = (step.id, ref.kind, ref.id, ref.label, tuple(ref.path), ref.operator, ref.prop, ref.panel, ref.tab)
+            epoch = getattr(box["ctx"], "epoch", None)
+            if epoch is not None:
+                hit = self._cache.lookup(key, epoch)
+                if hit is not None:
+                    self.stats.cache_hits += 1
+                    return hit
+            g = gate(ground_target(box["ctx"], ref))
+            once = (step.id, epoch)
+            if g.recheck and epoch is not None and once not in self._rechecked and hasattr(svc, "reset"):
+                self._rechecked.add(once)
+                svc.reset()                                                       # forget the words: the next look reads the whole window again
+                obs2, ctx2 = svc.look(props or None, attrs or None, wanted or None)
+                if ctx2 is not None:
+                    self.stats.rechecks += 1
+                    box["ctx"], box["observed"] = ctx2, obs2
+                    g = gate(ground_target(ctx2, ref))
+                    epoch = getattr(ctx2, "epoch", epoch)
+            if epoch is not None:
+                self._cache.put(key, epoch, g)
+            return g
+        state = step_state.assess(step, observed, ground, entry)
+        return state, box["observed"]
 
     # ---- judging (touches the session: main thread)
     def apply(self, engine, look: Look) -> Tick:
@@ -310,31 +291,34 @@ class VisionBridge:
         if engine.current_step() is None:
             return Tick("idle", "No step is active.")
         if look.problem is not None:
-            return Tick(look.problem_state, look.problem, look.target, keys=look.keys, inputs=look.inputs)
-        verdict = engine.check(look.observed or {})
-        status = verdict.status if verdict is not None else None
+            return Tick(look.problem_state, look.problem, look.target, keys=look.keys)
         step = engine.current_step()
         key = (engine.session_id, step.id if step is not None else "", getattr(engine, "revision", 0))
+        entry = look.entry
+        if key != self._visit:                           # a new visit to a step (Previous, jump, Resume, next session): what was recorded for it before is stale
+            self._visit = key
+            if step is not None:
+                self._entries.pop(step.id, None)
+            self._rechecked.clear()
+            entry = None
+        verdict = engine.check(look.observed or {}, entry)
+        status = verdict.status if verdict is not None else None
         if status == "unmet":
-            self._seen_unmet.add(key)                       # the screen has seen the step NOT done during this visit
+            self._seen_unmet.add(key)                    # the screen has seen the step NOT done during this visit
         self._first_met.setdefault(key, status == "met")
         already = status == "met" and self._first_met[key] and key not in self._seen_unmet
         advanced = False
         if self.auto_advance and status == "met" and verdict is not None and not verdict.unobservable and not already:
-            engine.complete(by="observed")                  # only when the screen saw the state change, never because it was true all along
+            engine.complete(by="observed")               # only when the screen saw the state change, never because it was true all along
             advanced = True
-        if len(self._first_met) > 500:                      # a long session is a few dozen visits; keep the table small
+        if len(self._first_met) > 500:
             self._first_met.clear()
             self._seen_unmet.clear()
         if advanced:
-            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.pointer, look.keys, look.inputs)
-        if already:
-            msg = "This already looks done on the screen (it was true when the step started), so press Done when you have done it."
-        elif look.rect is None and look.target and not look.keys:
-            msg = "Several places on the screen match; open the menu and it will narrow down." if look.ambiguous else "Looking for that on the screen."
-        else:
-            msg = "Watching the screen."
-        return Tick("watching", msg, look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.pointer, look.keys, look.inputs)
+            self._cache.forget()
+            return Tick("done_seen", "GuideWire saw this step done.", look.target, look.rect, look.complete, look.ambiguous, status, True, look.hint, look.keys, "verified", look.shortcut)
+        note = "This already looks done on the screen (it was true when the step started), so press Done when you have done it." if already else None
+        return Tick("watching", note or look.status or "Watching the screen.", look.target, look.rect, look.complete, look.ambiguous, status, False, look.hint, look.keys, look.phase, look.shortcut)
 
     def tick(self, engine, app: str | None = None) -> Tick:
         """Look and judge in one call (tests, the live check script). Never raises."""

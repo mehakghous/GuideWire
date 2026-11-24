@@ -218,18 +218,18 @@ def test_without_any_model_a_pasted_link_still_gets_the_old_message(win):
     assert win.current_screen() is win.new_tutorial and "AI gateway" in win.new_tutorial.message.text()
 
 
-def test_a_houdini_video_gets_v13_and_a_second_look_at_a_long_gap_and_maya_does_not():
-    """2026-11-22: Houdini videos use prompt v13 and the gap pass (docs/extraction_v11_report_2026-11-22.md, Houdini section)."""
+def test_a_houdini_video_gets_a_second_look_at_a_long_gap_and_maya_does_not():
+    """2026-11-22: Houdini videos get the gap pass (docs/extraction_v11_report_2026-11-22.md, Houdini section); since 2026-11-24 every application uses prompt v14."""
     link = "https://www.youtube.com/watch?v=AAAAAAAAAAA"
     first = {"steps": [_step("Create the Skeleton node", "00:05", "00:15"), _step("Add a Merge node", "02:00", "02:10")]}       # 1:45 with no step between them
     clip = {"steps": [_step("Press F to enter Modify mode", "00:20", "00:22")]}
     hou = ScriptedProvider([first, clip, {"groups": []}])
     r = video_steps(link, "houdini", provider_factory=lambda: hou, fetch_meta=_meta())
-    assert r.steps.prompt_version == "v13" and [s.goal for s in r.steps.steps] == ["Create the Skeleton node", "Press F to enter Modify mode", "Add a Merge node"]
+    assert r.steps.prompt_version == "v14" and [s.goal for s in r.steps.steps] == ["Create the Skeleton node", "Press F to enter Modify mode", "Add a Merge node"]
     assert hou.calls[1]["video_url"].endswith("#t=12,123")                    # the clip: the stretch 0:15 to 2:00 with 3 s each side
     maya = ScriptedProvider([first, {"groups": []}])
     r = video_steps(link, "maya", provider_factory=lambda: maya, fetch_meta=_meta())
-    assert r.steps.prompt_version == "v12" and len(r.steps.steps) == 2 and not any("#t=" in (c["video_url"] or "") for c in maya.calls)
+    assert r.steps.prompt_version == "v14" and len(r.steps.steps) == 2 and not any("#t=" in (c["video_url"] or "") for c in maya.calls)
 
 
 def test_a_failed_second_look_keeps_the_houdini_steps():
@@ -249,3 +249,17 @@ def test_a_houdini_label_houdini_does_not_have_is_corrected_from_the_clip():
     s = r.steps.steps[0]
     assert s.how_to[0].text == "Set Group to point* on configurecontrols1." and any(f.startswith("label corrected by a second look") for f in s.flags)
     assert not any("is not a parameter of" in f for f in s.flags) and p.calls[1]["video_url"].endswith("#t=2,18")
+
+
+def test_a_video_step_with_several_how_to_lines_becomes_finer_steps_grouped_by_its_goal_without_a_grouping_call():
+    """2026-11-23: every how-to line is its own step (the line word for word); the original goal is the group; the model is not asked to group again."""
+    two = _step("Create the hip joint", "00:05", "00:15")
+    two["how_to"] = [{"text": "Open the Skeleton menu.", "support": "shown"}, {"text": "Choose Create Joints and click once.", "support": "shown"}]
+    two["actions"] = [{"verb": "open_menu", "ui_element": "Skeleton"}, {"verb": "click", "ui_element": "Skeleton > Create Joints"}]
+    p = ScriptedProvider([{"steps": [two, _step("Create the knee joint", "00:20", "00:30")]}])
+    r = video_steps("https://youtu.be/AAAAAAAAAAA", "maya", provider_factory=lambda: p, fetch_meta=_meta())
+    assert [s.goal for s in r.steps.steps] == ["Open the Skeleton menu.", "Choose Create Joints and click once.", "Create the knee joint"]
+    assert [s.group for s in r.steps.steps][:2] == ["Create the hip joint"] * 2 and r.steps.steps[2].group is None
+    assert not any("could not be grouped" in n for n in r.notes)
+    off = video_steps("https://youtu.be/AAAAAAAAAAA", "maya", provider_factory=lambda: ScriptedProvider([{"steps": [two]}, RuntimeError("x")]), fetch_meta=_meta(), split=False)
+    assert [s.goal for s in off.steps.steps] == ["Create the hip joint"]

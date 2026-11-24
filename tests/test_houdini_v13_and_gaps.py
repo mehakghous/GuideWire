@@ -17,7 +17,7 @@ def _raw(goal, start, end, **kw):
 
 # ---- v13
 def test_v13_is_listed_and_is_v12_for_blender_and_maya():
-    assert PROMPT_VERSIONS[-1] == "v13"
+    assert PROMPT_VERSIONS[-2:] == ("v13", "v14")
     for app in ("blender", "maya"):
         assert build_system_prompt(get_profile(app), "v13") == build_system_prompt(get_profile(app), "v12")
     assert video_prompt("v13", 300, "T") == video_prompt("v12", 300, "T") and _schema("v13") == _schema("v12")

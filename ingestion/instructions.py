@@ -178,3 +178,29 @@ def speech_details(text: str, app: str) -> tuple[list[Action], list[HowTo]]:
         actions.append(Action(verb="set_value", ui_element="Name", value=m.group(1)))
         lines.append(HowTo(text=f"Name it {m.group(1)}.", support="said", evidence=m.group(0)))
     return actions, lines
+
+
+_MAC_KEYS = {"command": "Ctrl", "cmd": "Ctrl", "option": "Alt", "opt": "Alt"}
+_MAC_ALTERNATIVE = re.compile(r"\s*\((?:or|on mac|mac)[^)]*\b(?:cmd|command|option|opt|mac)\b[^)]*\)", re.I)
+
+
+def windows_keys(sl: StepList) -> int:
+    """GuideWire guides a Blender, Maya or Houdini on Windows. A model that watched a Mac tutorial writes "Command" and "Option", or adds "(or Option+P)" after every shortcut, and the guide then looks for keys
+    that do not exist on the learner's keyboard ("Press Command then Command+P"). Command becomes Ctrl and Option becomes Alt in the actions, and a "(or ... Mac key)" aside is dropped from the lines. Returns how many
+    places changed. Mutates the step list (fresh model output only)."""
+    changed = 0
+    for st in sl.steps:
+        for a in st.actions:
+            new = [_MAC_KEYS.get(k.strip().lower(), k) for k in a.keys]
+            if new != a.keys:
+                a.keys, changed = new, changed + 1
+        for line in (*st.how_to, *st.check):
+            text = _MAC_ALTERNATIVE.sub("", line.text)
+            for mac, win in (("Command", "Ctrl"), ("Cmd", "Ctrl"), ("Option", "Alt")):
+                text = re.sub(r"\b" + mac + r"\b(?=\s*[+ ]\s*[A-Za-z0-9]|\s+key)", win, text)
+            if text != line.text:
+                line.text, changed = text, changed + 1
+        goal = _MAC_ALTERNATIVE.sub("", st.goal)
+        if goal != st.goal:
+            st.goal, changed = goal, changed + 1
+    return changed

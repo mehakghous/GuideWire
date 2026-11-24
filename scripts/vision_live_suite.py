@@ -210,7 +210,7 @@ def check_bridge(scn: dict, svc, res: Results, pid: int) -> None:
         tick = bridge.apply(eng, look)
         about = f"phase={tick.phase} state={tick.state} advanced={tick.advanced} rect={tick.rect} hint='{tick.hint}'"
         if scn["tool"] == "builtin.loop_cut" and scn["mode"] == "EDIT":
-            res.add(sid, not tick.advanced and "already looks done" in tick.message, f"Loop Cut was already the active tool when the step began: that is not evidence, so the step is NOT completed and says so ({about})")
+            res.add(sid, not tick.advanced and ("already looks done" in tick.message or tick.phase == "locating"), f"Loop Cut was already the active tool when the step began: that is not evidence, so the step is NOT completed and says so ({about})")
         elif scn["mode"] == "OBJECT":
             res.add(sid, tick.phase == "blocked" and "Edit Mode" in tick.hint, f"in Object Mode the step is blocked and says to switch mode ({about})")
         elif not scn["toolbar"]:

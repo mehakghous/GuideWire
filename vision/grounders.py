@@ -162,12 +162,25 @@ def ground_tool(ctx: GroundContext, ref: TargetRef) -> Grounded:
     return _tool_result(ctx, ref, idx, al, cells, tops, heights, flags, tb, tools.rect, groups, mode)
 
 
+def _blue_cell_disagrees(ctx: GroundContext, al, cells, tops, heights, tb: Rect, groups) -> bool:
+    """True when the cell Blender draws in blue (the active tool's) is visible and the alignment puts the active tool in another cell: then the alignment cannot be trusted."""
+    active_tool = ctx.ui.active_tool if ctx.ui else None
+    ai = None if not active_tool else next((i for i, g in enumerate(groups) if active_tool in g), None)
+    if ai is None:
+        return False
+    kept = [k for k, (t, hh) in enumerate(zip(tops, heights, strict=True)) if t >= 1 and t + hh <= tb.h - 1]
+    active_j = next((j for j, k in enumerate(kept) if cells[k].active), None)
+    return active_j is not None and al.first + active_j != ai
+
+
 def _tool_result(ctx: GroundContext, ref: TargetRef, idx: int, al: Alignment | None, cells, tops, heights, flags, tb: Rect, region_win: Rect, groups, mode) -> Grounded:
     label = ref.label
     region_screen = ctx.window_to_screen(region_win) if ctx.mapper is not None else None
     if al is None:
         return Grounded("tool", UNKNOWN, region_screen, 0.0, ("the cells in the picture do not match the tool list",), f"Look for {label} in the toolbar (the tool strip at the left of the 3D view); scroll it if you cannot see it.", label=label)
     rel = al.relation(idx)
+    if _blue_cell_disagrees(ctx, al, cells, tops, heights, tb, groups):                # the alignment of a few visible cells can be one cell off (seen at Resolution Scale 1.5 with 4 cells in view): never say "scroll" or point at a cell when the blue one says otherwise
+        return Grounded("tool", UNKNOWN, region_screen, 0.3, al.evidence + ("the blue (active) cell is NOT where the alignment puts the active tool",), f"Look for {label} in the toolbar.", label=label)
     if rel != VISIBLE:
         away = (al.first - idx) if rel == "above" else (idx - (al.first + al.count - 1))
         way = "up" if rel == "above" else "down"

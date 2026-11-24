@@ -302,3 +302,19 @@ def test_a_constraint_field_is_pointed_at_when_only_its_label_was_read_because_t
     assert two.state == g.AMBIGUOUS and not gate(two).ok                                              # two constraints have one: pointing at either would be a guess
     none = g.ground_target(vf.make_context([], state, "POSE"), HEAD_TAIL)
     assert none.state == g.OFFSCREEN and "Scroll the Properties editor" in none.note                   # as before
+
+
+def test_a_misaligned_toolbar_is_not_reported_as_scrolled_out_when_the_blue_cell_disagrees():
+    """Seen live at Resolution Scale 1.5: 4 visible cells aligned one cell off, so the grounder said 'scroll down' for the ACTIVE tool whose blue cell was in view."""
+    from types import SimpleNamespace as NS
+
+    from shared.grounding import Rect
+    from shared.step_record import TargetRef
+    from vision import grounders as g
+    cells = [NS(rect=Rect(10, 10 + 40 * i, 36, 34), active=(i == 0)) for i in range(4)]            # the blue cell is the first visible one
+    tops, heights, tb = [1 + 40 * i for i in range(4)], [34] * 4, Rect(0, 9, 60, 200)
+    groups = [[f"t{i}"] for i in range(21)]
+    ctx = NS(mapper=None, ui=NS(active_tool="t9"))
+    al = NS(first=10, count=4, confidence=0.85, evidence=("fit",), relation=lambda i: "above" if i < 10 else "visible")      # the alignment says the visible cells are 11 to 14: wrong by one
+    out = g._tool_result(ctx, TargetRef(kind="tool", label="Extrude Region", id="t9"), 9, al, cells, tops, heights, [], tb, tb, groups, "EDIT_MESH")
+    assert out.state == g.UNKNOWN and out.direction is None and "scroll" not in out.note

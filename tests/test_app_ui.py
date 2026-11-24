@@ -444,6 +444,14 @@ def test_pressing_done_by_hand_still_works_and_drops_a_stale_reading(win):
     assert s.engine.position == 2 and s._shown_step == "s02"
 
 
+def test_a_step_already_true_when_the_session_opens_is_not_completed_by_the_screen(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT", "selection_types": ["MESH"]}))
+    s.poll()
+    assert s.engine.position == 1 and "already" in s.watch_label.text().lower()      # the learner presses Done themselves
+    s.done_button.click()
+    assert s.engine.position == 2
+
+
 def test_a_vision_failure_leaves_the_session_working_by_hand(win):
     s, overlay = _guided(win, vf.FakeService(boom=RuntimeError("OCR failed")))
     s.poll()

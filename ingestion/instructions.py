@@ -91,12 +91,31 @@ def _checks(step: Step, app: str) -> list[HowTo]:
     return out
 
 
+_GENERIC = frozenset("""blender maya houdini joint joints node nodes bone bones object objects select click this that with from when your then into after before because which will have
+them they their would should only also each every does make more most than there here some other same like using used uses want need what about just onto while value values step
+steps rig rigs tool tools menu panel window option options""".split())
+
+
+def _content_words(text: str) -> set[str]:
+    return {w.rstrip("s") for w in re.findall(r"[a-z][a-z0-9]{3,}", text.lower()) if w not in _GENERIC}
+
+
+def concerns_step(text: str, step: Step) -> bool:
+    """A documented pitfall belongs on a step only when it is about something the step actually does: at least two distinctive words in common with the step's goal, reason,
+    how-to lines, UI names and evidence. A feature tag alone is too coarse (v11 found every APEX pitfall, "Multi IK Segments" included, on a step that only adds an FK node)."""
+    said = " ".join([step.goal, step.why or "", step.result or "", *(h.text for h in step.how_to), *(a.ui_element or "" for a in step.actions), step.visual_evidence or "", *step.evidence])
+    return len(_content_words(text) & _content_words(said)) >= 2
+
+
 def _from_knowledge(step: Step, app: str) -> None:
-    """Common mistakes (with their tier and source), what to have done first, and a note where sources disagree, for the feature this step teaches."""
+    """Common mistakes (with their tier and source), what to have done first, and a note where sources disagree, for the feature this step teaches. A documented mistake is added only
+    when it concerns what the step does (`concerns_step`); mistakes the tutorial itself shows are the model's and are never filtered here."""
     from .rigging_knowledge import load as knowledge
     kb = knowledge()
     for e in kb.for_feature(step.feature_id, app) if step.feature_id else []:
         for m in e.mistakes:
+            if not concerns_step(m.text, step):
+                continue
             line = f"{m.text} ({_cite(kb, m)})"
             if line not in step.common_mistakes:
                 step.common_mistakes.append(line)

@@ -127,3 +127,43 @@ def test_a_sidebar_step_is_a_target_the_session_can_guide_to():
     ref = TargetRef(kind="sidebar", label="Roll", panel="Transform", prop="Roll")
     st = Step(id="s25", order=25, goal="Set bone Roll to 90", actions=[Action(verb="set_value", ui_element="Sidebar > Transform > Roll", target=ref)])
     assert step_state.needs_of(st) == [ref]
+
+
+# ---- moving through a step with several parts (reported 2026-11-22: "it keeps repeating the armature step" on https://youtu.be/PctSMB-RGsM, step 1 of the v11 extraction)
+def _armature_then_edit_mode():
+    """The real step: Shift+A, Add > Armature > Single Bone, Tab, then In Front in the armature's viewport display; it ends in Edit Mode with an armature."""
+    step = Step(id="s01", order=1, goal="Create a single bone armature and enable viewport display in front",
+                actions=[Action(verb="press_keys", keys=["Shift", "A"]), Action(verb="open_menu", ui_element="Add > Armature > Single Bone"),
+                         Action(verb="press_keys", keys=["Tab"]), Action(verb="click", ui_element="Properties:Object > Viewport Display > In Front")],
+                start_state=[StatePredicate(kind="mode", target="OBJECT")],
+                expected_state=[StatePredicate(kind="mode", target="EDIT_ARMATURE"), StatePredicate(kind="node_exists", target="ARMATURE")])
+    return targets.resolve_steps([step])[0]
+
+
+EMPTY = {"mode": "OBJECT", "node_counts": {}, "nodes": []}
+
+
+def test_the_add_menu_is_done_once_what_it_adds_is_there_and_the_mode_key_is_guided_next():
+    step = _armature_then_edit_mode()
+    assert ss.assess(step, EMPTY, fixed(), EMPTY).target.label == "Single Bone"
+    added = {"mode": "OBJECT", "node_counts": {"ARMATURE": 1}, "nodes": ["ARMATURE"]}
+    st = ss.assess(step, added, fixed(), EMPTY)
+    assert st.target.kind == "mode" and st.target.mode == "EDIT_ARMATURE"          # before the fix: still "Open: Add > Armature > Single Bone"
+
+
+def test_once_the_step_is_under_way_it_never_sends_the_learner_back_to_its_start_mode():
+    step = _armature_then_edit_mode()
+    st = ss.assess(step, {"mode": "EDIT_ARMATURE", "node_counts": {"ARMATURE": 1}, "nodes": ["ARMATURE"]}, fixed(), EMPTY)
+    assert st.phase != "blocked" and st.target.label == "In Front"                  # before the fix: "Switch to Object Mode first"
+
+
+def test_an_armature_that_was_there_before_the_step_is_not_progress():
+    step = _armature_then_edit_mode()
+    there = {"mode": "OBJECT", "node_counts": {"ARMATURE": 1}, "nodes": ["ARMATURE"]}
+    assert ss.assess(step, there, fixed(), there).target.label == "Single Bone"
+
+
+def test_the_start_mode_is_still_checked_before_anything_is_done():
+    step = _armature_then_edit_mode()
+    st = ss.assess(step, {"mode": "SCULPT", "node_counts": {}, "nodes": []}, fixed(), {"mode": "SCULPT", "node_counts": {}, "nodes": []})
+    assert st.phase == "blocked" and st.target.mode == "OBJECT"

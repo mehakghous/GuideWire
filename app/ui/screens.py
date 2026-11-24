@@ -9,6 +9,7 @@ import html
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import QFrame, QScrollArea, QCheckBox, QComboBox, QFormLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget, QMessageBox, QPlainTextEdit, QProgressBar, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
+from .. import key_alternatives
 from ..accounts import AccountError, Accounts, User
 from ..db import Database
 from ..pipeline import _YOUTUBE, APPS, request_steps
@@ -405,8 +406,11 @@ class StepReviewScreen(QWidget):
         if step.group:
             members = [s for s in self.editor.steps.steps if s.group_id == step.group_id]
             parts.append(f"<p>Part of: {html.escape(step.group)} (step {members.index(step) + 1} of {len(members)} in this group)</p>")
+        if step.why:
+            parts.append(f"<p><b>Why</b> {html.escape(step.why)}</p>")
         parts.append(self._bullets("How to do it", [h.text for h in step.how_to]))
         parts.append(self._bullets("How you can tell it worked", [h.text for h in step.check]))
+        parts.append(self._bullets("Watch out", step.common_mistakes))
         parts.append(self._bullets("Notes", step.flags))
         self.detail.setText("".join(parts))
 
@@ -1036,13 +1040,20 @@ class SessionScreen(QWidget):
             self.refresh()
 
     @staticmethod
-    def _detail_for(step, viewed: bool = False) -> str:
+    def _detail_for(step, viewed: bool = False, mode: str | None = None) -> str:
         """What someone following the step needs: how to do it, how to tell it worked, and whether GuideWire can check it. The validator's notes (where a step's expected state came from, vocabulary warnings) are for the editor and stay on the Review screen."""
         parts: list[str] = []
+        if step.why:
+            parts.append("Why\n" + step.why)
         if step.how_to:
             parts.append("How to do it\n" + "\n".join(f"• {h.text}" for h in step.how_to))
         if step.check:
             parts.append("How you can tell it worked\n" + "\n".join(f"• {h.text}" for h in step.check))
+        alts = key_alternatives.alternatives_of(step, mode)
+        if alts:
+            parts.append("Without the keyboard\n" + "\n".join(f"• {a.keys}: {a.text}" for a in alts))
+        if step.common_mistakes:
+            parts.append("Watch out\n" + "\n".join(f"• {m}" for m in step.common_mistakes))
         check = checkability(step)
         if check.level != "checkable":
             parts.append(check.full if viewed else f"{check.full} Press Done when you have finished it.")
@@ -1066,7 +1077,7 @@ class SessionScreen(QWidget):
             self.step_pill.setText(f"Looking at step {self.viewing}, not your current step")
             self.step_text.setText(f"<b>Step {self.viewing}:</b> {html.escape(viewed.goal)}")
             said = {"done": "You marked this step done.", "skipped": "You skipped this step.", "pending": "This step is still to do."}[statuses[self.viewing - 1]]
-            self.detail.setText(said + "\n" + self._detail_for(viewed, True))
+            self.detail.setText(said + "\n" + self._detail_for(viewed, True, key_alternatives.mode_for([s for _, s in e.steps], self.viewing - 1)))
         elif e.state == NOT_STARTED:
             self.step_pill.setText("Not started")
             self.step_text.setText("Check what this tutorial assumes, then press Start." if self.prereqs else "Press Start to begin.")
@@ -1078,7 +1089,7 @@ class SessionScreen(QWidget):
         else:
             self.step_pill.setText("Your current step" + (" (paused)" if self.paused else ""))
             self.step_text.setText(f"<b>Step {e.position}:</b> {html.escape(step.goal)}")
-            self.detail.setText(self._detail_for(step))
+            self.detail.setText(self._detail_for(step, False, key_alternatives.mode_for([s for _, s in e.steps], (e.position or 1) - 1)))
         self.steps_list.show_state(statuses, e.position if active else None, self.viewing)
         self.goto_button.setVisible(viewed is not None and active)
         self.unview_button.setVisible(viewed is not None)

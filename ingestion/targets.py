@@ -25,9 +25,9 @@ VOCAB = Path(__file__).resolve().parent.parent / "knowledge" / "app_vocab" / "bl
 
 CONTAINERS = {
     "toolbar": "tool", "tool bar": "tool", "tools": "tool", "tool shelf": "tool",
-    "mode selector": "mode", "mode dropdown": "mode", "mode menu": "mode", "mode": "mode", "interaction mode": "mode",
+    "mode selector": "mode", "mode selection": "mode", "mode dropdown": "mode", "mode menu": "mode", "mode": "mode", "interaction mode": "mode",
     "properties": "property", "properties editor": "property", "properties panel": "property", "property editor": "property",
-    "viewport context menu": "context_menu", "context menu": "context_menu", "right-click menu": "context_menu", "right click menu": "context_menu",
+    "viewport context menu": "context_menu", "context menu": "context_menu", "right-click menu": "context_menu", "right click menu": "context_menu", "right click": "context_menu", "right-click": "context_menu",
     "sidebar": "sidebar", "side bar": "sidebar", "side panel": "sidebar", "sidebar panel": "sidebar", "n panel": "sidebar", "n-panel": "sidebar", "npanel": "sidebar", "3d view sidebar": "sidebar",
 }
 SIDEBAR_TABS = {"item": "ITEM", "tool": "TOOL", "view": "VIEW"}      # the tabs along the 3D view sidebar's right edge (add-ons add more)
@@ -147,7 +147,7 @@ def _choice(cat: Catalog, op: str, label: str) -> tuple[str, str] | None:
 
 
 def _tool(cat: Catalog, label: str, mode: str | None) -> TargetRef | None:
-    hits = cat.tools.get(_n(label))
+    hits = cat.tools.get(_n(label)) or cat.tools.get(_n(label).removesuffix(" tool").strip())      # "Scale Tool" is the Scale tool
     if not hits:                                                 # the tutorial wrote an id-like name ("loop_cut")
         slug = _n(label).replace(" ", "_")
         hits = [(m, i, c) for i, mc in cat.tool_ids.items() if i.split(".")[-1] == slug for (m, c) in mc]
@@ -171,6 +171,23 @@ def _tab_id(cat: Catalog, name: str) -> str | None:
             if form and form in cat.tabs:
                 return cat.tabs[form]
     return None
+
+
+def _tab_target(cat: Catalog, name: str) -> TargetRef | None:
+    """A Properties tab named on its own ("Bone Constraints", "Object Data Properties")."""
+    tab = _tab_id(cat, name)
+    return None if tab is None else TargetRef(kind="property", label=name, tab=tab, path=[name], confidence=1.0, catalog_version=cat.version)
+
+
+def _panel_tab(cat: Catalog, panel: str) -> tuple[str | None, list[str]] | None:
+    """The Properties tab a panel name belongs to ("Viewport Display" -> its tab), and the panel ids; the tab is None when the panel exists in several tabs. None when no tab has such a panel."""
+    p = _n(panel)
+    hits = [(tab, ids) for (tab, name), ids in cat.panels.items() if name == p]
+    if not hits:
+        return None
+    tabs = sorted({t for t, _ in hits})
+    tab = tabs[0].upper() if len(tabs) == 1 else None
+    return tab, sorted({i for _, ids in hits for i in ids})
 
 
 def _property(cat: Catalog, segs: list[str]) -> TargetRef:
@@ -223,7 +240,7 @@ def resolve_action(action: Action, mode_hint: str | None = None, cat: Catalog | 
         container, _, tabname = segs[0].partition(":")
         segs = [container.strip(), tabname.strip(), *segs[1:]]
     head, leaf = _n(segs[0]), segs[-1]
-    kind = CONTAINERS.get(head)
+    kind = CONTAINERS.get(head) or ("context_menu" if head.endswith(" context menu") else None)     # "Armature Context Menu > Subdivide"
     v = cat.version
 
     if kind == "tool" and len(segs) >= 2:
@@ -236,14 +253,37 @@ def resolve_action(action: Action, mode_hint: str | None = None, cat: Catalog | 
         return TargetRef(kind="context_menu", label=leaf, path=segs[1:], operator=op, candidates=cands, confidence=conf if op else 0.4, catalog_version=v)
     if kind == "property" and len(segs) >= 3:
         return _property(cat, segs)
+    if kind == "property" and len(segs) == 2:                    # "Properties > Bone Constraints": the tab itself (the grounder points at its icon when another tab is open)
+        return _tab_target(cat, segs[1])
     if kind == "sidebar" and len(segs) >= 2:
         return _sidebar(cat, segs)
     if kind is not None:
         return None                                              # a container word with nothing after it: nothing to point at
 
+    # Short forms (v12, 2026-11-22: its steps write "Edit Mode", "Move", "Item > Roll", "Viewport Display > In Front", "Clear Parent" where v10's wrote "Mode selector > Edit Mode" and the like; unresolved,
+    # they fell back to searching the screen for the words, and the highlight got worse)
+    if len(segs) >= 2 and head.removesuffix(" tab").strip() in SIDEBAR_TABS:        # "Item > Roll", "Item > Transform > Roll"
+        return _sidebar(cat, ["Sidebar", *segs])
+    if len(segs) == 2 and context_operator is None:
+        panel_tab = _panel_tab(cat, segs[0])
+        if panel_tab is not None:                                                     # "Viewport Display > In Front": a panel of the Properties editor and a field in it
+            tab, ids = panel_tab
+            return TargetRef(kind="property", label=leaf, tab=tab, panel=segs[0], prop=leaf, path=segs, candidates=ids, confidence=1.0 if tab else 0.5, catalog_version=v)
+    if len(segs) == 1:
+        if head in cat.modes:                                                         # "Edit Mode"
+            return TargetRef(kind="mode", label=leaf, id=cat.modes[head], confidence=1.0, catalog_version=v)
+        if head in cat.tools:                                                         # "Move", "Loop Cut": a toolbar tool by its label
+            return _tool(cat, leaf, mode_hint)
+        if len(head.split()) >= 2 and _tab_id(cat, leaf) is not None and head not in cat.ops_by_label:      # "Bone Constraints", "Object Data Properties"; one word ("Bone") is more often a thing in the viewport
+            return _tab_target(cat, leaf)
+        if context_operator:                                                          # "Clear Parent" after Alt+P: a choice in the pop-up that key opened
+            ch = _choice(cat, context_operator, leaf)
+            if ch:
+                return TargetRef(kind="operator_panel", label=leaf, operator=context_operator, prop=ch[0], id=ch[1], confidence=0.9, catalog_version=v)
+
     # an operator's own panel: "Loop Cut and Slide > Number of Cuts" (what the operator leaves in the redo panel after it ran)
-    if len(segs) == 2 and _n(segs[0]) in cat.ops_by_label:
-        op, cands, conf = _pick_operator(cat, segs[0], mode_hint)
+    if len(segs) == 2 and _n(segs[0]).removesuffix(" panel").strip() in cat.ops_by_label:      # "Loop Cut and Slide Panel > Number of Cuts" is the operator's own panel
+        op, cands, conf = _pick_operator(cat, _n(segs[0]).removesuffix(" panel").strip(), mode_hint)
         hit = _prop(cat, op, leaf) if op else None
         if hit:
             return TargetRef(kind="operator_panel", label=leaf, operator=op, prop=hit[0], candidates=cands, confidence=conf, catalog_version=v)
@@ -296,6 +336,8 @@ def resolve_step(step: Step, cat: Catalog | None = None, report: Report | None =
     context_op = None
     for a in step.actions:
         t = resolve_action(a, mode, cat, context_op)
+        if t is None and expected_mode and CONTAINERS.get(_n(a.ui_element or "")) == "mode":      # "Mode" alone: the mode the step ends in is the one meant
+            t = TargetRef(kind="mode", label=expected_mode.split("_")[0].title() + " Mode", id=expected_mode.split("_")[0], mode=expected_mode, confidence=0.9, catalog_version=cat.version)
         if t is not None and t.kind in ("keys", "context_menu") and t.operator:
             context_op = t.operator                                  # the pop-up menu that follows belongs to this operator
         if t is not None and t.kind == "mode" and t.id and expected_mode and (expected_mode == t.id or expected_mode.startswith(t.id + "_")):

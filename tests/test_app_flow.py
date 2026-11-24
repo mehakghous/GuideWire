@@ -216,3 +216,36 @@ def test_without_any_model_a_pasted_link_still_gets_the_old_message(win):
     win.new_tutorial.text.setPlainText("https://youtu.be/abc123")
     win.new_tutorial.create_button.click()
     assert win.current_screen() is win.new_tutorial and "AI gateway" in win.new_tutorial.message.text()
+
+
+def test_a_houdini_video_gets_v13_and_a_second_look_at_a_long_gap_and_maya_does_not():
+    """2026-11-22: Houdini videos use prompt v13 and the gap pass (docs/extraction_v11_report_2026-11-22.md, Houdini section)."""
+    link = "https://www.youtube.com/watch?v=AAAAAAAAAAA"
+    first = {"steps": [_step("Create the Skeleton node", "00:05", "00:15"), _step("Add a Merge node", "02:00", "02:10")]}       # 1:45 with no step between them
+    clip = {"steps": [_step("Press F to enter Modify mode", "00:20", "00:22")]}
+    hou = ScriptedProvider([first, clip, {"groups": []}])
+    r = video_steps(link, "houdini", provider_factory=lambda: hou, fetch_meta=_meta())
+    assert r.steps.prompt_version == "v13" and [s.goal for s in r.steps.steps] == ["Create the Skeleton node", "Press F to enter Modify mode", "Add a Merge node"]
+    assert hou.calls[1]["video_url"].endswith("#t=12,123")                    # the clip: the stretch 0:15 to 2:00 with 3 s each side
+    maya = ScriptedProvider([first, {"groups": []}])
+    r = video_steps(link, "maya", provider_factory=lambda: maya, fetch_meta=_meta())
+    assert r.steps.prompt_version == "v12" and len(r.steps.steps) == 2 and not any("#t=" in (c["video_url"] or "") for c in maya.calls)
+
+
+def test_a_failed_second_look_keeps_the_houdini_steps():
+    link = "https://www.youtube.com/watch?v=AAAAAAAAAAA"
+    first = {"steps": [_step("Create the Skeleton node", "00:05", "00:15"), _step("Add a Merge node", "02:00", "02:10")]}
+    p = ScriptedProvider([first, RuntimeError("quota"), {"groups": []}])
+    r = video_steps(link, "houdini", provider_factory=lambda: p, fetch_meta=_meta())
+    assert r.steps is not None and len(r.steps.steps) == 2 and any("could not be made" in w for w in r.steps.warnings)
+
+
+def test_a_houdini_label_houdini_does_not_have_is_corrected_from_the_clip():
+    link = "https://www.youtube.com/watch?v=AAAAAAAAAAA"
+    bad = {**_step("Configure controls on APEX Configure Controls", "00:05", "00:15"),
+           "how_to": [{"text": "Set Target Pattern to point* on configurecontrols1.", "support": "shown", "evidence": "x"}]}
+    p = ScriptedProvider([{"steps": [bad]}, {"seen": True, "label": "Group", "value": "point*", "evidence": "the Group field holds point*"}, {"groups": []}])
+    r = video_steps(link, "houdini", provider_factory=lambda: p, fetch_meta=_meta())
+    s = r.steps.steps[0]
+    assert s.how_to[0].text == "Set Group to point* on configurecontrols1." and any(f.startswith("label corrected by a second look") for f in s.flags)
+    assert not any("is not a parameter of" in f for f in s.flags) and p.calls[1]["video_url"].endswith("#t=2,18")

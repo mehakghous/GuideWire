@@ -178,6 +178,17 @@ class VisionService:
             return None
         return ui.region({"toolbar": "toolbox", "properties": "channelbox"}.get(region, region))
 
+    def _houdini_look(self, win, frame, pixels, words, layout, probe):
+        """Houdini: the observed state is the probe's; the grounding context carries the probe's interface snapshot (`houdini`) and the words read from the window (for parameter labels). Without
+        the probe the context has no snapshot: grounders then say what to look for, in words, and point at nothing."""
+        from vision.grounders import GroundContext
+        from vision.probe_client import merge_observed
+        observed = merge_observed({}, probe)
+        last = self._reader.last
+        epoch = (observed.get("ui_rev"), observed.get("scene_rev"), (win.rect.x, win.rect.y, win.rect.w, win.rect.h), last.serial if last is not None else 0, True)
+        ctx = GroundContext(None, None, frame.geometry, pixels, words, layout, None, None, epoch, True, houdini=(probe or {}).get("ui"))
+        return observed, ctx
+
     def reset(self) -> None:
         """Forget what was read, so the next look reads the whole window."""
         self._reader.reset()
@@ -203,6 +214,8 @@ class VisionService:
         from vision.probe_client import merge_observed
         win, frame, pixels, words, layout = self._scene(properties, attributes, keys)
         probe = self._probe if self.use_probe else None                     # read once, in `_scene`, for this very frame
+        if self.profile.key == "houdini" and win is not None:             # Houdini: its probe reports where nodes and panes are (docs/houdini_grounding.md)
+            return self._houdini_look(win, frame, pixels, words, layout, probe)
         if win is None or not self.profile.validated:      # hidden, or an app whose screen layout is not built yet
             return merge_observed({}, probe), None
         if self.profile.key != "blender":                  # Maya: its own widgets say where things are; no screen-only reading, so the probe answers

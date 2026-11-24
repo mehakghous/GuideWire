@@ -68,6 +68,16 @@ class GroundContext:
     epoch: Any = None                          # (interface revision, scene revision, window, words serial, settled): a result stays valid while it is unchanged
     settled: bool = True                       # the interface has not changed for a moment: Blender scrolls smoothly, so for about a second after a change the picture lags what the add-on reports
     maya: Any = None                           # Maya only: vision.mayaui.MayaUi built from the probe, when it describes the window as it is on screen now (then `ui` and `mapper` stay None)
+    houdini: dict | None = None                # Houdini: the probe's interface snapshot (vision/probes/houdini_probe.py `ui`): panes, node tiles, the parameter pane's node and labels; screen pixels
+
+    def screen_to_frame(self, r: Rect) -> Rect | None:
+        """A screen rectangle in the captured frame's pixels (the inverse of `frame_to_screen` without a Blender mapper); None without a capture."""
+        g = self.geometry
+        if g is None:
+            return None
+        m = g.monitor
+        sx, sy = g.image_w / m.w, g.image_h / m.h
+        return Rect(round((r.x - m.x) * sx), round((r.y - m.y) * sy), round(r.w * sx), round(r.h * sy))
 
     def frame_to_screen(self, r: Rect) -> Rect:
         if self.mapper is not None:
@@ -544,4 +554,107 @@ def ground_target(ctx: GroundContext, ref: TargetRef) -> Grounded:
         return ground_operator_panel(ctx, ref)
     if ref.kind == "context_menu":
         return ground_context_menu(ctx, ref)
+    if ref.kind == "node":
+        return ground_houdini_node(ctx, ref)
+    if ref.kind == "parm":
+        return ground_houdini_parm(ctx, ref)
+    if ref.kind == "pane":
+        return ground_houdini_pane(ctx, ref)
     return Grounded(ref.kind, WORDS, None, 1.0, ("nothing on screen names it",), label=ref.label)
+
+
+# ---------------------------------------------------------------- Houdini (docs/houdini_grounding.md)
+# Houdini reports where its nodes and panes are (the probe's `ui` snapshot, checked against a capture of a real Houdini 22 window). Parameter fields are drawn by Houdini itself, so a parameter is
+# found by reading the words INSIDE the parameter pane and matching them against the labels Houdini says that pane's node has: a closed list, never free text.
+HOUDINI_PANE_WORDS = {"NetworkEditor": "the network editor", "SceneViewer": "the viewport", "Parm": "the parameter pane"}
+
+
+def _hkey(s: str) -> str:
+    import re
+    return re.sub(r"[^a-z0-9]", "", (s or "").lower())
+
+
+def _hrect(r) -> Rect:
+    return Rect(int(r[0]), int(r[1]), int(r[2]), int(r[3]))
+
+
+def _same_node_label(a: str, b: str) -> bool:
+    return bool(a and b) and _hkey(a).removeprefix("apex") == _hkey(b).removeprefix("apex")
+
+
+def _houdini_nodes(ctx: GroundContext, ref: TargetRef) -> list[dict]:
+    """The visible nodes the target means: by instance name when the step names one, else by type (label or type name)."""
+    nodes = ((ctx.houdini or {}).get("network") or {}).get("nodes") or []
+    if ref.path:
+        return [n for n in nodes if n.get("name") == ref.path[0]]
+    return [n for n in nodes if _same_node_label(n.get("label", ""), ref.label) or (ref.id and _hkey(n.get("type", "")) == _hkey(ref.id))]
+
+
+def ground_houdini_node(ctx: GroundContext, ref: TargetRef) -> Grounded:
+    """A node in the network editor: its tile as the probe reports it. One match is the node; several of the same type pick the selected one, else the answer is ambiguous (no box); none means it is not
+    in the part of the network that is shown."""
+    hou = ctx.houdini
+    if not hou or not hou.get("network"):
+        return Grounded("node", UNKNOWN, None, 0.0, ("the Houdini probe reports no network editor",), f"Find {ref.label} in the network editor.", label=ref.label)
+    hits = _houdini_nodes(ctx, ref)
+    if len(hits) > 1:
+        sel = [n for n in hits if n.get("selected")]
+        hits = sel if len(sel) == 1 else hits
+    path = hou["network"].get("path", "")
+    if len(hits) == 1:
+        n = hits[0]
+        return Grounded("node", VISIBLE, _hrect(n["rect"]), 0.95, ("the Houdini probe reports the node's tile", f"the node {n['name']} is in {path}"),
+                        f"This is {n['name']} ({n.get('label') or ref.label}).", label=n["name"], complete=True)
+    if len(hits) > 1:
+        return Grounded("node", AMBIGUOUS, None, 0.5, (f"{len(hits)} nodes of this type are in view",), f"There are {len(hits)} {ref.label} nodes here: pick the one the step means.",
+                        ambiguous=True, label=ref.label)
+    net_rect = hou["network"].get("rect")
+    return Grounded("node", NOT_FOUND, _hrect(net_rect) if net_rect else None, 0.6, (f"no {ref.label} node is in view in {path}",),
+                    f"{ref.label} is not in the part of {path} that is shown: create it, or pan the network editor to it.", label=ref.label)
+
+
+def ground_houdini_pane(ctx: GroundContext, ref: TargetRef) -> Grounded:
+    """The pane a key or an action belongs in (Tab in the network editor, F in the viewport): a region hint, with the key in words."""
+    hou = ctx.houdini or {}
+    keys = "+".join(ref.keys)
+    where = HOUDINI_PANE_WORDS.get(ref.id or "", ref.label)
+    rect = next((p.get("rect") for p in hou.get("panes", []) if p.get("type") == ref.id and p.get("rect")), None)
+    note = f"Press {keys} with the mouse over {where}." if keys else f"Work in {where}."
+    if rect is None:
+        return Grounded("pane", WORDS, None, 1.0, (f"the Houdini probe reports no {ref.id} pane on screen",), note, label=ref.label)
+    return Grounded("pane", HIDDEN, _hrect(rect), 0.9, ("the Houdini probe reports the pane's rectangle",), note, label=ref.label)
+
+
+def ground_houdini_parm(ctx: GroundContext, ref: TargetRef) -> Grounded:
+    """A parameter: the parameter pane must show the step's node (else point at that node first); the label must be one Houdini lists for it; then the label is found by the words read inside the pane.
+    The box covers the parameter's row (label to the pane's right edge). Two places with the label: ambiguous, no box."""
+    hou = ctx.houdini or {}
+    parm = hou.get("parm")
+    label = ref.prop or ref.label
+    if not parm:
+        return Grounded("parm", UNKNOWN, None, 0.0, ("the Houdini probe reports no parameter pane",), f"Find {label} in the parameter pane.", label=label)
+    node_label = ref.panel or ""
+    if node_label and not _same_node_label(node_label, parm.get("label", "")):
+        node = ground_houdini_node(ctx, TargetRef(kind="node", label=node_label, id=ref.id))
+        return Grounded("parm", WRONG, node.rect if node.located else None, 0.85, (f"the parameter pane shows {parm.get('node')}, the step needs a {node_label}",),
+                        f"Select the {node_label} node first: its parameters, {label} among them, then show in the parameter pane.", label=label)
+    labels = parm.get("labels") or []
+    exact = next((x for x in labels if _hkey(x) == _hkey(label)), None)
+    if exact is None:
+        return Grounded("parm", WORDS, None, 1.0, (f"{parm.get('label')} has no parameter labelled {label} in this Houdini",), f"Look for {label} in the parameter pane.", label=label)
+    pane = parm.get("rect")
+    if not pane:
+        return Grounded("parm", UNKNOWN, None, 0.3, ("the parameter pane's rectangle is not known",), f"Find {exact} in the parameter pane.", label=exact)
+    pane_r = _hrect(pane)
+    within = ctx.screen_to_frame(pane_r)
+    hits = find_phrase(ctx.words, exact, within, min_score=0.85) if within is not None else []
+    if len(hits) == 1:
+        r, score = hits[0]
+        s = ctx.frame_to_screen(r)
+        row = Rect(s.x, s.y - 2, max(s.w, pane_r.x + pane_r.w - s.x - 4), s.h + 4)
+        return Grounded("parm", VISIBLE, row, round(min(0.95, score), 2), (f"the parameter pane shows {parm.get('node')}", f"the label '{exact}' was read in it"),
+                        f"Set {exact} here.", label=exact, complete=True)
+    if len(hits) > 1:
+        return Grounded("parm", AMBIGUOUS, None, 0.5, (f"'{exact}' was read {len(hits)} times in the pane",), f"Find {exact} in the parameter pane.", label=exact, ambiguous=True)
+    return Grounded("parm", NOT_OPEN, pane_r, 0.6, (f"{exact} is a parameter of {parm.get('label')} but its label was not read in the pane",),
+                    f"{exact} is in the parameter pane: scroll it or open the folder that holds it.", label=exact)

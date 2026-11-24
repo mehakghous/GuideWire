@@ -147,6 +147,12 @@ def operator_for_keys(keys: list[str] | tuple[str, ...] | str, mode: str | None 
     return found
 
 
+def rows_for_keys(keys: list[str] | tuple[str, ...] | str, mode: str | None = None) -> list[dict]:
+    """The default-keymap rows a key press matches in `mode` (the operator and its property values, which `operator_for_keys` leaves out: Shift+A is wm.call_menu with name VIEW3D_MT_add)."""
+    want = canonical(keys)
+    return [row for row in _catalog().get("keymap", []) if _valid_in(row["keymap"], mode) and _row_keys(row) == want and row["value"] in ("PRESS", "ANY", "CLICK")]
+
+
 def tool_operator(tool_id: str) -> str | None:
     """The operator a toolbar tool runs (Loop Cut -> mesh.loopcut_slide), from the catalog, or None."""
     for rows in _catalog().get("tools", {}).values():

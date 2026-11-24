@@ -413,12 +413,15 @@ def test_session_without_vision_has_no_guidance(win):
 def test_guidance_shows_the_highlight_for_the_active_step(win):
     s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT"}))
     s.poll()
-    assert overlay.shown >= 1 and len(overlay.marks) == 1 and s.watch_label.text() == "Found Cube"
+    assert overlay.shown >= 1 and len(overlay.marks) == 1 and "already looks done" in s.watch_label.text()   # the cube was there from the start: not evidence
     assert s.engine.position == 1
 
 
 def test_guidance_completes_a_step_the_screen_shows_done(win):
-    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT", "selection_types": ["MESH"]}))
+    svc = vf.FakeService({"mode": "OBJECT", "selection_types": []})
+    s, overlay = _guided(win, svc)
+    s.poll()                                                        # nothing is selected yet: not done
+    svc.observed = {"mode": "OBJECT", "selection_types": ["MESH"]}
     s.poll()
     assert s.engine.position == 2 and "Step 2" in s.step_text.text()
     assert "saw this step done" in s.status.text()
@@ -447,6 +450,14 @@ def test_pressing_done_by_hand_still_works_and_drops_a_stale_reading(win):
     s.done_button.click()                                           # the learner moves on first
     s._looked(look, first)
     assert s.engine.position == 2 and s._shown_step == "s02"
+
+
+def test_a_step_already_true_when_the_session_opens_is_not_completed_by_the_screen(win):
+    s, overlay = _guided(win, vf.FakeService({"mode": "OBJECT", "selection_types": ["MESH"]}))
+    s.poll()
+    assert s.engine.position == 1 and "already" in s.watch_label.text().lower()      # the learner presses Done themselves
+    s.done_button.click()
+    assert s.engine.position == 2
 
 
 def test_a_vision_failure_leaves_the_session_working_by_hand(win):

@@ -36,7 +36,7 @@ from .validate import Issue, ValidationFailure, check_structure, refresh_coverag
 log = logging.getLogger(__name__)
 
 DEFAULT_PROMPT_VERSION = "v2"  # stays the baseline until a live experiment justifies v3
-PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds", "v11", "v12", "v13", "v14")
+PROMPT_VERSIONS = ("v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v10-nokb", "v10-outline", "v10-preds", "v10-hou", "v10-houpreds", "v11", "v12", "v13", "v14", "v15")
 
 
 class ExtractionError(RuntimeError):
@@ -143,12 +143,12 @@ class DraftStepListV11(DraftStepList):
 
 
 def _extended(prompt_version: str) -> bool:
-    return prompt_version in ("v10-preds", "v10-houpreds", "v11", "v12", "v13", "v14")
+    return prompt_version in ("v10-preds", "v10-houpreds", "v11", "v12", "v13", "v14", "v15")
 
 
 def _draft_model(prompt_version: str) -> type[DraftStepList]:
     """The model-facing step-list shape for a prompt version."""
-    if prompt_version in ("v11", "v12", "v13", "v14"):
+    if prompt_version in ("v11", "v12", "v13", "v14", "v15"):
         return DraftStepListV11
     return DraftStepListExt if _extended(prompt_version) else DraftStepList
 
@@ -167,7 +167,7 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
     if kb_mode and (version != "v10" or kb_mode not in ("nokb", "outline", "preds", "hou", "houpreds")):
         raise ValueError(f"unknown prompt version {full_version!r}; choose from {PROMPT_VERSIONS}")
     # Blender gained a node vocabulary (objects, bones, constraints, modifiers) after the recorded runs; the frozen prompts v2 to v6 must not change, so only v7 shows it.
-    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14")) else ""
+    node_line = f"\n  node_exists: {sorted(profile.nodes)} (a node or object of that type must exist)" if profile.nodes and (profile.name != "blender" or version in ("v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15")) else ""
     vocab = f"""  mode: {sorted(profile.modes)}
   active_tool: {sorted(profile.tools)}
   workspace: {sorted(profile.workspaces)}
@@ -177,8 +177,8 @@ def build_system_prompt(profile: AppProfile, version: str = DEFAULT_PROMPT_VERSI
   Predicate JSON looks like {{"kind": "mode", "name": "EDIT_MESH"}} or
   {{"kind": "property_equals", "name": "object.location.x", "expected_value": 2.0}}.
   `name` must be one of the listed strings exactly; do not put the kind in `name`."""
-    if version in ("v11", "v12", "v13", "v14"):
-        return _v11_system_prompt(profile, vocab, fine=version in ("v12", "v13", "v14"), houdini_fine=version in ("v13", "v14"), teaching=version == "v14")
+    if version in ("v11", "v12", "v13", "v14", "v15"):
+        return _v11_system_prompt(profile, vocab, fine=version in ("v12", "v13", "v14", "v15"), houdini_fine=version in ("v13", "v14", "v15"), teaching=version if version in ("v14", "v15") else None)
     if version == "v2":
         return f"""You convert software tutorials into precise, ordered step records for {profile.name}.
 
@@ -245,7 +245,7 @@ Rules:
 #   * no place for the instructor's reasons: narration was used only as evidence, so "why" was lost;
 #   * an instructor's on-screen mistake (an undo, a redo) was either turned into steps or dropped along with its lesson.
 # v11 asks for MEANINGFUL steps: one operation a learner would name as one thing to do, with every click, value and name inside it, and the reason the instructor gives.
-def _v11_system_prompt(profile: AppProfile, vocab: str, fine: bool = False, houdini_fine: bool = False, teaching: bool = False) -> str:
+def _v11_system_prompt(profile: AppProfile, vocab: str, fine: bool = False, houdini_fine: bool = False, teaching: str | None = None) -> str:
     """v11, or with `fine` v12: the same prompt with smaller steps (`_V12_STEP_RULES` in place of `_V11_STEP_RULES`)."""
     from .features import CRAFT_FEATURES, load_catalog
     feats = "\n".join(f"  {f.id}: {f.name}" for f in load_catalog().supported(profile.name, ("N", "P", "C")))
@@ -255,7 +255,7 @@ HOUDINI NODE NETWORKS. A node is usually one step: create it (with the Tab menu 
 line per parameter with the exact parameter label and value shown in the parameter pane. Start a new step when the instructor moves to another node, or comes back later to change a node for a
 new reason. Read parameter labels from the screen; if a label or value cannot be read, say so instead of guessing a likely name.
 """) if profile.name == "houdini" else ""
-    step_rules = (_V14_STEP_RULES if teaching else _V12_STEP_RULES) if fine else _V11_STEP_RULES
+    step_rules = ({"v14": _V14_STEP_RULES, "v15": _V15_STEP_RULES}.get(teaching or "", _V12_STEP_RULES)) if fine else _V11_STEP_RULES
     how_lines = "1 to 3" if fine else "ordered,"
     prompt = f"""You turn a software tutorial video for {profile.name} into the steps a learner follows to reproduce it in their own copy of {profile.name}.
 
@@ -307,7 +307,7 @@ FIELDS.
   start_state follows the same rules and says what must already hold before the step.
 {houdini}"""
     if teaching:
-        for old, new in _V14_REPLACEMENTS:
+        for old, new in (_V15_REPLACEMENTS if teaching == "v15" else _V14_REPLACEMENTS):
             assert old in prompt, old[:60]
             prompt = prompt.replace(old, new, 1)
     return prompt
@@ -343,7 +343,44 @@ _V12_STEP_RULES = """WHAT ONE STEP IS.
 #   * "why: ONE sentence": generic "To ..." lines; the instructor's concrete reason (the bone's X axis must point at the pole target; 90 or -90 depending on how the armature was built) was lost;
 #   * no rule to define a term at its first use (controller bone, pole target, roll), or to say a direction ("forward", "backwards") or a value that depends on the setup.
 # v14 changes only those rules (the replacements below). Everything else is v12's, word for word; v12 and v13 are unchanged.
+# v14 (2026-11-24): the rules as they were when a learner found its output much better than v12's (steps not too coarse, every parent and unparent step present). v15 below adds the rules written
+# afterwards (what to expect when nothing happens, two choices in one setting, cause and effect, never name a bone the video does not, a value with its test). They were measured to make steps
+# coarser (about 34 to 24 steps on the leg IK video) and are kept as v15 for further testing.
 _V14_STEP_RULES = """WHAT ONE STEP IS.
+- A step is ONE operation with ONE result the learner can see in the application: something is added, a mode or editor is switched, an option is turned on or off, a value or name is set,
+  one element is moved, rotated, scaled or extruded, two things are connected, parented or constrained, a transform is cleared or reset. A learner should be able to do it from 1 to 3 short how_to lines.
+- A switch of mode (Edit Mode, Pose Mode, Object Mode, a viewport state) is a step of its own: later steps happen in that mode, and the learner can see that it worked.
+- Each item that gets its own name, value or position is its own step: naming five joints is five steps; extruding three bones is three steps; setting the same thing on two bones is two steps, the
+  second saying it is done the same way on the other bone. Identical repeats with nothing that differs (pressing the same key several times) are one step that says how many times.
+- TRY, SEE, FIX. An instructor often does something, shows that it does not work yet (moves a controller and the knee twists; rotates a bone and the foot does not follow), and fixes it in the next
+  steps. Keep that thread. The try is a step of its own ("Move the foot controller and watch the knee"), whose why says what goes wrong and what the next steps fix. Never jump to the fix as if the
+  problem had not been shown. A reset, a clear or an undo that the instructor does to get back to a clean state is a step.
+- Fold only pure preparation into the step it serves: selecting the object or node to act on, opening the menu, panel, dialog or editor that the step uses. They are the first how_to lines. A selection
+  that only prepares the next action stays in the step of that action.
+- If a step needs more than 3 how_to lines it is probably two steps. Never merge two results into one step, and never split one operation into several steps.
+- No steps for: intros, outros, recaps, sponsor segments, camera or view navigation that changes nothing, hovering, and talk with nothing to do."""
+
+
+_V14_REPLACEMENTS = (
+    ("""- If the instructor makes a mistake on screen and undoes or corrects it, write only the correct way as the step, and put the pitfall in common_mistakes ("<what went wrong> happens if
+  <cause>; <how the instructor fixed it>"). Do not write steps for the mistake or the undo.
+- If the instructor tests or demonstrates the result (moves a control to show it works), put that in the check lines of the step it tests. Make it a step of its own only when the instructor
+  presents it as a stage of the tutorial ("now let's test the rig").""",
+     """- If the instructor slips (a wrong click, an undo he did not mean) and corrects it, write only the correct way as the step, and put the pitfall in common_mistakes ("<what went wrong> happens if
+  <cause>; <how the instructor fixed it>"). A deliberate try that shows a problem the next steps solve is not a slip: it is a step (see TRY, SEE, FIX).
+- If the instructor tests or demonstrates the result (moves a control to show it works), it is a step of its own when it teaches something (what the result looks like, what is still wrong); the check lines of
+  the step it tests are enough when it only confirms."""),
+    ("""- why: the purpose in one sentence, ONLY as the instructor says or clearly shows it; null when no reason is given. Never make up a reason.""",
+     """- why: one to three short plain sentences, ONLY as the instructor says or clearly shows it; null when no reason is given. Never make up a reason. Say it in the context of what is on screen: the instructor's
+  own reasoning with the concrete example he uses (which bone, which axis, what goes wrong), not a general sentence that starts "To ...". If he gives a condition ("it depends on how your armature was built",
+  "it could also be minus 90"), say it. If the step uses a term the learner may not know (controller bone, pole target, roll, IK, constraint) and the instructor explains it, begin with a one-sentence plain
+  definition, at the FIRST step that uses the term and not again. A step that shows something not working yet says so and names what fixes it."""),
+    ("""  shortcut or field, every value and name. Give each line support""",
+     """  shortcut or field, every value and name. Write directions the way the learner sees them (up, down, forward, backward, left, right, towards or away from the camera, along the named axis) and the amount
+  when the video shows it; when the instructor says a value depends on the setup, give both ("90, or minus 90 if the axis points the other way"). Name keys the way a Windows keyboard does (Ctrl, Alt, Shift) and never add the Mac or other-system alternative. Give each line support"""),
+)
+
+_V15_STEP_RULES = """WHAT ONE STEP IS.
 - A step is ONE operation with ONE result the learner can see in the application: something is added, a mode or editor is switched, an option is turned on or off, a value or name is set,
   one element is moved, rotated, scaled or extruded, two things are connected, parented or constrained, a transform is cleared or reset. A learner should be able to do it from 1 to 3 short how_to lines.
 - A switch of mode (Edit Mode, Pose Mode, Object Mode, a viewport state) is a step of its own: later steps happen in that mode, and the learner can see that it worked.
@@ -361,7 +398,7 @@ _V14_STEP_RULES = """WHAT ONE STEP IS.
 - If a step needs more than 3 how_to lines (4 when a setting takes two choices), it is probably two steps. Never merge two results into one step, and never split one operation into several steps.
 - No steps for: intros, outros, recaps, sponsor segments, camera or view navigation that changes nothing, hovering, and talk with nothing to do."""
 
-_V14_REPLACEMENTS = (
+_V15_REPLACEMENTS = (
     ("""- If the instructor makes a mistake on screen and undoes or corrects it, write only the correct way as the step, and put the pitfall in common_mistakes ("<what went wrong> happens if
   <cause>; <how the instructor fixed it>"). Do not write steps for the mistake or the undo.
 - If the instructor tests or demonstrates the result (moves a control to show it works), put that in the check lines of the step it tests. Make it a step of its own only when the instructor
@@ -560,7 +597,7 @@ RIGGING_APPS = ("maya", "houdini")
 # Then v12 the same day: v11's steps were too big for the learner ("each step is so many mini steps"). v12 = v11 with one visible result per step (same videos, three repeats): 12.5 steps,
 # 98 % matching something the instructor did, no copied names, every step with its reason; Blender 18 steps, close to the earlier division.
 # Houdini then v13 (v12 with Houdini steps as small as the other applications'), with the gap pass in the app: docs/extraction_v11_report_2026-11-22.md, Houdini section.
-RECOMMENDED_VIDEO_PROMPT = {"houdini": "v14", "maya": "v14", "blender": "v14"}      # 2026-11-24: v14 for every application, after three runs on each of the six labelled videos (docs/guidance_fixes_2026-11-24.md)
+RECOMMENDED_VIDEO_PROMPT = {"houdini": "v15", "maya": "v15", "blender": "v14"}      # 2026-11-25, three runs on each of the six labelled videos: Blender v14 (words found 94.2% against v12 90.9% and v15 91.2%); Maya and Houdini v15 (87.7% and 72.2% against v14 81.7% and 67.3%; v12/v13 78.6% and 64.4%). See docs/guidance_fixes_2026-11-24.md
 GAP_PASS_APPS = frozenset({"houdini"})        # the applications whose video extraction gets the gap pass (fill_gaps) in the app
 
 
@@ -691,12 +728,12 @@ def _run(
                 draft, source_type=source_type, app=app, video_id=video_id,
                 model_id=provider.model_id, prompt_version=prompt_version,
             )
-            if prompt_version == "v14":
+            if prompt_version in ("v14", "v15"):
                 windows_keys(sl)                           # a Mac tutorial's Command and Option are Ctrl and Alt for the learner
             compose_instructions(sl)                       # before validation, so unknown menu names get the usual "please check" flag
             derive_state(sl)
             sl = sanitize_and_annotate(sl, profile, video_duration_s)
-            if prompt_version == "v14":
+            if prompt_version in ("v14", "v15"):
                 resolve_repeats(sl)                        # "do the same thing with this bone": the other bone of the same kind, not an invented name
             last_partial = sl
             if allow_empty and not sl.steps:
@@ -984,7 +1021,7 @@ def video_prompt(prompt_version: str, duration_s: float | None, title_hint: str 
     from .transcript import transcript_for_prompt
     prompt_version = prompt_version.partition("-")[0]                  # "v10-nokb" and "v10-outline" differ only in the system prompt
 
-    if prompt_version in ("v12", "v13", "v14"):
+    if prompt_version in ("v12", "v13", "v14", "v15"):
         dur_txt = f"\nThe video is exactly {_mmss(duration_s)} long; every timestamp must be within 00:00 to {_mmss(duration_s)}." if duration_s else ""
         return (
             "Watch the whole tutorial, listening to the narration and reading the screen together, and write the steps a learner needs to reproduce it: one step per operation with a "

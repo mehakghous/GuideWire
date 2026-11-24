@@ -219,17 +219,17 @@ def test_without_any_model_a_pasted_link_still_gets_the_old_message(win):
 
 
 def test_a_houdini_video_gets_a_second_look_at_a_long_gap_and_maya_does_not():
-    """2026-11-22: Houdini videos get the gap pass (docs/extraction_v11_report_2026-11-22.md, Houdini section); since 2026-11-24 every application uses prompt v14."""
+    """2026-11-22: Houdini videos get the gap pass (docs/extraction_v11_report_2026-11-22.md, Houdini section); since 2026-11-25 Maya and Houdini use prompt v15 and Blender v14."""
     link = "https://www.youtube.com/watch?v=AAAAAAAAAAA"
     first = {"steps": [_step("Create the Skeleton node", "00:05", "00:15"), _step("Add a Merge node", "02:00", "02:10")]}       # 1:45 with no step between them
     clip = {"steps": [_step("Press F to enter Modify mode", "00:20", "00:22")]}
     hou = ScriptedProvider([first, clip, {"groups": []}])
     r = video_steps(link, "houdini", provider_factory=lambda: hou, fetch_meta=_meta())
-    assert r.steps.prompt_version == "v14" and [s.goal for s in r.steps.steps] == ["Create the Skeleton node", "Press F to enter Modify mode", "Add a Merge node"]
+    assert r.steps.prompt_version == "v15" and [s.goal for s in r.steps.steps] == ["Create the Skeleton node", "Press F to enter Modify mode", "Add a Merge node"]
     assert hou.calls[1]["video_url"].endswith("#t=12,123")                    # the clip: the stretch 0:15 to 2:00 with 3 s each side
     maya = ScriptedProvider([first, {"groups": []}])
     r = video_steps(link, "maya", provider_factory=lambda: maya, fetch_meta=_meta())
-    assert r.steps.prompt_version == "v14" and len(r.steps.steps) == 2 and not any("#t=" in (c["video_url"] or "") for c in maya.calls)
+    assert r.steps.prompt_version == "v15" and len(r.steps.steps) == 2 and not any("#t=" in (c["video_url"] or "") for c in maya.calls)
 
 
 def test_a_failed_second_look_keeps_the_houdini_steps():

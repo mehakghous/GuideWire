@@ -108,3 +108,30 @@ Because of this every application now uses v14 (`RECOMMENDED_VIDEO_PROMPT`). The
 **One thing to watch.** On the Maya leg video the joint names came out as `leftThigh` in 2 of 3 v14 runs and as `left_thigh` in the first (v12: camel case in all 3). One run in three is not enough to say, but exact names are what a learner types.
 
 Cost: about $1.35 for the 18 extractions of this round.
+
+## Fifth round (25 Nov): which prompt made the good tutorial, and the defaults
+
+**What was compared.** The learner found the newest tutorial in the tester account (`blender test 6`, made by the app at 11:30 on 23 Nov) much better than the ones made later, and asked to go back to "v13". It was not v12 or v13: v13 is the Houdini prompt, and Blender used v12 until that morning. The tutorial has a "test IK movement / knee twisting" step and a "Pose > Clear Transform > All" step, which only v14 produces. So it came from v14 as it was at that time, before the rules added afterwards.
+
+**What was done.** The rules added afterwards (what to expect when nothing happens, two choices in one setting, cause and effect, never name a bone the video does not, a value with its test) are now **v15**. **v14** is back to the text it had when the learner liked its output. Nothing is lost: both are selectable (`--prompt-version`).
+
+**Three runs on each of the six labelled videos** (cost about $1.35 each time). Mean of three runs, "words found" and "step support" from the labels:
+
+| | Steps (after split) | Words found | Step support | Test/observe steps |
+|---|---|---|---|---|
+| Blender v12 | 18.2 (28.0) | 90.9% | 97.2% | 3.8 |
+| Blender **v14** | 18.5 (28.3) | **94.2%** | **98.9%** | 4.7 |
+| Blender v15 | 20.8 (29.0) | 91.2% | 97.5% | 5.0 |
+| Maya v12 | 9.7 (16.0) | 78.6% | 98.7% | 0.5 |
+| Maya v14 | 13.5 (23.2) | 81.7% | 90.9% | 1.8 |
+| Maya **v15** | 12.3 (21.0) | **87.7%** | **100%** | 1.5 |
+| Houdini v13 | 11.5 (20.2) | 64.4% | 93.2% | 2.5 |
+| Houdini v14 | 11.5 (20.5) | 67.3% | 90.6% | 2.8 |
+| Houdini **v15** | 11.5 (20.5) | **72.2%** | **94.4%** | 2.7 |
+
+So the defaults are now **Blender v14, Maya v15, Houdini v15**, each the best of the three on its own application.
+
+**What the numbers do and do not say.**
+- They do not show that the later rules made Blender steps coarser (v14 18.5 against v15 20.8 steps); the leg IK video alone gave 30, 18 and 22 steps in three runs of the same v14 prompt, and 27, 27 and 25 with v15. The same prompt varies that much from run to run.
+- Steps that name clearing or removing a parent, and steps that name Keep Offset, are the same in number across v12, v14 and v15 on that video (3 and 1 to 2). The knee controller's parent and keep-offset steps being present or merged in one extraction is therefore mostly luck of the draw, and the good tutorial was one good draw. Nothing here fixes that variation.
+- What the labelled scores cannot see is how well each step maps to something the guide can highlight; that was checked on the leg IK video only (48 of 49 steps got a rectangle for v14).

@@ -29,10 +29,10 @@ def test_v14_does_not_forbid_the_demonstrations_v12_dropped():
     assert "ONE sentence" not in v14 and "why: the purpose in one sentence" not in v14
 
 
-def test_every_application_uses_v14_for_videos():
-    """2026-11-24: three runs on each of the six labelled videos; Maya and Houdini found more of the labelled actions by their words (about +9 and +8 points) with the same or better step support."""
-    for app in ("blender", "maya", "houdini"):
-        assert extract.recommended_video_prompt_version(app) == "v14"
+def test_each_application_uses_the_prompt_its_three_runs_favoured():
+    """2026-11-25, three runs on each of the six labelled videos: Blender v14 (words found 94.2% against v12 90.9% and v15 91.2%); Maya v15 (87.7% against v14 81.7%) and Houdini v15 (72.2% against 67.3%)."""
+    assert extract.recommended_video_prompt_version("blender") == "v14"
+    assert extract.recommended_video_prompt_version("maya") == extract.recommended_video_prompt_version("houdini") == "v15"
 
 
 def test_the_v14_rules_are_generic_no_name_from_one_tutorial_is_in_the_prompt():
@@ -44,9 +44,16 @@ def test_the_v14_rules_are_generic_no_name_from_one_tutorial_is_in_the_prompt():
             assert word not in added
 
 
-def test_a_setting_that_takes_two_choices_is_written_as_two_lines_in_every_application():
+def test_the_later_rules_are_v15_and_v14_is_the_text_the_learner_liked():
+    """2026-11-24: the rules written after the learner's first look (what to expect when nothing happens, two choices in one setting, cause and effect, never name a bone the video does not, a value with its test)
+    made the steps coarser, so v14 is back to its earlier text and they are v15."""
+    later = ("SETTINGS THAT TAKE TWO CHOICES", "NAME BONES AND OBJECTS ONLY AS THE VIDEO DOES", "when NOTHING happens", "Get cause and effect the right way round", "AND the test he uses to choose it")
     for app in ("blender", "maya", "houdini"):
-        assert "SETTINGS THAT TAKE TWO CHOICES" in _prompt_for(app) and "SETTINGS THAT TAKE TWO CHOICES" not in _prompt_for(app, "v12")
+        v14, v15 = _prompt_for(app), _prompt_for(app, "v15")
+        for rule in later:
+            assert rule in v15 and rule not in v14
+        for rule in ("TRY, SEE, FIX", "one to three short plain sentences", "Write directions the way the learner sees them"):
+            assert rule in v14 and rule in v15
 
 
 def test_a_mac_tutorials_command_and_option_become_ctrl_and_alt_and_the_mac_aside_is_dropped():

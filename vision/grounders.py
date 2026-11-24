@@ -22,7 +22,7 @@ from typing import Any
 
 from shared.grounding import CaptureGeometry, Rect
 from shared.step_record import TargetRef
-from vision.locate import Located, find_phrase, locate
+from vision.locate import Located, _whole_label, find_phrase, locate
 from vision.ocr import Word
 from vision.toolbar_align import Alignment, align, cell_rect, full_cells, sep_flags
 from vision.uimodel import FrameMapper, UiModel
@@ -150,11 +150,11 @@ def ground_tool(ctx: GroundContext, ref: TargetRef) -> Grounded:
     from vision.toolbar import find_cells
     viewport = ui.region("VIEW_3D", "WINDOW")
     if viewport is None:
-        return Grounded("tool", UNKNOWN, None, 0.0, ("the 3D view has no drawing region in the snapshot",), f"Look for {label} in the toolbar.", label=label)
+        return Grounded("tool", UNKNOWN, None, 0.0, ("the 3D view has no drawing region in the snapshot",), f"Find {label} in the toolbar.", label=label)
     tb = mp.to_frame(tools.rect)
     cells = [c for c in find_cells(ctx.pixels, mp.to_frame(viewport.rect)) if tb.x - 4 <= c.rect.x and c.rect.x + c.rect.w <= tb.x + tb.w + 4 and tb.y - 4 <= c.rect.y and c.rect.y + c.rect.h <= tb.y + tb.h + 4]
     if not ctx.settled:                                              # the toolbar (or the window) changed a moment ago and Blender animates it: cell positions in the picture are between two places
-        return Grounded("tool", UNKNOWN, ctx.window_to_screen(tools.rect), 0.3, ("the interface changed a moment ago and Blender is still moving it",), f"Look for {label} in the toolbar (it will be pointed out as soon as the toolbar stops moving).", label=label)
+        return Grounded("tool", UNKNOWN, ctx.window_to_screen(tools.rect), 0.3, ("the interface changed a moment ago and Blender is still moving it",), f"Find {label} in the toolbar (it will be pointed out as soon as the toolbar stops moving).", label=label)
     tops, heights = [c.rect.y - tb.y for c in cells], [c.rect.h for c in cells]
     scroll = 1.0 - (tools.view_top if tools.view_top is not None else 1.0)
     al = align(tops, heights, tb.h, flags, scroll, ui.ui_scale)
@@ -165,7 +165,7 @@ def _tool_result(ctx: GroundContext, ref: TargetRef, idx: int, al: Alignment | N
     label = ref.label
     region_screen = ctx.window_to_screen(region_win) if ctx.mapper is not None else None
     if al is None:
-        return Grounded("tool", UNKNOWN, region_screen, 0.0, ("the cells in the picture do not match the tool list",), f"Look for {label} in the toolbar (the tool strip at the left of the 3D view); scroll it if you cannot see it.", label=label)
+        return Grounded("tool", UNKNOWN, region_screen, 0.0, ("the cells in the picture do not match the tool list",), f"Find {label} in the toolbar (the tool strip at the left of the 3D view); scroll it if you cannot see it.", label=label)
     rel = al.relation(idx)
     if rel != VISIBLE:
         away = (al.first - idx) if rel == "above" else (idx - (al.first + al.count - 1))
@@ -175,7 +175,7 @@ def _tool_result(ctx: GroundContext, ref: TargetRef, idx: int, al: Alignment | N
     full = full_cells(tops, heights, tb.h)
     cr = cell_rect(idx, al, full, flags)
     if cr is None:
-        return Grounded("tool", UNKNOWN, region_screen, 0.2, al.evidence, f"Look for {label} in the toolbar.", label=label)
+        return Grounded("tool", UNKNOWN, region_screen, 0.2, al.evidence, f"Find {label} in the toolbar.", label=label)
     top, h = cr
     x = cells[0].rect.x if cells else tb.x + 4
     w = cells[0].rect.w if cells else tb.w - 8
@@ -193,7 +193,7 @@ def _tool_result(ctx: GroundContext, ref: TargetRef, idx: int, al: Alignment | N
             evidence.append("the blue (active) cell is the active tool's cell, as the alignment says")
             conf = min(1.0, conf + 0.03)
         else:
-            return Grounded("tool", UNKNOWN, region_screen, 0.3, tuple(evidence) + ("the blue (active) cell is NOT where the alignment puts the active tool",), f"Look for {label} in the toolbar.", label=label)
+            return Grounded("tool", UNKNOWN, region_screen, 0.3, tuple(evidence) + ("the blue (active) cell is NOT where the alignment puts the active tool",), f"Find {label} in the toolbar.", label=label)
     rect = ctx.frame_to_screen(Rect(round(x), round(tb.y + top), round(w), round(h)))
     return Grounded("tool", VISIBLE, rect, conf, tuple(evidence), f"Click {label} in the toolbar.", label=label)
 
@@ -323,7 +323,7 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
         return Grounded("property", NOT_FOUND, nav_screen, 0.0, ("the Properties editor has no content region",), "", label=ref.label)
     box = ctx.window_to_frame(win.rect)
     if box is None:
-        return Grounded("property", UNKNOWN, None, 0.0, ("the snapshot does not fit this frame",), f"Look for {ref.prop} in the {tab_name} tab.", label=ref.label)
+        return Grounded("property", UNKNOWN, None, 0.0, ("the snapshot does not fit this frame",), f"Find {ref.prop} in the {tab_name} tab.", label=ref.label)
     panel = find_phrase(ctx.words, ref.panel, box, min_score=0.9) if ref.panel else []
     win_screen = ctx.window_to_screen(win.rect)
     if ref.panel and not panel:
@@ -339,13 +339,17 @@ def ground_property(ctx: GroundContext, ref: TargetRef) -> Grounded:
         return Grounded("property", VISIBLE, ctx.frame_to_screen(widget_rect(ctx.words, r, box)), round(min(s, 0.95 if panel else 0.8), 2), ev, f"Find {ref.prop} in the {ref.panel or tab_name} panel.", complete=True, label=ref.label)
     if panel:
         header = panel[0][0]
+        if header.y + header.h >= box.y + box.h - 40:                  # the header is the last thing in view: whether the panel is open cannot be read (nothing shows under it), and the field is out of view either way
+            strip = ctx.window_to_screen(Rect(win.rect.x, win.rect.y, win.rect.w, 36))
+            return Grounded("property", OFFSCREEN, strip, 0.6, (f"the header '{ref.panel}' is at the bottom edge of the editor and nothing is shown under it",),
+                            f"Scroll down in the Properties editor: open {ref.panel} if it is closed, then find {ref.prop}.", label=ref.label, direction="down")
         if _panel_open(ctx, header, box, ref.tab):                     # open, and the field is under the part that is in view: it needs a scroll, not a click on the header
             strip = ctx.window_to_screen(Rect(win.rect.x, win.rect.y, win.rect.w, 36))          # Blender's region rectangles count from the bottom: this is the bottom edge of the editor
             return Grounded("property", OFFSCREEN, strip, 0.6, (f"the panel '{ref.panel}' is open and '{ref.prop}' is not in the part that is in view",),
                             f"{ref.panel} is open. Scroll down in the Properties editor to {ref.prop}.", label=ref.label, direction="down")
         return Grounded("property", OFFSCREEN, ctx.frame_to_screen(header), 0.6, (f"the header '{ref.panel}' is shown and the panel under it is closed",),
                         f"Click {ref.panel} to open it; {ref.prop} is inside.", label=ref.label, matched=ref.panel or "")
-    return Grounded("property", UNKNOWN, win_screen, 0.3, ("the tab is open; its content was not read",), f"Look for {ref.prop} in the {tab_name} tab.", label=ref.label)
+    return Grounded("property", UNKNOWN, win_screen, 0.3, ("the tab is open; its content was not read",), f"Find {ref.prop} in the {tab_name} tab.", label=ref.label)
 
 
 def _lone_field(ctx: GroundContext, ref: TargetRef, box: Rect, where: str, kind: str = "property") -> Grounded | None:
@@ -436,16 +440,25 @@ def ground_sidebar(ctx: GroundContext, ref: TargetRef) -> Grounded:
     if panel:
         return Grounded("sidebar", OFFSCREEN, ctx.frame_to_screen(panel[0][0]), 0.6, (f"the header '{ref.panel}' is shown and '{label}' is not under it",),
                         f"Click {ref.panel} to open it, or scroll the sidebar: {label} is inside.", label=ref.label, matched=ref.panel or "")
-    return Grounded("sidebar", UNKNOWN, region_screen, 0.3, ("the sidebar is open; the label was not read in it",), f"Look for {label} in the sidebar{' (' + tab + ' tab)' if tab else ''}.", label=ref.label)
+    return Grounded("sidebar", UNKNOWN, region_screen, 0.3, ("the sidebar is open; the label was not read in it",), f"Find {label} in the sidebar{' (' + tab + ' tab)' if tab else ''}.", label=ref.label)
 
 
 def ground_operator_panel(ctx: GroundContext, ref: TargetRef) -> Grounded:
     """A field of the panel an operator leaves after it ran (Loop Cut and Slide > Number of Cuts), or a choice in the popup an operator shows (Set Parent To > With Automatic Weights)."""
     if ref.id:                                                         # a choice in a popup: text, wherever the popup opened
-        hits = find_phrase(ctx.words, ref.label, None, min_score=0.9)
+        hud = None if _hud_window_rect(ctx) is None else ctx.window_to_frame(_hud_window_rect(ctx))
+        found = [h for h in find_phrase(ctx.words, ref.label, None, min_score=0.9) if hud is None or not hud.contains(h[0].x, h[0].y)]      # after the choice was made Blender keeps its title in the settings panel at the bottom left ("> Clear Parent"): that is not a pop-up
+        hits = _whole_label(ctx.words, found)      # a tooltip that ends in the same words ("...selected bones and their parents: Clear Parent") is not a choice
         if len(hits) == 1:
             return Grounded("operator_panel", VISIBLE, ctx.frame_to_screen(hits[0][0]), round(hits[0][1], 2), (f"the choice '{ref.label}' was read",), f"Click {ref.label}.", complete=True, label=ref.label)
         if len(hits) > 1:
+            top = min(hits, key=lambda h: h[0].y)
+            column = [h for h in hits if abs(h[0].x - top[0].x) <= 200]       # the pop-up is one narrow column; the same words further away are something else (the tooltip of the item under the mouse)
+            lowest = max(column, key=lambda h: h[0].y)
+            if len(column) >= 2 and sum(1 for h in column if abs(h[0].y - lowest[0].y) <= lowest[0].h) == 1:
+                # the same words one under the other in one column: a pop-up headed "Clear Parent" whose first choice is "Clear Parent". The title is the upper one; the choice is the one below it
+                return Grounded("operator_panel", VISIBLE, ctx.frame_to_screen(lowest[0]), round(lowest[1] * 0.9, 2), (f"'{ref.label}' was read twice in one column: the pop-up's title and, below it, the choice",),
+                                f"Click {ref.label}.", complete=True, label=ref.label)
             return Grounded("operator_panel", AMBIGUOUS, None, 0.3, (f"'{ref.label}' appears {len(hits)} times",), "", ambiguous=True, label=ref.label)
         return Grounded("operator_panel", NOT_OPEN, None, 0.0, ("the popup is not open",), f"The choices appear after the shortcut or menu item that started them; then click {ref.label}.", label=ref.label)
     # A tool's or an operator's field is shown in one of two places, and which one depends on the Blender version and on what ran: the TOOL SETTINGS bar along the top of the 3D view (Loop Cut's
@@ -619,7 +632,7 @@ def ground_houdini_parm(ctx: GroundContext, ref: TargetRef) -> Grounded:
     labels = parm.get("labels") or []
     exact = next((x for x in labels if _hkey(x) == _hkey(label)), None)
     if exact is None:
-        return Grounded("parm", WORDS, None, 1.0, (f"{parm.get('label')} has no parameter labelled {label} in this Houdini",), f"Look for {label} in the parameter pane.", label=label)
+        return Grounded("parm", WORDS, None, 1.0, (f"{parm.get('label')} has no parameter labelled {label} in this Houdini",), f"Find {label} in the parameter pane.", label=label)
     pane = parm.get("rect")
     if not pane:
         return Grounded("parm", UNKNOWN, None, 0.3, ("the parameter pane's rectangle is not known",), f"Find {exact} in the parameter pane.", label=exact)

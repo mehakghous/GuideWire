@@ -43,12 +43,30 @@ PENALTY = {
     "ungrounded_how_to": 0.85,
     "vague_value": 0.9,
     "unknown_parm": 0.85,
+    "inferred_name": 0.85,
 }
 
 # A how-to line that says to change something without saying to what ("Adjust shape scale/offset to enlarge control shapes", "set a custom color"). In the v11 runs no model wrote
 # "not readable" when it could not read a value; it wrote a line like these instead, so the reviewer is told here, deterministically.
 _VAGUE = re.compile(r"\b(adjust\w*|tweak\w*|as needed|as desired|to taste|to suit|some value|a custom|a suitable|appropriate value|enlarge|until it looks)\b", re.I)
 _HAS_VALUE = re.compile(r"\d|'[^']+'|\"[^\"]+\"|\bto (on|off|true|false|[A-Z][\w-]*)\b")
+
+
+# The instructor often only points: "do the same thing with this bone". A model that cannot read a name then picked one from the rig's layout ("the toe bone"), and the learner parented the wrong bone. When the
+# only evidence is a pointing phrase and the step names a body part that no evidence mentions, the reviewer is told here, deterministically.
+_POINTING = re.compile(r"\b(same|similar)\s+(thing|way)\b|\bthe other\s+(one|bone|control|controller)\b|\b(do|did) (it|that) again\b", re.I)      # "do the same thing with this bone": a repeat on ANOTHER bone, which the model then named
+_ROLE_WORDS = ("toe", "hip", "knee", "ankle", "foot", "thigh", "shin", "heel", "pelvis", "spine", "wrist", "elbow", "shoulder")
+
+
+def inferred_names(step: Step) -> list[str]:
+    """Body-part names the step's lines use that the instructor never SAID, when what he said only points ("do the same thing with this bone"). What was said is the step's quotes and the quotes of its
+    "said" lines; a "shown" line's evidence and the visual evidence are the model's own description ("Toe bone selected"), which was exactly the invention, so they do not count."""
+    heard = " ".join([*step.evidence, *(h.evidence or "" for h in step.how_to if h.support == "said")])
+    if not _POINTING.search(heard):
+        return []
+    said = heard.lower()
+    text = " ".join([step.goal, *(h.text for h in step.how_to)]).lower()
+    return [w for w in _ROLE_WORDS if re.search(r"\b" + w + r"\b", text) and not re.search(r"\b" + w + r"\b", said)]
 
 
 def vague_lines(step: Step) -> list[str]:
@@ -275,6 +293,11 @@ def sanitize_and_annotate(
             from .houdini_parms import label_of, unknown_labels, version
             for lab, nodes in unknown_labels(step):
                 flag(step, "unknown_parm", f"'{lab}' is not a parameter of {' or '.join(label_of(n) for n in nodes[:2])} in Houdini {version()}: check the label in the video (the tutorial may use another Houdini version)")
+
+        named = inferred_names(step)
+        if named and step.video_start_s is not None:
+            at = f"{int(step.video_start_s // 60)}:{int(step.video_start_s % 60):02d}"
+            flag(step, "inferred_name", f"the instructor only says \"this bone\" here; \"{named[0]}\" was worked out by the model, not heard or read: check which bone it is in the video at {at}")
 
         vague = vague_lines(step)
         if vague:

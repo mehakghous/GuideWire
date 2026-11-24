@@ -123,10 +123,12 @@ def test_when_the_other_way_is_not_found_the_words_still_say_it_and_nothing_is_d
     assert not st.show_rect and "use the Add menu in the 3D view header" in st.hint
 
 
-def test_two_keys_two_other_ways_are_words_only_no_guess_about_which_to_point_at():
+def test_two_keys_two_other_ways_the_hint_names_both_and_the_first_one_on_screen_is_pointed_at():
+    """2026-11-23: it used to point at nothing when a step had several keys. A learner without the keyboard then had no highlight at all on a step like "press G, R, S"; the first way that is on screen is pointed
+    at (the learner meets the next one when the first is done) and the hint still names every one."""
     step = _step(KEYS("G"), KEYS("R"), start="EDIT_ARMATURE")
     st = ss.assess(step, {"mode": "EDIT_ARMATURE"}, _ground_found("Armature"))
-    assert not st.show_rect and "for G" in st.hint
+    assert st.show_rect and "for G" in st.hint and "for R" in st.hint
 
 
 def test_a_step_that_already_points_at_a_menu_also_names_the_key_that_opens_it():

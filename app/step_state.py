@@ -77,6 +77,19 @@ def needs_of(step: Step) -> list[TargetRef]:
         t = a.target if a.target is not None and a.target.kind in GROUNDED_KINDS else (_mode_from_keys(step, a) or text_target(a))
         if t is not None and not any(t.kind == "mode" and o.kind == "mode" and o.mode == t.mode for o in out):
             out.append(t)
+    return _merge_property_chain(out)
+
+
+def _merge_property_chain(needs: list[TargetRef]) -> list[TargetRef]:
+    """A Properties tab or panel the step opens, followed by a field in it, is one thing to find: the field target already walks the learner through the tab icon, the panel header and the field
+    (ground_property). Left as two, the first could never be seen done, so the field was never reached."""
+    out: list[TargetRef] = []
+    for i, t in enumerate(needs):
+        nxt = needs[i + 1] if i + 1 < len(needs) else None
+        if (t.kind == "property" and nxt is not None and nxt.kind == "property" and nxt.tab == t.tab and nxt.prop and nxt.prop != t.prop
+                and (t.prop is None or nxt.panel == t.prop or (t.panel is None and nxt.panel is None and len(t.path) <= 1))):
+            continue
+        out.append(t)
     return out
 
 
@@ -184,14 +197,22 @@ def assess(step: Step, observed: dict, ground: Callable[[TargetRef], Gated], ent
         what = "Do this in the 3D view" if (keys or any(a.target is not None and a.target.kind == "viewport" for a in step.actions)) else "Do the step as described"
         done = bool(prog.done)
         how = (_how(step, keys) + " " + other_way).strip()
-        if len(alts) == 1 and not done:                           # one key, one other way: point at it (the same gate as any target: no rectangle unless the screen shows it with confidence)
-            g = ground(alts[0].target)
-            if g.ok and g.result.rect is not None:
-                return StepState("acting", what, how, alts[0].target, g.result, True, prog, "", keys, other_way)
+        if alts and not done:                                     # a key with another way: point at it (the same gate as any target: no rectangle unless the screen shows it with confidence). With several keys the first
+            for alt in alts:                                      # other way that is on screen is pointed at; the sentence names them all, and the learner meets the next one after the first is done
+                g = ground(alt.target)
+                if g.ok and g.result.rect is not None:
+                    return StepState("acting", what, how, alt.target, g.result, True, prog, "", keys, other_way)
         return StepState("acting", "Keep going" if done else what, how, None, None, False, prog, "", keys, other_way)
 
     ref = pending[0]
     g = ground(ref)
+    if not (g.ok and g.result.state == VISIBLE and g.result.rect is not None):
+        for later in pending[1:]:                                # a later part that is a pop-up or menu choice and is already on screen means the earlier ones are done (the pop-up is up): point there. Other kinds are
+            if later.kind not in ("operator_panel", "menu", "context_menu"):      # not used: a Houdini parameter pane or a property label can be on screen long before the step has got to it
+                continue
+            g2 = ground(later)
+            if g2.ok and g2.result.state == VISIBLE and g2.result.rect is not None and g2.result.complete:
+                ref, g = later, g2
     gr = g.result
     sc = _advice(step, ref, gr, observed)
     tail = f" Or press {sc} with the mouse over the 3D view." if sc else ""

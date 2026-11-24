@@ -77,7 +77,37 @@ def _beside(prev: Rect, cand: Rect) -> bool:
     """A submenu item opens to the right of, or below, its parent, and close by."""
     dx = cand.x - (prev.x + prev.w)
     dy = cand.y - prev.y
+    if dx >= -5:                                         # a submenu opens at the right of its item and, near the bottom of the screen or with a long list, extends UPWARD from it (Object > Parent > Armature Deform)
+        return abs(dx) <= NEAR and abs(dy) <= NEAR
     return dx >= -prev.w and dy >= -prev.h and abs(dx) <= NEAR and abs(dy) <= NEAR
+
+
+def _not_the_mode_dropdown(words: list[Word], hits: list[tuple[Rect, float]], phrase: str) -> list[tuple[Rect, float]]:
+    """The 3D view's mode dropdown reads "Object Mode", "Edit Mode" or "Pose Mode" in the same header row as the Object, Select and Add menus. "Object" in "Object Mode" is not the Object menu: with both
+    counted, a path that starts at the Object menu always looked ambiguous and was never pointed at. A hit followed on the same row by the word "Mode" is dropped (unless nothing else is left)."""
+    if _norm(phrase) == "mode" or len(hits) < 2:
+        return hits
+    modes = [w.rect for w in words if _norm(w.text) == "mode"]
+    kept = [(r, s) for r, s in hits if not any(abs(m.y - r.y) <= max(r.h, m.h) / 2 and 0 <= m.x - (r.x + r.w) <= 30 for m in modes)]
+    return kept or hits
+
+
+def _whole_label(words: list[Word], hits: list[tuple[Rect, float]]) -> list[tuple[Rect, float]]:
+    """A menu item or tab is a whole label. "Extrude" is not the "Extrude" of "Extrude to Cursor", and "Parent" is not the "Parent" of "Clear Parent" or "Make Parent without Inverse": a hit with another word
+    right beside it on the same row (a word space, not the gap before a shortcut or an arrow) is part of a longer label. With several hits those are dropped; unless nothing else is left, they are all kept."""
+    if len(hits) < 2:
+        return hits
+
+    def joined(r: Rect) -> bool:
+        for w in words:
+            m = w.rect
+            if m.x >= r.x and m.x + m.w <= r.x + r.w and m.y >= r.y - 2 and m.y + m.h <= r.y + r.h + 2:
+                continue                                                  # a word of the hit itself
+            if abs(m.y - r.y) <= max(r.h, m.h) / 2 and (0 <= m.x - (r.x + r.w) <= 10 or 0 <= r.x - (m.x + m.w) <= 10):
+                return True
+        return False
+    kept = [(r, s) for r, s in hits if not joined(r)]
+    return kept or hits
 
 
 def locate(words: list[Word], ui_element: str, within: Rect | None = None, below_first: bool = False) -> Located | None:
@@ -86,7 +116,7 @@ def locate(words: list[Word], ui_element: str, within: Rect | None = None, below
     path = parse_path(ui_element)
     if not path:
         return None
-    first = find_phrase(words, path[0], within)
+    first = _whole_label(words, _not_the_mode_dropdown(words, find_phrase(words, path[0], within), path[0]))
     if not first:
         return None
     ties = sum(1 for _, s in first[1:] if s >= first[0][1] - 1e-9)
@@ -98,6 +128,7 @@ def locate(words: list[Word], ui_element: str, within: Rect | None = None, below
             nxt = [(r, s) for r, s in find_phrase(words, path[k]) if _beside(best.rect, r) and not (below_first and depth == 1 and r.y < best.rect.y + best.rect.h)]          # `within` limits only where the path STARTS (the menu bar); a submenu opens wherever it opens
             if k > depth:                                  # a skipped part: only what sits right under the parent counts (its dropdown), never a same word elsewhere such as the "Add Cylinder" panel
                 nxt = [(r, s) for r, s in nxt if -20 <= r.x - best.rect.x <= 150 and 0 <= r.y - best.rect.y <= 500]
+            nxt = _whole_label(words, nxt)
             if nxt:
                 at = k
                 break

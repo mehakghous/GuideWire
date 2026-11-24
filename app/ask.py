@@ -420,12 +420,12 @@ class Asker:
 def default_model_factory(has_video: bool = False):
     """The real AI for answering: Gemini 3.5 Flash-Lite behind the cost guard, grounded on the knowledge base; with a video link it can also look at a short clip when the steps cannot answer.
     Raises RuntimeError with a plain message when no key is set."""
-    from dotenv import load_dotenv
+    from shared.paths import load_env
 
     from ingestion.answer_model import ModelAnswerer, default_manual
     from ingestion.budget import TIERS, BudgetedProvider, BudgetExceeded, Ceilings, api_key_for
     from ingestion.providers.gemini import GeminiProvider
-    load_dotenv()
+    load_env()
     try:
         provider = BudgetedProvider(GeminiProvider(api_key=api_key_for("default"), model=TIERS["iterate"]), ceilings=Ceilings.from_env(max_usd_run=0.5), label="default")
     except BudgetExceeded as e:

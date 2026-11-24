@@ -3,6 +3,10 @@ from __future__ import annotations
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
+from shared.diagnostics import get_logger
+
+log = get_logger("worker")
+
 
 class Worker(QThread):
     """`fn(on_status)` runs in the background; `done` carries its result, or the exception it raised."""
@@ -17,6 +21,7 @@ class Worker(QThread):
         try:
             self.done.emit(self.fn(self.status.emit))
         except Exception as e:                    # never let a background error close the app
+            log.exception("background task failed: %s", type(e).__name__)
             self.done.emit(e)
 
 
@@ -26,6 +31,7 @@ def run_call(owner, fn, on_done, on_status=None, sync: bool = False) -> None:
         try:
             result = fn(on_status or (lambda _m: None))
         except Exception as e:
+            log.exception("background task failed (sync): %s", type(e).__name__)
             result = e
         on_done(result)
         return

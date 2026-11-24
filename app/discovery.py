@@ -19,8 +19,10 @@ import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from shared.paths import writable_root
+
 APPS = ("blender", "maya", "houdini")
-CACHE_PATH = Path(__file__).resolve().parents[1] / "local_data" / "discovery_cache.json"
+CACHE_PATH = writable_root() / "local_data" / "discovery_cache.json"        # the repository in development, %LOCALAPPDATA%/GuideWire when installed
 CACHE_TTL_S = 24 * 3600
 CAVEAT = "Judged from the video's title, channel and length: GuideWire has not watched it, so check it fits before you use it."
 
@@ -90,8 +92,8 @@ def _suggestion(rec) -> Suggestion:
 
 def live_functions():
     """(search, metadata) for the YouTube Data API, or None when no key is set."""
-    from dotenv import load_dotenv
-    load_dotenv()
+    from shared.paths import load_env
+    load_env()
     if not os.environ.get("YOUTUBE_API_KEY", "").strip():
         return None
     from ingestion.youtube import api
@@ -115,11 +117,11 @@ _BEGINNER = re.compile(r"\b(beginners?|new to|first time|never (?:rigged|used)|j
 
 def default_fit_provider():
     """The model that watches the first two minutes of each top suggestion: Gemini 3.5 Flash-Lite behind the cost guard (about 0.4 cent a clip). Raises when no key is set."""
-    from dotenv import load_dotenv
+    from shared.paths import load_env
 
     from ingestion.budget import TIERS, BudgetedProvider, BudgetExceeded, Ceilings, api_key_for
     from ingestion.providers.gemini import GeminiProvider
-    load_dotenv()
+    load_env()
     try:
         return BudgetedProvider(GeminiProvider(api_key=api_key_for("default"), model=TIERS["iterate"]), ceilings=Ceilings.from_env(max_usd_run=0.2), label="default")
     except BudgetExceeded as e:

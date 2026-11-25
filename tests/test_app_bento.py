@@ -315,15 +315,19 @@ def test_the_session_hero_shows_the_step_number_as_a_watermark(win):
     assert win.session.step_tile.watermark == "1"
 
 
+def _finish_fade(screen):
+    """Drive the fade to its end by hand: the shared Qt animation clock is not reliable inside a long test run."""
+    anim = screen._fade_anim
+    anim.setCurrentTime(anim.duration())
+
+
 def test_a_screen_fades_in_and_the_effect_is_removed_afterwards(win, qapp):
-    import time
     _login(win)
     win.show()
     win.sidebar.buttons["history"].click()
     screen = win.current_screen()
-    for _ in range(40):
-        qapp.processEvents()
-        time.sleep(0.02)
+    assert screen.graphicsEffect() is not None
+    _finish_fade(screen)
     assert screen.graphicsEffect() is None
 
 
@@ -354,3 +358,27 @@ def test_the_login_brand_is_the_hero_slab(win):
 def test_new_tutorial_keeps_its_message_and_create_button_in_the_text_slab(win):
     nt = win.new_tutorial
     assert nt.message.parent() is nt.create_button.parent() is nt.text.parent()
+
+
+def test_showing_a_screen_again_while_it_fades_does_not_remove_the_new_fade(win, qapp):
+    _login(win)
+    win.show()
+    win.sidebar.buttons["history"].click()
+    first = win.current_screen()
+    old_anim = first._fade_anim
+    win.sidebar.buttons["home"].click()
+    win.sidebar.buttons["history"].click()                          # the same screen again, while its first fade has not ended
+    assert win.current_screen() is first and first._fade_anim is not old_anim and first.graphicsEffect() is not None
+    old_anim.finished.emit()                                        # the stale fade ends late: it must leave the new effect alone
+    assert first.graphicsEffect() is not None
+    _finish_fade(first)
+    assert first.graphicsEffect() is None
+
+
+def test_recolouring_the_shadows_survives_deleted_widgets(qapp):
+    from app.ui.bento import recolour_shadows
+    t = Tile("x")
+    t.deleteLater()
+    del t
+    qapp.processEvents()
+    recolour_shadows()                                              # must not raise

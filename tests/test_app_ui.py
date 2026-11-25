@@ -204,13 +204,21 @@ def test_craft_step_tells_the_user_it_is_manual(win):
     assert "You confirm" in s.detail.text() and "Press Done" in s.detail.text()
 
 
-def test_each_open_creates_its_own_session_and_back_goes_home(win):
+def test_back_goes_home_and_reopening_continues_the_session_until_it_is_finished(win):
     s = _session(win)
     first = s.engine.session_id
     s.back_button.click()
+    assert win.current_screen() is win.home
     win.home.tutorials.setCurrentRow(0)
     win.home.session_button.click()
-    assert win.session.engine.session_id != first and win.current_screen() is win.session
+    assert win.session.engine.session_id == first and win.current_screen() is win.session      # not a new session: nothing is lost by leaving
+    s.start_button.click()
+    for _ in range(4):
+        s.done_button.click()
+    assert s.engine.state == "finished"
+    s.back_button.click()
+    win.home.session_button.click()
+    assert win.session.engine.session_id != first                                              # a finished session is not reopened: a fresh one starts
 
 
 # ---------------------------------------------------------------- history and profile
@@ -227,7 +235,7 @@ def test_history_is_empty_then_lists_sessions(win):
     win.home.history_button.click()
     assert win.history.list.count() == 1
     text = win.history.list.item(0).text()
-    assert "in progress" in text and "1/4 steps" in text
+    assert "paused" in text and "1/4 steps" in text
 
 
 def test_history_shows_only_own_sessions(win):

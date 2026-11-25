@@ -124,11 +124,17 @@ QLabel#sideSmall { color: @teal_text@; font-size: 9pt; font-weight: 600; }
 QLabel#sideStatus { color: @teal_text@; font-weight: 700; }
 QLabel#sideUser { font-weight: 700; padding-left: 6px; }
 QFrame#sideCard { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @teal_hi@, stop:1 @teal@); border: 2px solid @hi@; border-radius: 22px; }
-QPushButton#navItem { background: transparent; border: none; border-radius: 20px; color: @muted@; text-align: left; padding: 10px 16px; font-weight: 600; }
+QPushButton#navItem { background: transparent; border: none; border-radius: 16px; color: @muted@; text-align: left; padding: 5px 16px; font-weight: 600; }
 QPushButton#navItem:hover { background: @accent_soft@; color: @text@; }
 QPushButton#navItem[on="true"] { background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border: 2px solid @accent_hi@; color: @accent_text@; font-weight: 700; }
 QPushButton#navLogout { background: transparent; border: none; color: @accent@; text-align: left; padding: 6px 6px; font-weight: 700; }
 QPushButton#navLogout:hover { color: @accent_hover@; }
+QFrame#connCard { background: @field@; border: 2px solid @hi@; border-radius: 18px; }
+QFrame#connCard[kind="offline"] { background: @amber@; }
+QFrame#connCard[kind="problem"] { background: @danger_soft@; }
+QFrame#connCard[kind="busy"] { background: @mint@; }
+QFrame#connCard QLabel#sideSmall { color: @muted@; }
+QFrame#connCard QLabel#sideStatus { color: @text@; }
 /* ---- chat: bubbles, chips, the composer */
 QFrame#bubbleUser { background: qlineargradient(x1:0, y1:0, x2:0.4, y2:1, stop:0 @accent_hi@, stop:1 @accent@); border-radius: 22px; border-bottom-right-radius: 6px; border: 2px solid @accent_hi@; }
 QFrame#bubbleUser QLabel { color: @accent_text@; }

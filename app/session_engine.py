@@ -1,11 +1,13 @@
 """Session engine: a small state machine that walks one user through one saved tutorial and stores progress in the database.
 
-States:   not_started  ->  active (step N)  ->  finished
+States:   not_started  ->  active (step N)  <->  paused (step N)  ->  finished
 Per step: pending | done | skipped      (and who said so: "user" or "observed")
 
 Rules:
   - only the owner of the tutorial can run a session on it;
   - `complete`, `skip` and `back` are only valid while a session is active; everything else raises EngineError;
+  - `pause` keeps the step the learner is on and every step's status; `resume` continues from exactly there. Opening a tutorial again continues its unfinished
+    session (`resume_or_create`) instead of starting a new one, so leaving a session never loses progress; `create` is the only way to start over;
   - a step is marked done by the user, or by `auto_check` when the observed application state satisfies its expected state;
     a step that cannot be checked (no expected state, craft step, or an unknown predicate kind) is never completed automatically;
   - progress is written to the database after every change, so a session survives closing the app (`SessionEngine.load`).
@@ -20,7 +22,7 @@ from shared.step_record import Step
 
 from .db import Database, now
 
-NOT_STARTED, ACTIVE, FINISHED = "not_started", "active", "finished"
+NOT_STARTED, ACTIVE, PAUSED, FINISHED = "not_started", "active", "paused", "finished"
 PENDING, DONE, SKIPPED = "pending", "done", "skipped"
 
 
@@ -69,6 +71,14 @@ class SessionEngine:
         return cls(db, user_id, sid)
 
     @classmethod
+    def resume_or_create(cls, db: Database, user_id: int, tutorial_id: int) -> "SessionEngine":
+        """Continue this tutorial's unfinished session if there is one; otherwise start a new one."""
+        row = db.open_session_for(user_id, tutorial_id)
+        if row is not None:
+            return cls(db, user_id, row["id"])
+        return cls.create(db, user_id, tutorial_id)
+
+    @classmethod
     def load(cls, db: Database, user_id: int, session_id: int) -> "SessionEngine":
         return cls(db, user_id, session_id)
 
@@ -85,6 +95,21 @@ class SessionEngine:
     def position(self) -> int | None:
         """1-based number of the active step, or None when not active."""
         return self._row["current_pos"] if self.state == ACTIVE else None
+
+    @property
+    def paused_at(self) -> int | None:
+        """1-based number of the step a paused session will continue at, or None when it is not paused."""
+        return self._row["current_pos"] if self.state == PAUSED else None
+
+    @property
+    def tutorial_id(self) -> int:
+        return int(self._row["tutorial_id"])
+
+    @property
+    def source_url(self) -> str | None:
+        """The link the tutorial was made from (a video), or None."""
+        row = self.db.conn.execute("SELECT source_url FROM tutorial WHERE id = ?", (self.tutorial_id,)).fetchone()
+        return None if row is None else row["source_url"]
 
     def current_step(self) -> Step | None:
         p = self.position
@@ -112,6 +137,17 @@ class SessionEngine:
             raise EngineError("this tutorial has no steps")
         self.db.update_session(self.session_id, state=ACTIVE, current_pos=1, started_at=now())
         self.revision = next(_VISITS)
+
+    def pause(self) -> None:
+        """Stop for now. The step the learner is on and the status of every step are kept."""
+        pos = self._need_active()
+        self.db.update_session(self.session_id, state=PAUSED, current_pos=pos)
+
+    def resume(self) -> None:
+        """Continue a paused session at the step it stopped on."""
+        if self.state != PAUSED:
+            raise EngineError(f"session is {self.state}, not paused")
+        self.db.update_session(self.session_id, state=ACTIVE, current_pos=self._row["current_pos"])
 
     def _close_current(self, status: str, by: str) -> None:
         pos = self._need_active()

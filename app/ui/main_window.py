@@ -32,8 +32,8 @@ SAMPLE_DIR = Path(__file__).resolve().parents[2] / "shared" / "examples"
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None, vision_bridge=None, cloud=None, show_welcome: bool = False):
-        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision_bridge` (app.vision_bridge.VisionBridge) is the screen guidance for sessions; `vision` is the older form, a vision service that is wrapped in a bridge. None of them means sessions run by hand. `cloud` (app.cloud: Supabase) is the online account and sync; None means everything stays on this computer. `show_welcome` shows the first-run welcome after a learner's first login (the real app turns it on; tests leave it off)."""
+    def __init__(self, db: Database, video_provider_factory=None, ask_model_factory=None, sync: bool = False, discover=None, vision=None, vision_bridge=None, cloud=None, show_welcome: bool = False, gateway=None):
+        """`video_provider_factory` (the AI for video links) and `ask_model_factory` (the AI for questions) and `discover` (the YouTube tutorial search: (goal, app) -> DiscoveryResult) are given by `main()`; tests and any run without them stay offline. `vision_bridge` (app.vision_bridge.VisionBridge) is the screen guidance for sessions; `vision` is the older form, a vision service that is wrapped in a bridge. None of them means sessions run by hand. `cloud` (app.cloud: Supabase) is the online account and sync; None means everything stays on this computer. `gateway` (ingestion.gateway_client.GatewayClient) is the AI service: when given, video links are read by it (no key on this computer). `show_welcome` shows the first-run welcome after a learner's first login (the real app turns it on; tests leave it off)."""
         super().__init__()
         self.setWindowTitle("GuideWire")
         self.resize(1260, 800)
@@ -66,9 +66,9 @@ class MainWindow(QMainWindow):
         self.onboarding = OnboardingScreen()
         self.privacy = PrivacyScreen()
         video_runner = None
-        if video_provider_factory is not None:
+        if video_provider_factory is not None or gateway is not None:
             from ..pipeline import video_steps
-            video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)      # noqa: E731
+            video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status, gateway=gateway)      # noqa: E731
         self.ask_screen = AskScreen(Asker(ask_model_factory, discover=discover, video_runner=video_runner), sync=sync)
         self.find_screen = FindScreen(sync=sync)
         self.find_screen.finder = discover
@@ -78,9 +78,8 @@ class MainWindow(QMainWindow):
         self.session.asker = self.ask_screen.asker               # the same answers as the Ask screen, asked from inside a session
         self.session.load_tutorial = self._tutorial_for_ask
         self.ask_screen.find_saved = self._saved_for_video
-        if video_provider_factory is not None:
-            from ..pipeline import video_steps
-            self.new_tutorial.video_runner = lambda url, app, status: video_steps(url, app, provider_factory=video_provider_factory, on_status=status)
+        if video_runner is not None:
+            self.new_tutorial.video_runner = video_runner
         self.new_tutorial.sync = sync
         self.stack = QStackedWidget()
         for screen in (self.login, self.home, self.review, self.session, self.history, self.profile, self.new_tutorial, self.ask_screen, self.find_screen,
@@ -535,15 +534,23 @@ def _make_bridge():
 
 
 def main() -> int:
-    from ..cloud import SupabaseCloud
     from ..ask import default_model_factory
+    from ..cloud import SupabaseCloud
     from ..discovery import default_fit_provider, find_tutorials
     from ..pipeline import default_video_provider
+    from ..remote import answer_factory, connection, discovery_functions
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE)
-    window = MainWindow(Database(), cloud=SupabaseCloud.from_env(), show_welcome=True, video_provider_factory=default_video_provider, ask_model_factory=default_model_factory,
-                        discover=lambda goal, app, limit=3, exclude=(), check=True: find_tutorials(goal, app, limit=limit, exclude=exclude, fit_provider=default_fit_provider if check else None),
-                        vision_bridge=_make_bridge())
+    gateway = connection()                                  # the AI service when configured: no provider key on this computer; else the keys in .env (development)
+    if gateway is not None:
+        search, metadata = discovery_functions(gateway)
+        ask_factory, video_factory = answer_factory(gateway), None
+        discover = lambda goal, app, limit=3, exclude=(), check=True: find_tutorials(goal, app, limit=limit, exclude=exclude, search=search, metadata=metadata)      # noqa: E731
+    else:
+        ask_factory, video_factory = default_model_factory, default_video_provider
+        discover = lambda goal, app, limit=3, exclude=(), check=True: find_tutorials(goal, app, limit=limit, exclude=exclude, fit_provider=default_fit_provider if check else None)      # noqa: E731
+    window = MainWindow(Database(), cloud=SupabaseCloud.from_env(), show_welcome=True, video_provider_factory=video_factory, ask_model_factory=ask_factory, discover=discover,
+                        vision_bridge=_make_bridge(), gateway=gateway)
     window.show()
     return app.exec()
 

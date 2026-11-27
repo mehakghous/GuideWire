@@ -577,3 +577,34 @@ def test_a_scene_with_a_mesh_or_one_that_cannot_be_read_gives_no_warning(leg_ses
     svc.observed = {"mode": "OBJECT", "nodes": ["MESH", "ARMATURE"]}
     screen.poll()
     assert screen._prereq_checked and not screen.prereq_missing
+
+
+def test_minimizing_guidewire_does_not_pause_the_session_and_the_small_guide_stays(env):
+    """2026-11-28, learner report: the small guide vanished when GuideWire was minimized to open Blender, and never came back. The window system hides a minimized window before the main window has set the
+    "minimized" flag, so the hide was taken for leaving the session and the engine was paused (a paused engine is not watched, so the guide was hidden for good)."""
+    from PyQt6.QtGui import QHideEvent
+    from app.session_engine import ACTIVE
+    screen, engine, _svc, _o = env
+
+    class FromTheWindowSystem(QHideEvent):                  # what Qt sends to a window that was minimized: a spontaneous hide
+        def spontaneous(self) -> bool:
+            return True
+    screen.show()
+    screen.poll()
+    assert screen.panel is not None and not screen.panel.isHidden()
+    screen.hideEvent(FromTheWindowSystem())                  # arrives BEFORE set_window_minimized(True)
+    screen.set_window_minimized(True)
+    assert engine.state == ACTIVE and screen.watching
+    assert not screen.panel.isHidden()
+    screen.set_window_minimized(False)
+    assert engine.state == ACTIVE and screen.watching
+
+
+def test_leaving_the_session_page_still_pauses_it_where_it_is(env):
+    """The pause on leaving (the learner's progress is saved) is kept: the application itself hides the page, which is not a spontaneous hide."""
+    from PyQt6.QtGui import QHideEvent
+    from app.session_engine import PAUSED
+    screen, engine, _svc, _o = env
+    screen.show()
+    screen.hideEvent(QHideEvent())
+    assert engine.state == PAUSED and not screen.watching

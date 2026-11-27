@@ -905,8 +905,11 @@ class SessionScreen(QWidget):
 
     def hideEvent(self, event) -> None:  # noqa: N802 (Qt override)
         super().hideEvent(event)
-        if self._minimized():
-            return                                           # GuideWire minimized on purpose: the small guide and the highlight stay and keep watching
+        if self._minimized() or event.spontaneous():
+            # GuideWire minimized on purpose: the small guide and the highlight stay and keep watching. The window system hides a minimized window BEFORE the main window's changeEvent has set the flag,
+            # so the flag alone missed it and the session was paused (found 2026-11-28: the small guide vanished when GuideWire was minimized to open Blender, and never came back). A hide the window
+            # system sends (spontaneous) is a minimize; leaving the session shows another page, which the application hides itself.
+            return
         self.pause_if_active()
         self.timer.stop()
         self.track_timer.stop()

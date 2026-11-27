@@ -46,14 +46,30 @@ def default_video_provider():
         raise RuntimeError("The AI model is not set up on this computer: put GEMINI_API_KEY in the .env file.") from e
 
 
-def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_meta=None, group: bool = True, on_status=None) -> PipelineResult:
+def _gateway_steps(gateway, url: str, vid: str, app: str, duration: float | None, title: str | None, say) -> PipelineResult:
+    """The AI service reads the video (first pass, gap pass, label repair and grouping all run there): the same steps the local path gives, with no provider key on this computer."""
+    from ingestion.providers.base import ProviderError, QuotaError
+    say("The AI is watching the video. This takes about one to two minutes...")
+    try:
+        sl = gateway.extract(video_url=f"https://www.youtube.com/watch?v={vid}", app=app, duration_s=duration, title_hint=title)
+    except QuotaError:
+        return PipelineResult(None, "You have used today's share of video reading. Try again tomorrow, or paste the written steps instead.")
+    except ProviderError as e:
+        return PipelineResult(None, str(e))
+    notes = [f"Drafted automatically by {sl.model_id} ({sl.prompt_version}) from the video; review the steps before you use them."]
+    if not any(s.group_id for s in sl.steps):
+        notes.append("The steps could not be grouped; they are shown one by one.")
+    return PipelineResult(sl, f"{len(sl.steps)} steps found" + (f" in {len(sl.groups)} groups." if any(s.group_id for s in sl.steps) else "."), notes, "youtube_video", api_calls=1, network_calls=1)
+
+
+def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_meta=None, group: bool = True, on_status=None, gateway=None) -> PipelineResult:
     """A YouTube link in, a step list out: read the video's title and length, have the model watch it (the prompt chosen by measurement for this application), then give the steps display groups.
-    Never raises: every failure comes back as a plain message and no steps. `provider_factory` and `fetch_meta` are injected so tests need no network."""
+    Never raises: every failure comes back as a plain message and no steps. `provider_factory` and `fetch_meta` are injected so tests need no network. With a `gateway` (ingestion.gateway_client.GatewayClient) the AI service reads the video and looks it up: no key is needed on this computer."""
     from ingestion.extract import GAP_PASS_APPS, ExtractionError, extract_from_video, fill_gaps, recommended_video_prompt_version
     from ingestion.grouping import group_steps
     from ingestion.youtube.metadata import fetch_metadata, parse_video_id
     say = on_status or (lambda _m: None)
-    if provider_factory is None:
+    if provider_factory is None and gateway is None:
         return PipelineResult(None, YOUTUBE_MESSAGE, route="youtube")
     if app not in APPS:
         return PipelineResult(None, f"Unknown application {app!r}: choose one of {', '.join(APPS)}.")
@@ -65,6 +81,9 @@ def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_
     say("Looking up the video...")
     title, duration = None, None
     try:
+        if gateway is not None and fetch_meta is None:
+            from .remote import video_metadata
+            fetch_meta = lambda v: video_metadata(gateway, v)      # noqa: E731
         md = (fetch_meta or fetch_metadata)(vid)
         if md.privacy_status != "public":
             return PipelineResult(None, f"The video is '{md.privacy_status}': GuideWire can only read public videos.")
@@ -73,6 +92,8 @@ def video_steps(url: str, app: str = "blender", *, provider_factory=None, fetch_
         pass                                                # no YouTube key or no network: go on without the length (the steps still work, the cost estimate is rougher)
     if duration and duration > MAX_VIDEO_S:
         return PipelineResult(None, f"That video is {duration / 60:.0f} minutes long. For now GuideWire reads videos up to {MAX_VIDEO_S // 60} minutes: choose a shorter one, or one chapter of it.")
+    if gateway is not None:
+        return _gateway_steps(gateway, url, vid, app, duration, title, say)
     try:
         provider = provider_factory()
     except Exception as e:

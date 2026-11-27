@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 from ingestion.starter_plan import starter_bundle
 from ingestion.answer_model import ModelAnswerer, changes_progress, default_manual, session_from_tutorial
 from ingestion.budget import BudgetedProvider, BudgetExceeded
-from ingestion.extract import ExtractionError, default_prompt_version, extract_from_text, extract_from_video, recommended_video_prompt_version
+from ingestion.extract import GAP_PASS_APPS, ExtractionError, default_prompt_version, extract_from_text, extract_from_video, fill_gaps, recommended_video_prompt_version
 from ingestion.followup import respond
 from ingestion.providers.base import ProviderError, QuotaError
 from ingestion.router import route
@@ -40,6 +40,7 @@ class ExtractIn(BaseModel):
     app: str = "blender"
     duration_s: float | None = Field(default=None, ge=0)
     title_hint: str | None = Field(default=None, max_length=200)
+    group: bool = True                                                        # give the steps display groups (one more model call)
 
 
 class TutorialStepIn(BaseModel):
@@ -65,6 +66,24 @@ class AnswerIn(BaseModel):
     model: bool = False                                                       # True: answer with the model, grounded on the knowledge base (one paid call)
     tutorial: TutorialIn | None = None                                        # only used with model=True, or for a session question such as "what is next"
     history: list[str] = Field(default_factory=list, max_length=3)           # the learner's last messages, oldest first
+
+
+def read_video(provider, vid: str, body: "ExtractIn"):
+    """The same reading the app does locally (app.pipeline.video_steps), so a learner gets the same steps with or without the gateway: first pass, then the gap pass for the apps that use it,
+    then the parameter-label repair, then display groups. Every extra pass keeps the first pass's steps when it fails."""
+    version = recommended_video_prompt_version(body.app, True)
+    sl = extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint, prompt_version=version)
+    if body.app in GAP_PASS_APPS:
+        sl = fill_gaps(provider, sl, vid, app=body.app, prompt_version=version, duration_s=body.duration_s, title_hint=body.title_hint)
+        if any("is not a parameter of" in f for s in sl.steps for f in s.flags):
+            from ingestion.label_repair import repair_labels
+            repair_labels(provider, sl, vid, body.duration_s)
+    if body.group:
+        from ingestion.grouping import group_steps
+        sl = group_steps(sl, provider)
+    if body.title_hint and not sl.title:
+        sl = sl.model_copy(update={"title": body.title_hint})
+    return sl
 
 
 def tokens_from_env() -> dict[str, str]:
@@ -161,9 +180,7 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
                 provider = provider_factory()
                 if hasattr(provider, "video_seconds"):
                     provider.video_seconds = body.duration_s
-                sl = provider_call(lambda: extract_from_video(provider, vid, app=body.app, duration_s=body.duration_s, title_hint=body.title_hint,
-                                                      prompt_version=recommended_video_prompt_version(body.app))
-                                   if vid else extract_from_text(provider, body.text, app=body.app, prompt_version=default_prompt_version(body.app)))
+                sl = provider_call(lambda: read_video(provider, vid, body) if vid else extract_from_text(provider, body.text, app=body.app, prompt_version=default_prompt_version(body.app)))
             finally:
                 slots.release()
             out = sl.model_dump(mode="json")
@@ -213,6 +230,19 @@ def create_app(*, provider_factory: Callable, tokens: dict[str, str] | None = No
             raise HTTPException(502, f"YouTube metadata failed: {type(e).__name__}")
         d = asdict(m)
         return {k: d[k] for k in ("video_id", "title", "duration_s", "chapters", "license", "embeddable")}
+
+    @app.get("/v1/youtube/videos")
+    def videos(ids: str, uid: str = Depends(user)):
+        try:
+            wanted = [parse_video_id(i) for i in ids.split(",")[:50] if i.strip()]
+        except ValueError as e:
+            raise HTTPException(422, str(e))
+        if not wanted:
+            raise HTTPException(422, "send up to 50 video ids, separated by commas")
+        try:
+            return {"results": yt_api.videos_metadata(wanted, get=yt_get)}
+        except yt_api.YouTubeApiError as e:
+            raise HTTPException(502, str(e))
 
     @app.get("/v1/youtube/search")
     def search(q: str, limit: int = 10, uid: str = Depends(user)):
